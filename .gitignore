@@ -1,0 +1,16 @@
+jethro-backend/node_modules/
+jethro-backend/dist/
+jethro-backend/.env
+
+jethro-frontend/node_modules/
+jethro-frontend/dist/
+jethro-frontend/.env
+jethro-frontend/tsconfig.tsbuildinfo
+
+jethro/node_modules/
+jethro/.expo/
+jethro/.env
+jethro/.git.backup/
+jethro/**/__pycache__/
+
+.DS_Store

@@ -1,0 +1,433 @@
+{
+  "info": {
+    "_postman_id": "9f31d54a-6cb5-4c8f-8ab3-bf6f45d80d5d",
+    "name": "Jethro Forms API",
+    "description": "Colecao para testar o backend de formularios do Jethro no Insomnia ou Postman.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "admin_api_key",
+      "value": "dev-admin-key"
+    },
+    {
+      "key": "form_slug",
+      "value": "diagnostico-inicial"
+    },
+    {
+      "key": "form_id",
+      "value": "COLE_O_FORM_ID_AQUI"
+    },
+    {
+      "key": "question_id",
+      "value": "COLE_O_QUESTION_ID_AQUI"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/health/check",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "health",
+                "check"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Public Forms",
+      "item": [
+        {
+          "name": "Get Published Form",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/forms/{{form_slug}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "forms",
+                "{{form_slug}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Submit Form Success",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sessionId\": \"insomnia-session-success\",\n  \"answers\": [\n    {\n      \"questionId\": \"question_nome\",\n      \"value\": \"Daniel Lopes\"\n    },\n    {\n      \"questionId\": \"question_email\",\n      \"value\": \"daniel@example.com\"\n    },\n    {\n      \"questionId\": \"question_idade\",\n      \"value\": 31\n    },\n    {\n      \"questionId\": \"question_objetivo\",\n      \"value\": \"organizar_rotina\"\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/forms/{{form_slug}}/submissions",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "forms",
+                "{{form_slug}}",
+                "submissions"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Submit Form Invalid Email",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sessionId\": \"insomnia-session-invalid-email\",\n  \"answers\": [\n    {\n      \"questionId\": \"question_nome\",\n      \"value\": \"Daniel Lopes\"\n    },\n    {\n      \"questionId\": \"question_email\",\n      \"value\": \"email-invalido\"\n    },\n    {\n      \"questionId\": \"question_idade\",\n      \"value\": 31\n    },\n    {\n      \"questionId\": \"question_objetivo\",\n      \"value\": \"organizar_rotina\"\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/forms/{{form_slug}}/submissions",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "forms",
+                "{{form_slug}}",
+                "submissions"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Track Form Started",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sessionId\": \"insomnia-session-events\",\n  \"type\": \"form_started\",\n  \"stepId\": \"step_contexto\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/forms/{{form_slug}}/events",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "forms",
+                "{{form_slug}}",
+                "events"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Track Form Abandoned",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sessionId\": \"insomnia-session-events\",\n  \"type\": \"form_abandoned\",\n  \"stepId\": \"step_contexto\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/forms/{{form_slug}}/events",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "forms",
+                "{{form_slug}}",
+                "events"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin Forms",
+      "item": [
+        {
+          "name": "List Forms",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-admin-api-key",
+                "value": "{{admin_api_key}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/admin/forms",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "forms"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Form By ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-admin-api-key",
+                "value": "{{admin_api_key}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/admin/forms/{{form_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "forms",
+                "{{form_id}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Form",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-admin-api-key",
+                "value": "{{admin_api_key}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"slug\": \"diagnostico-admin-demo\",\n  \"title\": \"Diagnostico Admin Demo\",\n  \"description\": \"Formulario criado via API admin\",\n  \"status\": \"published\",\n  \"steps\": [\n    {\n      \"id\": \"step_1\",\n      \"title\": \"Contexto\",\n      \"description\": \"Dados iniciais\",\n      \"order\": 0\n    },\n    {\n      \"id\": \"step_2\",\n      \"title\": \"Objetivo\",\n      \"description\": \"Meta principal\",\n      \"order\": 1\n    }\n  ],\n  \"questions\": [\n    {\n      \"id\": \"question_nome_demo\",\n      \"stepId\": \"step_1\",\n      \"slug\": \"nome\",\n      \"label\": \"Qual e o seu nome?\",\n      \"type\": \"text\",\n      \"required\": true,\n      \"order\": 0,\n      \"options\": [],\n      \"validation\": {\n        \"minLength\": 2,\n        \"maxLength\": 80\n      }\n    },\n    {\n      \"id\": \"question_email_demo\",\n      \"stepId\": \"step_1\",\n      \"slug\": \"email\",\n      \"label\": \"Qual e o seu email?\",\n      \"type\": \"email\",\n      \"required\": true,\n      \"order\": 1,\n      \"options\": [],\n      \"validation\": {}\n    },\n    {\n      \"id\": \"question_idade_demo\",\n      \"stepId\": \"step_1\",\n      \"slug\": \"idade\",\n      \"label\": \"Qual e a sua idade?\",\n      \"type\": \"number\",\n      \"required\": true,\n      \"order\": 2,\n      \"options\": [],\n      \"validation\": {\n        \"min\": 18,\n        \"max\": 120\n      }\n    },\n    {\n      \"id\": \"question_objetivo_demo\",\n      \"stepId\": \"step_2\",\n      \"slug\": \"objetivo_principal\",\n      \"label\": \"Qual e o seu objetivo principal?\",\n      \"type\": \"single_select\",\n      \"required\": true,\n      \"order\": 3,\n      \"options\": [\n        {\n          \"id\": \"option_1\",\n          \"label\": \"Organizar rotina\",\n          \"value\": \"organizar_rotina\",\n          \"order\": 0\n        },\n        {\n          \"id\": \"option_2\",\n          \"label\": \"Aumentar renda\",\n          \"value\": \"aumentar_renda\",\n          \"order\": 1\n        }\n      ],\n      \"validation\": {}\n    }\n  ],\n  \"settings\": {\n    \"successTitle\": \"Diagnostico enviado\",\n    \"successMessage\": \"Recebemos suas respostas e vamos processar.\",\n    \"errorMessage\": \"Nao foi possivel enviar agora. Tente novamente.\",\n    \"allowRetry\": true\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/admin/forms",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "forms"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Form",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "x-admin-api-key",
+                "value": "{{admin_api_key}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Diagnostico Admin Demo Atualizado\",\n  \"description\": \"Descricao atualizada via API\",\n  \"settings\": {\n    \"successTitle\": \"Tudo certo\",\n    \"successMessage\": \"Formulario recebido com sucesso.\",\n    \"errorMessage\": \"Falha ao enviar. Tente novamente.\",\n    \"allowRetry\": true\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/admin/forms/{{form_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "forms",
+                "{{form_id}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Form",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "x-admin-api-key",
+                "value": "{{admin_api_key}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/admin/forms/{{form_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "forms",
+                "{{form_id}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Question",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "x-admin-api-key",
+                "value": "{{admin_api_key}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"stepId\": \"step_2\",\n  \"slug\": \"desafio_principal\",\n  \"label\": \"Qual e o principal desafio hoje?\",\n  \"helperText\": \"Pergunta objetiva para reduzir ruido\",\n  \"type\": \"text\",\n  \"required\": true,\n  \"order\": 4,\n  \"options\": [],\n  \"validation\": {\n    \"minLength\": 3,\n    \"maxLength\": 120\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/admin/forms/{{form_id}}/questions",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "forms",
+                "{{form_id}}",
+                "questions"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Question",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "x-admin-api-key",
+                "value": "{{admin_api_key}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"label\": \"Qual e o seu principal desafio neste momento?\",\n  \"validation\": {\n    \"minLength\": 5,\n    \"maxLength\": 150\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/admin/forms/{{form_id}}/questions/{{question_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "forms",
+                "{{form_id}}",
+                "questions",
+                "{{question_id}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Question",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "x-admin-api-key",
+                "value": "{{admin_api_key}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/admin/forms/{{form_id}}/questions/{{question_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "forms",
+                "{{form_id}}",
+                "questions",
+                "{{question_id}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Analytics Summary",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "x-admin-api-key",
+                "value": "{{admin_api_key}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/admin/forms/{{form_id}}/analytics/summary",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "admin",
+                "forms",
+                "{{form_id}}",
+                "analytics",
+                "summary"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
