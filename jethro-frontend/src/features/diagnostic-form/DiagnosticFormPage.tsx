@@ -81,10 +81,10 @@ export function DiagnosticFormPage() {
           <h2>{currentStep.title}</h2>
           <p>{currentStep.description}</p>
 
-          <div className="question-grid">
-            {/* TODO Pollynerd: se a UI crescer, quebrar por tipo ou por step.
-                HINT: hoje esta tudo centralizado para ficar facil de entender o fluxo completo. */}
-            {currentQuestions.map((question) => (
+	          <div className="question-grid">
+	            {/* TODO Pollynerd: se a UI crescer, quebrar por tipo ou por step.
+	                HINT: hoje esta tudo centralizado para ficar facil de entender o fluxo completo. */}
+	            {currentQuestions.map((question) => (
               <QuestionField
                 key={question.id}
                 question={question}
@@ -93,12 +93,15 @@ export function DiagnosticFormPage() {
                 options={question.type === 'money_range' ? getRevenueOptions(question) : question.options}
                 onChange={(value) => setFieldValue(question, value)}
               />
-            ))}
-          </div>
+	            ))}
+	          </div>
 
-          <div className="actions">
-            <button className="button-ghost" type="button" onClick={previousStep} disabled={currentStepIndex === 0}>
-              Voltar
+            {/** Global errors - chama o parser de erros global */}
+	          {errors._global ? <div className="field-error">{errors._global}</div> : null}
+
+	          <div className="actions">
+	            <button className="button-ghost" type="button" onClick={previousStep} disabled={currentStepIndex === 0}>
+	              Voltar
             </button>
 
             {currentStepIndex === steps.length - 1 ? (

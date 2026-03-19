@@ -61,12 +61,32 @@ export function validateField(question: FormQuestion, value: JsonValue): string 
   if (question.type === 'phone') {
     const phone =
       typeof value === 'object' && value !== null && !Array.isArray(value) ? value : null;
+    //TRATAMENTO PARA PEGAR APENAS OS DIGITOS LOCAIS DO NUMERO PARA MOSTRAR NO INPUT, SEM O DDI, POIS O USUÁRIO PRECISA VER APENAS O NUMERO LOCAL PARA EDITAR, O DDI FICA IMPLICITO NA SELEÇÃO DO PAÍS.
+    if (!phone) {
+      return question.required ? 'Preencha este campo para continuar.' : undefined;
+    }
+    // O número completo é armazenado no backend, mas o input mostra apenas a parte local para facilitar a edição. Na validação, precisamos considerar o número completo para garantir que o DDI esteja presente e correto. 
+    const numero = typeof phone.numero === 'string' ? phone.numero.trim() : '';
+    const paisCodigo = typeof phone.pais_codigo === 'string' ? phone.pais_codigo.trim() : '';
+    const paisIso = typeof phone.pais_iso === 'string' ? phone.pais_iso.trim().toUpperCase() : '';
 
-    if (phone && typeof phone.numero === 'string' && phone.numero.trim()) {
-      const apenasDigitos = phone.numero.replace(/\D/g, '');
-      if (apenasDigitos.length < 8) {
-        return 'Número de telefone incompleto. Mínimo 8 dígitos.';
-      }
+    if (!numero) {
+      return question.required ? 'Preencha este campo para continuar.' : undefined;
+    }
+
+    // Espelhamos no front a mesma regra estrutural que o backend aplica no submit.
+    if (!/^\+\d{10,15}$/.test(numero) || !/^\+\d{1,4}$/.test(paisCodigo) || !/^[A-Z]{2}$/.test(paisIso)) {
+      return 'Numero invalido para o pais selecionado.';
+    }
+
+    // O numero completo precisa comecar com o DDI selecionado.
+    if (!numero.startsWith(paisCodigo)) {
+      return 'Numero invalido para o pais selecionado.';
+    }
+
+    const localDigits = numero.slice(paisCodigo.length).replace(/\D/g, '');
+    if (localDigits.length < 8) {
+      return 'Numero de telefone incompleto. Minimo 8 digitos.';
     }
   }
 

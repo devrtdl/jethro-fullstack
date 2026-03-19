@@ -64,10 +64,14 @@ export function useDiagnosticForm() {
   );
 
   function setFieldValue(question: FormQuestion, value: JsonValue) {
+    // Validamos na mudança para o usuário ver o problema no próprio step, antes do submit final.
+    const nextError = validateField(question, value);
+
     setState((current) => ({
       ...current,
       values: { ...current.values, [question.slug]: value },
-      errors: { ...current.errors, [question.slug]: '' },
+      // Validamos na mudanca para o usuario ver o problema no proprio step, antes do submit final.
+      errors: { ...current.errors, [question.slug]: nextError ?? '' },
     }));
   }
 

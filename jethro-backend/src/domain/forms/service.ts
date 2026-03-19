@@ -859,16 +859,11 @@ export class FormsService {
 }
 
 async function ensureSeedData(service: FormsService) {
-  const existing = await service.repository.findFormBySlug('diagnostico-inicial');
-  if (existing) {
-    return existing;
-  }
-
-  return service.createForm({
+  const seedInput: Omit<FormDefinition, 'id' | 'createdAt' | 'updatedAt'> = {
     slug: 'diagnostico-inicial',
     title: 'Diagnostico Inicial Jethro',
     description: 'Formulario tecnico de diagnostico conforme especificacao do Jethro.',
-    status: 'published',
+    status: 'published' as const,
     steps: [
       { id: 'step_identificacao', title: 'Identificacao', description: 'Dados basicos do empreendedor.', order: 0 },
       { id: 'step_negocio', title: 'Negocio', description: 'Contexto e maturidade do negocio.', order: 1 },
@@ -1144,7 +1139,14 @@ async function ensureSeedData(service: FormsService) {
       errorMessage: 'Nao foi possivel enviar agora. Revise os dados e tente novamente.',
       allowRetry: true,
     },
-  });
+  };
+
+  const existing = await service.repository.findFormBySlug(seedInput.slug);
+  if (!existing) {
+    return service.createForm(seedInput);
+  }
+
+  return service.repository.updateForm(existing.id, seedInput);
 }
 
 export async function createFormsService() {
