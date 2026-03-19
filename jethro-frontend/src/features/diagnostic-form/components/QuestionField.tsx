@@ -2,6 +2,8 @@ import type { ChangeEvent } from 'react';
 
 import type { FormQuestion, JsonValue, QuestionOption } from '../../../types/form';
 
+import { PhoneField } from './PhoneField';
+
 type Props = {
   question: FormQuestion;
   value: JsonValue;
@@ -95,13 +97,13 @@ export function QuestionField({ question, value, error, options = question.optio
           onChange={handleNumberChange}
         />
       ) : null}
-
-      {question.type === 'phone' ? (
+{/*
+       {question.type === 'phone' ? (
         <>
           {/* aqui ficou simplificado de proposito.
               quando a gente plugar um componente de telefone melhor, o contrato precisa continuar o mesmo. */}
           {/* TODO Pollynerd: trocar isso por um phone input decente.
-              HINT: o importante nao e o componente, e sim manter numero/pais_codigo/pais_iso no state final. */}
+              HINT: o importante nao e o componente, e sim manter numero/pais_codigo/pais_iso no state final. 
           <select
             value={
               typeof value === 'object' && value && !Array.isArray(value) && typeof value.pais_iso === 'string'
@@ -135,8 +137,24 @@ export function QuestionField({ question, value, error, options = question.optio
             onChange={(event) => handlePhoneChange('numero', event.target.value)}
           />
         </>
-      ) : null}
+      ) : null} */}
+   
+{question.type === 'phone' ? (
+  <PhoneField
+    value={
+      typeof value === 'object' && value && !Array.isArray(value)
+        ? {
+            numero: typeof value.numero === 'string' ? value.numero : '',
+            pais_codigo: typeof value.pais_codigo === 'string' ? value.pais_codigo : '+55',
+            pais_iso: typeof value.pais_iso === 'string' ? value.pais_iso : 'BR',
+          }
+        : { numero: '', pais_codigo: '+55', pais_iso: 'BR' }
+    }
+    onChange={onChange}
+  />
+) : null}
 
+      
       {question.type === 'single_select' ? renderOptions(question, options, value, onChange) : null}
 
       {question.type === 'money_range' ? (

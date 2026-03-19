@@ -19,6 +19,7 @@ export async function getPublicForm(slug: string) {
   return payload.data;
 }
 
+
 export async function submitForm(slug: string, payload: SubmissionPayload) {
   const response = await fetch(`${API_BASE_URL}/forms/${slug}/submissions`, {
     method: 'POST',
@@ -31,9 +32,18 @@ export async function submitForm(slug: string, payload: SubmissionPayload) {
   const body = (await parseJson(response)) as SubmissionResponse;
 
   if (!response.ok) {
-    // TODO Pollynerd: melhorar isso para ler o erro real do backend.
-    // aqui ainda esta generico porque eu quis primeiro fechar o fluxo ponta a ponta.
-    throw new Error('Nao foi possivel enviar o formulario.');
+    // lê o erro real que o backend mandou
+    const errorBody = body as unknown as {
+      success: false;
+      error: { code: string; message: string; retryable: boolean; details?: unknown };
+    };
+    const message = errorBody?.error?.message ?? 'Nao foi possivel enviar o formulario.';
+    const error = new Error(message);
+    // carrega os detalhes junto pra poder ler no catch
+    (error as any).details = errorBody?.error?.details;
+    (error as any).code = errorBody?.error?.code;
+    (error as any).retryable = errorBody?.error?.retryable;
+    throw error;
   }
 
   return body.data;
