@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jethro - Cenários de Teste do Diagnóstico</title>
+  <style>
+    :root {
+      --bg: #0b1220;
+      --panel: #132238;
+      --panel-soft: #1b2d47;
+      --text: #f7f4ea;
+      --muted: #b9c3d3;
+      --gold: #e8cc73;
+      --line: #2d3f5c;
+      --accent: #8bb5ff;
+      --danger: #f2b2a5;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 32px;
+      background: linear-gradient(180deg, #09101c 0%, #0f1a2d 100%);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.5;
+    }
+
+    main {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    h1, h2, h3 {
+      margin: 0 0 12px;
+      line-height: 1.15;
+    }
+
+    h1 {
+      font-size: 34px;
+      color: var(--gold);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    h2 {
+      margin-top: 28px;
+      font-size: 22px;
+      color: var(--gold);
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+
+    h3 {
+      font-size: 18px;
+      color: var(--text);
+    }
+
+    p, li {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .hero, .panel, .scenario {
+      background: rgba(19, 34, 56, 0.94);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 24px;
+      box-shadow: 0 14px 40px rgba(0, 0, 0, 0.18);
+    }
+
+    .hero {
+      padding: 28px;
+      margin-bottom: 20px;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .meta {
+      background: rgba(11, 18, 32, 0.55);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 18px;
+    }
+
+    .meta strong {
+      color: var(--text);
+    }
+
+    .tag-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(232, 204, 115, 0.35);
+      background: rgba(232, 204, 115, 0.08);
+      color: var(--gold);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 14px;
+      font-size: 13px;
+    }
+
+    th, td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+      text-align: left;
+    }
+
+    th {
+      color: var(--gold);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    td strong {
+      color: var(--text);
+    }
+
+    .grid {
+      display: grid;
+      gap: 18px;
+    }
+
+    .scenario-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .scenario-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 14px;
+    }
+
+    .model {
+      color: var(--gold);
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .pill {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(139, 181, 255, 0.12);
+      border: 1px solid rgba(139, 181, 255, 0.28);
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      white-space: nowrap;
+    }
+
+    .scenario ul {
+      margin: 10px 0 0;
+      padding-left: 18px;
+    }
+
+    .scenario li {
+      margin-bottom: 6px;
+    }
+
+    .result-box {
+      margin-top: 14px;
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: rgba(11, 18, 32, 0.56);
+      border: 1px solid var(--line);
+    }
+
+    .note {
+      border-left: 3px solid var(--gold);
+      padding-left: 12px;
+      margin-top: 10px;
+    }
+
+    .warning {
+      border-left-color: var(--danger);
+    }
+
+    .small {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .footer {
+      margin-top: 28px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    @media print {
+      body {
+        background: #ffffff;
+        color: #111827;
+        padding: 18px;
+      }
+
+      .hero, .panel, .scenario {
+        box-shadow: none;
+        background: #ffffff;
+        border-color: #d1d5db;
+      }
+
+      h1, h2, .tag, th, .model {
+        color: #7a5a00;
+      }
+
+      p, li, .small, .footer, .meta, td {
+        color: #374151;
+      }
+
+      .result-box, .meta {
+        background: #f8fafc;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="hero">
+      <div class="hero-grid">
+        <div>
+          <h1>Cenários de Teste do Diagnóstico Jethro</h1>
+          <p>
+            Documento de QA para validação do motor de diagnóstico, mensagens devolvidas no app e fluxo
+            de resultado. Este material cobre os 9 resultados possíveis, os cenários de prioridade entre modelos
+            e os casos de borda mais importantes para a apresentação e para a homologação do MVP.
+          </p>
+          <div class="tag-list">
+            <span class="tag">Motor v2.4</span>
+            <span class="tag">Mensagens V1/V2/V3</span>
+            <span class="tag">App mobile</span>
+            <span class="tag">QA funcional</span>
+          </div>
+        </div>
+        <aside class="meta">
+          <p><strong>Projeto:</strong> Jethro</p>
+          <p><strong>Data:</strong> 30/03/2026</p>
+          <p><strong>Objetivo:</strong> validar classificação, conteúdo exibido e CTA do paywall</p>
+          <p><strong>Escopo:</strong> fluxo <code>cadastro/login → diagnóstico → resultado (2 telas) → paywall</code></p>
+        </aside>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Regras Gerais</h2>
+      <ul>
+        <li>O diagnóstico exibido no app não deve mostrar o código do modelo. O usuário vê apenas o título editorial.</li>
+        <li>O resultado acontece em 3 telas lógicas: <strong>Realidade Direta</strong>, <strong>Precipício</strong> e <strong>Paywall</strong>.</li>
+        <li>O CTA esperado do resultado é sempre <strong>QUERO MEU PLANO DE AÇÃO</strong>.</li>
+        <li>As mensagens podem variar entre <strong>V1, V2 ou V3</strong> de forma aleatória, mas o resultado esperado do modelo permanece o mesmo.</li>
+        <li>O campo <code>canal_aquisicao</code> é interno no formulário atual do app. Cenários que dependem dele são válidos para QA de API, seed e lógica, mas podem exigir apoio técnico para reprodução manual.</li>
+      </ul>
+      <div class="note warning">
+        <p class="small">
+          Observação importante: não existe um número finito e útil de “todas” as combinações possíveis de respostas.
+          Por isso, este documento cobre os cenários canônicos por modelo, os conflitos de prioridade documentados no motor
+          e os edge cases mais relevantes para QA real.
+        </p>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Mapa de Campos</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Campo do app</th>
+            <th>Valores relevantes</th>
+            <th>Mapeamento no motor</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>fase_negocio</strong></td>
+            <td>ideia, inicio, crescimento, consolidado</td>
+            <td>Q5 = A, B, C, D</td>
+          </tr>
+          <tr>
+            <td><strong>faturamento_mensal.faixa</strong></td>
+            <td>not_revenue, upto_5k, 5k_20k, 20k_50k, above_50k</td>
+            <td>Q11 = A, B, C, D, D</td>
+          </tr>
+          <tr>
+            <td><strong>lucro_crescimento</strong></td>
+            <td>crescendo, estavel, regredindo</td>
+            <td>Q12 = A, B, C</td>
+          </tr>
+          <tr>
+            <td><strong>capacidade_operacional</strong></td>
+            <td>sozinho, equipe_2_5, equipe_6_10, mais_10</td>
+            <td>Q16 = C, B, A, A</td>
+          </tr>
+          <tr>
+            <td><strong>horas_semana</strong></td>
+            <td>1-19, 20-39, 40-60, 61+</td>
+            <td>Q17 = menos_20h, 20_39h, 40_60h, D</td>
+          </tr>
+          <tr>
+            <td><strong>formalizacao</strong></td>
+            <td>nao_comecei, informal, formalizada, empresa_media_grande, outro</td>
+            <td>Q18 = A, B, C, D, B</td>
+          </tr>
+          <tr>
+            <td><strong>canal_aquisicao</strong></td>
+            <td>indicacao, instagram, trafego_pago, linkedin, ativo, varios, outro</td>
+            <td>Q15 = A quando <code>indicacao</code>; demais valores = não A</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <h2>Cenários Canônicos por Resultado</h2>
+    <section class="grid scenario-grid">
+      <article class="scenario">
+        <div class="scenario-header">
+          <div>
+            <div class="model">Resultado I</div>
+            <h3>Ainda Não Começou — O Chamado Precisa de Método</h3>
+          </div>
+          <span class="pill">Reproduzível no app</span>
+        </div>
+        <ul>
+          <li><strong>fase_negocio:</strong> ideia</li>
+          <li><strong>faturamento_mensal:</strong> ainda não fatura</li>
+          <li><strong>formalizacao:</strong> não comecei</li>
+          <li><strong>lucro_crescimento:</strong> estável ou regredindo</li>
+          <li><strong>capacidade_operacional:</strong> sozinho(a)</li>
+          <li><strong>horas_semana:</strong> 1 a 19h</li>
+        </ul>
+        <div class="result-box">
+          <p><strong>Esperado:</strong> título editorial de início absoluto, sem mostrar “Modelo I”.</p>
+          <p><strong>Causa raiz:</strong> falta de oferta mínima, método inicial e validação prática.</p>
+        </div>
+      </article>
+
+      <article class="scenario">
+        <div class="scenario-header">
+          <div>
+            <div class="model">Resultado E</div>
+            <h3>Validação Inicial — Movimento Ainda Sem Prova</h3>
+          </div>
+          <span class="pill">API / lógica</span>
+        </div>
+        <ul>
+          <li><strong>fase_negocio:</strong> ideia ou início</li>
+          <li><strong>faturamento_mensal:</strong> ainda não fatura</li>
+          <li><strong>formalizacao:</strong> informal</li>
+          <li><strong>ou:</strong> faturamento até 5k + fase ideia/início + canal_aquisicao = indicação</li>
+        </ul>
+        <div class="result-box">
+          <p><strong>Esperado:</strong> cenário de validação, não de empresa já estruturada.</p>
+          <p><strong>Causa raiz:</strong> oferta e canal ainda sem validação consistente de mercado.</p>
+        </div>
+      </article>
+
+      <article class="scenario">
+        <div class="scenario-header">
+          <div>
+            <div class="model">Resultado G</div>
+            <h3>Operação no Limite - Crescer Piora Tudo</h3>
+          </div>
+          <span class="pill">Reproduzível no app</span>
+        </div>
+        <ul>
+          <li><strong>faturamento_mensal:</strong> 5k-20k, 20k-50k ou acima de 50k</li>
+          <li><strong>capacidade_operacional:</strong> sozinho(a)</li>
+          <li><strong>lucro_crescimento:</strong> qualquer valor</li>
+          <li><strong>horas_semana:</strong> qualquer valor</li>
+        </ul>
+        <div class="result-box">
+          <p><strong>Esperado:</strong> título editorial do exemplo apresentado ao cliente.</p>
+          <p><strong>Causa raiz:</strong> ausência de sistema operacional — processo + padrão + capacidade estruturada.</p>
+        </div>
+      </article>
+
+      <article class="scenario">
+        <div class="scenario-header">
+          <div>
+            <div class="model">Resultado D</div>
+            <h3>Fatura, Mas Sangra — Receita Sem Lucro</h3>
+          </div>
+          <span class="pill">Reproduzível no app</span>
+        </div>
+        <ul>
+          <li><strong>faturamento_mensal:</strong> até 5k ou mais</li>
+          <li><strong>lucro_crescimento:</strong> regredindo</li>
+          <li><strong>capacidade_operacional:</strong> equipe_2_5, equipe_6_10 ou mais_10 para não cair em G</li>
+          <li><strong>horas_semana:</strong> até 60h para não cair em H se a ordem mudar no futuro</li>
+        </ul>
+        <div class="result-box">
+          <p><strong>Esperado:</strong> leitura de faturamento sem lucro, sem mostrar “Modelo D”.</p>
+          <p><strong>Causa raiz:</strong> falta de clareza financeira, margem protegida e controle econômico real.</p>
+        </div>
+      </article>
+
+      <article class="scenario">
+        <div class="scenario-header">
+          <div>
+            <div class="model">Resultado H</div>
+            <h3>O Gargalo é o Dono — A Empresa Cabe Só em Você</h3>
+          </div>
+          <span class="pill">Reproduzível no app</span>
+        </div>
+        <ul>
+          <li><strong>horas_semana:</strong> mais de 60h</li>
+          <li><strong>faturamento_mensal:</strong> até 5k ou mais</li>
+          <li><strong>capacidade_operacional:</strong> equipe_2_5, equipe_6_10 ou mais_10 para não cair em G</li>
+          <li><strong>lucro_crescimento:</strong> crescendo ou estável para não cair em D</li>
+        </ul>
+        <div class="result-box">
+          <p><strong>Esperado:</strong> foco em governo pessoal, agenda, delegação e rotina.</p>
+          <p><strong>Causa raiz:</strong> centralização, ausência de delegação e governo pessoal insuficiente.</p>
+        </div>
+      </article>
+
+      <article class="scenario">
+        <div class="scenario-header">
+          <div>
+            <div class="model">Resultado A</div>
+            <h3>Negócio Travado — Sem Fundação para Crescer</h3>
+          </div>
+          <span class="pill">Reproduzível no app</span>
+        </div>
+        <ul>
+          <li><strong>organizacao_financeira:</strong> desorganizada</li>
+          <li><strong>estrutura_negocio:</strong> em desenvolvimento ou ainda não</li>
+          <li><strong>lucro_crescimento:</strong> estável ou regredindo</li>
+          <li><strong>conexao_dons:</strong> não</li>
+          <li><strong>ou proposito_negocio:</strong> sem clareza</li>
+          <li><strong>faturamento_mensal:</strong> evitar 5k-20k+ com capacidade sozinho(a), para não cair em G</li>
+        </ul>
+        <div class="result-box">
+          <p><strong>Esperado:</strong> leitura de caos financeiro + falta de direção + falta de governo.</p>
+          <p><strong>Causa raiz:</strong> ausência de fundamento financeiro, direção clara e governo semanal.</p>
+        </div>
+      </article>
+
+      <article class="scenario">
+        <div class="scenario-header">
+          <div>
+            <div class="model">Resultado F</div>
+            <h3>Vende, Mas Sem Motor — Dependência de Indicação</h3>
+          </div>
+          <span class="pill">API / lógica</span>
+        </div>
+        <ul>
+          <li><strong>faturamento_mensal:</strong> até 5k ou mais</li>
+          <li><strong>canal_aquisicao:</strong> indicação</li>
+          <li><strong>lucro_crescimento:</strong> estável ou regredindo</li>
+          <li><strong>capacidade_operacional:</strong> equipe_2_5 ou maior, para não colidir com G</li>
+          <li><strong>horas_semana:</strong> até 60h, para não colidir com H</li>
+        </ul>
+        <div class="result-box">
+          <p><strong>Esperado:</strong> foco em dependência de indicação e ausência de motor comercial.</p>
+          <p><strong>Causa raiz:</strong> ausência de aquisição previsível, funil claro e rotina comercial.</p>
+        </div>
+      </article>
+
+      <article class="scenario">
+        <div class="scenario-header">
+          <div>
+            <div class="model">Resultado C</div>
+            <h3>Boa Base, Caixa Apertado — Valor Sem Conversão</h3>
+          </div>
+          <span class="pill">Reproduzível no app</span>
+        </div>
+        <ul>
+          <li><strong>conexao_dons:</strong> total ou parcialmente</li>
+          <li><strong>proposito_negocio:</strong> claro ou em definição</li>
+          <li><strong>organizacao_financeira:</strong> básica ou desorganizada</li>
+          <li><strong>lucro_crescimento:</strong> estável ou regredindo</li>
+          <li><strong>faturamento_mensal:</strong> até 5k</li>
+          <li><strong>canal_aquisicao:</strong> não indicação, se testado por API</li>
+        </ul>
+        <div class="result-box">
+          <p><strong>Esperado:</strong> propósito existe, mas o caixa não acompanha.</p>
+          <p><strong>Causa raiz:</strong> desalinhamento entre valor gerado, modelo de receita e estrutura econômica.</p>
+        </div>
+      </article>
+
+      <article class="scenario">
+        <div class="scenario-header">
+          <div>
+            <div class="model">Resultado B</div>
+            <h3>Base Boa, Motor Fraco — O Platô Chegou</h3>
+          </div>
+          <span class="pill">API / lógica</span>
+        </div>
+        <ul>
+          <li><strong>organizacao_financeira:</strong> estruturada ou básica</li>
+          <li><strong>estrutura_negocio:</strong> estruturado ou em desenvolvimento</li>
+          <li><strong>faturamento_mensal:</strong> até 5k ou mais</li>
+          <li><strong>lucro_crescimento:</strong> estável</li>
+          <li><strong>canal_aquisicao:</strong> qualquer valor diferente de indicação</li>
+        </ul>
+        <div class="result-box">
+          <p><strong>Esperado:</strong> negócio saudável, mas parado no platô.</p>
+          <p><strong>Causa raiz:</strong> ausência de motor comercial previsível e esteira clara de crescimento.</p>
+        </div>
+      </article>
+    </section>
+
+    <section class="panel">
+      <h2>Cenários de Prioridade Entre Modelos</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Conflito</th>
+            <th>Condição combinada</th>
+            <th>Resultado esperado</th>
+            <th>Motivo</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>G ∩ D</strong></td>
+            <td>fatura 5k+ + regredindo + operação sozinho(a)</td>
+            <td><strong>G</strong></td>
+            <td>Sem estrutura operacional, vender mais só piora o problema.</td>
+          </tr>
+          <tr>
+            <td><strong>G ∩ H</strong></td>
+            <td>fatura 5k+ + operação sozinho(a) + 61h+</td>
+            <td><strong>G</strong></td>
+            <td>Colapso operacional vence sobrecarga do dono.</td>
+          </tr>
+          <tr>
+            <td><strong>D ∩ H</strong></td>
+            <td>fatura até 5k+ + regredindo + 61h+</td>
+            <td><strong>D</strong></td>
+            <td>Crise financeira tem prioridade sobre governo pessoal.</td>
+          </tr>
+          <tr>
+            <td><strong>D ∩ F</strong></td>
+            <td>fatura até 5k+ + regredindo + indicação</td>
+            <td><strong>D</strong></td>
+            <td>Estabilizar margem vem antes de escalar canal.</td>
+          </tr>
+          <tr>
+            <td><strong>F ∩ C</strong></td>
+            <td>indicação + boa clareza + caixa pressionado</td>
+            <td><strong>F</strong></td>
+            <td>Quando o propósito está resolvido, a raiz vira comercial.</td>
+          </tr>
+          <tr>
+            <td><strong>E ∩ F</strong></td>
+            <td>fase ideia/início + até 5k + indicação</td>
+            <td><strong>E</strong></td>
+            <td>Pré-validação vem antes do diagnóstico de motor comercial.</td>
+          </tr>
+          <tr>
+            <td><strong>I ∩ E</strong></td>
+            <td>não fatura + Q18 decide</td>
+            <td><strong>I</strong> quando formalização ≠ informal</td>
+            <td>O gate de Q18 separa “ainda não começou” de “já começou sem validar”.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="panel">
+      <h2>Casos de Borda e Regressão</h2>
+      <ul>
+        <li><strong>Resultado salvo antigo:</strong> o app deve reabrir o último diagnóstico sem exibir campos vazios ou “undefined”.</li>
+        <li><strong>Responder novamente:</strong> ao tocar em “Responder novamente”, o formulário deve reiniciar e permitir novo envio completo.</li>
+        <li><strong>Mensagem aleatória:</strong> o mesmo modelo pode sortear V1, V2 ou V3. O tester deve validar o modelo editorial, não apenas o texto exato.</li>
+        <li><strong>Campo interno canal_aquisicao:</strong> cenários B, E e F podem exigir QA técnico complementar porque o app atual não mostra essa pergunta ao usuário.</li>
+        <li><strong>Fallback A:</strong> perfis híbridos e difusos devem cair em A apenas quando nenhum modelo anterior dominar.</li>
+      </ul>
+      <div class="note">
+        <p class="small">
+          Ponto de atenção do motor: o documento v2.4 menciona um fallback legado para <code>Q11 = A</code> sem <code>Q18</code>.
+          Se o payload chegar sem formalização, a classificação esperada em legado deve ser tratada como caso especial de compatibilidade.
+        </p>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Checklist de Validação Visual no App</h2>
+      <ul>
+        <li>Tela 1 do resultado deve mostrar <strong>Realidade Direta</strong>, título editorial, corpo principal, <strong>Causa raiz</strong> e <strong>Palavra para este momento</strong>.</li>
+        <li>Tela 2 do resultado deve mostrar <strong>Precipício</strong> e o CTA <strong>QUERO MEU PLANO DE AÇÃO</strong>.</li>
+        <li>Tela 3 deve ser o <strong>paywall</strong> separado, não embutido na tela 2.</li>
+        <li>O título editorial não deve exibir “Modelo A/B/C...” ao usuário final.</li>
+        <li>O botão de logout deve permitir voltar para a tela de entrada.</li>
+        <li>O resultado anterior deve reabrir para o mesmo usuário autenticado.</li>
+      </ul>
+    </section>
+
+    <p class="footer">
+      Baseado em: <code>01-Jethro_Motor_v2_4_Daniel.docx</code>, <code>02-Jethro_Mensagens_Diagnostico_v1_1.docx</code>,
+      implementação atual do backend e fluxo do app em 30/03/2026.
+    </p>
+  </main>
+</body>
+</html>

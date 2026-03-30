@@ -578,74 +578,6 @@ const modelSummaries: Record<ClassifiedDiagnostic['code'], { title: string; mess
   },
 };
 
-const diagnosticPresentation: Record<
-  ClassifiedDiagnostic['code'],
-  {
-    block1Title: string;
-    rootCause: string;
-    block2Title: string;
-    block1Body?: string;
-    scriptureText?: string;
-    scriptureVerse?: string;
-    block2Body?: string;
-    ctaLabel?: string;
-  }
-> = {
-  A: {
-    block1Title: 'Negócio Travado — Sem Fundação para Crescer',
-    rootCause: 'ausência de fundamento financeiro, direção clara e governo semanal.',
-    block2Title: 'O que acontece quando o negócio cresce sem fundamento:',
-  },
-  B: {
-    block1Title: 'Base Boa, Motor Fraco — O Platô Chegou',
-    rootCause: 'ausência de motor comercial previsível e esteira clara de crescimento.',
-    block2Title: 'O que acontece quando o negócio para de evoluir mesmo sendo saudável:',
-  },
-  C: {
-    block1Title: 'Boa Base, Caixa Apertado — Valor Sem Conversão',
-    rootCause: 'desalinhamento entre valor gerado, modelo de receita e estrutura econômica.',
-    block2Title: 'O que acontece quando há propósito, mas o caixa não acompanha:',
-  },
-  D: {
-    block1Title: 'Fatura, Mas Sangra — Receita Sem Lucro',
-    rootCause: 'falta de clareza financeira, margem protegida e controle econômico real.',
-    block2Title: 'O que acontece quando a empresa vende muito, mas enriquece pouco:',
-  },
-  E: {
-    block1Title: 'Validação Inicial — Movimento Ainda Sem Prova',
-    rootCause: 'oferta e canal ainda sem validação consistente de mercado.',
-    block2Title: 'O que acontece quando o negócio tenta escalar antes de validar:',
-  },
-  F: {
-    block1Title: 'Vende, Mas Sem Motor — Dependência de Indicação',
-    rootCause: 'ausência de aquisição previsível, funil claro e rotina comercial.',
-    block2Title: 'O que acontece quando as vendas dependem sempre do acaso:',
-  },
-  G: {
-    block1Title: 'Operação no Limite - Crescer Piora Tudo',
-    rootCause: 'ausência de sistema operacional — processo + padrão + capacidade estruturada.',
-    block2Title: 'O que acontece quando a operação sem estrutura tenta crescer:',
-    block1Body:
-      '[NOME], você está num paradoxo perigoso: vender mais está te quebrando.\nExiste uma fase onde o crescimento vira inimigo.\nQuando a operação não tem estrutura para o que já existe, vender mais significa entregar pior.\nO Jethro identificou exatamente esse ponto no seu negócio:\n• Sua capacidade operacional está no limite — mais demanda gera mais caos\n• Tudo passa por você — a equipe executa, mas depende das suas decisões\n• Não há processos documentados: o que funciona hoje não se repete amanhã',
-    scriptureText:
-      'Sabedoria constrói a casa — não a preenche de qualquer forma. Estrutura é ato de fé, não de medo.\n"A sabedoria edificou a sua casa; lavrou as suas sete colunas."',
-    scriptureVerse: '— Provérbios 9:1',
-    block2Body:
-      'A lógica é matemática e implacável:\n• Mais vendas → mais atraso → mais reclamação\n• Mais reclamação → mais retrabalho → mais custo invisível\n• Mais custo → menos margem → crescimento que sangra\n• E no final: perda de reputação — que é o ativo mais difícil de recuperar\n\nRECIPÍCIO\n"Um bom nome é preferível às grandes riquezas." — Provérbios 22:1\nCresce sem estrutura e você pagará com o nome da sua empresa.\n\nVocê vai continuar crescendo o caos... ou vai primeiro construir a casa que aguenta o crescimento?',
-    ctaLabel: 'QUERO MEU PLANO DE AÇÃO',
-  },
-  H: {
-    block1Title: 'O Gargalo é o Dono — A Empresa Cabe Só em Você',
-    rootCause: 'centralização, ausência de delegação e governo pessoal insuficiente.',
-    block2Title: 'O que acontece quando tudo depende do fundador:',
-  },
-  I: {
-    block1Title: 'Ainda Não Começou — O Chamado Precisa de Método',
-    rootCause: 'falta de oferta mínima, método inicial e validação prática.',
-    block2Title: 'O que acontece quando a visão não encontra um caminho concreto:',
-  },
-};
-
 function mapRevenueToMotorBand(faixa: string | undefined) {
   if (!faixa || faixa === 'not_revenue') {
     return 'A';
@@ -754,8 +686,6 @@ async function buildDiagnosticSummary(
   classified: ClassifiedDiagnostic,
   fullName?: string
 ): Promise<DiagnosticSummary> {
-  const presentation = diagnosticPresentation[classified.code];
-
   if (hasDatabaseConfig()) {
     try {
       const pool = getDbPool();
@@ -783,14 +713,14 @@ async function buildDiagnosticSummary(
           status: 'ready',
           modelCode: classified.code,
           variant: message.variant,
-          block1Title: presentation.block1Title,
-          block1Body: personalizeDiagnosticText(presentation.block1Body ?? message.block_1_body, fullName),
-          rootCause: personalizeDiagnosticText(presentation.rootCause ?? message.root_cause, fullName),
-          scriptureVerse: presentation.scriptureVerse ?? message.scripture_verse ?? undefined,
-          scriptureText: personalizeDiagnosticText(presentation.scriptureText ?? message.scripture_text ?? '', fullName) || undefined,
-          block2Title: presentation.block2Title,
-          block2Body: personalizeDiagnosticText(presentation.block2Body ?? message.block_2_body, fullName),
-          ctaLabel: presentation.ctaLabel ?? message.cta_label,
+          block1Title: personalizeDiagnosticText(message.block_1_title, fullName),
+          block1Body: personalizeDiagnosticText(message.block_1_body, fullName),
+          rootCause: personalizeDiagnosticText(message.root_cause, fullName),
+          scriptureVerse: message.scripture_verse ?? undefined,
+          scriptureText: personalizeDiagnosticText(message.scripture_text ?? '', fullName) || undefined,
+          block2Title: personalizeDiagnosticText(message.block_2_title, fullName),
+          block2Body: personalizeDiagnosticText(message.block_2_body, fullName),
+          ctaLabel: personalizeDiagnosticText(message.cta_label, fullName),
           generatedAt: submittedAt,
         };
       }
@@ -803,18 +733,14 @@ async function buildDiagnosticSummary(
     status: 'ready',
     modelCode: classified.code,
     variant: 'v1',
-    block1Title: presentation.block1Title,
-    block1Body: personalizeDiagnosticText(
-      presentation.block1Body ?? `[NOME], ${classified.message.charAt(0).toLowerCase()}${classified.message.slice(1)}`,
-      fullName
-    ),
-    rootCause: presentation.rootCause,
-    scriptureVerse: presentation.scriptureVerse ?? undefined,
-    scriptureText: presentation.scriptureText ?? undefined,
-    block2Title: presentation.block2Title,
-    block2Body:
-      presentation.block2Body ?? 'Seu diagnóstico aponta um risco real de permanecer no mesmo ciclo se nada mudar nas próximas semanas.',
-    ctaLabel: presentation.ctaLabel ?? 'QUERO MEU PLANO DE AÇÃO',
+    block1Title: classified.title,
+    block1Body: personalizeDiagnosticText(`[NOME], ${classified.message.charAt(0).toLowerCase()}${classified.message.slice(1)}`, fullName),
+    rootCause: undefined,
+    scriptureVerse: undefined,
+    scriptureText: undefined,
+    block2Title: 'O que fazer agora:',
+    block2Body: 'Seu diagnóstico aponta um risco real de permanecer no mesmo ciclo se nada mudar nas próximas semanas.',
+    ctaLabel: 'QUERO MEU PLANO DE AÇÃO',
     generatedAt: submittedAt,
   };
 }

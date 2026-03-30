@@ -1,0 +1,273 @@
+JETHRO
+CENÁRIOS DE TESTE DO DIAGNÓSTICO
+Data: 30/03/2026
+
+OBJETIVO
+Validar o motor de diagnóstico, as mensagens exibidas no app e o fluxo:
+cadastro/login -> diagnóstico -> resultado (2 telas) -> paywall.
+
+OBSERVAÇÕES GERAIS
+- O app não deve exibir "Modelo A/B/C..." ao usuário final.
+- O resultado deve acontecer em 3 telas lógicas:
+  1. Realidade Direta
+  2. Precipício
+  3. Paywall
+- O CTA esperado do resultado é sempre: QUERO MEU PLANO DE AÇÃO
+- As mensagens podem variar entre V1, V2 e V3 aleatoriamente.
+- O campo canal_aquisicao é interno no formulário atual do app.
+  Por isso, cenários B, E e F podem exigir apoio técnico para reprodução manual.
+
+MAPA RÁPIDO DE CAMPOS
+- fase_negocio:
+  ideia -> Q5=A
+  inicio -> Q5=B
+  crescimento -> Q5=C
+  consolidado -> Q5=D
+
+- faturamento_mensal.faixa:
+  not_revenue -> Q11=A
+  upto_5k / upto_2k -> Q11=B
+  5k_20k / 2k_10k -> Q11=C
+  20k_50k / above_50k / 10k_25k / above_25k -> Q11=D
+
+- lucro_crescimento:
+  crescendo -> Q12=A
+  estavel -> Q12=B
+  regredindo -> Q12=C
+
+- capacidade_operacional:
+  sozinho -> Q16=C
+  equipe_2_5 -> Q16=B
+  equipe_6_10 -> Q16=A
+  mais_10 -> Q16=A
+
+- horas_semana:
+  1-19 -> menos_20h
+  20-39 -> 20_39h
+  40-60 -> 40_60h
+  61+ -> D
+
+- formalizacao:
+  nao_comecei -> Q18=A
+  informal / outro -> Q18=B
+  formalizada -> Q18=C
+  empresa_media_grande -> Q18=D
+
+CENÁRIOS CANÔNICOS POR RESULTADO
+
+1. RESULTADO I
+Título esperado:
+Ainda Não Começou — O Chamado Precisa de Método
+
+Respostas de exemplo:
+- fase_negocio: ideia
+- faturamento_mensal: ainda não fatura
+- formalizacao: nao_comecei
+- lucro_crescimento: estavel ou regredindo
+- capacidade_operacional: sozinho
+- horas_semana: 1 a 19
+
+Esperado:
+- resultado editorial de início absoluto
+- causa raiz ligada a falta de oferta mínima, método inicial e validação prática
+
+2. RESULTADO E
+Título esperado:
+Validação Inicial — Movimento Ainda Sem Prova
+
+Respostas de exemplo:
+- fase_negocio: ideia ou inicio
+- faturamento_mensal: ainda não fatura
+- formalizacao: informal
+
+Ou:
+- fase_negocio: ideia ou inicio
+- faturamento_mensal: até 5k
+- canal_aquisicao: indicacao
+
+Esperado:
+- leitura de pré-validação
+- não deve parecer empresa já estruturada
+
+3. RESULTADO G
+Título esperado:
+Operação no Limite - Crescer Piora Tudo
+
+Respostas de exemplo:
+- faturamento_mensal: 5k-20k, 20k-50k ou acima de 50k
+- capacidade_operacional: sozinho
+- lucro_crescimento: qualquer valor
+- horas_semana: qualquer valor
+
+Esperado:
+- tela 1 com Realidade Direta, Causa raiz e Palavra para este momento
+- tela 2 com Precipício
+- tela 3 com paywall
+
+4. RESULTADO D
+Título esperado:
+Fatura, Mas Sangra — Receita Sem Lucro
+
+Respostas de exemplo:
+- faturamento_mensal: até 5k ou mais
+- lucro_crescimento: regredindo
+- capacidade_operacional: equipe_2_5, equipe_6_10 ou mais_10
+- horas_semana: até 60
+
+Esperado:
+- leitura de faturamento sem lucro
+- foco em margem, custo invisível e controle econômico
+
+5. RESULTADO H
+Título esperado:
+O Gargalo é o Dono — A Empresa Cabe Só em Você
+
+Respostas de exemplo:
+- horas_semana: mais de 60
+- faturamento_mensal: até 5k ou mais
+- capacidade_operacional: equipe_2_5, equipe_6_10 ou mais_10
+- lucro_crescimento: crescendo ou estavel
+
+Esperado:
+- foco em governo pessoal, agenda, delegação e rotina
+
+6. RESULTADO A
+Título esperado:
+Negócio Travado — Sem Fundação para Crescer
+
+Respostas de exemplo:
+- organizacao_financeira: desorganizada
+- estrutura_negocio: desenvolvimento ou inexistente
+- lucro_crescimento: estavel ou regredindo
+- conexao_dons: nao
+  ou
+- proposito_negocio: sem_clareza
+
+Esperado:
+- leitura de caos financeiro, ausência de direção e falta de governo
+
+7. RESULTADO F
+Título esperado:
+Vende, Mas Sem Motor — Dependência de Indicação
+
+Respostas de exemplo:
+- faturamento_mensal: até 5k ou mais
+- canal_aquisicao: indicacao
+- lucro_crescimento: estavel ou regredindo
+- capacidade_operacional: equipe_2_5 ou maior
+- horas_semana: até 60
+
+Esperado:
+- foco em ausência de motor comercial
+- dependência de indicação
+
+8. RESULTADO C
+Título esperado:
+Boa Base, Caixa Apertado — Valor Sem Conversão
+
+Respostas de exemplo:
+- conexao_dons: total ou parcial
+- proposito_negocio: claro ou em_definicao
+- organizacao_financeira: basica ou desorganizada
+- lucro_crescimento: estavel ou regredindo
+- faturamento_mensal: até 5k
+
+Esperado:
+- propósito existe, mas o caixa não acompanha
+
+9. RESULTADO B
+Título esperado:
+Base Boa, Motor Fraco — O Platô Chegou
+
+Respostas de exemplo:
+- organizacao_financeira: estruturada ou basica
+- estrutura_negocio: estruturado ou desenvolvimento
+- faturamento_mensal: até 5k ou mais
+- lucro_crescimento: estavel
+- canal_aquisicao: diferente de indicacao
+
+Esperado:
+- negócio saudável, mas travado no platô
+
+CENÁRIOS DE PRIORIDADE ENTRE MODELOS
+
+1. G x D
+Condição:
+- faturamento 5k+
+- lucro regredindo
+- capacidade_operacional = sozinho
+Resultado esperado: G
+
+2. G x H
+Condição:
+- faturamento 5k+
+- capacidade_operacional = sozinho
+- horas_semana = 61+
+Resultado esperado: G
+
+3. D x H
+Condição:
+- faturamento 5k+
+- lucro regredindo
+- horas_semana = 61+
+Resultado esperado: D
+
+4. D x F
+Condição:
+- faturamento 5k+
+- lucro regredindo
+- canal_aquisicao = indicacao
+Resultado esperado: D
+
+5. F x C
+Condição:
+- indicacao
+- boa clareza de propósito
+- caixa pressionado
+Resultado esperado: F
+
+6. E x F
+Condição:
+- fase ideia/inicio
+- faturamento até 5k
+- indicacao
+Resultado esperado: E
+
+7. I x E
+Condição:
+- não fatura
+- Q18 decide
+Resultado esperado:
+- I quando formalizacao != informal
+- E quando formalizacao = informal
+
+CASOS DE BORDA E REGRESSÃO
+- O resultado salvo antigo não pode aparecer vazio ou com "undefined".
+- O botão "Responder novamente" deve reiniciar o formulário.
+- O mesmo modelo pode sortear V1, V2 ou V3.
+- O tester deve validar o modelo editorial e a estrutura do resultado, não apenas o texto literal.
+- O fallback A deve aparecer apenas quando nenhum modelo anterior dominar.
+
+CHECKLIST VISUAL NO APP
+- Tela 1 mostra:
+  Realidade Direta
+  título editorial
+  corpo principal
+  Causa raiz
+  Palavra para este momento
+
+- Tela 2 mostra:
+  Precipício
+  CTA QUERO MEU PLANO DE AÇÃO
+
+- Tela 3 mostra:
+  paywall separado
+
+- O app não exibe "Modelo A/B/C..." ao usuário.
+- O resultado anterior reabre para o mesmo usuário autenticado.
+- O botão de logout volta para a tela de entrada.
+
+BASE DESTE DOCUMENTO
+- 01-Jethro_Motor_v2_4_Daniel.docx
+- 02-Jethro_Mensagens_Diagnostico_v1_1.docx
+- Implementação atual do backend e do app em 30/03/2026
