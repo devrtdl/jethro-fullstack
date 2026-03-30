@@ -512,6 +512,7 @@ type DiagnosticMessageRow = {
   variant: 'v1' | 'v2' | 'v3';
   block_1_title: string;
   block_1_body: string;
+  root_cause: string;
   scripture_verse: string | null;
   scripture_text: string | null;
   block_2_title: string;
@@ -763,6 +764,7 @@ async function buildDiagnosticSummary(
            variant,
            block_1_title,
            block_1_body,
+           root_cause,
            scripture_verse,
            scripture_text,
            block_2_title,
@@ -783,7 +785,7 @@ async function buildDiagnosticSummary(
           variant: message.variant,
           block1Title: presentation.block1Title,
           block1Body: personalizeDiagnosticText(presentation.block1Body ?? message.block_1_body, fullName),
-          rootCause: personalizeDiagnosticText(presentation.rootCause, fullName),
+          rootCause: personalizeDiagnosticText(presentation.rootCause ?? message.root_cause, fullName),
           scriptureVerse: presentation.scriptureVerse ?? message.scripture_verse ?? undefined,
           scriptureText: personalizeDiagnosticText(presentation.scriptureText ?? message.scripture_text ?? '', fullName) || undefined,
           block2Title: presentation.block2Title,

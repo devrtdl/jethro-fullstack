@@ -322,8 +322,7 @@ function QuestionInput({
 
 export function HomeScreen() {
   const { session, isReady, errorMessage } = useAuthSession();
-  const [showPaywall, setShowPaywall] = useState(false);
-  const [resultStep, setResultStep] = useState<'block1' | 'block2'>('block1');
+  const [resultStep, setResultStep] = useState<'block1' | 'block2' | 'paywall'>('block1');
   const [isSigningOut, setIsSigningOut] = useState(false);
   const diagnostic = useDiagnosticForm({
     enabled: Boolean(session?.user?.email),
@@ -404,14 +403,13 @@ export function HomeScreen() {
                 <Pressable
                   style={styles.secondaryButton}
                   onPress={() => {
-                    setShowPaywall(false);
                     setResultStep('block1');
                     diagnostic.reset();
                   }}>
                   <Text style={styles.secondaryButtonLabel}>Responder novamente</Text>
                 </Pressable>
               </>
-            ) : (
+            ) : resultStep === 'block2' ? (
               <>
                 <Text style={styles.resultSectionLabel}>Precipício</Text>
                 <Text style={styles.valueHighlight}>{diagnostic.submitResult.diagnostic.block2Title}</Text>
@@ -419,7 +417,7 @@ export function HomeScreen() {
 
                 <Text style={styles.bodyText}>Gerado em {formatDate(diagnostic.submitResult.diagnostic.generatedAt)}.</Text>
 
-            <Pressable style={styles.primaryButton} onPress={() => setShowPaywall(true)}>
+                <Pressable style={styles.primaryButton} onPress={() => setResultStep('paywall')}>
                   <Text style={styles.primaryButtonLabel}>{diagnostic.submitResult.diagnostic.ctaLabel}</Text>
                 </Pressable>
                 <Pressable style={styles.secondaryButton} onPress={() => setResultStep('block1')}>
@@ -428,16 +426,13 @@ export function HomeScreen() {
                 <Pressable
                   style={styles.secondaryButton}
                   onPress={() => {
-                    setShowPaywall(false);
                     setResultStep('block1');
                     diagnostic.reset();
                   }}>
                   <Text style={styles.secondaryButtonLabel}>Responder novamente</Text>
                 </Pressable>
               </>
-            )}
-
-            {showPaywall ? (
+            ) : (
               <View style={styles.paywallCard}>
                 <Text style={styles.sectionTitle}>Oferta de entrada</Text>
                 <Text style={styles.valueHighlight}>Plano Pro Jethro</Text>
@@ -460,8 +455,11 @@ export function HomeScreen() {
                   }>
                   <Text style={styles.primaryButtonLabel}>Assinar em breve</Text>
                 </Pressable>
+                <Pressable style={styles.secondaryButton} onPress={() => setResultStep('block2')}>
+                  <Text style={styles.secondaryButtonLabel}>Voltar para o diagnóstico</Text>
+                </Pressable>
               </View>
-            ) : null}
+            )}
           </View>
         ) : (
           <View style={styles.formStage}>

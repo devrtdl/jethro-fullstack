@@ -12,7 +12,7 @@ type DiagnosticQuestionSeed = {
   orderIndex: number;
   label: string;
   helperText?: string;
-  questionType: 'text' | 'textarea' | 'email' | 'phone' | 'single_select' | 'money_range';
+  questionType: 'text' | 'textarea' | 'email' | 'phone' | 'single_select' | 'money_range' | 'number';
   isRequired?: boolean;
   isInternal?: boolean;
   validation?: Record<string, unknown>;
@@ -36,6 +36,7 @@ type DiagnosticMessageSeed = {
   variant: 'v1' | 'v2' | 'v3';
   block1Title: string;
   block1Body: string;
+  rootCause?: string;
   scriptureVerse?: string;
   scriptureText?: string;
   block2Title: string;
@@ -709,6 +710,18 @@ const diagnosticMessages: DiagnosticMessageSeed[] = [
   },
 ];
 
+const diagnosticMessageRootCauses: Record<string, string> = {
+  A: 'caos financeiro + ausência de direção + falta de governo semanal.',
+  B: 'falta motor de multiplicação — aquisição + oferta + recorrência + metas.',
+  C: 'propósito sem modelo financeiro + caixa sem governo.',
+  D: 'custo invisível + precificação sem margem + ilusão de faturamento.',
+  E: 'oferta sem validação real + canal sem prova + ausência de rotina de venda.',
+  F: 'ausência de motor comercial estruturado.',
+  G: 'ausência de sistema operacional — processo + padrão + capacidade estruturada.',
+  H: 'centralização excessiva + falta de governo pessoal + delegação insuficiente.',
+  I: 'falta de método inicial, validação prática e estrutura mínima para começar.',
+};
+
 const rogerioQuotes: RogerioQuoteSeed[] = [
   {
     code: 'RQ-001',
@@ -1213,13 +1226,15 @@ async function seedDiagnosticModels(client: PoolClient) {
 
 async function seedDiagnosticMessages(client: PoolClient) {
   for (const message of diagnosticMessages) {
+    const rootCause = message.rootCause ?? diagnosticMessageRootCauses[message.modelCode] ?? '';
     await client.query(
       `insert into diagnostic_messages (
-        model_code, variant, block_1_title, block_1_body, scripture_verse, scripture_text, block_2_title, block_2_body, cta_label
-      ) values ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        model_code, variant, block_1_title, block_1_body, root_cause, scripture_verse, scripture_text, block_2_title, block_2_body, cta_label
+      ) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
       on conflict (model_code, variant) do update set
         block_1_title = excluded.block_1_title,
         block_1_body = excluded.block_1_body,
+        root_cause = excluded.root_cause,
         scripture_verse = excluded.scripture_verse,
         scripture_text = excluded.scripture_text,
         block_2_title = excluded.block_2_title,
@@ -1231,6 +1246,7 @@ async function seedDiagnosticMessages(client: PoolClient) {
         message.variant,
         message.block1Title,
         message.block1Body,
+        rootCause,
         message.scriptureVerse ?? null,
         message.scriptureText ?? null,
         message.block2Title,
