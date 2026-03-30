@@ -510,6 +510,7 @@ type ClassifiedDiagnostic = {
 
 type DiagnosticMessageRow = {
   variant: 'v1' | 'v2' | 'v3';
+  model_title: string;
   block_1_title: string;
   block_1_body: string;
   root_cause: string;
@@ -691,6 +692,7 @@ async function buildDiagnosticSummary(
       const pool = getDbPool();
       const result = await pool.query<DiagnosticMessageRow>(
         `select
+           dm.title as model_title,
            variant,
            block_1_title,
            block_1_body,
@@ -700,8 +702,9 @@ async function buildDiagnosticSummary(
            block_2_title,
            block_2_body,
            cta_label
-         from diagnostic_messages
-         where model_code = $1
+         from diagnostic_messages dmgs
+         inner join diagnostic_models dm on dm.code = dmgs.model_code
+         where dmgs.model_code = $1
          order by random()
          limit 1`,
         [classified.code]
@@ -713,7 +716,7 @@ async function buildDiagnosticSummary(
           status: 'ready',
           modelCode: classified.code,
           variant: message.variant,
-          block1Title: personalizeDiagnosticText(message.block_1_title, fullName),
+          block1Title: personalizeDiagnosticText(message.model_title, fullName),
           block1Body: personalizeDiagnosticText(message.block_1_body, fullName),
           rootCause: personalizeDiagnosticText(message.root_cause, fullName),
           scriptureVerse: message.scripture_verse ?? undefined,

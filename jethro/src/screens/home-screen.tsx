@@ -412,7 +412,6 @@ export function HomeScreen() {
             ) : resultStep === 'block2' ? (
               <>
                 <Text style={styles.resultSectionLabel}>Precipício</Text>
-                <Text style={styles.valueHighlight}>{diagnostic.submitResult.diagnostic.block2Title}</Text>
                 <Text style={styles.bodyText}>{diagnostic.submitResult.diagnostic.block2Body}</Text>
 
                 <Text style={styles.bodyText}>Gerado em {formatDate(diagnostic.submitResult.diagnostic.generatedAt)}.</Text>
