@@ -21,7 +21,7 @@ export function useAuthSession() {
     try {
       setIdentities(await authService.getUserIdentities());
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'Nao foi possivel carregar as vinculacoes.');
+      setErrorMessage(error instanceof Error ? error.message : 'Não foi possível carregar as vinculações.');
     }
   }
 
@@ -40,7 +40,7 @@ export function useAuthSession() {
         }
       })
       .catch((error) => {
-        setErrorMessage(error instanceof Error ? error.message : 'Nao foi possivel carregar a sessao.');
+        setErrorMessage(error instanceof Error ? error.message : 'Não foi possível carregar a sessão.');
       })
       .finally(() => setIsReady(true));
 

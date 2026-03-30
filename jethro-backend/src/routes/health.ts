@@ -6,7 +6,7 @@ export async function registerHealthRoutes(app: FastifyInstance) {
   app.get('/health/check', async () => {
     return {
       status: 'ok',
-      message: 'Jethro backend is healthy.',
+      message: 'A API do Jethro está saudável.',
       environment: env.APP_ENV,
       timestamp: new Date().toISOString(),
     };

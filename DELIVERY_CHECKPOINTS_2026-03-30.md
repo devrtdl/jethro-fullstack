@@ -44,20 +44,20 @@ Fora do corte desta entrega:
 
 ### Bloco 3 - Amanha 09:00-10:30
 - [x] Conectar diagnostico nativo ao backend
-- [ ] Salvar respostas vinculadas ao usuario
-- [ ] Executar classificacao do modelo no backend
+- [x] Salvar respostas vinculadas ao usuario
+- [x] Executar classificacao do modelo no backend
 - [x] Exibir tela de resultado no app
 
 ### Bloco 4 - Amanha 10:30-11:30
 - [x] Criar tela mock de paywall
 - [x] Encadear navegacao resultado -> paywall
-- [ ] Preparar dados iniciais do plano semanal no dominio
-- [ ] Validar estados de erro e loading principais
+- [x] Preparar dados iniciais do plano semanal no dominio
+- [x] Validar estados de erro e loading principais
 
 ### Bloco 5 - Amanha 11:30-12:00
-- [ ] Rodar verificacoes finais
+- [x] Rodar verificacoes finais
 - [ ] Revisar fluxo de demo ponta a ponta
-- [ ] Ajustar textos e pontos visuais mais evidentes
+- [x] Ajustar textos e pontos visuais mais evidentes
 - [ ] Preparar roteiro da apresentacao
 
 ## Ordem de Execucao Recomendada

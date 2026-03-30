@@ -5,6 +5,7 @@ import { env } from './config/env.js';
 import { errorResponse } from './lib/api-response.js';
 import { closeDbPool } from './lib/db.js';
 import { isAppError } from './lib/errors.js';
+import { registerAuthBridgeRoutes } from './routes/auth-bridge.js';
 import { registerFormRoutes } from './routes/forms.js';
 import { registerHealthRoutes } from './routes/health.js';
 
@@ -26,6 +27,7 @@ export function createApp() {
     return reply.code(204).send();
   });
 
+  app.register(registerAuthBridgeRoutes);
   app.register(registerHealthRoutes);
   app.register(registerFormRoutes);
   app.addHook('onClose', async () => {

@@ -69,7 +69,7 @@ async function request<T>(path: string, options: RequestOptions = {}) {
     const payload = await parseResponse(response);
 
     if (!response.ok) {
-      throw new ApiError(getErrorMessage(payload, 'Nao foi possivel concluir a requisicao.'), {
+      throw new ApiError(getErrorMessage(payload, 'Não foi possível concluir a requisição.'), {
         code: 'HTTP_ERROR',
         status: response.status,
         details: payload,
@@ -89,12 +89,12 @@ async function request<T>(path: string, options: RequestOptions = {}) {
     }
 
     if (error instanceof SyntaxError) {
-      throw new ApiError('A resposta da API veio em um formato invalido.', {
+      throw new ApiError('A resposta da API veio em um formato inválido.', {
         code: 'PARSE_ERROR',
       });
     }
 
-    throw new ApiError('Nao foi possivel se conectar com a API.', {
+    throw new ApiError('Não foi possível se conectar com a API.', {
       code: 'NETWORK',
       details: error,
     });

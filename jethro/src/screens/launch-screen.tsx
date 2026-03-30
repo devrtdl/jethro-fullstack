@@ -67,18 +67,22 @@ export function LaunchScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.glowLarge} />
-      <View style={styles.glowSmall} />
+      <View style={styles.gridLineVertical} />
+      <View style={styles.gridLineHorizontal} />
+      <View style={styles.glowHalo} />
+      <View style={styles.glowBase} />
 
       <View style={styles.brandBlock}>
-        <Image source={require('@/assets/images/splash-icon.png')} style={styles.logo} contentFit="contain" />
+        <View style={styles.logoShell}>
+          <Image source={require('@/assets/images/splash-icon.png')} style={styles.logo} contentFit="contain" />
+        </View>
         <Text style={styles.brandName}>Jethro</Text>
-        <Text style={styles.brandTagline}>Metodo PBN no ritmo do app.</Text>
+        <Text style={styles.brandTagline}>Diagnóstico, verdade e plano no ritmo certo.</Text>
       </View>
 
       <View style={styles.footer}>
         <ActivityIndicator color={palette.gold} />
-        <Text style={styles.footerText}>Preparando a sua jornada...</Text>
+        <Text style={styles.footerText}>Preparando sua jornada</Text>
       </View>
     </View>
   );
@@ -91,54 +95,80 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     backgroundColor: palette.background,
     paddingHorizontal: 28,
-    paddingTop: 120,
-    paddingBottom: 72,
+    paddingTop: 112,
+    paddingBottom: 56,
   },
-  glowLarge: {
+  gridLineVertical: {
     position: 'absolute',
-    top: 40,
-    width: 320,
-    height: 320,
+    top: 0,
+    bottom: 0,
+    width: 1,
+    right: 54,
+    backgroundColor: 'rgba(247, 243, 236, 0.05)',
+  },
+  gridLineHorizontal: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 148,
+    height: 1,
+    backgroundColor: 'rgba(247, 243, 236, 0.04)',
+  },
+  glowHalo: {
+    position: 'absolute',
+    top: 108,
+    width: 280,
+    height: 280,
     borderRadius: 999,
-    backgroundColor: 'rgba(215, 184, 110, 0.08)',
+    backgroundColor: 'rgba(215, 184, 110, 0.10)',
   },
-  glowSmall: {
+  glowBase: {
     position: 'absolute',
-    bottom: 80,
-    right: 20,
-    width: 180,
+    bottom: -30,
+    width: 340,
     height: 180,
     borderRadius: 999,
     backgroundColor: 'rgba(125, 171, 225, 0.08)',
   },
   brandBlock: {
     alignItems: 'center',
-    gap: 16,
+    gap: 14,
+  },
+  logoShell: {
+    width: 136,
+    height: 136,
+    borderRadius: 40,
+    backgroundColor: 'rgba(247, 243, 236, 0.04)',
+    borderWidth: 1,
+    borderColor: 'rgba(215, 184, 110, 0.14)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   logo: {
-    width: 132,
-    height: 132,
+    width: 92,
+    height: 92,
   },
   brandName: {
     color: palette.cream,
-    fontSize: 42,
-    fontWeight: '500',
-    letterSpacing: 0.6,
+    fontSize: 44,
+    fontWeight: '600',
+    letterSpacing: 0.4,
   },
   brandTagline: {
     color: palette.muted,
-    fontSize: 16,
-    lineHeight: 24,
+    fontSize: 15,
+    lineHeight: 23,
     textAlign: 'center',
+    maxWidth: 260,
   },
   footer: {
     alignItems: 'center',
-    gap: 12,
+    gap: 10,
   },
   footerText: {
     color: palette.gold,
-    fontSize: 14,
-    letterSpacing: 0.8,
+    fontSize: 13,
+    letterSpacing: 1,
     textTransform: 'uppercase',
   },
 });

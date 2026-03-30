@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 
+import { authService } from '@/src/services/auth/auth-service';
 import { diagnosticService } from '@/src/services/diagnostic/diagnostic-service';
 import type {
   FormQuestion,
@@ -8,6 +9,7 @@ import type {
   QuestionOption,
   SubmissionResult,
 } from '@/src/types/diagnostic-form';
+import { ApiError } from '@/src/types/api';
 
 type UseDiagnosticFormOptions = {
   enabled: boolean;
@@ -48,6 +50,12 @@ function validateField(question: FormQuestion, value: JsonValue): string | undef
       value === null ||
       value === undefined ||
       (typeof value === 'string' && !value.trim()) ||
+      (typeof value === 'object' &&
+        value !== null &&
+        !Array.isArray(value) &&
+        question.type === 'money_range' &&
+        typeof value.faixa === 'string' &&
+        !value.faixa.trim()) ||
       (typeof value === 'object' &&
         value !== null &&
         !Array.isArray(value) &&
@@ -93,6 +101,38 @@ function validateField(question: FormQuestion, value: JsonValue): string | undef
     }
   }
 
+  if (question.type === 'money_range') {
+    const revenue = typeof value === 'object' && value && !Array.isArray(value) ? value : null;
+    if (!revenue) {
+      return question.required ? 'Preencha este campo para continuar.' : undefined;
+    }
+
+    const faixa = typeof revenue.faixa === 'string' ? revenue.faixa.trim() : '';
+    const moeda = typeof revenue.moeda === 'string' ? revenue.moeda.trim() : '';
+    const pais = typeof revenue.pais === 'string' ? revenue.pais.trim() : '';
+
+    if (!faixa || !moeda || !pais) {
+      return 'Selecione uma faixa de faturamento valida.';
+    }
+  }
+
+  if (question.type === 'number' && value !== '' && value !== null && value !== undefined) {
+    const numericValue =
+      typeof value === 'number' ? value : typeof value === 'string' && value.trim() ? Number(value) : NaN;
+
+    if (Number.isNaN(numericValue)) {
+      return 'Informe um numero valido.';
+    }
+
+    if (question.validation.min !== undefined && numericValue < question.validation.min) {
+      return `Minimo de ${question.validation.min}.`;
+    }
+
+    if (question.validation.max !== undefined && numericValue > question.validation.max) {
+      return `Maximo de ${question.validation.max}.`;
+    }
+  }
+
   if ((question.type === 'text' || question.type === 'textarea') && typeof value === 'string' && value.trim()) {
     if (question.validation.minLength !== undefined && value.trim().length < question.validation.minLength) {
       return `Minimo de ${question.validation.minLength} caracteres.`;
@@ -109,7 +149,7 @@ function validateField(question: FormQuestion, value: JsonValue): string | undef
 function parseSubmissionError(error: unknown) {
   const fallback = {
     fieldErrors: {} as Record<string, string>,
-    globalError: 'Nao foi possivel enviar o diagnostico. Tente novamente.',
+    globalError: 'Não foi possível enviar o diagnóstico. Tente novamente.',
   };
 
   if (!(error instanceof Error)) {
@@ -134,6 +174,7 @@ export function useDiagnosticForm({ enabled, prefillEmail, prefillName }: UseDia
   const [isLoading, setIsLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [submitResult, setSubmitResult] = useState<SubmissionResult | null>(null);
+  const [isViewingSavedResult, setIsViewingSavedResult] = useState(false);
 
   useEffect(() => {
     if (!enabled) {
@@ -142,9 +183,16 @@ export function useDiagnosticForm({ enabled, prefillEmail, prefillName }: UseDia
 
     setIsLoading(true);
     setLoadError(null);
-    void diagnosticService
-      .getPublicForm()
-      .then((nextForm) => {
+    void Promise.allSettled([
+      diagnosticService.getPublicForm(),
+      prefillEmail ? authService.getLatestDiagnostic(prefillEmail) : Promise.resolve(null),
+    ])
+      .then(([formResult, latestDiagnosticResult]) => {
+        if (formResult.status !== 'fulfilled') {
+          throw formResult.reason;
+        }
+
+        const nextForm = formResult.value;
         setForm(nextForm);
         setState((current) => ({
           ...current,
@@ -155,10 +203,22 @@ export function useDiagnosticForm({ enabled, prefillEmail, prefillName }: UseDia
             ...(prefillName ? { nome_completo: prefillName } : {}),
           },
         }));
+
+        if (latestDiagnosticResult?.status === 'fulfilled' && latestDiagnosticResult.value) {
+          setSubmitResult(latestDiagnosticResult.value);
+          setIsViewingSavedResult(true);
+        }
+
+        if (
+          latestDiagnosticResult?.status === 'rejected' &&
+          !(latestDiagnosticResult.reason instanceof ApiError && latestDiagnosticResult.reason.status === 404)
+        ) {
+          throw latestDiagnosticResult.reason;
+        }
       })
       .catch((error) => {
         setForm(null);
-        setLoadError(error instanceof Error ? error.message : 'Nao foi possivel carregar o formulario do diagnostico.');
+        setLoadError(error instanceof Error ? error.message : 'Não foi possível carregar o formulário do diagnóstico.');
       })
       .finally(() => setIsLoading(false));
   }, [enabled, prefillEmail, prefillName]);
@@ -169,6 +229,7 @@ export function useDiagnosticForm({ enabled, prefillEmail, prefillName }: UseDia
   const currentQuestions = questions
     .filter((question) => question.stepId === currentStep?.id && !question.internalOnly)
     .sort((left, right) => left.order - right.order);
+  const selectedCountryIso = getCountryIsoFromState(state.values);
 
   function setFieldValue(question: FormQuestion, value: JsonValue) {
     const nextError = validateField(question, value);
@@ -240,6 +301,7 @@ export function useDiagnosticForm({ enabled, prefillEmail, prefillName }: UseDia
       });
 
       setSubmitResult(result);
+      setIsViewingSavedResult(false);
     } catch (error) {
       const { fieldErrors, globalError } = parseSubmissionError(error);
       setState((current) => ({
@@ -254,6 +316,7 @@ export function useDiagnosticForm({ enabled, prefillEmail, prefillName }: UseDia
   function reset() {
     setCurrentStepIndex(0);
     setSubmitResult(null);
+    setIsViewingSavedResult(false);
     setState({
       values: {
         whatsapp: initialPhoneValue(),
@@ -270,12 +333,14 @@ export function useDiagnosticForm({ enabled, prefillEmail, prefillName }: UseDia
     currentStep,
     currentStepIndex,
     currentQuestions,
+    selectedCountryIso,
     values: state.values,
     errors: state.errors,
     isLoading,
     loadError,
     isSubmitting,
     submitResult,
+    isViewingSavedResult,
     setFieldValue,
     getQuestionValue,
     getRevenueOptions,

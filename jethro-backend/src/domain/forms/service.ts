@@ -1,5 +1,7 @@
 import { createHmac } from 'node:crypto';
 
+import type { PoolClient } from 'pg';
+
 import { env } from '../../config/env.js';
 import { getDbPool, hasDatabaseConfig } from '../../lib/db.js';
 import { AppError } from '../../lib/errors.js';
@@ -506,6 +508,36 @@ type ClassifiedDiagnostic = {
   message: string;
 };
 
+type DiagnosticMessageRow = {
+  variant: 'v1' | 'v2' | 'v3';
+  block_1_title: string;
+  block_1_body: string;
+  scripture_verse: string | null;
+  scripture_text: string | null;
+  block_2_title: string;
+  block_2_body: string;
+  cta_label: string;
+};
+
+type DiagnosticModelPlanRow = {
+  pillars: string[];
+  title: string;
+};
+
+type DevotionalRow = {
+  semana_numero: number;
+  titulo: string;
+  texto: string;
+  versiculo: string;
+};
+
+type ActionPlanRow = {
+  codigo: string;
+  titulo: string;
+  descricao: string;
+  bloco: 'FIN' | 'COM' | 'LID' | 'OPE' | 'MET' | 'PILAR' | 'GERAL';
+};
+
 const modelSummaries: Record<ClassifiedDiagnostic['code'], { title: string; message: string }> = {
   A: {
     title: 'Modelo A — Negocio travado e desorganizado',
@@ -542,6 +574,74 @@ const modelSummaries: Record<ClassifiedDiagnostic['code'], { title: string; mess
   I: {
     title: 'Modelo I — Ainda nao comecou',
     message: 'O chamado existe, mas o negocio ainda precisa de metodo, oferta minima e validacao antes de ganhar tracao.',
+  },
+};
+
+const diagnosticPresentation: Record<
+  ClassifiedDiagnostic['code'],
+  {
+    block1Title: string;
+    rootCause: string;
+    block2Title: string;
+    block1Body?: string;
+    scriptureText?: string;
+    scriptureVerse?: string;
+    block2Body?: string;
+    ctaLabel?: string;
+  }
+> = {
+  A: {
+    block1Title: 'Negócio Travado — Sem Fundação para Crescer',
+    rootCause: 'ausência de fundamento financeiro, direção clara e governo semanal.',
+    block2Title: 'O que acontece quando o negócio cresce sem fundamento:',
+  },
+  B: {
+    block1Title: 'Base Boa, Motor Fraco — O Platô Chegou',
+    rootCause: 'ausência de motor comercial previsível e esteira clara de crescimento.',
+    block2Title: 'O que acontece quando o negócio para de evoluir mesmo sendo saudável:',
+  },
+  C: {
+    block1Title: 'Boa Base, Caixa Apertado — Valor Sem Conversão',
+    rootCause: 'desalinhamento entre valor gerado, modelo de receita e estrutura econômica.',
+    block2Title: 'O que acontece quando há propósito, mas o caixa não acompanha:',
+  },
+  D: {
+    block1Title: 'Fatura, Mas Sangra — Receita Sem Lucro',
+    rootCause: 'falta de clareza financeira, margem protegida e controle econômico real.',
+    block2Title: 'O que acontece quando a empresa vende muito, mas enriquece pouco:',
+  },
+  E: {
+    block1Title: 'Validação Inicial — Movimento Ainda Sem Prova',
+    rootCause: 'oferta e canal ainda sem validação consistente de mercado.',
+    block2Title: 'O que acontece quando o negócio tenta escalar antes de validar:',
+  },
+  F: {
+    block1Title: 'Vende, Mas Sem Motor — Dependência de Indicação',
+    rootCause: 'ausência de aquisição previsível, funil claro e rotina comercial.',
+    block2Title: 'O que acontece quando as vendas dependem sempre do acaso:',
+  },
+  G: {
+    block1Title: 'Operação no Limite - Crescer Piora Tudo',
+    rootCause: 'ausência de sistema operacional — processo + padrão + capacidade estruturada.',
+    block2Title: 'O que acontece quando a operação sem estrutura tenta crescer:',
+    block1Body:
+      '[NOME], você está num paradoxo perigoso: vender mais está te quebrando.\nExiste uma fase onde o crescimento vira inimigo.\nQuando a operação não tem estrutura para o que já existe, vender mais significa entregar pior.\nO Jethro identificou exatamente esse ponto no seu negócio:\n• Sua capacidade operacional está no limite — mais demanda gera mais caos\n• Tudo passa por você — a equipe executa, mas depende das suas decisões\n• Não há processos documentados: o que funciona hoje não se repete amanhã',
+    scriptureText:
+      'Sabedoria constrói a casa — não a preenche de qualquer forma. Estrutura é ato de fé, não de medo.\n"A sabedoria edificou a sua casa; lavrou as suas sete colunas."',
+    scriptureVerse: '— Provérbios 9:1',
+    block2Body:
+      'A lógica é matemática e implacável:\n• Mais vendas → mais atraso → mais reclamação\n• Mais reclamação → mais retrabalho → mais custo invisível\n• Mais custo → menos margem → crescimento que sangra\n• E no final: perda de reputação — que é o ativo mais difícil de recuperar\n\nRECIPÍCIO\n"Um bom nome é preferível às grandes riquezas." — Provérbios 22:1\nCresce sem estrutura e você pagará com o nome da sua empresa.\n\nVocê vai continuar crescendo o caos... ou vai primeiro construir a casa que aguenta o crescimento?',
+    ctaLabel: 'QUERO MEU PLANO DE AÇÃO',
+  },
+  H: {
+    block1Title: 'O Gargalo é o Dono — A Empresa Cabe Só em Você',
+    rootCause: 'centralização, ausência de delegação e governo pessoal insuficiente.',
+    block2Title: 'O que acontece quando tudo depende do fundador:',
+  },
+  I: {
+    block1Title: 'Ainda Não Começou — O Chamado Precisa de Método',
+    rootCause: 'falta de oferta mínima, método inicial e validação prática.',
+    block2Title: 'O que acontece quando a visão não encontra um caminho concreto:',
   },
 };
 
@@ -616,11 +716,80 @@ function classifyDiagnostic(answersBySlug: Record<string, JsonValue>): Classifie
   };
 }
 
-function buildDiagnosticSummary(submittedAt: string, classified: ClassifiedDiagnostic): DiagnosticSummary {
+function personalizeDiagnosticText(text: string, fullName: string | undefined) {
+  const name = fullName?.trim() || 'Empreendedor';
+  return text.replace(/\[NOME\]/g, name);
+}
+
+function getInitialWeekPhase(weekNumber: number) {
+  return weekNumber <= 2 ? 'fundamento' : 'estrutura';
+}
+
+async function buildDiagnosticSummary(
+  submittedAt: string,
+  classified: ClassifiedDiagnostic,
+  fullName?: string
+): Promise<DiagnosticSummary> {
+  const presentation = diagnosticPresentation[classified.code];
+
+  if (hasDatabaseConfig()) {
+    try {
+      const pool = getDbPool();
+      const result = await pool.query<DiagnosticMessageRow>(
+        `select
+           variant,
+           block_1_title,
+           block_1_body,
+           scripture_verse,
+           scripture_text,
+           block_2_title,
+           block_2_body,
+           cta_label
+         from diagnostic_messages
+         where model_code = $1
+         order by random()
+         limit 1`,
+        [classified.code]
+      );
+
+      const message = result.rows[0];
+      if (message) {
+        return {
+          status: 'ready',
+          modelCode: classified.code,
+          variant: message.variant,
+          block1Title: presentation.block1Title,
+          block1Body: personalizeDiagnosticText(presentation.block1Body ?? message.block_1_body, fullName),
+          rootCause: personalizeDiagnosticText(presentation.rootCause, fullName),
+          scriptureVerse: presentation.scriptureVerse ?? message.scripture_verse ?? undefined,
+          scriptureText: personalizeDiagnosticText(presentation.scriptureText ?? message.scripture_text ?? '', fullName) || undefined,
+          block2Title: presentation.block2Title,
+          block2Body: personalizeDiagnosticText(presentation.block2Body ?? message.block_2_body, fullName),
+          ctaLabel: presentation.ctaLabel ?? message.cta_label,
+          generatedAt: submittedAt,
+        };
+      }
+    } catch {
+      // Mantem fallback para nao bloquear a submissao se a consulta de mensagens falhar.
+    }
+  }
+
   return {
     status: 'ready',
-    title: classified.title,
-    message: classified.message,
+    modelCode: classified.code,
+    variant: 'v1',
+    block1Title: presentation.block1Title,
+    block1Body: personalizeDiagnosticText(
+      presentation.block1Body ?? `[NOME], ${classified.message.charAt(0).toLowerCase()}${classified.message.slice(1)}`,
+      fullName
+    ),
+    rootCause: presentation.rootCause,
+    scriptureVerse: presentation.scriptureVerse ?? undefined,
+    scriptureText: presentation.scriptureText ?? undefined,
+    block2Title: presentation.block2Title,
+    block2Body:
+      presentation.block2Body ?? 'Seu diagnóstico aponta um risco real de permanecer no mesmo ciclo se nada mudar nas próximas semanas.',
+    ctaLabel: presentation.ctaLabel ?? 'QUERO MEU PLANO DE AÇÃO',
     generatedAt: submittedAt,
   };
 }
@@ -844,7 +1013,7 @@ export class FormsService {
     const whatsapp = asObjectRecord(rawAnswersBySlug.whatsapp) as PhoneAnswer | undefined;
 
     const submittedAt = new Date().toISOString();
-    const diagnostic = buildDiagnosticSummary(submittedAt, classified);
+    const diagnostic = await buildDiagnosticSummary(submittedAt, classified, respondent.fullName);
 
     const payload: BackendCompatibleSubmissionPayload = {
       event: 'diagnostic.form.submitted',
@@ -1043,10 +1212,11 @@ export class FormsService {
 
       const revenue = asObjectRecord(input.answersBySlug.faturamento_mensal) as RevenueAnswer | undefined;
 
-      await client.query(
+      const diagnosticInsert = await client.query<{ id: string }>(
         `insert into diagnostico_respostas (
           user_id, modelo_identificado, q11_faturamento, q15_canal, q16_capacidade, q17_horas, q18_status_empresa, score, payload_raw, answers_by_code
-        ) values ($1, $2, $3, $4, $5, $6, $7, $8, $9::jsonb, $10::jsonb)`,
+        ) values ($1, $2, $3, $4, $5, $6, $7, $8, $9::jsonb, $10::jsonb)
+        returning id`,
         [
           userId,
           input.classified.code,
@@ -1065,11 +1235,148 @@ export class FormsService {
         ]
       );
 
+      const diagnosticoId = diagnosticInsert.rows[0]?.id;
+      if (diagnosticoId) {
+        await this.ensureInitialPlanForDiagnostic(client, {
+          userId,
+          diagnosticoId,
+          modelCode: input.classified.code,
+          answersBySlug: input.answersBySlug,
+        });
+      }
+
       await client.query('commit');
     } catch {
       await client.query('rollback');
     } finally {
       client.release();
+    }
+  }
+
+  private async ensureInitialPlanForDiagnostic(
+    client: PoolClient,
+    input: {
+      userId: string;
+      diagnosticoId: string;
+      modelCode: ClassifiedDiagnostic['code'];
+      answersBySlug: Record<string, JsonValue>;
+    }
+  ) {
+    const onboardingResult = await client.query<{ id: string }>(
+      `insert into onboarding_sessions (
+         user_id, diagnostico_id, status, modelo_confirmado, json_completo, sem_dre_flag, sem_empresa_flag, equipa_comercial_count
+       ) values ($1, $2, 'completed', $3, $4::jsonb, $5, $6, $7)
+       returning id`,
+      [
+        input.userId,
+        input.diagnosticoId,
+        input.modelCode,
+        JSON.stringify(input.answersBySlug),
+        false,
+        ['A', 'C', 'D'].includes(String(input.answersBySlug.status_empresa ?? input.answersBySlug.q18_status_empresa ?? '')),
+        0,
+      ]
+    );
+
+    const onboardingId = onboardingResult.rows[0]?.id;
+    if (!onboardingId) {
+      return;
+    }
+
+    const planoResult = await client.query<{ id: string }>(
+      `insert into planos_acao (user_id, onboarding_id, modelo, versao_alma, documento_1, documento_2)
+       values ($1, $2, $3, $4, $5::jsonb, $6::jsonb)
+       returning id`,
+      [
+        input.userId,
+        onboardingId,
+        input.modelCode,
+        'alma_rogerio_v5_4',
+        JSON.stringify({ source: 'diagnostico_mvp', generated_from: input.diagnosticoId }),
+        JSON.stringify({ status: 'draft_initial_plan' }),
+      ]
+    );
+
+    const planoId = planoResult.rows[0]?.id;
+    if (!planoId) {
+      return;
+    }
+
+    const modelResult = await client.query<DiagnosticModelPlanRow>(
+      `select pillars, title from diagnostic_models where code = $1 limit 1`,
+      [input.modelCode]
+    );
+    const model = modelResult.rows[0];
+    const pillars = Array.isArray(model?.pillars) && model.pillars.length ? model.pillars : ['P1', 'P2', 'P3', 'P4'];
+
+    const devotionalsResult = await client.query<DevotionalRow>(
+      `select semana_numero, titulo, texto, versiculo
+       from devocionais
+       where semana_numero between 1 and 4
+       order by semana_numero asc`
+    );
+
+    const actionsResult = await client.query<ActionPlanRow>(
+      `select codigo, titulo, descricao, bloco
+       from acoes_library
+       where modelos_obrigatorios @> $1::jsonb
+       order by codigo asc
+       limit 4`,
+      [JSON.stringify([input.modelCode])]
+    );
+
+    const devotionals = devotionalsResult.rows;
+    const actions = actionsResult.rows;
+
+    for (let weekIndex = 0; weekIndex < 4; weekIndex += 1) {
+      const weekNumber = weekIndex + 1;
+      const devotional = devotionals[weekIndex];
+      const action = actions[weekIndex];
+      const isUnlocked = weekNumber === 1;
+
+      const weekResult = await client.query<{ id: string }>(
+        `insert into semanas (
+           plano_id, numero, mes, fase, pilar, versiculo, objetivo, unlocked_at, iniciada_em
+         ) values ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+         returning id`,
+        [
+          planoId,
+          weekNumber,
+          1,
+          getInitialWeekPhase(weekNumber),
+          pillars[weekIndex % pillars.length] ?? 'P1',
+          devotional?.versiculo ?? null,
+          devotional?.titulo ?? `Semana ${weekNumber} - ${model?.title ?? 'Plano inicial'}`,
+          isUnlocked ? new Date().toISOString() : null,
+          isUnlocked ? new Date().toISOString() : null,
+        ]
+      );
+
+      const weekId = weekResult.rows[0]?.id;
+      if (!weekId) {
+        continue;
+      }
+
+      await client.query(
+        `insert into gates_semanais (user_id, semana_id, semana_numero, gate_status, gate_timestamp, avancou_em)
+         values ($1, $2, $3, $4, now(), $5)`,
+        [input.userId, weekId, weekNumber, isUnlocked ? 'available' : 'locked', isUnlocked ? new Date().toISOString() : null]
+      );
+
+      if (action) {
+        await client.query(
+          `insert into tarefas_semana (semana_id, acao_codigo, descricao, responsavel, meta, prioridade)
+           values ($1, $2, $3, $4, $5, $6)`,
+          [
+            weekId,
+            action.codigo,
+            action.descricao,
+            'Fundador',
+            `Executar ${action.titulo.toLowerCase()} na semana ${weekNumber}.`,
+            weekNumber === 1 ? 'alta' : 'media',
+          ]
+        );
+      }
     }
   }
 

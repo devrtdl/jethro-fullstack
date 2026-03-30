@@ -84,8 +84,16 @@ export type SubmissionResult = {
   };
   diagnostic: {
     status: 'pending' | 'ready';
-    title: string;
-    message: string;
+    modelCode: string;
+    variant: 'v1' | 'v2' | 'v3';
+    block1Title: string;
+    block1Body: string;
+    rootCause?: string;
+    scriptureVerse?: string;
+    scriptureText?: string;
+    block2Title: string;
+    block2Body: string;
+    ctaLabel: string;
     generatedAt: string;
   };
   derived: {

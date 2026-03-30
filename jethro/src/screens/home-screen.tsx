@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import {
   ActivityIndicator,
-  Platform,
+  Alert,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -15,7 +15,7 @@ import { useAuthSession } from '@/src/hooks/use-auth-session';
 import { useDiagnosticForm } from '@/src/hooks/use-diagnostic-form';
 import { hasSupabaseConfig } from '@/src/lib/supabase';
 import { authService } from '@/src/services/auth/auth-service';
-import type { FormQuestion, JsonValue } from '@/src/types/diagnostic-form';
+import type { FormQuestion, JsonValue, QuestionOption } from '@/src/types/diagnostic-form';
 
 const palette = {
   background: '#070D18',
@@ -79,6 +79,18 @@ function getPhoneCountryIso(value: JsonValue) {
   return value.pais_iso.toUpperCase();
 }
 
+function getSelectedOptionValue(value: JsonValue) {
+  if (typeof value === 'string') {
+    return value;
+  }
+
+  if (typeof value === 'object' && value !== null && !Array.isArray(value) && typeof value.faixa === 'string') {
+    return value.faixa;
+  }
+
+  return '';
+}
+
 function AuthCard() {
   const [mode, setMode] = useState<'signin' | 'signup'>('signup');
   const [email, setEmail] = useState('');
@@ -90,7 +102,7 @@ function AuthCard() {
   async function handlePasswordAuth() {
     const normalizedEmail = email.trim().toLowerCase();
     if (!normalizedEmail || !password.trim()) {
-      setError('Preencha email e senha para continuar.');
+      setError('Preencha e-mail e senha para continuar.');
       return;
     }
 
@@ -103,21 +115,21 @@ function AuthCard() {
         const result = await authService.signUpWithPassword(normalizedEmail, password);
         setMessage(
           result.user?.confirmed_at
-            ? 'Conta criada com sucesso. Vamos para o diagnostico.'
-            : 'Conta criada. Confirme o email se o projeto estiver com verificacao ativa.'
+            ? 'Conta criada com sucesso. Vamos para o diagnóstico.'
+            : 'Conta criada. Confirme o e-mail se o projeto estiver com verificação ativa.'
         );
       } else {
         await authService.signInWithPassword(normalizedEmail, password);
         setMessage('Entrada liberada com sucesso.');
       }
     } catch (authError) {
-      setError(authError instanceof Error ? authError.message : 'Nao foi possivel autenticar.');
+      setError(authError instanceof Error ? authError.message : 'Não foi possível autenticar.');
     } finally {
       setIsLoading(false);
     }
   }
 
-  async function handleSocialLogin(provider: 'google' | 'apple') {
+  async function handleSocialLogin(provider: 'google') {
     setIsLoading(true);
     setError(null);
     setMessage(null);
@@ -126,7 +138,7 @@ function AuthCard() {
       await authService.signInWithOAuth(provider);
       setMessage(`${provider === 'google' ? 'Google' : 'Apple'} conectado com sucesso.`);
     } catch (authError) {
-      setError(authError instanceof Error ? authError.message : 'Nao foi possivel iniciar o login social.');
+      setError(authError instanceof Error ? authError.message : 'Não foi possível iniciar o login social.');
     } finally {
       setIsLoading(false);
     }
@@ -135,15 +147,14 @@ function AuthCard() {
   return (
     <View style={styles.primaryCard}>
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Entrar no app</Text>
+        <Text style={styles.sectionTitle}>Entrar no Jethro</Text>
         <View style={styles.statusChip}>
-          <Text style={styles.statusLabel}>AUTH</Text>
+          <Text style={styles.statusLabel}>Acesso</Text>
         </View>
       </View>
 
       <Text style={styles.bodyText}>
-        O novo fluxo comeca dentro do app: conta criada, diagnostico respondido, resultado liberado e paywall na
-        sequencia.
+        O novo fluxo comeca aqui: conta criada, diagnostico respondido, resultado liberado e oferta na sequencia.
       </Text>
 
       <View style={styles.modeRow}>
@@ -184,11 +195,6 @@ function AuthCard() {
         <Pressable style={styles.secondaryButton} onPress={() => void handleSocialLogin('google')} disabled={isLoading}>
           <Text style={styles.secondaryButtonLabel}>Entrar com Google</Text>
         </Pressable>
-        {Platform.OS === 'ios' ? (
-          <Pressable style={styles.secondaryButton} onPress={() => void handleSocialLogin('apple')} disabled={isLoading}>
-            <Text style={styles.secondaryButtonLabel}>Entrar com Apple</Text>
-          </Pressable>
-        ) : null}
       </View>
 
       {message ? <Text style={styles.successText}>{message}</Text> : null}
@@ -203,12 +209,14 @@ function QuestionInput({
   error,
   onChange,
   getRevenueOptions,
+  selectedCountryIso,
 }: {
   question: FormQuestion;
   value: JsonValue;
   error?: string;
   onChange: (value: JsonValue) => void;
-  getRevenueOptions: (question: FormQuestion) => Array<{ id: string; label: string; value: string }>;
+  getRevenueOptions: (question: FormQuestion) => QuestionOption[];
+  selectedCountryIso: string;
 }) {
   const options = question.type === 'money_range' ? getRevenueOptions(question) : question.options;
 
@@ -243,6 +251,17 @@ function QuestionInput({
         />
       ) : null}
 
+      {question.type === 'number' ? (
+        <TextInput
+          keyboardType="number-pad"
+          placeholder={question.placeholder ?? 'Digite um numero'}
+          placeholderTextColor="#8692A3"
+          style={styles.input}
+          value={typeof value === 'number' ? String(value) : typeof value === 'string' ? value : ''}
+          onChangeText={(text) => onChange(text.replace(/[^\d]/g, ''))}
+        />
+      ) : null}
+
       {question.type === 'phone' ? (
         <View style={styles.stack}>
           <View style={styles.optionWrap}>
@@ -272,12 +291,23 @@ function QuestionInput({
       {question.type === 'single_select' || question.type === 'money_range' ? (
         <View style={styles.optionWrap}>
           {options.map((option) => {
-            const active = value === option.value;
+            const active = getSelectedOptionValue(value) === option.value;
             return (
               <Pressable
                 key={option.id}
                 style={[styles.optionPill, active ? styles.optionPillActive : null]}
-                onPress={() => onChange(option.value)}>
+                onPress={() =>
+                  onChange(
+                    question.type === 'money_range'
+                      ? {
+                          faixa: option.value,
+                          moeda:
+                            typeof option.metadata?.currency === 'string' ? option.metadata.currency : 'USD',
+                          pais: selectedCountryIso,
+                        }
+                      : option.value
+                  )
+                }>
                 <Text style={[styles.optionLabel, active ? styles.optionLabelActive : null]}>{option.label}</Text>
               </Pressable>
             );
@@ -293,11 +323,23 @@ function QuestionInput({
 export function HomeScreen() {
   const { session, isReady, errorMessage } = useAuthSession();
   const [showPaywall, setShowPaywall] = useState(false);
+  const [resultStep, setResultStep] = useState<'block1' | 'block2'>('block1');
+  const [isSigningOut, setIsSigningOut] = useState(false);
   const diagnostic = useDiagnosticForm({
     enabled: Boolean(session?.user?.email),
     prefillEmail: session?.user?.email,
     prefillName: session?.user?.user_metadata?.full_name,
   });
+
+  async function handleSignOut() {
+    setIsSigningOut(true);
+
+    try {
+      await authService.signOut();
+    } finally {
+      setIsSigningOut(false);
+    }
+  }
 
   if (!hasSupabaseConfig()) {
     return (
@@ -313,119 +355,169 @@ export function HomeScreen() {
   return (
     <ScreenContainer backgroundColor={palette.background} contentStyle={styles.container} padded={false}>
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        <View style={styles.heroCard}>
-          <Text style={styles.eyebrow}>Jethro App</Text>
-          <Text style={styles.heroTitle}>Conta, diagnostico, resultado e paywall no mesmo fluxo.</Text>
-          <Text style={styles.heroText}>
-            Este e o corte da nova estrategia: o usuario entra pelo app, responde o diagnostico dentro dele e segue para monetizacao.
-          </Text>
-        </View>
-
         {!isReady ? (
           <View style={styles.loaderBlock}>
             <ActivityIndicator color={palette.goldSoft} />
-            <Text style={styles.bodyText}>Carregando a sessao atual...</Text>
+            <Text style={styles.bodyText}>Carregando a sessão atual...</Text>
           </View>
         ) : !session?.user?.email ? (
           <AuthCard />
         ) : diagnostic.submitResult ? (
           <View style={styles.primaryCard}>
-            <Text style={styles.sectionTitle}>Resultado do diagnostico</Text>
-            <Text style={styles.valueHighlight}>{diagnostic.submitResult.diagnostic.title}</Text>
-            <Text style={styles.bodyText}>{diagnostic.submitResult.diagnostic.message}</Text>
+            <Pressable style={styles.inlineLogoutButton} onPress={() => void handleSignOut()} disabled={isSigningOut}>
+              {isSigningOut ? <ActivityIndicator color={palette.cream} /> : <Text style={styles.inlineLogoutLabel}>Sair</Text>}
+            </Pressable>
+            <Text style={styles.sectionTitle}>Resultado do diagnóstico</Text>
+            {diagnostic.isViewingSavedResult ? <Text style={styles.savedResultLabel}>Último diagnóstico salvo</Text> : null}
 
-            <View style={styles.metricRow}>
-              <View style={styles.metricTile}>
-                <Text style={styles.metricLabel}>Score</Text>
-                <Text style={styles.metricValue}>{diagnostic.submitResult.derived.score}</Text>
-              </View>
-              <View style={styles.metricTile}>
-                <Text style={styles.metricLabel}>Faixa</Text>
-                <Text style={styles.metricValue}>{diagnostic.submitResult.derived.scoreBand}</Text>
-              </View>
-            </View>
+            {resultStep === 'block1' ? (
+              <>
+                <Text style={styles.resultSectionLabel}>Realidade Direta</Text>
+                <Text style={styles.valueHighlight}>{diagnostic.submitResult.diagnostic.block1Title}</Text>
+                <Text style={styles.bodyText}>{diagnostic.submitResult.diagnostic.block1Body}</Text>
 
-            <Text style={styles.bodyText}>Gerado em {formatDate(diagnostic.submitResult.diagnostic.generatedAt)}.</Text>
+                <View style={styles.causeCard}>
+                  <Text style={styles.causeLabel}>Causa raiz</Text>
+                  <Text style={styles.causeText}>
+                    {diagnostic.submitResult.diagnostic.rootCause ??
+                      'Seu diagnóstico anterior foi restaurado para você retomar a jornada.'}
+                  </Text>
+                </View>
+
+                {diagnostic.submitResult.diagnostic.scriptureText || diagnostic.submitResult.diagnostic.scriptureVerse ? (
+                  <View style={styles.scriptureCard}>
+                    <Text style={styles.scriptureEyebrow}>Palavra Para Este Momento</Text>
+                    {diagnostic.submitResult.diagnostic.scriptureText ? (
+                      <Text style={styles.scriptureText}>{diagnostic.submitResult.diagnostic.scriptureText}</Text>
+                    ) : null}
+                    {diagnostic.submitResult.diagnostic.scriptureVerse ? (
+                      <Text style={styles.scriptureVerse}>{diagnostic.submitResult.diagnostic.scriptureVerse}</Text>
+                    ) : null}
+                  </View>
+                ) : null}
+
+                <Text style={styles.bodyText}>Gerado em {formatDate(diagnostic.submitResult.diagnostic.generatedAt)}.</Text>
+
+                <Pressable style={styles.primaryButton} onPress={() => setResultStep('block2')}>
+                  <Text style={styles.primaryButtonLabel}>Ver o próximo passo</Text>
+                </Pressable>
+                <Pressable
+                  style={styles.secondaryButton}
+                  onPress={() => {
+                    setShowPaywall(false);
+                    setResultStep('block1');
+                    diagnostic.reset();
+                  }}>
+                  <Text style={styles.secondaryButtonLabel}>Responder novamente</Text>
+                </Pressable>
+              </>
+            ) : (
+              <>
+                <Text style={styles.resultSectionLabel}>Precipício</Text>
+                <Text style={styles.valueHighlight}>{diagnostic.submitResult.diagnostic.block2Title}</Text>
+                <Text style={styles.bodyText}>{diagnostic.submitResult.diagnostic.block2Body}</Text>
+
+                <Text style={styles.bodyText}>Gerado em {formatDate(diagnostic.submitResult.diagnostic.generatedAt)}.</Text>
 
             <Pressable style={styles.primaryButton} onPress={() => setShowPaywall(true)}>
-              <Text style={styles.primaryButtonLabel}>Continuar para o paywall</Text>
-            </Pressable>
-            <Pressable style={styles.secondaryButton} onPress={() => { setShowPaywall(false); diagnostic.reset(); }}>
-              <Text style={styles.secondaryButtonLabel}>Refazer diagnostico</Text>
-            </Pressable>
+                  <Text style={styles.primaryButtonLabel}>{diagnostic.submitResult.diagnostic.ctaLabel}</Text>
+                </Pressable>
+                <Pressable style={styles.secondaryButton} onPress={() => setResultStep('block1')}>
+                  <Text style={styles.secondaryButtonLabel}>Voltar para o diagnóstico</Text>
+                </Pressable>
+                <Pressable
+                  style={styles.secondaryButton}
+                  onPress={() => {
+                    setShowPaywall(false);
+                    setResultStep('block1');
+                    diagnostic.reset();
+                  }}>
+                  <Text style={styles.secondaryButtonLabel}>Responder novamente</Text>
+                </Pressable>
+              </>
+            )}
 
             {showPaywall ? (
               <View style={styles.paywallCard}>
-                <Text style={styles.sectionTitle}>Paywall mock</Text>
+                <Text style={styles.sectionTitle}>Oferta de entrada</Text>
                 <Text style={styles.valueHighlight}>Plano Pro Jethro</Text>
                 <Text style={styles.bodyText}>
-                  Mock navegavel para a apresentacao. Aqui entram a oferta, comparativo Light/Pro, garantias e o CTA de assinatura real.
+                  Simulação navegável para a apresentação. Aqui entram a oferta, o comparativo entre planos, garantias e o CTA de assinatura real.
                 </Text>
                 <View style={styles.stack}>
-                  <Text style={styles.bodyText}>• Diagnostico completo associado a conta</Text>
+                  <Text style={styles.bodyText}>• Diagnóstico completo associado à conta</Text>
                   <Text style={styles.bodyText}>• Plano semanal guiado</Text>
                   <Text style={styles.bodyText}>• Check-ins e gates</Text>
-                  <Text style={styles.bodyText}>• Devocionais e biblioteca de acoes</Text>
+                  <Text style={styles.bodyText}>• Devocionais e biblioteca de ações</Text>
                 </View>
-                <Pressable style={[styles.primaryButton, styles.primaryButtonDisabled]}>
+                <Pressable
+                  style={[styles.primaryButton, styles.primaryButtonDisabled]}
+                  onPress={() =>
+                    Alert.alert(
+                      'Assinatura em breve',
+                      'O billing real ainda não foi conectado. Para a apresentação, este botão representa a entrada no checkout.'
+                    )
+                  }>
                   <Text style={styles.primaryButtonLabel}>Assinar em breve</Text>
                 </Pressable>
               </View>
             ) : null}
           </View>
         ) : (
-          <View style={styles.primaryCard}>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Diagnostico nativo</Text>
-              <View style={styles.statusChip}>
-                <Text style={styles.statusLabel}>APP</Text>
-              </View>
-            </View>
-
-            <Text style={styles.bodyText}>
-              Sessao ativa para {session.user.email}. O diagnostico agora acontece dentro do app, sem depender do frontend web.
-            </Text>
-
+          <View style={styles.formStage}>
+            <Pressable style={styles.inlineLogoutButton} onPress={() => void handleSignOut()} disabled={isSigningOut}>
+              {isSigningOut ? <ActivityIndicator color={palette.cream} /> : <Text style={styles.inlineLogoutLabel}>Sair</Text>}
+            </Pressable>
             {diagnostic.isLoading ? (
               <View style={styles.loaderBlock}>
                 <ActivityIndicator color={palette.goldSoft} />
-                <Text style={styles.bodyText}>Carregando formulario do backend...</Text>
+                <Text style={styles.bodyText}>Carregando formulário do diagnóstico...</Text>
               </View>
             ) : diagnostic.loadError ? (
               <View style={styles.stack}>
                 <Text style={styles.errorText}>{diagnostic.loadError}</Text>
                 <Text style={styles.bodyText}>
-                  Verifique se o backend esta rodando e se o celular consegue acessar a URL configurada da API.
+                  Verifique se a API está disponível e se o celular consegue acessar a URL configurada.
                 </Text>
               </View>
             ) : diagnostic.form && diagnostic.currentStep ? (
               <>
-                <View style={styles.progressTrack}>
-                  {diagnostic.steps.map((step, index) => (
-                    <View
-                      key={step.id}
-                      style={[styles.progressSegment, index <= diagnostic.currentStepIndex ? styles.progressSegmentActive : null]}
-                    />
-                  ))}
+                <View style={styles.progressHeader}>
+                  <View style={styles.progressTrack}>
+                    {diagnostic.steps.map((step, index) => (
+                      <View
+                        key={step.id}
+                        style={[styles.progressSegment, index <= diagnostic.currentStepIndex ? styles.progressSegmentActive : null]}
+                      />
+                    ))}
+                  </View>
+                  <Text style={styles.progressCounter}>
+                    {diagnostic.currentStepIndex + 1}/{diagnostic.steps.length}
+                  </Text>
                 </View>
 
-                <Text style={styles.valueHighlight}>{diagnostic.currentStep.title}</Text>
-                {diagnostic.currentStep.description ? <Text style={styles.bodyText}>{diagnostic.currentStep.description}</Text> : null}
+                <Text style={styles.formTitle}>{diagnostic.currentQuestions[0]?.label ?? diagnostic.currentStep.title}</Text>
+                {diagnostic.currentQuestions[0]?.helperText ? (
+                  <Text style={styles.formHelper}>{diagnostic.currentQuestions[0].helperText}</Text>
+                ) : diagnostic.currentStep.description ? (
+                  <Text style={styles.formHelper}>{diagnostic.currentStep.description}</Text>
+                ) : null}
 
-                <View style={styles.stack}>
-                  {diagnostic.currentQuestions.map((question) => (
+                <View style={styles.formQuestionStack}>
+                  {diagnostic.currentQuestions.map((question, index) => (
                     <QuestionInput
                       key={question.id}
                       question={question}
                       value={diagnostic.getQuestionValue(diagnostic.values, question)}
-                      error={diagnostic.errors[question.slug]}
+                      error={index === 0 ? diagnostic.errors[question.slug] : undefined}
                       onChange={(value) => diagnostic.setFieldValue(question, value)}
                       getRevenueOptions={diagnostic.getRevenueOptions}
+                      selectedCountryIso={diagnostic.selectedCountryIso}
                     />
                   ))}
                 </View>
 
-                {diagnostic.errors._global ? <Text style={styles.errorText}>{diagnostic.errors._global}</Text> : null}
+                {diagnostic.errors._global ? <Text style={styles.formErrorText}>{diagnostic.errors._global}</Text> : null}
 
                 <View style={styles.footerActions}>
                   <Pressable style={styles.secondaryButton} onPress={diagnostic.previousStep} disabled={diagnostic.currentStepIndex === 0}>
@@ -437,7 +529,7 @@ export function HomeScreen() {
                       {diagnostic.isSubmitting ? (
                         <ActivityIndicator color={palette.surface} />
                       ) : (
-                        <Text style={styles.primaryButtonLabel}>Enviar diagnostico</Text>
+                          <Text style={styles.primaryButtonLabel}>Enviar diagnóstico</Text>
                       )}
                     </Pressable>
                   ) : (
@@ -448,7 +540,7 @@ export function HomeScreen() {
                 </View>
               </>
             ) : (
-              <Text style={styles.errorText}>Nao foi possivel carregar o formulario do diagnostico.</Text>
+              <Text style={styles.errorText}>Não foi possível carregar o formulário do diagnóstico.</Text>
             )}
           </View>
         )}
@@ -469,6 +561,33 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
     gap: 18,
   },
+  formStage: {
+    borderRadius: 34,
+    backgroundColor: '#151C2A',
+    borderWidth: 1,
+    borderColor: 'rgba(232, 201, 122, 0.12)',
+    paddingHorizontal: 18,
+    paddingTop: 18,
+    paddingBottom: 22,
+    gap: 18,
+    overflow: 'hidden',
+  },
+  inlineLogoutButton: {
+    alignSelf: 'flex-end',
+    minHeight: 38,
+    borderRadius: 999,
+    paddingHorizontal: 14,
+    backgroundColor: 'rgba(247, 243, 236, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(247, 243, 236, 0.08)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  inlineLogoutLabel: {
+    color: palette.cream,
+    fontSize: 13,
+    fontWeight: '700',
+  },
   heroCard: {
     borderRadius: 30,
     backgroundColor: palette.surface,
@@ -476,6 +595,26 @@ const styles = StyleSheet.create({
     borderColor: palette.cardBorder,
     padding: 22,
     gap: 14,
+  },
+  causeCard: {
+    borderRadius: 22,
+    backgroundColor: 'rgba(247, 243, 236, 0.06)',
+    borderWidth: 1,
+    borderColor: 'rgba(247, 243, 236, 0.08)',
+    padding: 18,
+    gap: 8,
+  },
+  causeLabel: {
+    color: palette.goldSoft,
+    fontSize: 12,
+    fontWeight: '800',
+    letterSpacing: 1.4,
+    textTransform: 'uppercase',
+  },
+  causeText: {
+    color: palette.cream,
+    fontSize: 16,
+    lineHeight: 25,
   },
   primaryCard: {
     borderRadius: 28,
@@ -493,6 +632,47 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(201, 168, 76, 0.3)',
     padding: 18,
     gap: 12,
+  },
+  scriptureCard: {
+    borderRadius: 22,
+    backgroundColor: 'rgba(215, 184, 110, 0.16)',
+    borderWidth: 1,
+    borderColor: 'rgba(215, 184, 110, 0.35)',
+    padding: 18,
+    gap: 8,
+  },
+  savedResultLabel: {
+    alignSelf: 'flex-start',
+    borderRadius: 999,
+    backgroundColor: 'rgba(141, 186, 136, 0.16)',
+    borderWidth: 1,
+    borderColor: 'rgba(141, 186, 136, 0.28)',
+    color: palette.success,
+    fontSize: 12,
+    fontWeight: '800',
+    letterSpacing: 1.2,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    textTransform: 'uppercase',
+  },
+  scriptureEyebrow: {
+    color: palette.gold,
+    fontSize: 12,
+    fontWeight: '800',
+    letterSpacing: 1.4,
+    textTransform: 'uppercase',
+  },
+  scriptureText: {
+    color: palette.cream,
+    fontSize: 17,
+    lineHeight: 26,
+    fontWeight: '600',
+  },
+  scriptureVerse: {
+    color: palette.goldSoft,
+    fontSize: 14,
+    lineHeight: 22,
+    fontWeight: '700',
   },
   eyebrownSpacer: {},
   eyebrow: {
@@ -524,6 +704,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '800',
     letterSpacing: 2,
+    textTransform: 'uppercase',
+  },
+  resultSectionLabel: {
+    color: palette.goldSoft,
+    fontSize: 12,
+    fontWeight: '800',
+    letterSpacing: 1.8,
     textTransform: 'uppercase',
   },
   statusChip: {
@@ -633,6 +820,17 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     gap: 12,
   },
+  progressHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  progressCounter: {
+    color: palette.cream,
+    fontSize: 14,
+    fontWeight: '700',
+    opacity: 0.9,
+  },
   metricRow: {
     flexDirection: 'row',
     gap: 12,
@@ -656,63 +854,97 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   progressTrack: {
+    flex: 1,
     flexDirection: 'row',
     gap: 8,
   },
   progressSegment: {
     flex: 1,
-    height: 8,
+    height: 6,
     borderRadius: 999,
-    backgroundColor: 'rgba(247, 243, 236, 0.08)',
+    backgroundColor: 'rgba(247, 243, 236, 0.16)',
   },
   progressSegmentActive: {
     backgroundColor: palette.goldSoft,
+  },
+  formTitle: {
+    color: palette.cream,
+    fontSize: 34,
+    lineHeight: 42,
+    fontWeight: '500',
+    textAlign: 'center',
+    marginTop: 8,
+  },
+  formHelper: {
+    color: palette.muted,
+    fontSize: 15,
+    lineHeight: 24,
+    textAlign: 'center',
+    paddingHorizontal: 16,
+  },
+  formQuestionStack: {
+    gap: 16,
+    marginTop: 8,
+  },
+  formErrorText: {
+    color: palette.danger,
+    fontSize: 14,
+    lineHeight: 22,
+    textAlign: 'center',
   },
   stack: {
     gap: 12,
   },
   questionBlock: {
-    gap: 10,
+    gap: 12,
   },
   questionLabel: {
     color: palette.cream,
-    fontSize: 15,
+    fontSize: 16,
     lineHeight: 22,
     fontWeight: '600',
+    textAlign: 'center',
   },
   questionHelper: {
     color: palette.muted,
     fontSize: 13,
     lineHeight: 20,
+    textAlign: 'center',
   },
   optionWrap: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
+    gap: 12,
   },
   optionPill: {
-    borderRadius: 999,
+    minHeight: 58,
+    borderRadius: 22,
     borderWidth: 1,
-    borderColor: 'rgba(232, 201, 122, 0.14)',
-    backgroundColor: palette.surface,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
+    borderColor: 'rgba(247, 243, 236, 0.12)',
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    paddingHorizontal: 18,
+    paddingVertical: 16,
+    justifyContent: 'center',
   },
   optionPillActive: {
-    backgroundColor: 'rgba(201, 168, 76, 0.2)',
-    borderColor: 'rgba(201, 168, 76, 0.35)',
+    backgroundColor: 'rgba(201, 168, 76, 0.18)',
+    borderColor: 'rgba(201, 168, 76, 0.75)',
+    shadowColor: palette.goldSoft,
+    shadowOpacity: 0.2,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 8 },
   },
   optionLabel: {
-    color: palette.muted,
-    fontSize: 14,
-    lineHeight: 20,
+    color: palette.cream,
+    fontSize: 16,
+    lineHeight: 22,
+    fontWeight: '500',
   },
   optionLabelActive: {
     color: palette.cream,
-    fontWeight: '700',
+    fontWeight: '800',
   },
   footerActions: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     gap: 12,
+    marginTop: 10,
   },
 });

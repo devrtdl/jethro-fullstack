@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ActivityIndicator, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { ScreenContainer } from '@/src/components/screen-container';
 import { useAuthSession } from '@/src/hooks/use-auth-session';
@@ -19,8 +19,7 @@ const palette = {
 };
 
 const providerCards = [
-  { id: 'google', title: 'Google', description: 'Acesso rapido em novos dispositivos usando sua conta Google.' },
-  { id: 'apple', title: 'Apple', description: 'Ideal para iPhone e iPad, mantendo o email principal protegido.' },
+  { id: 'google', title: 'Google', description: 'Acesso rápido em novos dispositivos usando sua conta Google.' },
 ] as const;
 
 export function SetupScreen() {
@@ -40,7 +39,7 @@ export function SetupScreen() {
       await refreshIdentities();
       setMessage(`${provider === 'google' ? 'Google' : 'Apple'} vinculado com sucesso.`);
     } catch (linkError) {
-      setError(linkError instanceof Error ? linkError.message : 'Nao foi possivel concluir a vinculacao.');
+      setError(linkError instanceof Error ? linkError.message : 'Não foi possível concluir a vinculação.');
     } finally {
       setIsLinkingProvider(null);
     }
@@ -54,7 +53,7 @@ export function SetupScreen() {
     try {
       await authService.signOut();
     } catch (signOutError) {
-      setError(signOutError instanceof Error ? signOutError.message : 'Nao foi possivel encerrar a sessao.');
+      setError(signOutError instanceof Error ? signOutError.message : 'Não foi possível encerrar a sessão.');
     } finally {
       setIsSigningOut(false);
     }
@@ -66,22 +65,22 @@ export function SetupScreen() {
         <Text style={styles.eyebrow}>Conta</Text>
         <Text style={styles.title}>Vincule provedores opcionais sem atrito no primeiro acesso.</Text>
         <Text style={styles.subtitle}>
-          O login principal continua sendo por email e codigo. Aqui voce pode adicionar Google ou Apple para acelerar
+          O login principal continua sendo por e-mail e senha. Aqui você pode adicionar o Google para acelerar
           acessos futuros em outros dispositivos.
         </Text>
       </View>
 
       <View style={styles.panel}>
-        <Text style={styles.sectionTitle}>Sessao atual</Text>
+        <Text style={styles.sectionTitle}>Sessão atual</Text>
         {session?.user?.email ? (
           <View style={styles.stack}>
             <Text style={styles.value}>{session.user.email}</Text>
             <Text style={styles.supportText}>
-              Esse e o email que autentica e puxa o diagnostico vinculado ao formulario.
+              Esse é o e-mail que autentica e puxa o diagnóstico vinculado ao formulário.
             </Text>
           </View>
         ) : (
-          <Text style={styles.supportText}>Entre primeiro na aba Home para habilitar a vinculacao de provedores.</Text>
+          <Text style={styles.supportText}>Entre primeiro na tela inicial para habilitar a vinculação de provedores.</Text>
         )}
       </View>
 
@@ -99,12 +98,11 @@ export function SetupScreen() {
       <View style={styles.panel}>
         <Text style={styles.sectionTitle}>Vincular agora</Text>
         <Text style={styles.supportText}>
-          Opcional. Isso reduz atrito quando voce trocar de aparelho ou quiser usar outro metodo de entrada.
+          Opcional. Isso reduz atrito quando você trocar de aparelho ou quiser usar outro método de entrada.
         </Text>
 
         <View style={styles.stack}>
           {providerCards
-            .filter((item) => item.id !== 'apple' || Platform.OS === 'ios')
             .map((provider) => (
               <View key={provider.id} style={styles.providerCard}>
                 <View style={styles.providerHeader}>
