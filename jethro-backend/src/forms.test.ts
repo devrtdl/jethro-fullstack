@@ -90,6 +90,7 @@ test('submits the full diagnostic payload with whatsapp and revenue objects and 
   assert.equal(body.data.payload.respondent.whatsapp.pais_iso, 'BR');
   assert.equal(body.data.payload.answersBySlug.faturamento_mensal.moeda, 'BRL');
   assert.equal(typeof body.data.derived.score, 'number');
+  assert.equal(body.data.diagnostic.modelCode, 'C');
   assert.equal(body.data.delivery.status, 'skipped');
 
   await app.close();

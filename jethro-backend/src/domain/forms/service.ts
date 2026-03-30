@@ -670,6 +670,31 @@ function mapABC(value: JsonValue | undefined, mapping: Record<string, 'A' | 'B' 
   return mapping[String(value ?? '')] ?? 'C';
 }
 
+function mapOperationalCapacityToMotorBand(value: JsonValue | undefined) {
+  const capacity = String(value ?? '');
+  if (capacity === 'mais_10' || capacity === 'equipe_6_10') return 'A';
+  if (capacity === 'equipe_2_5') return 'B';
+  return 'C';
+}
+
+function mapHoursToMotorBand(value: JsonValue | undefined) {
+  const hours = typeof value === 'number' ? value : Number(value ?? 0);
+  if (!Number.isFinite(hours) || hours <= 0) return 'A';
+  if (hours > 60) return 'mais_60h';
+  if (hours >= 40) return '40_60h';
+  if (hours >= 20) return '20_39h';
+  return 'menos_20h';
+}
+
+function mapFormalizationToMotorBand(value: JsonValue | undefined) {
+  const formalizacao = String(value ?? '');
+  if (formalizacao === 'nao_comecei') return 'A';
+  if (formalizacao === 'informal' || formalizacao === 'outro') return 'B';
+  if (formalizacao === 'formalizada') return 'C';
+  if (formalizacao === 'empresa_media_grande') return 'D';
+  return 'B';
+}
+
 function classifyDiagnostic(answersBySlug: Record<string, JsonValue>): ClassifiedDiagnostic {
   const q5 = mapPhaseToMotorBand(answersBySlug.fase_negocio);
   const q6 = mapABC(answersBySlug.conexao_dons, { total: 'A', parcial: 'B', nao: 'C' });
@@ -680,13 +705,11 @@ function classifyDiagnostic(answersBySlug: Record<string, JsonValue>): Classifie
   const q11 = mapRevenueToMotorBand(revenue?.faixa);
   const q12 = mapABC(answersBySlug.lucro_crescimento, { crescendo: 'A', estavel: 'B', regredindo: 'C' });
   const q15 = String(answersBySlug.canal_aquisicao ?? '');
-  const q16 = mapABC(answersBySlug.capacidade_operacional, {
-    aguenta_normalmente: 'A',
-    precisa_reorganizar: 'B',
-    colapso: 'C',
-  });
-  const q17 = String(answersBySlug.horas_semana ?? '');
-  const q18 = String(answersBySlug.status_empresa ?? answersBySlug.q18_status_empresa ?? '');
+  const q16 = mapOperationalCapacityToMotorBand(answersBySlug.capacidade_operacional);
+  const q17 = mapHoursToMotorBand(answersBySlug.horas_semana);
+  const q18 = mapFormalizationToMotorBand(
+    answersBySlug.formalizacao ?? answersBySlug.status_empresa ?? answersBySlug.q18_status_empresa
+  );
 
   let code: ClassifiedDiagnostic['code'] = 'A';
 
