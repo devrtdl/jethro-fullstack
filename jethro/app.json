@@ -52,6 +52,12 @@
         "projectId": "943c103b-2232-48f7-9764-3917ef7bb593"
       }
     },
-    "owner": "dlopes88"
+    "owner": "dlopes88",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/943c103b-2232-48f7-9764-3917ef7bb593"
+    }
   }
 }
