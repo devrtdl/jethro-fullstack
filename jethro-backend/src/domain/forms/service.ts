@@ -4,8 +4,11 @@ import { env } from '../../config/env.js';
 import { getDbPool, hasDatabaseConfig } from '../../lib/db.js';
 import { AppError } from '../../lib/errors.js';
 import { createId } from '../../lib/id.js';
+import { ensurePasswordlessUser } from '../../lib/supabase-auth.js';
 import type {
+  DiagnosticLookupInput,
   EventInput,
+  FormAccessRequestInput,
   FormInput,
   FormUpdateInput,
   QuestionInput,
@@ -19,6 +22,7 @@ import {
 import type {
   BackendCompatibleSubmissionPayload,
   DiagnosticDerivedData,
+  DiagnosticSummary,
   DynamicOptionMap,
   FormDefinition,
   FormEvent,
@@ -496,10 +500,136 @@ function buildRespondent(answersBySlug: Record<string, JsonValue>): SubmissionRe
   };
 }
 
+type ClassifiedDiagnostic = {
+  code: 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I';
+  title: string;
+  message: string;
+};
+
+const modelSummaries: Record<ClassifiedDiagnostic['code'], { title: string; message: string }> = {
+  A: {
+    title: 'Modelo A — Negocio travado e desorganizado',
+    message: 'Seu negocio pede fundamento: ordem financeira, clareza de direcao e governo semanal antes de acelerar.',
+  },
+  B: {
+    title: 'Modelo B — Negocio saudavel no plato',
+    message: 'Existe base para crescer, mas falta motor de multiplicacao, esteira de oferta e sistema comercial.',
+  },
+  C: {
+    title: 'Modelo C — Boa base, caixa apertado',
+    message: 'Existe proposito, mas ainda falta modelo e sistema para transformar valor em prosperidade sustentavel.',
+  },
+  D: {
+    title: 'Modelo D — Fatura, mas sangra',
+    message: 'O faturamento existe, porem a margem e o caixa estao fragilizados. O foco precisa ser clareza financeira e estrutura economica.',
+  },
+  E: {
+    title: 'Modelo E — Validacao inicial',
+    message: 'Ja existe movimento, mas a oferta e o canal ainda precisam de validacao real de mercado.',
+  },
+  F: {
+    title: 'Modelo F — Vende, mas sem motor',
+    message: 'O negocio depende demais de indicacao. E hora de instalar aquisicao previsivel, funil e follow-up.',
+  },
+  G: {
+    title: 'Modelo G — Operacao no limite',
+    message: 'Crescer do jeito atual piora a operacao. O negocio precisa de processo, padrao e capacidade antes de acelerar.',
+  },
+  H: {
+    title: 'Modelo H — O gargalo e o dono',
+    message: 'A empresa esta centralizada demais no fundador. Governo pessoal e delegacao sao o proximo salto.',
+  },
+  I: {
+    title: 'Modelo I — Ainda nao comecou',
+    message: 'O chamado existe, mas o negocio ainda precisa de metodo, oferta minima e validacao antes de ganhar tracao.',
+  },
+};
+
+function mapRevenueToMotorBand(faixa: string | undefined) {
+  if (!faixa || faixa === 'not_revenue') {
+    return 'A';
+  }
+  if (faixa === 'upto_5k' || faixa === 'upto_2k') {
+    return 'B';
+  }
+  if (faixa === '5k_20k' || faixa === '2k_10k') {
+    return 'C';
+  }
+  return 'D';
+}
+
+function mapPhaseToMotorBand(value: JsonValue | undefined) {
+  const phase = String(value ?? '');
+  if (phase === 'ideia') return 'A';
+  if (phase === 'inicio') return 'B';
+  if (phase === 'crescimento') return 'C';
+  return 'D';
+}
+
+function mapABC(value: JsonValue | undefined, mapping: Record<string, 'A' | 'B' | 'C'>) {
+  return mapping[String(value ?? '')] ?? 'C';
+}
+
+function classifyDiagnostic(answersBySlug: Record<string, JsonValue>): ClassifiedDiagnostic {
+  const q5 = mapPhaseToMotorBand(answersBySlug.fase_negocio);
+  const q6 = mapABC(answersBySlug.conexao_dons, { total: 'A', parcial: 'B', nao: 'C' });
+  const q7 = mapABC(answersBySlug.proposito_negocio, { claro: 'A', em_definicao: 'B', sem_clareza: 'C' });
+  const q8 = mapABC(answersBySlug.estrutura_negocio, { estruturado: 'A', desenvolvimento: 'B', inexistente: 'C' });
+  const q9 = mapABC(answersBySlug.organizacao_financeira, { estruturada: 'A', basica: 'B', desorganizada: 'C' });
+  const revenue = asObjectRecord(answersBySlug.faturamento_mensal) as RevenueAnswer | undefined;
+  const q11 = mapRevenueToMotorBand(revenue?.faixa);
+  const q12 = mapABC(answersBySlug.lucro_crescimento, { crescendo: 'A', estavel: 'B', regredindo: 'C' });
+  const q15 = String(answersBySlug.canal_aquisicao ?? '');
+  const q16 = mapABC(answersBySlug.capacidade_operacional, {
+    aguenta_normalmente: 'A',
+    precisa_reorganizar: 'B',
+    colapso: 'C',
+  });
+  const q17 = String(answersBySlug.horas_semana ?? '');
+  const q18 = String(answersBySlug.status_empresa ?? answersBySlug.q18_status_empresa ?? '');
+
+  let code: ClassifiedDiagnostic['code'] = 'A';
+
+  if (q11 === 'A' && ['A', 'C', 'D'].includes(q18)) {
+    code = 'I';
+  } else if ((q11 === 'A' && q18 === 'B') || (['A', 'B'].includes(q5) && q11 === 'B' && q15 === 'indicacao')) {
+    code = 'E';
+  } else if (['C', 'D'].includes(q11) && q16 === 'C') {
+    code = 'G';
+  } else if (['B', 'C', 'D'].includes(q11) && q12 === 'C') {
+    code = 'D';
+  } else if (q17 === 'mais_60h') {
+    code = 'H';
+  } else if (q9 === 'C' && ['B', 'C'].includes(q8) && ['B', 'C'].includes(q12) && (q6 === 'C' || q7 === 'C')) {
+    code = 'A';
+  } else if (['B', 'C', 'D'].includes(q11) && q15 === 'indicacao' && ['B', 'C'].includes(q12)) {
+    code = 'F';
+  } else if (['A', 'B'].includes(q6) && ['A', 'B'].includes(q7) && ['B', 'C'].includes(q9) && ['B', 'C'].includes(q12)) {
+    code = 'C';
+  } else if (['A', 'B'].includes(q9) && ['A', 'B'].includes(q8) && ['B', 'C', 'D'].includes(q11) && q12 === 'B' && q15 !== 'indicacao') {
+    code = 'B';
+  }
+
+  return {
+    code,
+    ...modelSummaries[code],
+  };
+}
+
+function buildDiagnosticSummary(submittedAt: string, classified: ClassifiedDiagnostic): DiagnosticSummary {
+  return {
+    status: 'ready',
+    title: classified.title,
+    message: classified.message,
+    generatedAt: submittedAt,
+  };
+}
+
 export class FormsService {
   constructor(public readonly repository: FormsRepository) {}
 
   async listForms() {
+    await this.ensureDefaultFormAvailable();
     return this.repository.listForms();
   }
 
@@ -531,6 +661,7 @@ export class FormsService {
   }
 
   async getFormBySlugOrThrow(slug: string) {
+    await this.ensureDefaultFormAvailable(slug);
     const form = await this.repository.findFormBySlug(slug);
     if (!form) {
       throw new AppError('Formulario nao encontrado.', 404, 'FORM_NOT_FOUND');
@@ -708,12 +839,16 @@ export class FormsService {
     });
 
     const derived = calculateDiagnosticDerivedData(rawAnswersBySlug);
+    const classified = classifyDiagnostic(rawAnswersBySlug);
     const respondent = buildRespondent(rawAnswersBySlug);
     const whatsapp = asObjectRecord(rawAnswersBySlug.whatsapp) as PhoneAnswer | undefined;
 
+    const submittedAt = new Date().toISOString();
+    const diagnostic = buildDiagnosticSummary(submittedAt, classified);
+
     const payload: BackendCompatibleSubmissionPayload = {
       event: 'diagnostic.form.submitted',
-      submittedAt: new Date().toISOString(),
+      submittedAt,
       form: {
         id: form.id,
         slug: form.slug,
@@ -733,6 +868,7 @@ export class FormsService {
       })),
       answersBySlug: rawAnswersBySlug,
       derived,
+      diagnostic,
     };
 
     const delivery = await deliverWebhook(form, payload);
@@ -753,6 +889,13 @@ export class FormsService {
     };
 
     await this.repository.saveSubmission(submission);
+    await this.provisionPasswordlessAccess(respondent.email, respondent.fullName);
+    await this.persistProductDomainSubmission({
+      respondent,
+      answersBySlug: rawAnswersBySlug,
+      derived,
+      classified,
+    });
 
     if (delivery.status === 'failed') {
       throw new AppError(
@@ -770,9 +913,64 @@ export class FormsService {
         title: form.settings.successTitle,
         message: form.settings.successMessage,
       },
+      diagnostic,
       payload,
       derived,
       delivery,
+    };
+  }
+
+  async prepareFormAccess(input: FormAccessRequestInput) {
+    const email = input.email.trim().toLowerCase();
+
+    if (!(await this.repository.hasSubmissionByEmail(email))) {
+      throw new AppError(
+        'Este email ainda nao tem acesso liberado. Use o mesmo email enviado no formulario.',
+        403,
+        'FORM_ACCESS_NOT_ALLOWED',
+        { email }
+      );
+    }
+
+    const provisionResult = await ensurePasswordlessUser({ email });
+    if (provisionResult.status === 'unconfigured') {
+      throw new AppError(
+        'A autenticacao por email ainda nao foi configurada neste ambiente.',
+        503,
+        'FORM_ACCESS_AUTH_NOT_CONFIGURED'
+      );
+    }
+
+    return {
+      email,
+      allowed: true,
+      loginMethod: 'otp',
+    };
+  }
+
+  async getLatestDiagnosticByEmail(input: DiagnosticLookupInput) {
+    const email = input.email.trim().toLowerCase();
+    const submission = await this.repository.findLatestSubmissionByEmail(email);
+
+    if (!submission) {
+      throw new AppError(
+        'Nenhum diagnostico encontrado para este email.',
+        404,
+        'DIAGNOSTIC_NOT_FOUND',
+        { email }
+      );
+    }
+
+    return {
+      email,
+      submissionId: submission.id,
+      formSlug: submission.formSlug,
+      createdAt: submission.createdAt,
+      respondent: submission.respondent,
+      diagnostic: submission.payload.diagnostic,
+      derived: submission.derived,
+      answersBySlug: submission.answersBySlug,
+      payload: submission.payload,
     };
   }
 
@@ -794,6 +992,100 @@ export class FormsService {
     };
 
     return this.repository.saveEvent(event);
+  }
+
+  private async provisionPasswordlessAccess(email: string | undefined, fullName: string | undefined) {
+    if (!email) {
+      return;
+    }
+
+    try {
+      await ensurePasswordlessUser({
+        email: email.trim().toLowerCase(),
+        fullName,
+      });
+    } catch {
+      // O form nao deve falhar se o provisionamento de auth estiver indisponivel.
+    }
+  }
+
+  private async persistProductDomainSubmission(input: {
+    respondent: SubmissionRespondent;
+    answersBySlug: Record<string, JsonValue>;
+    derived: DiagnosticDerivedData;
+    classified: ClassifiedDiagnostic;
+  }) {
+    if (!hasDatabaseConfig() || !input.respondent.email) {
+      return;
+    }
+
+    const pool = getDbPool();
+    const client = await pool.connect();
+
+    try {
+      await client.query('begin');
+
+      const userResult = await client.query<{ id: string }>(
+        `insert into users (email, nome, whatsapp, auth_provider, status)
+         values ($1, $2, $3, 'email', 'active')
+         on conflict (email) do update set
+           nome = excluded.nome,
+           whatsapp = coalesce(excluded.whatsapp, users.whatsapp),
+           updated_at = now()
+         returning id`,
+        [input.respondent.email.trim().toLowerCase(), input.respondent.fullName ?? null, input.respondent.whatsappNumber ?? null]
+      );
+
+      const userId = userResult.rows[0]?.id;
+      if (!userId) {
+        throw new Error('Falha ao localizar user para persistir diagnostico.');
+      }
+
+      const revenue = asObjectRecord(input.answersBySlug.faturamento_mensal) as RevenueAnswer | undefined;
+
+      await client.query(
+        `insert into diagnostico_respostas (
+          user_id, modelo_identificado, q11_faturamento, q15_canal, q16_capacidade, q17_horas, q18_status_empresa, score, payload_raw, answers_by_code
+        ) values ($1, $2, $3, $4, $5, $6, $7, $8, $9::jsonb, $10::jsonb)`,
+        [
+          userId,
+          input.classified.code,
+          revenue?.faixa ?? null,
+          typeof input.answersBySlug.canal_aquisicao === 'string' ? input.answersBySlug.canal_aquisicao : null,
+          typeof input.answersBySlug.capacidade_operacional === 'string' ? input.answersBySlug.capacidade_operacional : null,
+          typeof input.answersBySlug.horas_semana === 'string' ? input.answersBySlug.horas_semana : String(input.answersBySlug.horas_semana ?? ''),
+          typeof input.answersBySlug.status_empresa === 'string'
+            ? input.answersBySlug.status_empresa
+            : typeof input.answersBySlug.q18_status_empresa === 'string'
+              ? input.answersBySlug.q18_status_empresa
+              : null,
+          input.derived.score,
+          JSON.stringify(input.answersBySlug),
+          JSON.stringify(input.answersBySlug),
+        ]
+      );
+
+      await client.query('commit');
+    } catch {
+      await client.query('rollback');
+    } finally {
+      client.release();
+    }
+  }
+
+  private async ensureDefaultFormAvailable(slug?: string) {
+    const defaultForm = buildDefaultDiagnosticFormDefinition();
+    if (slug && slug !== defaultForm.slug) {
+      return;
+    }
+
+    const existing = await this.repository.findFormBySlug(defaultForm.slug);
+    if (!existing) {
+      await this.repository.createForm(defaultForm);
+      return;
+    }
+
+    await this.repository.updateForm(existing.id, defaultForm);
   }
 
   async getFormResults(formId: string) {
@@ -901,7 +1193,315 @@ async function ensureSeedData(service: FormsService) {
         stepId: 'step_identificacao',
         slug: 'whatsapp',
         label: 'Qual e o seu numero de WhatsApp?',
-        helperText: 'O backend espera numero, codigo do pais e ISO do pais.',
+        helperText: '',
+        type: 'phone',
+        presentation: 'phone',
+        required: true,
+        order: 2,
+        options: [],
+        validation: {},
+      },
+      {
+        id: 'question_email',
+        stepId: 'step_identificacao',
+        slug: 'email',
+        label: 'Qual e o seu endereco de email?',
+        type: 'email',
+        presentation: 'input',
+        required: true,
+        order: 3,
+        options: [],
+        validation: { maxLength: 150 },
+      },
+      {
+        id: 'question_fase_negocio',
+        stepId: 'step_negocio',
+        slug: 'fase_negocio',
+        label: 'Qual e a fase do seu negocio?',
+        type: 'single_select',
+        presentation: 'radio',
+        required: true,
+        order: 4,
+        options: [
+          { id: 'fase_ideia', label: 'Ideia', value: 'ideia', order: 0 },
+          { id: 'fase_inicio', label: 'Inicio (0-1 ano)', value: 'inicio', order: 1 },
+          { id: 'fase_crescimento', label: 'Em crescimento (1-3 anos)', value: 'crescimento', order: 2 },
+          { id: 'fase_consolidado', label: 'Consolidado (3+ anos)', value: 'consolidado', order: 3 },
+        ],
+        validation: {},
+      },
+      {
+        id: 'question_conexao_dons',
+        stepId: 'step_negocio',
+        slug: 'conexao_dons',
+        label: 'Voce sente que seu negocio esta conectado com seus dons e talentos?',
+        type: 'single_select',
+        presentation: 'scale',
+        required: true,
+        order: 5,
+        options: [
+          { id: 'dons_total', label: 'Sim, totalmente', value: 'total', order: 0 },
+          { id: 'dons_parcial', label: 'Parcialmente', value: 'parcial', order: 1 },
+          { id: 'dons_nao', label: 'Nao, ainda nao', value: 'nao', order: 2 },
+        ],
+        validation: {},
+      },
+      {
+        id: 'question_proposito_negocio',
+        stepId: 'step_negocio',
+        slug: 'proposito_negocio',
+        label: 'Voce sabe exatamente qual e o proposito do seu negocio e como ele entrega valor?',
+        type: 'single_select',
+        presentation: 'radio',
+        required: true,
+        order: 6,
+        options: [
+          { id: 'prop_claro', label: 'Sim, muito claro', value: 'claro', order: 0 },
+          { id: 'prop_ideia', label: 'Tenho ideia, mas nao esta definido', value: 'em_definicao', order: 1 },
+          { id: 'prop_nao', label: 'Nao tenho clareza', value: 'sem_clareza', order: 2 },
+        ],
+        validation: {},
+      },
+      {
+        id: 'question_estrutura_negocio',
+        stepId: 'step_negocio',
+        slug: 'estrutura_negocio',
+        label: 'Seu negocio tem estrutura solida, visao de futuro e planejamento estrategico?',
+        type: 'single_select',
+        presentation: 'radio',
+        required: true,
+        order: 7,
+        options: [
+          { id: 'est_bem', label: 'Sim, bem estruturado', value: 'estruturado', order: 0 },
+          { id: 'est_dev', label: 'Em desenvolvimento', value: 'desenvolvimento', order: 1 },
+          { id: 'est_nao', label: 'Ainda nao', value: 'inexistente', order: 2 },
+        ],
+        validation: {},
+      },
+      {
+        id: 'question_organizacao_financeira',
+        stepId: 'step_operacao',
+        slug: 'organizacao_financeira',
+        label: 'Como voce enxerga a organizacao financeira do seu negocio?',
+        type: 'single_select',
+        presentation: 'select',
+        required: true,
+        order: 8,
+        options: [
+          { id: 'fin_estr', label: 'Estruturada', value: 'estruturada', order: 0 },
+          { id: 'fin_bas', label: 'Basica', value: 'basica', order: 1 },
+          { id: 'fin_conf', label: 'Desorganizada / Confusa', value: 'desorganizada', order: 2 },
+        ],
+        validation: {},
+      },
+      {
+        id: 'question_formalizacao',
+        stepId: 'step_operacao',
+        slug: 'formalizacao',
+        label: 'Qual e a classificacao da formalizacao do seu negocio?',
+        type: 'single_select',
+        presentation: 'select',
+        required: true,
+        order: 9,
+        options: [
+          { id: 'for_informal', label: 'Informal', value: 'informal', order: 0 },
+          { id: 'for_formalizada', label: 'Formalizada / Empresa registrada', value: 'formalizada', order: 1 },
+          { id: 'for_media', label: 'Empresa de medio/grande porte', value: 'empresa_media_grande', order: 2 },
+          { id: 'for_nao', label: 'Ainda nao comecei', value: 'nao_comecei', order: 3 },
+          { id: 'for_outro', label: 'Outro', value: 'outro', order: 4 },
+        ],
+        validation: {},
+      },
+      {
+        id: 'question_faturamento_mensal',
+        stepId: 'step_operacao',
+        slug: 'faturamento_mensal',
+        label: 'Qual e o faturamento medio mensal do seu negocio?',
+        helperText: 'As opcoes mudam conforme o pais detectado no WhatsApp.',
+        type: 'money_range',
+        presentation: 'select',
+        required: true,
+        order: 10,
+        options: [],
+        validation: {},
+        dynamicOptionsByCountry: revenueBandsByCountry,
+        metadata: {
+          dependsOnQuestionSlug: 'whatsapp',
+          dependsOnCountryField: 'pais_iso',
+        },
+      },
+      {
+        id: 'question_lucro_crescimento',
+        stepId: 'step_operacao',
+        slug: 'lucro_crescimento',
+        label: 'Voce sente que o seu negocio esta gerando lucro e crescendo?',
+        type: 'single_select',
+        presentation: 'scale',
+        required: true,
+        order: 11,
+        options: [
+          { id: 'luc_cresce', label: 'Sim, crescendo', value: 'crescendo', order: 0 },
+          { id: 'luc_estavel', label: 'Estavel, sem crescimento', value: 'estavel', order: 1 },
+          { id: 'luc_regredindo', label: 'Nao, estamos regredindo', value: 'regredindo', order: 2 },
+        ],
+        validation: {},
+      },
+      {
+        id: 'question_objetivo_futuro',
+        stepId: 'step_objetivos',
+        slug: 'objetivo_futuro',
+        label: 'Onde voce deseja estar com seu negocio nos proximos 6 a 12 meses?',
+        type: 'textarea',
+        presentation: 'textarea',
+        required: true,
+        order: 12,
+        options: [],
+        validation: { minLength: 20, maxLength: 500 },
+      },
+      {
+        id: 'question_desafios',
+        stepId: 'step_objetivos',
+        slug: 'desafios',
+        label: 'Quais sao os 3 maiores desafios que voce esta enfrentando hoje?',
+        type: 'textarea',
+        presentation: 'textarea',
+        required: true,
+        order: 13,
+        options: [],
+        validation: { minLength: 20, maxLength: 600 },
+      },
+      {
+        id: 'question_canal_aquisicao',
+        stepId: 'step_objetivos',
+        slug: 'canal_aquisicao',
+        label: 'Como a maioria dos seus clientes chega ate voce hoje?',
+        type: 'single_select',
+        presentation: 'select',
+        required: true,
+        order: 14,
+        options: [
+          { id: 'can_instagram', label: 'Instagram', value: 'instagram', order: 0 },
+          { id: 'can_indicacao', label: 'Indicacao', value: 'indicacao', order: 1 },
+          { id: 'can_pago', label: 'Trafego pago', value: 'trafego_pago', order: 2 },
+          { id: 'can_linkedin', label: 'LinkedIn', value: 'linkedin', order: 3 },
+          { id: 'can_ativo', label: 'Eu vou atras ativamente', value: 'ativo', order: 4 },
+          { id: 'can_varios', label: 'Uso varios canais', value: 'varios', order: 5 },
+          { id: 'can_outro', label: 'Outro', value: 'outro', order: 6 },
+        ],
+        validation: {},
+      },
+      {
+        id: 'question_capacidade_operacional',
+        stepId: 'step_operacao',
+        slug: 'capacidade_operacional',
+        label: 'Se o numero de clientes dobrasse amanha, o que aconteceria?',
+        type: 'single_select',
+        presentation: 'radio',
+        required: true,
+        order: 15,
+        options: [
+          { id: 'cap_aguenta', label: 'Daria conta normalmente', value: 'aguenta_normalmente', order: 0 },
+          { id: 'cap_reorganiza', label: 'Precisaria reorganizar algumas partes', value: 'precisa_reorganizar', order: 1 },
+          { id: 'cap_colapso', label: 'A operacao entraria em colapso', value: 'colapso', order: 2 },
+        ],
+        validation: {},
+      },
+      {
+        id: 'question_horas_semana',
+        stepId: 'step_operacao',
+        slug: 'horas_semana',
+        label: 'Quantas horas por semana voce dedica ao seu negocio?',
+        type: 'single_select',
+        presentation: 'radio',
+        required: true,
+        order: 16,
+        options: [
+          { id: 'hrs_menos_10', label: 'Menos de 10h', value: 'menos_10h', order: 0 },
+          { id: 'hrs_10_20', label: '10-20h', value: '10_20h', order: 1 },
+          { id: 'hrs_20_40', label: '20-40h', value: '20_40h', order: 2 },
+          { id: 'hrs_40_60', label: 'Entre 40 e 60h', value: '40_60h', order: 3 },
+          { id: 'hrs_mais_60', label: 'Mais de 60h', value: 'mais_60h', order: 4 },
+        ],
+        validation: {},
+      },
+      {
+        id: 'question_status_empresa',
+        stepId: 'step_negocio',
+        slug: 'status_empresa',
+        label: 'Em que estado real esta a sua empresa ou produto hoje?',
+        type: 'single_select',
+        presentation: 'radio',
+        required: true,
+        order: 17,
+        options: [
+          { id: 'status_ainda_nao', label: 'Ainda nao comecei', value: 'A', order: 0 },
+          { id: 'status_em_desenvolvimento', label: 'Ja tenho empresa ou produto em desenvolvimento', value: 'B', order: 1 },
+          { id: 'status_ideia', label: 'Tenho a ideia, mas ainda nao estruturei', value: 'C', order: 2 },
+          { id: 'status_parado', label: 'Estou parado entre ideia e execucao', value: 'D', order: 3 },
+        ],
+        validation: {},
+      },
+    ],
+    settings: {
+      successTitle: 'Diagnostico enviado',
+      successMessage: 'Recebemos suas respostas e vamos processar seu diagnostico.',
+      errorMessage: 'Nao foi possivel enviar agora. Revise os dados e tente novamente.',
+      allowRetry: true,
+    },
+  };
+
+  const existing = await service.repository.findFormBySlug(seedInput.slug);
+  if (!existing) {
+    return service.createForm(seedInput);
+  }
+
+  return service.repository.updateForm(existing.id, seedInput);
+}
+
+function buildDefaultDiagnosticFormDefinition(): Omit<FormDefinition, 'id' | 'createdAt' | 'updatedAt'> {
+  return {
+    slug: 'diagnostico-inicial',
+    title: 'Diagnostico Inicial Jethro',
+    description: 'Formulario tecnico de diagnostico conforme especificacao do Jethro.',
+    status: 'published',
+    steps: [
+      { id: 'step_identificacao', title: 'Identificacao', description: 'Dados basicos do empreendedor.', order: 0 },
+      { id: 'step_negocio', title: 'Negocio', description: 'Contexto e maturidade do negocio.', order: 1 },
+      { id: 'step_operacao', title: 'Operacao', description: 'Operacao, receita e crescimento.', order: 2 },
+      { id: 'step_objetivos', title: 'Objetivos', description: 'Visao de futuro e desafios.', order: 3 },
+    ],
+    questions: [
+      {
+        id: 'question_nome_completo',
+        stepId: 'step_identificacao',
+        slug: 'nome_completo',
+        label: 'Qual e o seu nome e sobrenome?',
+        helperText: 'Informe nome completo com pelo menos duas palavras.',
+        type: 'text',
+        presentation: 'input',
+        required: true,
+        order: 0,
+        options: [],
+        validation: { minLength: 3, minWords: 2, pattern: "^[A-Za-zÀ-ÖØ-öø-ÿ' -]+$" },
+      },
+      {
+        id: 'question_area_atuacao',
+        stepId: 'step_identificacao',
+        slug: 'area_atuacao',
+        label: 'Qual e a area de atuacao do seu negocio?',
+        type: 'text',
+        presentation: 'input',
+        required: true,
+        order: 1,
+        options: [],
+        validation: { minLength: 3, maxLength: 100 },
+      },
+      {
+        id: 'question_whatsapp',
+        stepId: 'step_identificacao',
+        slug: 'whatsapp',
+        label: 'Qual e o seu numero de WhatsApp?',
+        helperText: '',
         type: 'phone',
         presentation: 'phone',
         required: true,
@@ -1140,25 +1740,14 @@ async function ensureSeedData(service: FormsService) {
       allowRetry: true,
     },
   };
-
-  const existing = await service.repository.findFormBySlug(seedInput.slug);
-  if (!existing) {
-    return service.createForm(seedInput);
-  }
-
-  return service.repository.updateForm(existing.id, seedInput);
 }
 
 export async function createFormsService() {
   if (env.APP_ENV !== 'test' && hasDatabaseConfig()) {
     const repository = new PostgresFormsRepository(getDbPool());
-    const service = new FormsService(repository);
-    await ensureSeedData(service);
-    return service;
+    return new FormsService(repository);
   }
 
   const repository = new InMemoryFormsRepository();
-  const service = new FormsService(repository);
-  await ensureSeedData(service);
-  return service;
+  return new FormsService(repository);
 }

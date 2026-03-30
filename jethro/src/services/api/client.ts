@@ -106,4 +106,10 @@ async function request<T>(path: string, options: RequestOptions = {}) {
 export const apiClient = {
   get: <T>(path: string, options?: Omit<RequestOptions, 'method' | 'body'>) =>
     request<T>(path, { ...options, method: 'GET' }),
+  post: <T>(path: string, body?: unknown, options?: Omit<RequestOptions, 'method' | 'body'>) =>
+    request<T>(path, {
+      ...options,
+      method: 'POST',
+      body: body === undefined ? undefined : JSON.stringify(body),
+    }),
 };

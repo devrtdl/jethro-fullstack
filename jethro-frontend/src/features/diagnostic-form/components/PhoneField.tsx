@@ -55,6 +55,30 @@ const COUNTRIES = [
   { iso: 'AO',  codigo: '+244', label: 'Angola',         Flag: FlagsAO },
   { iso: 'MZ',  codigo: '+258', label: 'Moçambique',     Flag: FlagsMZ },
 ];
+
+const PHONE_PLACEHOLDERS: Record<string, string> = {
+  BR: '(11) 99999-9999',
+  PT: '(21) 1234-5678',
+  US: '(201) 555-0123',
+  AR: '(11) 1234-5678',
+  CL: '(9) 8765-4321',
+  CO: '(321) 123-4567',
+  MX: '(55) 1234-5678',
+  PE: '(912) 345-678',
+  UY: '(99) 123-456',
+  ES: '(612) 34 56 78',
+  GB: '(20) 1234 5678',
+  DE: '(30) 12345678',
+  FR: '(1) 23 45 67 89',
+  IT: '(312) 345 6789',
+  CA: '(204) 234-5678',
+  AU: '(412) 345 678',
+  JP: '(90) 1234-5678',
+  CN: '(131) 2345 6789',
+  IN: '(98765) 43210',
+  AO: '(923) 123-456',
+  MZ: '(82) 123 4567',
+};
 // função para validar o número de telefone considerando o DDI e o formato local, garantindo que o número seja completo e consistente com o país selecionado. A validação inclui:
 // 1. Verificar se o valor é um objeto válido com as propriedades esperadas.
 // 2. Garantir que o número completo comece com o código do país selecionado (DDI).
@@ -88,6 +112,7 @@ function getLocalPhoneNumber(fullNumber: string, countryCode: string) {
 export function PhoneField({ value, onChange }: Props) {
   const selectedCountry = COUNTRIES.find((c) => c.iso === value.pais_iso) ?? COUNTRIES[0];
   const SelectedFlag = selectedCountry.Flag;
+  const phonePlaceholder = PHONE_PLACEHOLDERS[selectedCountry.iso] ?? '(11) 99999-9999';
 
   function handleCountryChange(event: ChangeEvent<HTMLSelectElement>) {
     const selected = COUNTRIES.find((c) => c.iso === event.target.value);
@@ -136,8 +161,7 @@ export function PhoneField({ value, onChange }: Props) {
       <input
        className="phone-number"
        type="tel"
-       //TODO POLLY: placeholder dinâmico de acordo com o país selecionado. Hoje deixamos um genérico que funciona para a maioria dos casos, mas idealmente seria algo como (99) 99999-9999 para Brasil, (99) 9999-9999 para Portugal, etc. 
-       placeholder="(11) 99999-9999"
+       placeholder={phonePlaceholder}
        value={getLocalPhoneNumber(value.numero, value.pais_codigo)}
        onChange={handleNumeroChange}
        onKeyDown={(e) => {

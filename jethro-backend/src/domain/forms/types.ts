@@ -94,6 +94,13 @@ export type DiagnosticDerivedData = {
   revenueBand?: string;
 };
 
+export type DiagnosticSummary = {
+  status: 'pending' | 'ready';
+  title: string;
+  message: string;
+  generatedAt: string;
+};
+
 export type SubmissionRespondent = {
   fullName?: string;
   email?: string;
@@ -151,6 +158,7 @@ export type BackendCompatibleSubmissionPayload = {
   }>;
   answersBySlug: Record<string, JsonValue>;
   derived: DiagnosticDerivedData;
+  diagnostic: DiagnosticSummary;
 };
 
 export type WebhookDeliveryResult = {

@@ -64,6 +64,25 @@ export function QuestionField({ question, value, error, options = question.optio
     onChange(event.target.value ? Number(event.target.value) : '');
   }
 
+  function handleMoneyRangeChange(nextValue: string) {
+    const selected = options.find((option) => option.value === nextValue);
+    if (!selected) {
+      onChange('');
+      return;
+    }
+
+    const currentCountry =
+      typeof value === 'object' && value !== null && !Array.isArray(value) && typeof value.pais === 'string'
+        ? value.pais
+        : 'BR';
+
+    onChange({
+      faixa: selected.value,
+      moeda: typeof selected.metadata?.currency === 'string' ? selected.metadata.currency : 'USD',
+      pais: currentCountry,
+    });
+  }
+
   return (
     <div className="field">
       <label htmlFor={question.slug}>{question.label}</label>
@@ -167,25 +186,7 @@ export function QuestionField({ question, value, error, options = question.optio
               ? value.faixa
               : ''
           }
-          onChange={(event) => {
-            // faturamento precisa carregar moeda e pais junto porque o backend valida esse bloco inteiro.
-            // TODO Pollynerd: quando trocar a UI, nao esquecer disso aqui.
-            // HINT: mandar so a faixa nao basta, backend espera faixa + moeda + pais.
-            const selected = options.find((option) => option.value === event.target.value);
-            if (!selected) {
-              onChange('');
-              return;
-            }
-
-            onChange({
-              faixa: selected.value,
-              moeda: typeof selected.metadata?.currency === 'string' ? selected.metadata.currency : 'USD',
-              pais:
-                typeof value === 'object' && value !== null && !Array.isArray(value) && typeof value.pais === 'string'
-                  ? value.pais
-                  : 'BR',
-            });
-          }}
+          onChange={(event) => handleMoneyRangeChange(event.target.value)}
         >
           <option value="">Selecione</option>
           {options.map((option) => (

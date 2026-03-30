@@ -119,8 +119,18 @@ export const eventInputSchema = z.object({
   stepId: z.string().trim().min(1).optional(),
 });
 
+export const formAccessRequestSchema = z.object({
+  email: z.email().trim().toLowerCase(),
+});
+
+export const diagnosticLookupSchema = z.object({
+  email: z.email().trim().toLowerCase(),
+});
+
 export type FormInput = z.infer<typeof formInputSchema>;
 export type FormUpdateInput = z.infer<typeof formUpdateSchema>;
 export type QuestionInput = z.infer<typeof questionInputSchema>;
 export type SubmissionInput = z.infer<typeof submissionInputSchema>;
 export type EventInput = z.infer<typeof eventInputSchema>;
+export type FormAccessRequestInput = z.infer<typeof formAccessRequestSchema>;
+export type DiagnosticLookupInput = z.infer<typeof diagnosticLookupSchema>;

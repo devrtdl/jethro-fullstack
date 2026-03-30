@@ -1,6 +1,6 @@
 import type { PublicFormResponse, SubmissionPayload, SubmissionResponse } from '../types/form';
 
-const API_BASE_URL = 'http://localhost:3000';
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.trim() || 'http://localhost:3000';
 
 async function parseJson(response: Response) {
   return response.json() as Promise<unknown>;

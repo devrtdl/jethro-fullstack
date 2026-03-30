@@ -41,4 +41,6 @@ export const env = {
   appEnv,
   apiBaseUrl: explicitApiUrl ?? sanitizeBaseUrl(getDerivedDevApiUrl()) ?? 'http://localhost:3000',
   apiTimeoutMs: Number(process.env.EXPO_PUBLIC_API_TIMEOUT_MS ?? '10000'),
+  supabaseUrl: sanitizeBaseUrl(process.env.EXPO_PUBLIC_SUPABASE_URL),
+  supabaseAnonKey: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY?.trim(),
 };

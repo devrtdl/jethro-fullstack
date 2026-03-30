@@ -1,16 +1,18 @@
 import type { PropsWithChildren } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View, type ViewStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 type ScreenContainerProps = PropsWithChildren<{
   padded?: boolean;
+  backgroundColor?: string;
+  contentStyle?: ViewStyle;
 }>;
 
-export function ScreenContainer({ children, padded = true }: ScreenContainerProps) {
+export function ScreenContainer({ children, padded = true, backgroundColor, contentStyle }: ScreenContainerProps) {
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, backgroundColor ? { backgroundColor } : null]}>
       <ScrollView contentContainerStyle={[styles.content, padded && styles.padded]}>
-        <View style={styles.stack}>{children}</View>
+        <View style={[styles.stack, contentStyle]}>{children}</View>
       </ScrollView>
     </SafeAreaView>
   );

@@ -29,6 +29,8 @@ export interface FormsRepository {
   ): Promise<FormQuestion | undefined>;
   deleteQuestion(formId: string, questionId: string): Promise<boolean>;
   saveSubmission(submission: FormSubmission): Promise<FormSubmission>;
+  hasSubmissionByEmail(email: string): Promise<boolean>;
+  findLatestSubmissionByEmail(email: string): Promise<FormSubmission | undefined>;
   listSubmissions(formId: string): Promise<FormSubmission[]>;
   findSubmissionById(formId: string, submissionId: string): Promise<FormSubmission | undefined>;
   saveEvent(event: FormEvent): Promise<FormEvent>;
@@ -157,6 +159,21 @@ export class InMemoryFormsRepository implements FormsRepository {
     list.push(submission);
     this.submissions.set(submission.formId, list);
     return submission;
+  }
+
+  async hasSubmissionByEmail(email: string) {
+    const normalizedEmail = email.trim().toLowerCase();
+    return [...this.submissions.values()].some((items) =>
+      items.some((submission) => submission.respondent.email?.trim().toLowerCase() === normalizedEmail)
+    );
+  }
+
+  async findLatestSubmissionByEmail(email: string) {
+    const normalizedEmail = email.trim().toLowerCase();
+    return [...this.submissions.values()]
+      .flat()
+      .filter((submission) => submission.respondent.email?.trim().toLowerCase() === normalizedEmail)
+      .sort((left, right) => right.createdAt.localeCompare(left.createdAt))[0];
   }
 
   async listSubmissions(formId: string) {
@@ -472,6 +489,32 @@ export class PostgresFormsRepository implements FormsRepository {
     }
 
     return mapSubmissionRow(row);
+  }
+
+  async hasSubmissionByEmail(email: string) {
+    const result = await this.pool.query<{ exists: boolean }>(
+      `select exists(
+          select 1
+          from form_submissions
+          where lower(respondent_email) = lower($1)
+       ) as exists`,
+      [email]
+    );
+
+    return result.rows[0]?.exists ?? false;
+  }
+
+  async findLatestSubmissionByEmail(email: string) {
+    const result = await this.pool.query<SubmissionRow>(
+      `select id, form_id, form_slug, created_at, answers, answers_by_slug, payload, status, respondent, derived, delivery
+       from form_submissions
+       where lower(respondent_email) = lower($1)
+       order by created_at desc
+       limit 1`,
+      [email]
+    );
+
+    return result.rows[0] ? mapSubmissionRow(result.rows[0]) : undefined;
   }
 
   async listSubmissions(formId: string) {

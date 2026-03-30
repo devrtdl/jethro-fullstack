@@ -43,27 +43,29 @@ export type FormStep = {
   order: number;
 };
 
+export type PublicFormData = {
+  id: string;
+  slug: string;
+  title: string;
+  description?: string;
+  steps: FormStep[];
+  questions: FormQuestion[];
+  runtime: {
+    revenueBandsByCountry: DynamicOptionMap;
+  };
+  confirmation: {
+    title: string;
+    message: string;
+  };
+  submissionError: {
+    message: string;
+    allowRetry: boolean;
+  };
+};
+
 export type PublicFormResponse = {
   success: true;
-  data: {
-    id: string;
-    slug: string;
-    title: string;
-    description?: string;
-    steps: FormStep[];
-    questions: FormQuestion[];
-    runtime: {
-      revenueBandsByCountry: DynamicOptionMap;
-    };
-    confirmation: {
-      title: string;
-      message: string;
-    };
-    submissionError: {
-      message: string;
-      allowRetry: boolean;
-    };
-  };
+  data: PublicFormData;
 };
 
 export type SubmissionPayload = {
@@ -74,36 +76,28 @@ export type SubmissionPayload = {
   }>;
 };
 
-export type SubmissionResponse = {
-  success: true;
-  data: {
-    submissionId: string;
-    confirmation: {
-      title: string;
-      message: string;
-    };
-    diagnostic: {
-      status: 'pending';
-      title: string;
-      message: string;
-      generatedAt: string;
-    };
-    derived: {
-      score: number;
-      scoreBand: 'baixo' | 'medio' | 'alto';
-      whatsappCountryIso?: string;
-      revenueCurrency?: string;
-      revenueBand?: string;
-    };
+export type SubmissionResult = {
+  submissionId: string;
+  confirmation: {
+    title: string;
+    message: string;
+  };
+  diagnostic: {
+    status: 'pending' | 'ready';
+    title: string;
+    message: string;
+    generatedAt: string;
+  };
+  derived: {
+    score: number;
+    scoreBand: 'baixo' | 'medio' | 'alto';
+    whatsappCountryIso?: string;
+    revenueCurrency?: string;
+    revenueBand?: string;
   };
 };
 
-export type ApiErrorPayload = {
-  success: false;
-  error: {
-    code: string;
-    message: string;
-    retryable: boolean;
-    details?: unknown;
-  };
+export type SubmissionResponse = {
+  success: true;
+  data: SubmissionResult;
 };

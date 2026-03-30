@@ -1,6 +1,38 @@
 import { QuestionField } from './components/QuestionField';
 import { useDiagnosticForm } from './useDiagnosticForm';
 
+const APP_DOWNLOAD_URL =
+  (import.meta.env.VITE_APP_DOWNLOAD_URL as string | undefined)?.trim() || 'https://jethro.app';
+
+type DiagnosticFormQuestionsProps = Pick<
+  ReturnType<typeof useDiagnosticForm>,
+  'currentQuestions' | 'values' | 'errors' | 'getQuestionValue' | 'getRevenueOptions' | 'setFieldValue'
+>;
+
+function DiagnosticFormQuestions({
+  currentQuestions,
+  values,
+  errors,
+  getQuestionValue,
+  getRevenueOptions,
+  setFieldValue,
+}: DiagnosticFormQuestionsProps) {
+  return (
+    <div className="question-grid">
+      {currentQuestions.map((question) => (
+        <QuestionField
+          key={question.id}
+          question={question}
+          value={getQuestionValue(values, question)}
+          error={errors[question.slug]}
+          options={question.type === 'money_range' ? getRevenueOptions(question) : question.options}
+          onChange={(value) => setFieldValue(question, value)}
+        />
+      ))}
+    </div>
+  );
+}
+
 export function DiagnosticFormPage() {
   const {
     form,
@@ -40,13 +72,15 @@ export function DiagnosticFormPage() {
           </aside>
           <section className="form-card">
             <div className="summary-block">
-              <h2>Resultado tecnico</h2>
+              <h2>{submitResult.diagnostic.title}</h2>
               {/* deixei esse bloco simples de proposito.
                   se a gente quiser virar uma tela de confirmacao mais elaborada, o lugar certo e aqui. */}
               {/* TODO Pollynerd: transformar isso numa tela de confirmacao melhor.
                   HINT: usar esse retorno para mostrar proximo passo, CTA e talvez resumo do que foi enviado. */}
-              <p>Score calculado no backend: {submitResult.score}</p>
-              <p>Faixa: {submitResult.scoreBand}</p>
+              <p>{submitResult.diagnostic.message}</p>
+              <a className="button-primary" href={APP_DOWNLOAD_URL} target="_blank" rel="noreferrer">
+                Baixar o app
+              </a>
             </div>
           </section>
         </div>
@@ -81,20 +115,14 @@ export function DiagnosticFormPage() {
           <h2>{currentStep.title}</h2>
           <p>{currentStep.description}</p>
 
-	          <div className="question-grid">
-	            {/* TODO Pollynerd: se a UI crescer, quebrar por tipo ou por step.
-	                HINT: hoje esta tudo centralizado para ficar facil de entender o fluxo completo. */}
-	            {currentQuestions.map((question) => (
-              <QuestionField
-                key={question.id}
-                question={question}
-                value={getQuestionValue(values, question)}
-                error={errors[question.slug]}
-                options={question.type === 'money_range' ? getRevenueOptions(question) : question.options}
-                onChange={(value) => setFieldValue(question, value)}
-              />
-	            ))}
-	          </div>
+          <DiagnosticFormQuestions
+            currentQuestions={currentQuestions}
+            values={values}
+            errors={errors}
+            getQuestionValue={getQuestionValue}
+            getRevenueOptions={getRevenueOptions}
+            setFieldValue={setFieldValue}
+          />
 
             {/** Global errors - chama o parser de erros global */}
 	          {errors._global ? <div className="field-error">{errors._global}</div> : null}

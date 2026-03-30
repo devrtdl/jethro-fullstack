@@ -42,8 +42,7 @@ export function useDiagnosticForm() {
   const [isLoading, setIsLoading] = useState(true);
   const [submitResult, setSubmitResult] = useState<{
     confirmation: { title: string; message: string };
-    score: number;
-    scoreBand: string;
+    diagnostic: { title: string; message: string; status: 'pending'; generatedAt: string };
   } | null>(null);
 
   useEffect(() => {
@@ -133,8 +132,7 @@ export function useDiagnosticForm() {
 
       setSubmitResult({
         confirmation: result.confirmation,
-        score: result.derived.score,
-        scoreBand: result.derived.scoreBand,
+        diagnostic: result.diagnostic,
       });
 
     } catch (error) {

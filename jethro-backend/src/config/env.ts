@@ -26,6 +26,8 @@ const envSchema = z.object({
   FRONTEND_ORIGIN: z.string().min(1).default('http://localhost:4174'),
   DATABASE_URL: z.string().min(1).optional(),
   DATABASE_SSL_REJECT_UNAUTHORIZED: booleanFromEnv.default(false),
+  SUPABASE_URL: z.string().url().optional(),
+  SUPABASE_SERVICE_ROLE_KEY: z.string().min(1).optional(),
 });
 
 export const env = envSchema.parse(process.env);

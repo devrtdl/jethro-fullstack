@@ -5,7 +5,9 @@ import { adminAuthPreHandler } from '../lib/admin-auth.js';
 import { successResponse } from '../lib/api-response.js';
 import { submissionRateLimitPreHandler } from '../lib/rate-limit.js';
 import {
+  diagnosticLookupSchema,
   eventInputSchema,
+  formAccessRequestSchema,
   formInputSchema,
   formUpdateSchema,
   questionInputSchema,
@@ -131,6 +133,18 @@ export async function registerFormRoutes(app: FastifyInstance) {
     const payload = eventInputSchema.parse(request.body);
     const event = await formsService.trackEvent(params.slug, payload);
     return reply.code(201).send(successResponse(event));
+  });
+
+  app.post('/auth/form-access/request', async (request) => {
+    const formsService = await formsServicePromise;
+    const payload = formAccessRequestSchema.parse(request.body);
+    return successResponse(await formsService.prepareFormAccess(payload));
+  });
+
+  app.post('/auth/form-access/diagnostic', async (request) => {
+    const formsService = await formsServicePromise;
+    const payload = diagnosticLookupSchema.parse(request.body);
+    return successResponse(await formsService.getLatestDiagnosticByEmail(payload));
   });
 }
 
