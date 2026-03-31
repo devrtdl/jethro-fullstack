@@ -414,14 +414,17 @@ function sanitizePublicForm(form: FormDefinition) {
 }
 
 const scoreMaps = {
-  fase_negocio: { ideia: 1, inicio: 2, crescimento: 3, consolidado: 4 },
-  conexao_dons: { total: 4, parcial: 2, nao: 1 },
-  proposito_negocio: { claro: 4, em_definicao: 2, sem_clareza: 1 },
-  estrutura_negocio: { estruturado: 4, desenvolvimento: 2, inexistente: 1 },
-  organizacao_financeira: { estruturada: 4, basica: 2, desorganizada: 1 },
-  formalizacao: { empresa_media_grande: 4, formalizada: 3, informal: 1, nao_comecei: 0, outro: 1 },
-  lucro_crescimento: { crescendo: 4, estavel: 2, regredindo: 1 },
-  capacidade_operacional: { mais_10: 4, equipe_6_10: 3, equipe_2_5: 2, sozinho: 1 },
+  // Q5–Q9, Q12, Q16 usam codigos de letra unica conforme domain-seed
+  fase_negocio: { A: 1, B: 2, C: 3, D: 4 },
+  conexao_dons: { A: 4, B: 2, C: 1 },
+  proposito_negocio: { A: 4, B: 2, C: 1 },
+  estrutura_negocio: { A: 4, B: 2, C: 1 },
+  organizacao_financeira: { A: 4, B: 2, C: 1 },
+  formalizacao: { medio_grande_porte: 4, formalizada: 3, informal: 1, nao_comecou: 0, outro: 1 },
+  lucro_crescimento: { A: 4, B: 2, C: 1 },
+  // A=Sozinho, B=2-5, C=6-10, D=Mais de 10 (precisa de equipe enorme = menor capacidade)
+  capacidade_operacional: { A: 4, B: 3, C: 2, D: 1 },
+  horas_semana: { A: 0, B: 1, C: 2, D: 3, E: 4 },
   faturamento_mensal: {
     above_50k: 4,
     above_25k: 4,
@@ -435,51 +438,24 @@ const scoreMaps = {
   },
 } as const;
 
-function calculateHoursScore(hours: number) {
-  if (hours >= 60) {
-    return 4;
-  }
-  if (hours >= 40) {
-    return 3;
-  }
-  if (hours >= 20) {
-    return 2;
-  }
-  if (hours >= 10) {
-    return 1;
-  }
-  return 0;
-}
-
 function calculateDiagnosticDerivedData(answersBySlug: Record<string, JsonValue>): DiagnosticDerivedData {
   const phone = asObjectRecord(answersBySlug.whatsapp) as PhoneAnswer | undefined;
   const revenue = asObjectRecord(answersBySlug.faturamento_mensal) as RevenueAnswer | undefined;
-  const horas = typeof answersBySlug.horas_semana === 'number' ? answersBySlug.horas_semana : 0;
 
   const scoreParts = [
     scoreMaps.fase_negocio[String(answersBySlug.fase_negocio) as keyof typeof scoreMaps.fase_negocio] ?? 0,
     scoreMaps.conexao_dons[String(answersBySlug.conexao_dons) as keyof typeof scoreMaps.conexao_dons] ?? 0,
-    scoreMaps.proposito_negocio[
-      String(answersBySlug.proposito_negocio) as keyof typeof scoreMaps.proposito_negocio
-    ] ?? 0,
-    scoreMaps.estrutura_negocio[
-      String(answersBySlug.estrutura_negocio) as keyof typeof scoreMaps.estrutura_negocio
-    ] ?? 0,
-    scoreMaps.organizacao_financeira[
-      String(answersBySlug.organizacao_financeira) as keyof typeof scoreMaps.organizacao_financeira
-    ] ?? 0,
+    scoreMaps.proposito_negocio[String(answersBySlug.proposito_negocio) as keyof typeof scoreMaps.proposito_negocio] ?? 0,
+    scoreMaps.estrutura_negocio[String(answersBySlug.estrutura_negocio) as keyof typeof scoreMaps.estrutura_negocio] ?? 0,
+    scoreMaps.organizacao_financeira[String(answersBySlug.organizacao_financeira) as keyof typeof scoreMaps.organizacao_financeira] ?? 0,
     scoreMaps.formalizacao[String(answersBySlug.formalizacao) as keyof typeof scoreMaps.formalizacao] ?? 0,
-    scoreMaps.lucro_crescimento[
-      String(answersBySlug.lucro_crescimento) as keyof typeof scoreMaps.lucro_crescimento
-    ] ?? 0,
-    scoreMaps.capacidade_operacional[
-      String(answersBySlug.capacidade_operacional) as keyof typeof scoreMaps.capacidade_operacional
-    ] ?? 0,
+    scoreMaps.lucro_crescimento[String(answersBySlug.lucro_crescimento) as keyof typeof scoreMaps.lucro_crescimento] ?? 0,
+    scoreMaps.capacidade_operacional[String(answersBySlug.capacidade_operacional) as keyof typeof scoreMaps.capacidade_operacional] ?? 0,
     scoreMaps.faturamento_mensal[revenue?.faixa as keyof typeof scoreMaps.faturamento_mensal] ?? 0,
-    calculateHoursScore(horas),
+    scoreMaps.horas_semana[String(answersBySlug.horas_semana) as keyof typeof scoreMaps.horas_semana] ?? 0,
   ];
 
-  const rawScore = (scoreParts.reduce((total, current) => total + current, 0) / (scoreParts.length * 4)) * 100;
+  const rawScore = (scoreParts.reduce((total: number, current) => total + current, 0) / (scoreParts.length * 4)) * 100;
   const score = Number(rawScore.toFixed(2));
 
   return {
@@ -539,93 +515,64 @@ type ActionPlanRow = {
 };
 
 
+// Q18 status_empresa é derivada — não exibida ao usuário.
+// Baseada em Q5 (fase_negocio) e Q10 (formalizacao).
+function deriveStatusEmpresa(answersBySlug: Record<string, JsonValue>): string {
+  const formalizacao = String(answersBySlug.formalizacao ?? '');
+  const fase = String(answersBySlug.fase_negocio ?? '');
+  if (formalizacao === 'nao_comecou') return 'A'; // não comecei
+  if (fase === 'A') return 'C';                   // tem ideia, não estruturou
+  return 'B';                                      // tem empresa (fase B, C ou D)
+}
+
 function mapRevenueToMotorBand(faixa: string | undefined) {
-  if (!faixa || faixa === 'not_revenue') {
-    return 'A';
-  }
-  if (faixa === 'upto_5k' || faixa === 'upto_2k') {
-    return 'B';
-  }
-  if (faixa === '5k_20k' || faixa === '2k_10k') {
-    return 'C';
-  }
+  if (!faixa || faixa === 'not_revenue') return 'A';
+  if (faixa === 'upto_5k' || faixa === 'upto_2k') return 'B';
+  if (faixa === '5k_20k' || faixa === '2k_10k') return 'C';
   return 'D';
-}
-
-function mapPhaseToMotorBand(value: JsonValue | undefined) {
-  const phase = String(value ?? '');
-  if (phase === 'ideia') return 'A';
-  if (phase === 'inicio') return 'B';
-  if (phase === 'crescimento') return 'C';
-  return 'D';
-}
-
-function mapABC(value: JsonValue | undefined, mapping: Record<string, 'A' | 'B' | 'C'>) {
-  return mapping[String(value ?? '')] ?? 'C';
-}
-
-function mapOperationalCapacityToMotorBand(value: JsonValue | undefined) {
-  const capacity = String(value ?? '');
-  if (capacity === 'mais_10' || capacity === 'equipe_6_10') return 'A';
-  if (capacity === 'equipe_2_5') return 'B';
-  return 'C';
-}
-
-function mapHoursToMotorBand(value: JsonValue | undefined) {
-  const hours = typeof value === 'number' ? value : Number(value ?? 0);
-  if (!Number.isFinite(hours) || hours <= 0) return 'A';
-  if (hours > 60) return 'mais_60h';
-  if (hours >= 40) return '40_60h';
-  if (hours >= 20) return '20_39h';
-  return 'menos_20h';
-}
-
-function mapFormalizationToMotorBand(value: JsonValue | undefined) {
-  const formalizacao = String(value ?? '');
-  if (formalizacao === 'nao_comecei') return 'A';
-  if (formalizacao === 'informal' || formalizacao === 'outro') return 'B';
-  if (formalizacao === 'formalizada') return 'C';
-  if (formalizacao === 'empresa_media_grande') return 'D';
-  return 'B';
 }
 
 function classifyDiagnostic(answersBySlug: Record<string, JsonValue>): ClassifiedDiagnostic {
-  const q5 = mapPhaseToMotorBand(answersBySlug.fase_negocio);
-  const q6 = mapABC(answersBySlug.conexao_dons, { total: 'A', parcial: 'B', nao: 'C' });
-  const q7 = mapABC(answersBySlug.proposito_negocio, { claro: 'A', em_definicao: 'B', sem_clareza: 'C' });
-  const q8 = mapABC(answersBySlug.estrutura_negocio, { estruturado: 'A', desenvolvimento: 'B', inexistente: 'C' });
-  const q9 = mapABC(answersBySlug.organizacao_financeira, { estruturada: 'A', basica: 'B', desorganizada: 'C' });
+  // Todas as questoes Q5-Q9, Q12, Q15-Q18 usam codigos de letra unica (A/B/C/D)
+  // conforme domain-seed.ts — nenhum mapeamento necessario
+  const q5 = String(answersBySlug.fase_negocio ?? '');
+  const q6 = String(answersBySlug.conexao_dons ?? '');
+  const q7 = String(answersBySlug.proposito_negocio ?? '');
+  const q8 = String(answersBySlug.estrutura_negocio ?? '');
+  const q9 = String(answersBySlug.organizacao_financeira ?? '');
   const revenue = asObjectRecord(answersBySlug.faturamento_mensal) as RevenueAnswer | undefined;
   const q11 = mapRevenueToMotorBand(revenue?.faixa);
-  const q12 = mapABC(answersBySlug.lucro_crescimento, { crescendo: 'A', estavel: 'B', regredindo: 'C' });
+  const q12 = String(answersBySlug.lucro_crescimento ?? '');
   const q15 = String(answersBySlug.canal_aquisicao ?? '');
-  const q16 = mapOperationalCapacityToMotorBand(answersBySlug.capacidade_operacional);
-  const q17 = mapHoursToMotorBand(answersBySlug.horas_semana);
-  const q18 = mapFormalizationToMotorBand(answersBySlug.formalizacao);
+  const q16 = String(answersBySlug.capacidade_operacional ?? '');
+  const q17 = String(answersBySlug.horas_semana ?? '');
+  // Q18: derivada de Q5+Q10 — nao exibida ao usuario
+  const q18 = deriveStatusEmpresa(answersBySlug);
 
-  let code: ClassifiedDiagnostic['code'] = 'A';
+  // Motor v2.4 — ordem de prioridade 0-8 (fonte: 01-Jethro_Motor_v2_4_Daniel.pdf)
+  // 0. MODELO I — pre-receita / ainda nao comecou
+  if (q11 === 'A' && ['A', 'C', 'D'].includes(q18)) return { code: 'I' };
+  // 1. MODELO E — ja comecou mas nao validou
+  if (q11 === 'A' && q18 === 'B') return { code: 'E' };
+  if (q5 <= 'B' && q11 === 'B' && q15 === 'A') return { code: 'E' };
+  // fallback I (q11='A' sem Q18 valida)
+  if (q11 === 'A') return { code: 'I' };
+  // 2. MODELO G — operacao no limite (precisa de 10+ pessoas = colapso operacional)
+  if (q11 >= 'C' && q16 === 'D') return { code: 'G' };
+  // 3. MODELO D — fatura mas sangra
+  if (q11 >= 'B' && q12 === 'C') return { code: 'D' };
+  // 4. MODELO H — gargalo do dono (Q17 D=40-60h ou E=>60h, com receita)
+  if (q11 >= 'B' && ['D', 'E'].includes(q17)) return { code: 'H' };
+  // 5. MODELO A — negocio travado e baguncado
+  if (q9 === 'C' && ['B', 'C'].includes(q8) && ['B', 'C'].includes(q12) && (q6 === 'C' || q7 === 'C')) return { code: 'A' };
+  // 6. MODELO F — vende mas sem motor comercial
+  if (q11 >= 'B' && q15 === 'A' && ['B', 'C'].includes(q12)) return { code: 'F' };
+  // 7. MODELO C — boa base, caixa apertado
+  if (['A', 'B'].includes(q6) && ['A', 'B'].includes(q7) && ['B', 'C'].includes(q9) && ['B', 'C'].includes(q12)) return { code: 'C' };
+  // 8. MODELO B — negocio saudavel no plato
+  if (['A', 'B'].includes(q9) && ['A', 'B'].includes(q8) && q11 >= 'B' && q12 === 'B' && q15 !== 'A') return { code: 'B' };
 
-  if (q11 === 'A' && ['A', 'C', 'D'].includes(q18)) {
-    code = 'I';
-  } else if ((q11 === 'A' && q18 === 'B') || (['A', 'B'].includes(q5) && q11 === 'B' && q15 === 'indicacao')) {
-    code = 'E';
-  } else if (['C', 'D'].includes(q11) && q16 === 'C') {
-    code = 'G';
-  } else if (['B', 'C', 'D'].includes(q11) && q12 === 'C') {
-    code = 'D';
-  } else if (q17 === 'mais_60h') {
-    code = 'H';
-  } else if (q9 === 'C' && ['B', 'C'].includes(q8) && ['B', 'C'].includes(q12) && (q6 === 'C' || q7 === 'C')) {
-    code = 'A';
-  } else if (['B', 'C', 'D'].includes(q11) && q15 === 'indicacao' && ['B', 'C'].includes(q12)) {
-    code = 'F';
-  } else if (['A', 'B'].includes(q6) && ['A', 'B'].includes(q7) && ['B', 'C'].includes(q9) && ['B', 'C'].includes(q12)) {
-    code = 'C';
-  } else if (['A', 'B'].includes(q9) && ['A', 'B'].includes(q8) && ['B', 'C', 'D'].includes(q11) && q12 === 'B' && q15 !== 'indicacao') {
-    code = 'B';
-  }
-
-  return { code };
+  return { code: 'A' }; // fallback
 }
 
 function personalizeDiagnosticText(text: string, fullName: string | undefined) {
@@ -648,15 +595,15 @@ async function buildDiagnosticSummary(
       const result = await pool.query<DiagnosticMessageRow>(
         `select
            dm.title as model_title,
-           variant,
-           block_1_title,
-           block_1_body,
-           root_cause,
-           scripture_verse,
-           scripture_text,
-           block_2_title,
-           block_2_body,
-           cta_label
+           dmgs.variant,
+           dmgs.block_1_title,
+           dmgs.block_1_body,
+           dmgs.root_cause,
+           dmgs.scripture_verse,
+           dmgs.scripture_text,
+           dmgs.block_2_title,
+           dmgs.block_2_body,
+           dmgs.cta_label
          from diagnostic_messages dmgs
          inner join diagnostic_models dm on dm.code = dmgs.model_code
          where dmgs.model_code = $1
@@ -1128,9 +1075,7 @@ export class FormsService {
           typeof input.answersBySlug.canal_aquisicao === 'string' ? input.answersBySlug.canal_aquisicao : null,
           typeof input.answersBySlug.capacidade_operacional === 'string' ? input.answersBySlug.capacidade_operacional : null,
           String(input.answersBySlug.horas_semana ?? ''),
-          typeof input.answersBySlug.formalizacao === 'string'
-            ? input.answersBySlug.formalizacao
-            : null,
+          deriveStatusEmpresa(input.answersBySlug),
           input.derived.score,
           JSON.stringify(input.answersBySlug),
           JSON.stringify(input.answersBySlug),
@@ -1175,7 +1120,7 @@ export class FormsService {
         input.modelCode,
         JSON.stringify(input.answersBySlug),
         false,
-        ['nao_comecei', 'informal'].includes(String(input.answersBySlug.formalizacao ?? '')),
+        ['A', 'C', 'D'].includes(deriveStatusEmpresa(input.answersBySlug)),
         0,
       ]
     );
