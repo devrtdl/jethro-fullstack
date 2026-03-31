@@ -97,7 +97,7 @@ export type DiagnosticDerivedData = {
 export type DiagnosticSummary = {
   status: 'pending' | 'ready';
   modelCode: string;
-  variant: 'v1' | 'v2' | 'v3';
+  variant: `v${number}`;
   block1Title: string;
   block1Body: string;
   rootCause?: string;

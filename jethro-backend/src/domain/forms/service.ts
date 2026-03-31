@@ -482,7 +482,7 @@ type ClassifiedDiagnostic = {
 };
 
 type DiagnosticMessageRow = {
-  variant: 'v1' | 'v2' | 'v3';
+  variant: `v${number}`;
   model_title: string;
   block_1_title: string;
   block_1_body: string;
