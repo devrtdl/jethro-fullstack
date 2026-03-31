@@ -422,8 +422,7 @@ const scoreMaps = {
   organizacao_financeira: { A: 4, B: 2, C: 1 },
   formalizacao: { medio_grande_porte: 4, formalizada: 3, informal: 1, nao_comecou: 0, outro: 1 },
   lucro_crescimento: { A: 4, B: 2, C: 1 },
-  // A=Sozinho, B=2-5, C=6-10, D=Mais de 10 (precisa de equipe enorme = menor capacidade)
-  capacidade_operacional: { A: 4, B: 3, C: 2, D: 1 },
+  capacidade_operacional: { A: 4, B: 2, C: 1 },
   horas_semana: { A: 0, B: 1, C: 2, D: 3, E: 4 },
   faturamento_mensal: {
     above_50k: 4,
@@ -557,8 +556,8 @@ function classifyDiagnostic(answersBySlug: Record<string, JsonValue>): Classifie
   if (q5 <= 'B' && q11 === 'B' && q15 === 'A') return { code: 'E' };
   // fallback I (q11='A' sem Q18 valida)
   if (q11 === 'A') return { code: 'I' };
-  // 2. MODELO G — operacao no limite (precisa de 10+ pessoas = colapso operacional)
-  if (q11 >= 'C' && q16 === 'D') return { code: 'G' };
+  // 2. MODELO G — operacao no limite
+  if (q11 >= 'C' && q16 === 'C') return { code: 'G' };
   // 3. MODELO D — fatura mas sangra
   if (q11 >= 'B' && q12 === 'C') return { code: 'D' };
   // 4. MODELO H — gargalo do dono (Q17 D=40-60h ou E=>60h, com receita)
