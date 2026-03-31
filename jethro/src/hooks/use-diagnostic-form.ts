@@ -71,7 +71,7 @@ function validateField(question: FormQuestion, value: JsonValue): string | undef
   if (question.type === 'email' && typeof value === 'string' && value.trim()) {
     const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
     if (!isValidEmail) {
-      return 'Informe um e-mail valido.';
+      return 'Informe um e-mail válido.';
     }
   }
 
@@ -97,7 +97,7 @@ function validateField(question: FormQuestion, value: JsonValue): string | undef
     }
 
     if (!/^\+\d{10,15}$/.test(number) || !/^\+\d{1,4}$/.test(countryCode) || !/^[A-Z]{2}$/.test(countryIso)) {
-      return 'Numero invalido para o pais selecionado.';
+      return 'Número inválido para o país selecionado.';
     }
   }
 
@@ -112,7 +112,7 @@ function validateField(question: FormQuestion, value: JsonValue): string | undef
     const pais = typeof revenue.pais === 'string' ? revenue.pais.trim() : '';
 
     if (!faixa || !moeda || !pais) {
-      return 'Selecione uma faixa de faturamento valida.';
+      return 'Selecione uma faixa de faturamento válida.';
     }
   }
 
@@ -121,25 +121,25 @@ function validateField(question: FormQuestion, value: JsonValue): string | undef
       typeof value === 'number' ? value : typeof value === 'string' && value.trim() ? Number(value) : NaN;
 
     if (Number.isNaN(numericValue)) {
-      return 'Informe um numero valido.';
+      return 'Informe um número válido.';
     }
 
     if (question.validation.min !== undefined && numericValue < question.validation.min) {
-      return `Minimo de ${question.validation.min}.`;
+      return `Mínimo de ${question.validation.min}.`;
     }
 
     if (question.validation.max !== undefined && numericValue > question.validation.max) {
-      return `Maximo de ${question.validation.max}.`;
+      return `Máximo de ${question.validation.max}.`;
     }
   }
 
   if ((question.type === 'text' || question.type === 'textarea') && typeof value === 'string' && value.trim()) {
     if (question.validation.minLength !== undefined && value.trim().length < question.validation.minLength) {
-      return `Minimo de ${question.validation.minLength} caracteres.`;
+      return `Mínimo de ${question.validation.minLength} caracteres.`;
     }
 
     if (question.validation.maxLength !== undefined && value.trim().length > question.validation.maxLength) {
-      return `Maximo de ${question.validation.maxLength} caracteres.`;
+      return `Máximo de ${question.validation.maxLength} caracteres.`;
     }
   }
 

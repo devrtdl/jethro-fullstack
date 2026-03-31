@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -18,20 +18,20 @@ import { authService } from '@/src/services/auth/auth-service';
 import type { FormQuestion, JsonValue, QuestionOption } from '@/src/types/diagnostic-form';
 
 const palette = {
-  background: '#F8F5EF',
-  surface: '#0F1B2D',
-  surfaceAlt: '#FFFFFF',
-  cardBorder: 'rgba(15, 27, 45, 0.08)',
+  background: '#070D18',
+  surface: '#0D1B2A',
+  surfaceAlt: '#162538',
+  cardBorder: 'rgba(232, 201, 122, 0.18)',
   gold: '#C9A84C',
   goldSoft: '#E8C97A',
   cream: '#F7F3EC',
-  text: '#182334',
-  muted: '#6D798A',
-  accent: '#2F67F6',
-  accentSoft: '#DCE7FF',
-  success: '#2EAF6E',
-  danger: '#D96B5F',
-  chip: 'rgba(47, 103, 246, 0.08)',
+  text: '#F7F3EC',
+  muted: '#98A4B5',
+  accent: '#D4954A',
+  accentSoft: 'rgba(212, 149, 74, 0.15)',
+  success: '#8DBA88',
+  danger: '#E07C6C',
+  chip: 'rgba(247, 243, 236, 0.1)',
 };
 
 const phoneCountries = [
@@ -156,7 +156,7 @@ function AuthCard() {
       </View>
 
       <Text style={styles.bodyText}>
-        O novo fluxo comeca aqui: conta criada, diagnostico respondido, resultado liberado e oferta na sequencia.
+        O novo fluxo começa aqui: conta criada, diagnóstico respondido, resultado liberado e oferta na sequência.
       </Text>
 
       <View style={styles.modeRow}>
@@ -207,6 +207,7 @@ function AuthCard() {
 
 function QuestionInput({
   question,
+  questionNumber,
   value,
   error,
   onChange,
@@ -214,6 +215,7 @@ function QuestionInput({
   selectedCountryIso,
 }: {
   question: FormQuestion;
+  questionNumber: number;
   value: JsonValue;
   error?: string;
   onChange: (value: JsonValue) => void;
@@ -224,7 +226,10 @@ function QuestionInput({
 
   return (
     <View style={styles.questionBlock}>
-      <Text style={styles.questionLabel}>{question.label}</Text>
+      <Text style={styles.questionLabel}>
+        <Text style={styles.questionNumber}>{questionNumber}. </Text>
+        {question.label}
+      </Text>
       {question.helperText ? <Text style={styles.questionHelper}>{question.helperText}</Text> : null}
 
       {question.type === 'text' || question.type === 'email' ? (
@@ -256,7 +261,7 @@ function QuestionInput({
       {question.type === 'number' ? (
         <TextInput
           keyboardType="number-pad"
-          placeholder={question.placeholder ?? 'Digite um numero'}
+          placeholder={question.placeholder ?? 'Digite um número'}
           placeholderTextColor="#8692A3"
           style={styles.input}
           value={typeof value === 'number' ? String(value) : typeof value === 'string' ? value : ''}
@@ -281,7 +286,7 @@ function QuestionInput({
           </View>
           <TextInput
             keyboardType="phone-pad"
-            placeholder="Numero com DDD"
+            placeholder="Número com DDD"
             placeholderTextColor="#8692A3"
             style={styles.input}
             value={getLocalPhoneDigits(value)}
@@ -420,6 +425,7 @@ export function HomeScreen() {
   const { session, isReady, errorMessage } = useAuthSession();
   const [resultStep, setResultStep] = useState<'block1' | 'block2' | 'paywall'>('block1');
   const [isSigningOut, setIsSigningOut] = useState(false);
+  const scrollRef = useRef<ScrollView>(null);
   const diagnostic = useDiagnosticForm({
     enabled: Boolean(session?.user?.email),
     prefillEmail: session?.user?.email,
@@ -441,7 +447,7 @@ export function HomeScreen() {
       <ScreenContainer backgroundColor={palette.background} contentStyle={styles.container} padded={false}>
         <View style={styles.primaryCard}>
           <Text style={styles.sectionTitle}>Configurar auth</Text>
-          <Text style={styles.errorText}>Defina `EXPO_PUBLIC_SUPABASE_URL` e `EXPO_PUBLIC_SUPABASE_ANON_KEY` para liberar a autenticacao.</Text>
+          <Text style={styles.errorText}>Defina `EXPO_PUBLIC_SUPABASE_URL` e `EXPO_PUBLIC_SUPABASE_ANON_KEY` para liberar a autenticação.</Text>
         </View>
       </ScreenContainer>
     );
@@ -449,7 +455,7 @@ export function HomeScreen() {
 
   return (
     <ScreenContainer backgroundColor={palette.background} contentStyle={styles.container} padded={false}>
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView ref={scrollRef} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <AppTopBar />
         {!isReady ? (
           <View style={styles.loaderBlock}>
@@ -483,6 +489,9 @@ export function HomeScreen() {
                 {diagnostic.submitResult.diagnostic.scriptureText || diagnostic.submitResult.diagnostic.scriptureVerse ? (
                   <View style={styles.scriptureCard}>
                     <Text style={styles.scriptureEyebrow}>Palavra Para Este Momento</Text>
+                    {diagnostic.submitResult.diagnostic.palavraIntro ? (
+                      <Text style={styles.scriptureIntro}>{diagnostic.submitResult.diagnostic.palavraIntro}</Text>
+                    ) : null}
                     {diagnostic.submitResult.diagnostic.scriptureText ? (
                       <Text style={styles.scriptureText}>{diagnostic.submitResult.diagnostic.scriptureText}</Text>
                     ) : null}
@@ -509,6 +518,7 @@ export function HomeScreen() {
             ) : resultStep === 'block2' ? (
               <>
                 <Text style={styles.resultSectionLabel}>Precipício</Text>
+                <Text style={styles.valueHighlight}>{diagnostic.submitResult.diagnostic.block2Title}</Text>
                 <Text style={styles.bodyText}>{diagnostic.submitResult.diagnostic.block2Body}</Text>
 
                 <Text style={styles.bodyText}>Gerado em {formatDate(diagnostic.submitResult.diagnostic.generatedAt)}.</Text>
@@ -594,6 +604,7 @@ export function HomeScreen() {
                     <QuestionInput
                       key={question.id}
                       question={question}
+                      questionNumber={question.order + 1}
                       value={diagnostic.getQuestionValue(diagnostic.values, question)}
                       error={index === 0 ? diagnostic.errors[question.slug] : undefined}
                       onChange={(value) => diagnostic.setFieldValue(question, value)}
@@ -606,7 +617,13 @@ export function HomeScreen() {
                 {diagnostic.errors._global ? <Text style={styles.formErrorText}>{diagnostic.errors._global}</Text> : null}
 
                 <View style={styles.footerActions}>
-                  <Pressable style={styles.secondaryButton} onPress={diagnostic.previousStep} disabled={diagnostic.currentStepIndex === 0}>
+                  <Pressable
+                    style={styles.secondaryButton}
+                    disabled={diagnostic.currentStepIndex === 0}
+                    onPress={() => {
+                      scrollRef.current?.scrollTo({ y: 0, animated: true });
+                      diagnostic.previousStep();
+                    }}>
                     <Text style={styles.secondaryButtonLabel}>Voltar</Text>
                   </Pressable>
 
@@ -619,7 +636,12 @@ export function HomeScreen() {
                       )}
                     </Pressable>
                   ) : (
-                    <Pressable style={styles.primaryButton} onPress={diagnostic.nextStep}>
+                    <Pressable
+                      style={styles.primaryButton}
+                      onPress={() => {
+                        scrollRef.current?.scrollTo({ y: 0, animated: true });
+                        diagnostic.nextStep();
+                      }}>
                       <Text style={styles.primaryButtonLabel}>Continuar</Text>
                     </Pressable>
                   )}
@@ -686,9 +708,9 @@ const styles = StyleSheet.create({
     minHeight: 38,
     borderRadius: 999,
     paddingHorizontal: 14,
-    backgroundColor: 'rgba(47, 103, 246, 0.08)',
+    backgroundColor: 'rgba(247, 243, 236, 0.08)',
     borderWidth: 1,
-    borderColor: 'rgba(47, 103, 246, 0.12)',
+    borderColor: 'rgba(247, 243, 236, 0.12)',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -771,6 +793,12 @@ const styles = StyleSheet.create({
     letterSpacing: 1.4,
     textTransform: 'uppercase',
   },
+  scriptureIntro: {
+    color: palette.muted,
+    fontSize: 13,
+    lineHeight: 20,
+    fontStyle: 'italic',
+  },
   scriptureText: {
     color: palette.text,
     fontSize: 17,
@@ -847,9 +875,9 @@ const styles = StyleSheet.create({
   },
   input: {
     borderRadius: 16,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: palette.surfaceAlt,
     borderWidth: 1,
-    borderColor: 'rgba(47, 103, 246, 0.28)',
+    borderColor: 'rgba(232, 201, 122, 0.28)',
     paddingHorizontal: 16,
     paddingVertical: 14,
     color: palette.text,
@@ -882,7 +910,7 @@ const styles = StyleSheet.create({
     borderColor: palette.cardBorder,
     minHeight: 54,
     paddingHorizontal: 18,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: palette.surfaceAlt,
   },
   secondaryButtonLabel: {
     color: palette.text,
@@ -1015,6 +1043,10 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     textAlign: 'center',
   },
+  questionNumber: {
+    color: palette.gold,
+    fontWeight: '700',
+  },
   questionHelper: {
     color: palette.muted,
     fontSize: 13,
@@ -1029,13 +1061,13 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     borderWidth: 1,
     borderColor: palette.cardBorder,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: palette.surfaceAlt,
     paddingHorizontal: 18,
     paddingVertical: 16,
     justifyContent: 'center',
   },
   optionPillActive: {
-    backgroundColor: 'rgba(47, 103, 246, 0.08)',
+    backgroundColor: palette.chip,
     borderColor: palette.accent,
   },
   optionLabel: {
@@ -1061,7 +1093,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(15, 27, 45, 0.1)',
+    borderBottomColor: 'rgba(247, 243, 236, 0.1)',
     paddingBottom: 10,
   },
   progressRowActive: {
@@ -1092,7 +1124,7 @@ const styles = StyleSheet.create({
   inlineProgressTrack: {
     height: 4,
     borderRadius: 999,
-    backgroundColor: 'rgba(15, 27, 45, 0.08)',
+    backgroundColor: 'rgba(247, 243, 236, 0.08)',
     overflow: 'hidden',
   },
   inlineProgressFill: {
@@ -1105,7 +1137,7 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     borderWidth: 1,
     borderColor: palette.cardBorder,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: palette.surfaceAlt,
     padding: 16,
     gap: 8,
   },
@@ -1138,8 +1170,8 @@ const styles = StyleSheet.create({
     minHeight: 42,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: 'rgba(47, 103, 246, 0.22)',
-    backgroundColor: '#FFFFFF',
+    borderColor: 'rgba(232, 201, 122, 0.22)',
+    backgroundColor: palette.surfaceAlt,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 12,
@@ -1162,7 +1194,7 @@ const styles = StyleSheet.create({
   chartArea: {
     height: 220,
     borderRadius: 18,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: palette.surfaceAlt,
     borderWidth: 1,
     borderColor: palette.cardBorder,
     paddingHorizontal: 18,
@@ -1177,7 +1209,7 @@ const styles = StyleSheet.create({
     right: 18,
     bottom: 48,
     height: 1,
-    backgroundColor: 'rgba(15, 27, 45, 0.08)',
+    backgroundColor: 'rgba(247, 243, 236, 0.08)',
   },
   chartGridLineMiddle: {
     bottom: 95,
@@ -1226,7 +1258,7 @@ const styles = StyleSheet.create({
     width: 12,
     height: 12,
     borderRadius: 999,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: palette.surfaceAlt,
     borderWidth: 3,
   },
   chartPointStart: {

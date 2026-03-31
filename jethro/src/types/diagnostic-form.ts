@@ -85,10 +85,11 @@ export type SubmissionResult = {
   diagnostic: {
     status: 'pending' | 'ready';
     modelCode: string;
-    variant: 'v1' | 'v2' | 'v3';
+    variant: `v${number}`;
     block1Title: string;
     block1Body: string;
     rootCause?: string;
+    palavraIntro?: string;
     scriptureVerse?: string;
     scriptureText?: string;
     block2Title: string;
