@@ -489,6 +489,7 @@ type DiagnosticMessageRow = {
   root_cause: string;
   scripture_verse: string | null;
   scripture_text: string | null;
+  palavra_intro: string | null;
   block_2_title: string;
   block_2_body: string;
   cta_label: string;
@@ -598,6 +599,7 @@ async function buildDiagnosticSummary(
            dmgs.block_1_title,
            dmgs.block_1_body,
            dmgs.root_cause,
+           dmgs.palavra_intro,
            dmgs.scripture_verse,
            dmgs.scripture_text,
            dmgs.block_2_title,
@@ -606,7 +608,7 @@ async function buildDiagnosticSummary(
          from diagnostic_messages dmgs
          inner join diagnostic_models dm on dm.code = dmgs.model_code
          where dmgs.model_code = $1
-         order by random()
+         order by cast(substring(dmgs.variant from 2) as integer) desc
          limit 1`,
         [classified.code]
       );
@@ -620,6 +622,7 @@ async function buildDiagnosticSummary(
           block1Title: personalizeDiagnosticText(message.model_title, fullName),
           block1Body: personalizeDiagnosticText(message.block_1_body, fullName),
           rootCause: personalizeDiagnosticText(message.root_cause, fullName),
+          palavraIntro: message.palavra_intro ?? undefined,
           scriptureVerse: message.scripture_verse ?? undefined,
           scriptureText: personalizeDiagnosticText(message.scripture_text ?? '', fullName) || undefined,
           block2Title: personalizeDiagnosticText(message.block_2_title, fullName),

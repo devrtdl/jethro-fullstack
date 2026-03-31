@@ -101,6 +101,7 @@ export type DiagnosticSummary = {
   block1Title: string;
   block1Body: string;
   rootCause?: string;
+  palavraIntro?: string;
   scriptureVerse?: string;
   scriptureText?: string;
   block2Title: string;

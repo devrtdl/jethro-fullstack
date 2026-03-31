@@ -9,19 +9,22 @@ import { authService } from '@/src/services/auth/auth-service';
 type AuthScreenMode = 'login' | 'register';
 
 const palette = {
-  background: '#060D17',
-  surface: '#0D1725',
-  surfaceAlt: '#121E2E',
-  tileA: '#1B2434',
-  tileB: '#232E42',
-  tileC: '#2B1F16',
-  border: 'rgba(215, 184, 110, 0.18)',
-  gold: '#D7B86E',
-  goldSoft: '#E8D39A',
+  background: '#F8F5EF',
+  surface: '#0F1B2D',
+  surfaceAlt: '#FFFFFF',
+  tileA: '#EAF0F8',
+  tileB: '#F7EBD0',
+  tileC: '#EEF3EA',
+  border: 'rgba(15, 27, 45, 0.08)',
+  gold: '#C9A84C',
+  goldSoft: '#E9D18A',
   cream: '#F6F1E8',
-  muted: '#A5B1BF',
-  success: '#8DBA88',
-  danger: '#E07C6C',
+  muted: '#6C788A',
+  success: '#3A9F63',
+  danger: '#D96B5F',
+  text: '#172335',
+  blue: '#2F67F6',
+  blueSoft: '#DDE7FF',
 };
 
 const mosaicTiles = [
@@ -136,36 +139,33 @@ export function AuthScreen({ mode }: { mode: AuthScreenMode }) {
         contentContainerStyle={styles.content}
         scrollEnabled={false}
         showsVerticalScrollIndicator={false}>
+        <View style={styles.topBar}>
+          <Pressable style={styles.iconButton}>
+            <Text style={styles.iconButtonLabel}>←</Text>
+          </Pressable>
+          <Text style={styles.wordmark}>JETHRO</Text>
+          <Pressable style={styles.iconButton}>
+            <Text style={styles.iconButtonLabel}>≡</Text>
+          </Pressable>
+        </View>
+
         <View style={styles.heroFrame}>
-          <View style={styles.glowTop} />
-          <View style={styles.glowBottom} />
-
           <View style={styles.mosaic}>
-            <View style={styles.mosaicColumn}>
-              <MosaicTile {...mosaicTiles[0]} />
+            <MosaicTile {...mosaicTiles[0]} />
+            <View style={styles.logoMedallion}>
+              <Image source={require('@/assets/images/splash-icon.png')} style={styles.logo} contentFit="contain" />
             </View>
-            <View style={[styles.mosaicColumn, styles.centerColumn]}>
-              <View style={styles.logoMedallion}>
-                <Image source={require('@/assets/images/splash-icon.png')} style={styles.logo} contentFit="contain" />
-              </View>
-              <View style={styles.brandChip}>
-                <Text style={styles.brandChipLabel}>Jethro</Text>
-              </View>
-            </View>
-            <View style={styles.mosaicColumn}>
-              <MosaicTile {...mosaicTiles[1]} />
-            </View>
+            <MosaicTile {...mosaicTiles[1]} />
           </View>
-
           <View style={styles.heroCopy}>
-            <Text style={styles.eyebrow}>{isRegister ? 'Primeiro acesso' : 'Acesso'}</Text>
             <Text style={styles.title}>
-              {isRegister ? 'Seu negócio merece direção.' : 'Volte para o seu próximo passo.'}
+              {isRegister ? 'Entre com seu e-mail para receber seu ' : 'Entre para retomar seu '}
+              <Text style={styles.titleAccent}>{isRegister ? 'plano de ação Jethro' : 'próximo passo Jethro'}</Text>
             </Text>
             <Text style={styles.subtitle}>
               {isRegister
-                ? 'Diagnóstico, verdade e plano no mesmo fluxo.'
-                : 'Entre com e-mail ou Google e retome sua jornada.'}
+                ? 'Diagnóstico, clareza e plano no mesmo fluxo.'
+                : 'Acesse com e-mail ou Google e continue de onde parou.'}
             </Text>
           </View>
         </View>
@@ -188,8 +188,8 @@ export function AuthScreen({ mode }: { mode: AuthScreenMode }) {
               autoCapitalize="none"
               autoComplete="email"
               keyboardType="email-address"
-              placeholder="voce@empresa.com"
-              placeholderTextColor="#8692A3"
+              placeholder="Seu e-mail"
+              placeholderTextColor="#8A94A5"
               style={styles.inlineInput}
               value={email}
               onChangeText={setEmail}
@@ -200,25 +200,32 @@ export function AuthScreen({ mode }: { mode: AuthScreenMode }) {
               autoComplete={isRegister ? 'new-password' : 'current-password'}
               secureTextEntry
               placeholder="Sua senha"
-              placeholderTextColor="#8692A3"
+              placeholderTextColor="#8A94A5"
               style={styles.inlineInput}
               value={password}
               onChangeText={setPassword}
             />
           </View>
 
+          <View style={styles.privacyCard}>
+            <Text style={styles.privacyIcon}>⌘</Text>
+            <Text style={styles.privacyText}>
+              Seus dados são tratados com segurança e usados apenas para liberar sua jornada no app.
+            </Text>
+          </View>
+
           <Pressable style={styles.primaryButton} onPress={() => void handlePasswordAction()} disabled={isSubmitting}>
             {isSubmitting ? (
-              <ActivityIndicator color={palette.surface} />
+              <ActivityIndicator color={palette.cream} />
             ) : (
               <Text style={styles.primaryButtonLabel}>
-                {isRegister ? 'Começar agora' : 'Continuar com e-mail'}
+                {isRegister ? 'Continuar' : 'Entrar'}
               </Text>
             )}
           </Pressable>
 
           <SocialButton
-            label={isRegister ? 'Cadastrar com Google' : 'Continuar com Google'}
+            label={isRegister ? 'Continuar com Google' : 'Entrar com Google'}
             icon="G"
             onPress={() => void handleSocialAuth('google')}
             disabled={isSubmitting}
@@ -249,68 +256,62 @@ const styles = StyleSheet.create({
   content: {
     flexGrow: 1,
     justifyContent: 'space-between',
-    paddingHorizontal: 18,
+    paddingHorizontal: 22,
     paddingTop: 8,
-    paddingBottom: 18,
-    gap: 12,
+    paddingBottom: 22,
+    gap: 14,
+  },
+  topBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    minHeight: 48,
+  },
+  iconButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 999,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  iconButtonLabel: {
+    color: palette.text,
+    fontSize: 24,
+    lineHeight: 24,
+  },
+  wordmark: {
+    color: palette.text,
+    fontSize: 18,
+    fontWeight: '800',
+    letterSpacing: 1.5,
   },
   heroFrame: {
-    borderRadius: 34,
-    backgroundColor: '#0A111B',
-    overflow: 'hidden',
-    minHeight: 262,
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 20,
-  },
-  glowTop: {
-    position: 'absolute',
-    top: 110,
-    left: -20,
-    right: -20,
-    height: 120,
-    backgroundColor: 'rgba(201, 168, 76, 0.08)',
-  },
-  glowBottom: {
-    position: 'absolute',
-    bottom: -10,
-    left: 60,
-    right: 60,
-    height: 90,
-    borderRadius: 999,
-    backgroundColor: 'rgba(215, 184, 110, 0.08)',
+    paddingTop: 8,
+    gap: 18,
   },
   mosaic: {
     flexDirection: 'row',
     gap: 12,
-    alignItems: 'flex-start',
-  },
-  mosaicColumn: {
-    flex: 1,
-    gap: 10,
-  },
-  centerColumn: {
     alignItems: 'center',
+    justifyContent: 'center',
   },
   tile: {
-    minHeight: 118,
-    borderRadius: 18,
+    flex: 1,
+    minHeight: 108,
+    borderRadius: 20,
     borderWidth: 1,
-    borderColor: 'rgba(215, 184, 110, 0.08)',
-    overflow: 'hidden',
-    padding: 14,
+    borderColor: palette.border,
+    padding: 16,
     justifyContent: 'flex-end',
   },
   tileShade: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 0, 0, 0.26)',
+    display: 'none',
   },
   tileTitle: {
-    color: palette.cream,
-    fontSize: 18,
+    color: palette.text,
+    fontSize: 17,
     lineHeight: 22,
     fontWeight: '700',
-    zIndex: 1,
   },
   tileSubtitle: {
     color: palette.gold,
@@ -318,56 +319,40 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     letterSpacing: 1.3,
     textTransform: 'uppercase',
-    zIndex: 1,
   },
   logoMedallion: {
     alignItems: 'center',
     justifyContent: 'center',
-    width: 108,
-    height: 108,
+    width: 94,
+    height: 94,
     borderRadius: 999,
-    backgroundColor: 'rgba(247, 241, 232, 0.05)',
+    backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: 'rgba(247, 241, 232, 0.08)',
+    borderColor: palette.border,
+    shadowColor: '#0E1B2D',
+    shadowOpacity: 0.08,
+    shadowRadius: 20,
+    shadowOffset: { width: 0, height: 10 },
   },
   logo: {
-    width: 50,
-    height: 50,
-  },
-  brandChip: {
-    borderRadius: 999,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    backgroundColor: 'rgba(247, 241, 232, 0.06)',
-    borderWidth: 1,
-    borderColor: 'rgba(247, 241, 232, 0.08)',
-  },
-  brandChipLabel: {
-    color: palette.goldSoft,
-    fontSize: 12,
-    fontWeight: '800',
-    letterSpacing: 1.6,
-    textTransform: 'uppercase',
+    width: 42,
+    height: 42,
   },
   heroCopy: {
     alignItems: 'center',
-    gap: 6,
-    marginTop: 18,
+    gap: 8,
     paddingHorizontal: 8,
   },
-  eyebrow: {
-    color: palette.gold,
-    fontSize: 12,
-    fontWeight: '800',
-    letterSpacing: 1.8,
-    textTransform: 'uppercase',
-  },
   title: {
-    color: palette.cream,
+    color: palette.text,
     fontSize: 28,
-    lineHeight: 32,
+    lineHeight: 36,
     fontWeight: '600',
     textAlign: 'center',
+  },
+  titleAccent: {
+    color: palette.gold,
+    fontWeight: '700',
   },
   subtitle: {
     color: palette.muted,
@@ -384,34 +369,57 @@ const styles = StyleSheet.create({
   },
   inlineInput: {
     minHeight: 54,
-    borderRadius: 999,
-    backgroundColor: '#0F1723',
+    borderRadius: 16,
+    backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: 'rgba(247, 241, 232, 0.14)',
-    paddingHorizontal: 20,
+    borderColor: 'rgba(47, 103, 246, 0.34)',
+    paddingHorizontal: 18,
     paddingVertical: 12,
-    color: palette.cream,
+    color: palette.text,
     fontSize: 15,
+  },
+  privacyCard: {
+    minHeight: 76,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: palette.border,
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 14,
+    paddingVertical: 14,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 12,
+  },
+  privacyIcon: {
+    color: palette.muted,
+    fontSize: 18,
+    lineHeight: 20,
+  },
+  privacyText: {
+    flex: 1,
+    color: palette.muted,
+    fontSize: 13,
+    lineHeight: 18,
   },
   primaryButton: {
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 999,
-    backgroundColor: palette.gold,
+    borderRadius: 16,
+    backgroundColor: palette.surface,
     minHeight: 54,
     paddingHorizontal: 18,
   },
   primaryButtonLabel: {
-    color: palette.surface,
+    color: palette.cream,
     fontSize: 17,
     fontWeight: '800',
   },
   socialButton: {
     minHeight: 54,
-    borderRadius: 999,
+    borderRadius: 16,
     borderWidth: 1,
-    borderColor: 'rgba(247, 241, 232, 0.14)',
-    backgroundColor: '#0F1723',
+    borderColor: palette.border,
+    backgroundColor: '#FFFFFF',
     paddingHorizontal: 18,
     flexDirection: 'row',
     alignItems: 'center',
@@ -422,17 +430,17 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 999,
-    backgroundColor: 'rgba(247, 241, 232, 0.08)',
+    backgroundColor: palette.blueSoft,
     alignItems: 'center',
     justifyContent: 'center',
   },
   socialIconLabel: {
-    color: palette.gold,
+    color: palette.blue,
     fontSize: 14,
     fontWeight: '800',
   },
   socialButtonLabel: {
-    color: palette.cream,
+    color: palette.text,
     fontSize: 15,
     fontWeight: '700',
   },
@@ -458,7 +466,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   footerLink: {
-    color: palette.gold,
+    color: palette.blue,
     fontSize: 14,
     fontWeight: '700',
   },

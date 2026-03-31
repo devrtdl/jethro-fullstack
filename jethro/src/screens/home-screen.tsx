@@ -18,18 +18,20 @@ import { authService } from '@/src/services/auth/auth-service';
 import type { FormQuestion, JsonValue, QuestionOption } from '@/src/types/diagnostic-form';
 
 const palette = {
-  background: '#070D18',
-  surface: '#0D1B2A',
-  surfaceAlt: '#162538',
-  cardBorder: 'rgba(232, 201, 122, 0.18)',
+  background: '#F8F5EF',
+  surface: '#0F1B2D',
+  surfaceAlt: '#FFFFFF',
+  cardBorder: 'rgba(15, 27, 45, 0.08)',
   gold: '#C9A84C',
   goldSoft: '#E8C97A',
   cream: '#F7F3EC',
-  muted: '#98A4B5',
-  accent: '#D4954A',
-  success: '#8DBA88',
-  danger: '#E07C6C',
-  chip: 'rgba(247, 243, 236, 0.1)',
+  text: '#182334',
+  muted: '#6D798A',
+  accent: '#2F67F6',
+  accentSoft: '#DCE7FF',
+  success: '#2EAF6E',
+  danger: '#D96B5F',
+  chip: 'rgba(47, 103, 246, 0.08)',
 };
 
 const phoneCountries = [
@@ -320,6 +322,100 @@ function QuestionInput({
   );
 }
 
+function AppTopBar() {
+  return (
+    <View style={styles.topBar}>
+      <Pressable style={styles.iconButton}>
+        <Text style={styles.iconButtonLabel}>←</Text>
+      </Pressable>
+      <Text style={styles.topBarTitle}>JETHRO</Text>
+      <Pressable style={styles.iconButton}>
+        <Text style={styles.iconButtonLabel}>≡</Text>
+      </Pressable>
+    </View>
+  );
+}
+
+function ProgressList() {
+  return (
+    <View style={styles.progressList}>
+      <View style={styles.progressRowStatic}>
+        <Text style={styles.progressItemLabel}>Diagnóstico concluído</Text>
+        <Text style={styles.progressItemCheck}>✓</Text>
+      </View>
+      <View style={styles.progressRowStatic}>
+        <Text style={styles.progressItemLabel}>Áreas de crescimento mapeadas</Text>
+        <Text style={styles.progressItemCheck}>✓</Text>
+      </View>
+      <View style={styles.progressRowActive}>
+        <View style={styles.progressRowCopy}>
+          <Text style={styles.progressItemLabel}>Preparando seu plano Jethro</Text>
+          <Text style={styles.progressItemPercent}>82%</Text>
+        </View>
+        <View style={styles.inlineProgressTrack}>
+          <View style={styles.inlineProgressFill} />
+        </View>
+      </View>
+    </View>
+  );
+}
+
+function TestimonialCard() {
+  return (
+    <View style={styles.testimonialCard}>
+      <Text style={styles.testimonialRating}>★★★★★</Text>
+      <Text style={styles.testimonialTitle}>Clareza com direção prática</Text>
+      <Text style={styles.testimonialBody}>
+        “O Jethro transformou um diagnóstico confuso em uma rota clara de ação. Eu saí com convicção do
+        que precisava fazer primeiro.”
+      </Text>
+      <Text style={styles.testimonialAuthor}>Cliente piloto</Text>
+    </View>
+  );
+}
+
+function GrowthChartCard() {
+  return (
+    <View style={styles.chartCard}>
+      <View style={styles.chartHeaderBadge}>
+        <Text style={styles.chartHeaderBadgeLabel}>Seu avanço nas próximas semanas</Text>
+      </View>
+      <Text style={styles.chartTitle}>
+        Veja seu negócio sair do <Text style={styles.chartTitleAccent}>caos para a direção</Text>
+      </Text>
+
+      <View style={styles.chartArea}>
+        <View style={styles.chartGridLine} />
+        <View style={[styles.chartGridLine, styles.chartGridLineMiddle]} />
+        <View style={[styles.chartGridLine, styles.chartGridLineTop]} />
+
+        <View style={styles.chartCurveSegmentOne} />
+        <View style={styles.chartCurveSegmentTwo} />
+        <View style={styles.chartCurveSegmentThree} />
+
+        <View style={[styles.chartPoint, styles.chartPointStart]} />
+        <View style={[styles.chartPoint, styles.chartPointEnd]} />
+
+        <View style={styles.chartLabelStart}>
+          <Text style={styles.chartLabelText}>Agora</Text>
+        </View>
+        <View style={styles.chartLabelEnd}>
+          <Text style={styles.chartLabelText}>Mais clareza</Text>
+        </View>
+
+        <View style={styles.chartWeekRow}>
+          <Text style={styles.chartWeekLabel}>Semana 1</Text>
+          <Text style={styles.chartWeekLabel}>Semana 2</Text>
+          <Text style={styles.chartWeekLabel}>Semana 3</Text>
+          <Text style={styles.chartWeekLabel}>Semana 4</Text>
+        </View>
+      </View>
+
+      <Text style={styles.chartFootnote}>Ilustração conceitual do progresso esperado com o plano.</Text>
+    </View>
+  );
+}
+
 export function HomeScreen() {
   const { session, isReady, errorMessage } = useAuthSession();
   const [resultStep, setResultStep] = useState<'block1' | 'block2' | 'paywall'>('block1');
@@ -354,6 +450,7 @@ export function HomeScreen() {
   return (
     <ScreenContainer backgroundColor={palette.background} contentStyle={styles.container} padded={false}>
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <AppTopBar />
         {!isReady ? (
           <View style={styles.loaderBlock}>
             <ActivityIndicator color={palette.goldSoft} />
@@ -433,17 +530,9 @@ export function HomeScreen() {
               </>
             ) : (
               <View style={styles.paywallCard}>
-                <Text style={styles.sectionTitle}>Oferta de entrada</Text>
-                <Text style={styles.valueHighlight}>Plano Pro Jethro</Text>
-                <Text style={styles.bodyText}>
-                  Simulação navegável para a apresentação. Aqui entram a oferta, o comparativo entre planos, garantias e o CTA de assinatura real.
-                </Text>
-                <View style={styles.stack}>
-                  <Text style={styles.bodyText}>• Diagnóstico completo associado à conta</Text>
-                  <Text style={styles.bodyText}>• Plano semanal guiado</Text>
-                  <Text style={styles.bodyText}>• Check-ins e gates</Text>
-                  <Text style={styles.bodyText}>• Devocionais e biblioteca de ações</Text>
-                </View>
+                <ProgressList />
+                <TestimonialCard />
+                <GrowthChartCard />
                 <Pressable
                   style={[styles.primaryButton, styles.primaryButtonDisabled]}
                   onPress={() =>
@@ -554,15 +643,38 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 22,
-    paddingTop: 22,
+    paddingTop: 10,
     paddingBottom: 40,
     gap: 18,
   },
+  topBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    minHeight: 44,
+  },
+  iconButton: {
+    width: 36,
+    height: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  iconButtonLabel: {
+    color: palette.text,
+    fontSize: 24,
+    lineHeight: 24,
+  },
+  topBarTitle: {
+    color: palette.text,
+    fontSize: 18,
+    fontWeight: '800',
+    letterSpacing: 1.4,
+  },
   formStage: {
-    borderRadius: 34,
-    backgroundColor: '#151C2A',
+    borderRadius: 28,
+    backgroundColor: palette.surfaceAlt,
     borderWidth: 1,
-    borderColor: 'rgba(232, 201, 122, 0.12)',
+    borderColor: palette.cardBorder,
     paddingHorizontal: 18,
     paddingTop: 18,
     paddingBottom: 22,
@@ -574,14 +686,14 @@ const styles = StyleSheet.create({
     minHeight: 38,
     borderRadius: 999,
     paddingHorizontal: 14,
-    backgroundColor: 'rgba(247, 243, 236, 0.08)',
+    backgroundColor: 'rgba(47, 103, 246, 0.08)',
     borderWidth: 1,
-    borderColor: 'rgba(247, 243, 236, 0.08)',
+    borderColor: 'rgba(47, 103, 246, 0.12)',
     alignItems: 'center',
     justifyContent: 'center',
   },
   inlineLogoutLabel: {
-    color: palette.cream,
+    color: palette.text,
     fontSize: 13,
     fontWeight: '700',
   },
@@ -624,17 +736,17 @@ const styles = StyleSheet.create({
   paywallCard: {
     marginTop: 8,
     borderRadius: 24,
-    backgroundColor: palette.surface,
+    backgroundColor: palette.surfaceAlt,
     borderWidth: 1,
-    borderColor: 'rgba(201, 168, 76, 0.3)',
+    borderColor: palette.cardBorder,
     padding: 18,
-    gap: 12,
+    gap: 18,
   },
   scriptureCard: {
     borderRadius: 22,
-    backgroundColor: 'rgba(215, 184, 110, 0.16)',
+    backgroundColor: 'rgba(201, 168, 76, 0.13)',
     borderWidth: 1,
-    borderColor: 'rgba(215, 184, 110, 0.35)',
+    borderColor: 'rgba(201, 168, 76, 0.25)',
     padding: 18,
     gap: 8,
   },
@@ -660,7 +772,7 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
   scriptureText: {
-    color: palette.cream,
+    color: palette.text,
     fontSize: 17,
     lineHeight: 26,
     fontWeight: '600',
@@ -728,19 +840,19 @@ const styles = StyleSheet.create({
     lineHeight: 24,
   },
   valueHighlight: {
-    color: palette.cream,
-    fontSize: 28,
-    lineHeight: 34,
-    fontWeight: '500',
+    color: palette.text,
+    fontSize: 26,
+    lineHeight: 32,
+    fontWeight: '600',
   },
   input: {
-    borderRadius: 18,
-    backgroundColor: palette.surface,
+    borderRadius: 16,
+    backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: 'rgba(232, 201, 122, 0.14)',
+    borderColor: 'rgba(47, 103, 246, 0.28)',
     paddingHorizontal: 16,
     paddingVertical: 14,
-    color: palette.cream,
+    color: palette.text,
     fontSize: 15,
   },
   textarea: {
@@ -749,8 +861,8 @@ const styles = StyleSheet.create({
   primaryButton: {
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 18,
-    backgroundColor: palette.goldSoft,
+    borderRadius: 16,
+    backgroundColor: palette.accent,
     minHeight: 54,
     paddingHorizontal: 18,
   },
@@ -758,21 +870,22 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   primaryButtonLabel: {
-    color: palette.surface,
+    color: '#FFFFFF',
     fontSize: 15,
     fontWeight: '800',
   },
   secondaryButton: {
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 18,
+    borderRadius: 16,
     borderWidth: 1,
-    borderColor: 'rgba(232, 201, 122, 0.18)',
+    borderColor: palette.cardBorder,
     minHeight: 54,
     paddingHorizontal: 18,
+    backgroundColor: '#FFFFFF',
   },
   secondaryButtonLabel: {
-    color: palette.cream,
+    color: palette.text,
     fontSize: 15,
     fontWeight: '700',
   },
@@ -823,7 +936,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   progressCounter: {
-    color: palette.cream,
+    color: palette.text,
     fontSize: 14,
     fontWeight: '700',
     opacity: 0.9,
@@ -865,10 +978,10 @@ const styles = StyleSheet.create({
     backgroundColor: palette.goldSoft,
   },
   formTitle: {
-    color: palette.cream,
+    color: palette.text,
     fontSize: 34,
     lineHeight: 42,
-    fontWeight: '500',
+    fontWeight: '600',
     textAlign: 'center',
     marginTop: 8,
   },
@@ -896,7 +1009,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   questionLabel: {
-    color: palette.cream,
+    color: palette.text,
     fontSize: 16,
     lineHeight: 22,
     fontWeight: '600',
@@ -913,35 +1026,257 @@ const styles = StyleSheet.create({
   },
   optionPill: {
     minHeight: 58,
-    borderRadius: 22,
+    borderRadius: 18,
     borderWidth: 1,
-    borderColor: 'rgba(247, 243, 236, 0.12)',
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    borderColor: palette.cardBorder,
+    backgroundColor: '#FFFFFF',
     paddingHorizontal: 18,
     paddingVertical: 16,
     justifyContent: 'center',
   },
   optionPillActive: {
-    backgroundColor: 'rgba(201, 168, 76, 0.18)',
-    borderColor: 'rgba(201, 168, 76, 0.75)',
-    shadowColor: palette.goldSoft,
-    shadowOpacity: 0.2,
-    shadowRadius: 18,
-    shadowOffset: { width: 0, height: 8 },
+    backgroundColor: 'rgba(47, 103, 246, 0.08)',
+    borderColor: palette.accent,
   },
   optionLabel: {
-    color: palette.cream,
+    color: palette.text,
     fontSize: 16,
     lineHeight: 22,
     fontWeight: '500',
   },
   optionLabelActive: {
-    color: palette.cream,
+    color: palette.text,
     fontWeight: '800',
   },
   footerActions: {
     flexDirection: 'column',
     gap: 12,
     marginTop: 10,
+  },
+  progressList: {
+    gap: 12,
+  },
+  progressRowStatic: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(15, 27, 45, 0.1)',
+    paddingBottom: 10,
+  },
+  progressRowActive: {
+    gap: 8,
+    paddingBottom: 4,
+  },
+  progressRowCopy: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: 12,
+  },
+  progressItemLabel: {
+    color: palette.text,
+    fontSize: 15,
+    fontWeight: '500',
+  },
+  progressItemCheck: {
+    color: palette.success,
+    fontSize: 18,
+    fontWeight: '800',
+  },
+  progressItemPercent: {
+    color: palette.text,
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  inlineProgressTrack: {
+    height: 4,
+    borderRadius: 999,
+    backgroundColor: 'rgba(15, 27, 45, 0.08)',
+    overflow: 'hidden',
+  },
+  inlineProgressFill: {
+    width: '82%',
+    height: '100%',
+    borderRadius: 999,
+    backgroundColor: palette.accent,
+  },
+  testimonialCard: {
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: palette.cardBorder,
+    backgroundColor: '#FFFFFF',
+    padding: 16,
+    gap: 8,
+  },
+  testimonialRating: {
+    color: palette.success,
+    fontSize: 16,
+    letterSpacing: 1.2,
+  },
+  testimonialTitle: {
+    color: palette.text,
+    fontSize: 20,
+    lineHeight: 26,
+    fontWeight: '600',
+  },
+  testimonialBody: {
+    color: palette.muted,
+    fontSize: 15,
+    lineHeight: 22,
+  },
+  testimonialAuthor: {
+    color: palette.text,
+    fontSize: 14,
+    lineHeight: 20,
+    textAlign: 'right',
+  },
+  chartCard: {
+    gap: 14,
+  },
+  chartHeaderBadge: {
+    minHeight: 42,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(47, 103, 246, 0.22)',
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 12,
+  },
+  chartHeaderBadgeLabel: {
+    color: palette.text,
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  chartTitle: {
+    color: palette.text,
+    fontSize: 18,
+    lineHeight: 26,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  chartTitleAccent: {
+    color: palette.gold,
+  },
+  chartArea: {
+    height: 220,
+    borderRadius: 18,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: palette.cardBorder,
+    paddingHorizontal: 18,
+    paddingTop: 22,
+    paddingBottom: 28,
+    justifyContent: 'flex-end',
+    overflow: 'hidden',
+  },
+  chartGridLine: {
+    position: 'absolute',
+    left: 18,
+    right: 18,
+    bottom: 48,
+    height: 1,
+    backgroundColor: 'rgba(15, 27, 45, 0.08)',
+  },
+  chartGridLineMiddle: {
+    bottom: 95,
+  },
+  chartGridLineTop: {
+    bottom: 142,
+  },
+  chartCurveSegmentOne: {
+    position: 'absolute',
+    left: 28,
+    bottom: 55,
+    width: 88,
+    height: 52,
+    borderTopLeftRadius: 44,
+    borderTopRightRadius: 44,
+    borderTopWidth: 4,
+    borderColor: '#F08A00',
+    transform: [{ rotate: '-10deg' }],
+  },
+  chartCurveSegmentTwo: {
+    position: 'absolute',
+    left: 102,
+    bottom: 86,
+    width: 92,
+    height: 44,
+    borderTopLeftRadius: 40,
+    borderTopRightRadius: 40,
+    borderTopWidth: 4,
+    borderColor: '#E6BE54',
+    transform: [{ rotate: '5deg' }],
+  },
+  chartCurveSegmentThree: {
+    position: 'absolute',
+    left: 176,
+    bottom: 104,
+    width: 104,
+    height: 72,
+    borderTopLeftRadius: 48,
+    borderTopRightRadius: 48,
+    borderTopWidth: 4,
+    borderColor: '#36C56F',
+    transform: [{ rotate: '6deg' }],
+  },
+  chartPoint: {
+    position: 'absolute',
+    width: 12,
+    height: 12,
+    borderRadius: 999,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 3,
+  },
+  chartPointStart: {
+    left: 20,
+    bottom: 48,
+    borderColor: '#F08A00',
+  },
+  chartPointEnd: {
+    right: 18,
+    bottom: 160,
+    borderColor: '#36C56F',
+  },
+  chartLabelStart: {
+    position: 'absolute',
+    left: 10,
+    bottom: 72,
+    borderRadius: 12,
+    backgroundColor: palette.surface,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+  },
+  chartLabelEnd: {
+    position: 'absolute',
+    right: 8,
+    bottom: 182,
+    borderRadius: 12,
+    backgroundColor: palette.surface,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+  },
+  chartLabelText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  chartWeekRow: {
+    position: 'absolute',
+    left: 18,
+    right: 18,
+    bottom: 10,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  chartWeekLabel: {
+    color: palette.muted,
+    fontSize: 11,
+  },
+  chartFootnote: {
+    color: palette.muted,
+    fontSize: 12,
+    textAlign: 'center',
   },
 });
