@@ -1,6 +1,13 @@
--- Rename q18_status_empresa to q18_formalizacao to match the actual question slug
-alter table diagnostico_respostas
-  rename column q18_status_empresa to q18_formalizacao;
+-- Rename q18_status_empresa to q18_formalizacao to match the actual question slug (idempotent)
+do $$
+begin
+  if exists (
+    select 1 from information_schema.columns
+    where table_name = 'diagnostico_respostas' and column_name = 'q18_status_empresa'
+  ) then
+    alter table diagnostico_respostas rename column q18_status_empresa to q18_formalizacao;
+  end if;
+end $$;
 
 -- Seed the canonical diagnostic form
 -- Uses ON CONFLICT so re-running is safe
