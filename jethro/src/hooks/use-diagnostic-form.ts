@@ -43,6 +43,28 @@ function getQuestionValue(values: Record<string, JsonValue>, question: FormQuest
   return values[question.slug] ?? (question.type === 'phone' ? initialPhoneValue() : '');
 }
 
+function isGibberish(text: string): boolean {
+  const trimmed = text.trim();
+  if (trimmed.length < 3) return false;
+
+  const lower = trimmed.toLowerCase();
+
+  // 3+ same char in a row: kkk, aaa, hhh
+  if (/(.)\1{2,}/.test(lower)) return true;
+
+  // Repeated 2-char pattern 3+ times: hahaha, lololo
+  if (/(..)\1{2,}/.test(lower)) return true;
+
+  // Too few vowels (< 20%) among letters — catches jadhfdsakfl, asdfghjkl
+  const letters = lower.replace(/[^a-záéíóúàâêôãõüç]/g, '');
+  if (letters.length >= 5) {
+    const vowels = (letters.match(/[aeiouáéíóúàâêôãõü]/g) ?? []).length;
+    if (vowels / letters.length < 0.20) return true;
+  }
+
+  return false;
+}
+
 function validateField(question: FormQuestion, value: JsonValue): string | undefined {
   if (question.required) {
     const empty =
@@ -64,6 +86,15 @@ function validateField(question: FormQuestion, value: JsonValue): string | undef
         !value.numero.trim());
 
     if (empty) {
+      if (question.type === 'single_select' || question.type === 'money_range') {
+        return 'Selecione uma opção para continuar.';
+      }
+      if (question.type === 'phone') {
+        return 'Informe seu número de WhatsApp.';
+      }
+      if (question.type === 'email') {
+        return 'Informe seu endereço de email.';
+      }
       return 'Preencha este campo para continuar.';
     }
   }
@@ -140,6 +171,10 @@ function validateField(question: FormQuestion, value: JsonValue): string | undef
 
     if (question.validation.maxLength !== undefined && value.trim().length > question.validation.maxLength) {
       return `Máximo de ${question.validation.maxLength} caracteres.`;
+    }
+
+    if (isGibberish(value.trim())) {
+      return 'Por favor, responda com palavras reais.';
     }
   }
 
@@ -264,12 +299,13 @@ export function useDiagnosticForm({ enabled, prefillEmail, prefillName }: UseDia
     return Object.keys(nextErrors).length === 0;
   }
 
-  function nextStep() {
+  function nextStep(): boolean {
     if (!validateCurrentStep()) {
-      return;
+      return false;
     }
 
     setCurrentStepIndex((current) => Math.min(current + 1, steps.length - 1));
+    return true;
   }
 
   function previousStep() {

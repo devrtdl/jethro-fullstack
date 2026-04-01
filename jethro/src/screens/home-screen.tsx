@@ -1,7 +1,8 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  InteractionManager,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -236,10 +237,10 @@ function QuestionInput({
         <TextInput
           autoCapitalize={question.type === 'email' ? 'none' : 'words'}
           autoComplete={question.type === 'email' ? 'email' : 'name'}
+          style={[styles.input, error ? styles.inputError : null]}
           keyboardType={question.type === 'email' ? 'email-address' : 'default'}
           placeholder={question.placeholder ?? 'Digite sua resposta'}
           placeholderTextColor="#8692A3"
-          style={styles.input}
           value={typeof value === 'string' ? value : ''}
           onChangeText={onChange}
         />
@@ -251,7 +252,7 @@ function QuestionInput({
           numberOfLines={5}
           placeholder={question.placeholder ?? 'Escreva com detalhes'}
           placeholderTextColor="#8692A3"
-          style={[styles.input, styles.textarea]}
+          style={[styles.input, styles.textarea, error ? styles.inputError : null]}
           textAlignVertical="top"
           value={typeof value === 'string' ? value : ''}
           onChangeText={onChange}
@@ -263,7 +264,7 @@ function QuestionInput({
           keyboardType="number-pad"
           placeholder={question.placeholder ?? 'Digite um número'}
           placeholderTextColor="#8692A3"
-          style={styles.input}
+          style={[styles.input, error ? styles.inputError : null]}
           value={typeof value === 'number' ? String(value) : typeof value === 'string' ? value : ''}
           onChangeText={(text) => onChange(text.replace(/[^\d]/g, ''))}
         />
@@ -431,6 +432,13 @@ export function HomeScreen() {
     prefillEmail: session?.user?.email,
     prefillName: session?.user?.user_metadata?.full_name,
   });
+
+  useEffect(() => {
+    const task = InteractionManager.runAfterInteractions(() => {
+      scrollRef.current?.scrollTo({ y: 0, animated: false });
+    });
+    return () => task.cancel();
+  }, [diagnostic.currentStepIndex]);
 
   async function handleSignOut() {
     setIsSigningOut(true);
@@ -600,13 +608,13 @@ export function HomeScreen() {
                 ) : null}
 
                 <View style={styles.formQuestionStack}>
-                  {diagnostic.currentQuestions.map((question, index) => (
+                  {diagnostic.currentQuestions.map((question) => (
                     <QuestionInput
                       key={question.id}
                       question={question}
                       questionNumber={question.order + 1}
                       value={diagnostic.getQuestionValue(diagnostic.values, question)}
-                      error={index === 0 ? diagnostic.errors[question.slug] : undefined}
+                      error={diagnostic.errors[question.slug]}
                       onChange={(value) => diagnostic.setFieldValue(question, value)}
                       getRevenueOptions={diagnostic.getRevenueOptions}
                       selectedCountryIso={diagnostic.selectedCountryIso}
@@ -620,10 +628,7 @@ export function HomeScreen() {
                   <Pressable
                     style={styles.secondaryButton}
                     disabled={diagnostic.currentStepIndex === 0}
-                    onPress={() => {
-                      scrollRef.current?.scrollTo({ y: 0, animated: true });
-                      diagnostic.previousStep();
-                    }}>
+                    onPress={diagnostic.previousStep}>
                     <Text style={styles.secondaryButtonLabel}>Voltar</Text>
                   </Pressable>
 
@@ -636,12 +641,7 @@ export function HomeScreen() {
                       )}
                     </Pressable>
                   ) : (
-                    <Pressable
-                      style={styles.primaryButton}
-                      onPress={() => {
-                        scrollRef.current?.scrollTo({ y: 0, animated: true });
-                        diagnostic.nextStep();
-                      }}>
+                    <Pressable style={styles.primaryButton} onPress={diagnostic.nextStep}>
                       <Text style={styles.primaryButtonLabel}>Continuar</Text>
                     </Pressable>
                   )}
@@ -953,6 +953,9 @@ const styles = StyleSheet.create({
     color: palette.danger,
     fontSize: 14,
     lineHeight: 22,
+  },
+  inputError: {
+    borderColor: palette.danger,
   },
   loaderBlock: {
     alignItems: 'flex-start',
