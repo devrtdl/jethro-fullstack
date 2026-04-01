@@ -19,20 +19,20 @@ import { authService } from '@/src/services/auth/auth-service';
 import type { FormQuestion, JsonValue, QuestionOption } from '@/src/types/diagnostic-form';
 
 const palette = {
-  background: '#070D18',
-  surface: '#0D1B2A',
-  surfaceAlt: '#162538',
-  cardBorder: 'rgba(232, 201, 122, 0.18)',
-  gold: '#C9A84C',
+  background: '#0B1F3B',
+  surface: '#112440',
+  surfaceAlt: '#163050',
+  cardBorder: 'rgba(212, 175, 55, 0.20)',
+  gold: '#D4AF37',
   goldSoft: '#E8C97A',
-  cream: '#F7F3EC',
-  text: '#F7F3EC',
-  muted: '#98A4B5',
-  accent: '#D4954A',
-  accentSoft: 'rgba(212, 149, 74, 0.15)',
-  success: '#8DBA88',
-  danger: '#E07C6C',
-  chip: 'rgba(247, 243, 236, 0.1)',
+  cream: '#F8F9FA',
+  text: '#F8F9FA',
+  muted: '#8A9BB0',
+  accent: '#D4AF37',
+  accentSoft: 'rgba(212, 175, 55, 0.15)',
+  success: '#4CAF7D',
+  danger: '#E05C5C',
+  chip: 'rgba(255, 255, 255, 0.08)',
 };
 
 const phoneCountries = [
@@ -328,16 +328,32 @@ function QuestionInput({
   );
 }
 
-function AppTopBar() {
+function AppTopBar({ onSignOut, isSigningOut }: { onSignOut: () => void; isSigningOut: boolean }) {
+  const [menuOpen, setMenuOpen] = useState(false);
+
   return (
-    <View style={styles.topBar}>
-      <Pressable style={styles.iconButton}>
-        <Text style={styles.iconButtonLabel}>←</Text>
-      </Pressable>
-      <Text style={styles.topBarTitle}>JETHRO</Text>
-      <Pressable style={styles.iconButton}>
-        <Text style={styles.iconButtonLabel}>≡</Text>
-      </Pressable>
+    <View>
+      <View style={styles.topBar}>
+        <View style={styles.iconButton} />
+        <Text style={styles.topBarTitle}>JETHRO</Text>
+        <Pressable style={styles.iconButton} onPress={() => setMenuOpen((v) => !v)}>
+          <Text style={styles.iconButtonLabel}>≡</Text>
+        </Pressable>
+      </View>
+      {menuOpen ? (
+        <View style={styles.menuDropdown}>
+          <Pressable
+            style={styles.menuItem}
+            onPress={() => { setMenuOpen(false); onSignOut(); }}
+            disabled={isSigningOut}>
+            {isSigningOut ? (
+              <ActivityIndicator color={palette.cream} size="small" />
+            ) : (
+              <Text style={styles.menuItemLabel}>Sair deste dispositivo</Text>
+            )}
+          </Pressable>
+        </View>
+      ) : null}
     </View>
   );
 }
@@ -464,7 +480,7 @@ export function HomeScreen() {
   return (
     <ScreenContainer backgroundColor={palette.background} contentStyle={styles.container} padded={false}>
       <ScrollView ref={scrollRef} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        <AppTopBar />
+        <AppTopBar onSignOut={handleSignOut} isSigningOut={isSigningOut} />
         {!isReady ? (
           <View style={styles.loaderBlock}>
             <ActivityIndicator color={palette.goldSoft} />
@@ -474,9 +490,6 @@ export function HomeScreen() {
           <AuthCard />
         ) : diagnostic.submitResult ? (
           <View style={styles.primaryCard}>
-            <Pressable style={styles.inlineLogoutButton} onPress={() => void handleSignOut()} disabled={isSigningOut}>
-              {isSigningOut ? <ActivityIndicator color={palette.cream} /> : <Text style={styles.inlineLogoutLabel}>Sair</Text>}
-            </Pressable>
             <Text style={styles.sectionTitle}>Resultado do diagnóstico</Text>
             {diagnostic.isViewingSavedResult ? <Text style={styles.savedResultLabel}>Último diagnóstico salvo</Text> : null}
 
@@ -569,9 +582,6 @@ export function HomeScreen() {
           </View>
         ) : (
           <View style={styles.formStage}>
-            <Pressable style={styles.inlineLogoutButton} onPress={() => void handleSignOut()} disabled={isSigningOut}>
-              {isSigningOut ? <ActivityIndicator color={palette.cream} /> : <Text style={styles.inlineLogoutLabel}>Sair</Text>}
-            </Pressable>
             {diagnostic.isLoading ? (
               <View style={styles.loaderBlock}>
                 <ActivityIndicator color={palette.goldSoft} />
@@ -600,13 +610,6 @@ export function HomeScreen() {
                   </Text>
                 </View>
 
-                <Text style={styles.formTitle}>{diagnostic.currentQuestions[0]?.label ?? diagnostic.currentStep.title}</Text>
-                {diagnostic.currentQuestions[0]?.helperText ? (
-                  <Text style={styles.formHelper}>{diagnostic.currentQuestions[0].helperText}</Text>
-                ) : diagnostic.currentStep.description ? (
-                  <Text style={styles.formHelper}>{diagnostic.currentStep.description}</Text>
-                ) : null}
-
                 <View style={styles.formQuestionStack}>
                   {diagnostic.currentQuestions.map((question) => (
                     <QuestionInput
@@ -625,12 +628,11 @@ export function HomeScreen() {
                 {diagnostic.errors._global ? <Text style={styles.formErrorText}>{diagnostic.errors._global}</Text> : null}
 
                 <View style={styles.footerActions}>
-                  <Pressable
-                    style={styles.secondaryButton}
-                    disabled={diagnostic.currentStepIndex === 0}
-                    onPress={diagnostic.previousStep}>
-                    <Text style={styles.secondaryButtonLabel}>Voltar</Text>
-                  </Pressable>
+                  {diagnostic.currentStepIndex > 0 ? (
+                    <Pressable style={styles.secondaryButton} onPress={diagnostic.previousStep}>
+                      <Text style={styles.secondaryButtonLabel}>Voltar</Text>
+                    </Pressable>
+                  ) : null}
 
                   {diagnostic.currentStepIndex === diagnostic.steps.length - 1 ? (
                     <Pressable style={styles.primaryButton} onPress={() => void diagnostic.submit()} disabled={diagnostic.isSubmitting}>
@@ -693,31 +695,28 @@ const styles = StyleSheet.create({
     letterSpacing: 1.4,
   },
   formStage: {
-    borderRadius: 28,
-    backgroundColor: palette.surfaceAlt,
+    gap: 18,
+    paddingBottom: 22,
+  },
+  menuDropdown: {
+    alignSelf: 'flex-end',
+    marginTop: 4,
+    borderRadius: 14,
+    backgroundColor: palette.surface,
     borderWidth: 1,
     borderColor: palette.cardBorder,
-    paddingHorizontal: 18,
-    paddingTop: 18,
-    paddingBottom: 22,
-    gap: 18,
     overflow: 'hidden',
+    minWidth: 200,
   },
-  inlineLogoutButton: {
-    alignSelf: 'flex-end',
-    minHeight: 38,
-    borderRadius: 999,
-    paddingHorizontal: 14,
-    backgroundColor: 'rgba(247, 243, 236, 0.08)',
-    borderWidth: 1,
-    borderColor: 'rgba(247, 243, 236, 0.12)',
-    alignItems: 'center',
-    justifyContent: 'center',
+  menuItem: {
+    paddingHorizontal: 18,
+    paddingVertical: 14,
+    alignItems: 'flex-start',
   },
-  inlineLogoutLabel: {
-    color: palette.text,
-    fontSize: 13,
-    fontWeight: '700',
+  menuItemLabel: {
+    color: palette.cream,
+    fontSize: 14,
+    fontWeight: '600',
   },
   heroCard: {
     borderRadius: 30,
@@ -748,21 +747,12 @@ const styles = StyleSheet.create({
     lineHeight: 25,
   },
   primaryCard: {
-    borderRadius: 28,
-    backgroundColor: palette.surfaceAlt,
-    borderWidth: 1,
-    borderColor: palette.cardBorder,
-    padding: 20,
     gap: 14,
+    paddingBottom: 22,
   },
   paywallCard: {
-    marginTop: 8,
-    borderRadius: 24,
-    backgroundColor: palette.surfaceAlt,
-    borderWidth: 1,
-    borderColor: palette.cardBorder,
-    padding: 18,
     gap: 18,
+    paddingBottom: 22,
   },
   scriptureCard: {
     borderRadius: 22,

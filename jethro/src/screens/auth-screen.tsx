@@ -9,70 +9,21 @@ import { authService } from '@/src/services/auth/auth-service';
 type AuthScreenMode = 'login' | 'register';
 
 const palette = {
-  background: '#F8F5EF',
-  surface: '#0F1B2D',
-  surfaceAlt: '#FFFFFF',
-  tileA: '#EAF0F8',
-  tileB: '#F7EBD0',
-  tileC: '#EEF3EA',
-  border: 'rgba(15, 27, 45, 0.08)',
-  gold: '#C9A84C',
-  goldSoft: '#E9D18A',
-  cream: '#F6F1E8',
-  muted: '#6C788A',
-  success: '#3A9F63',
-  danger: '#D96B5F',
-  text: '#172335',
-  blue: '#2F67F6',
-  blueSoft: '#DDE7FF',
+  background: '#0B1F3B',
+  surface: '#112440',
+  surfaceElevated: '#163050',
+  gold: '#D4AF37',
+  goldSoft: 'rgba(212, 175, 55, 0.18)',
+  goldGlow: 'rgba(212, 175, 55, 0.08)',
+  goldBorder: 'rgba(212, 175, 55, 0.25)',
+  cream: '#F8F9FA',
+  muted: '#8A9BB0',
+  mutedDim: 'rgba(138, 155, 176, 0.6)',
+  danger: '#E05C5C',
+  success: '#4CAF7D',
+  inputBorder: 'rgba(212, 175, 55, 0.20)',
+  inputBackground: 'rgba(17, 36, 64, 0.8)',
 };
-
-const mosaicTiles = [
-  { id: '1', title: 'Diagnóstico', subtitle: 'Clareza', tone: 'a' },
-  { id: '2', title: 'Plano', subtitle: 'Direção', tone: 'b' },
-] as const;
-
-function MosaicTile({
-  title,
-  subtitle,
-  tone,
-}: {
-  title: string;
-  subtitle: string;
-  tone: 'a' | 'b' | 'c';
-}) {
-  const backgroundColor =
-    tone === 'a' ? palette.tileA : tone === 'b' ? palette.tileB : palette.tileC;
-
-  return (
-    <View style={[styles.tile, { backgroundColor }]}>
-      <View style={styles.tileShade} />
-      <Text style={styles.tileTitle}>{title}</Text>
-      <Text style={styles.tileSubtitle}>{subtitle}</Text>
-    </View>
-  );
-}
-
-function SocialButton({
-  label,
-  icon,
-  onPress,
-  disabled,
-}: {
-  label: string;
-  icon: string;
-  onPress: () => void;
-  disabled: boolean;
-}) {
-  return (
-    <Pressable style={styles.socialButton} onPress={onPress} disabled={disabled}>
-      <View style={styles.socialIconShell}>
-        <Text style={styles.socialIconLabel}>{icon}</Text>
-      </View>
-      <Text style={styles.socialButtonLabel}>{label}</Text>
-    </Pressable>
-  );
-}
 
 export function AuthScreen({ mode }: { mode: AuthScreenMode }) {
   const [fullName, setFullName] = useState('');
@@ -134,114 +85,138 @@ export function AuthScreen({ mode }: { mode: AuthScreenMode }) {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      {/* Background glow */}
+      
+
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
         contentContainerStyle={styles.content}
-        scrollEnabled={false}
         showsVerticalScrollIndicator={false}>
-        <View style={styles.topBar}>
-          <Pressable style={styles.iconButton}>
-            <Text style={styles.iconButtonLabel}>←</Text>
-          </Pressable>
-          <Text style={styles.wordmark}>JETHRO</Text>
-          <Pressable style={styles.iconButton}>
-            <Text style={styles.iconButtonLabel}>≡</Text>
-          </Pressable>
-        </View>
 
-        <View style={styles.heroFrame}>
-          <View style={styles.mosaic}>
-            <MosaicTile {...mosaicTiles[0]} />
-            <View style={styles.logoMedallion}>
-              <Image source={require('@/assets/images/splash-icon.png')} style={styles.logo} contentFit="contain" />
+        {/* Logo + wordmark */}
+        <View style={styles.brandBlock}>
+          <Image
+            source={require('@/assets/logo.png')}
+            style={styles.logo}
+            contentFit="contain"
+          />
+
+          <View style={styles.wordmarkBlock}>
+            <Text style={styles.brandName}>JETHRO</Text>
+            <View style={styles.dividerRow}>
+              <View style={styles.dividerLine} />
+              <Text style={styles.brandTagline}>Mentor do Empreendedor Cristão</Text>
+              <View style={styles.dividerLine} />
             </View>
-            <MosaicTile {...mosaicTiles[1]} />
-          </View>
-          <View style={styles.heroCopy}>
-            <Text style={styles.title}>
-              {isRegister ? 'Entre com seu e-mail para receber seu ' : 'Entre para retomar seu '}
-              <Text style={styles.titleAccent}>{isRegister ? 'plano de ação Jethro' : 'próximo passo Jethro'}</Text>
-            </Text>
-            <Text style={styles.subtitle}>
-              {isRegister
-                ? 'Diagnóstico, clareza e plano no mesmo fluxo.'
-                : 'Acesse com e-mail ou Google e continue de onde parou.'}
-            </Text>
           </View>
         </View>
 
-        <View style={styles.actionStack}>
-          <View style={styles.inputStack}>
-            {isRegister ? (
+        {/* Heading */}
+        <View style={styles.headingBlock}>
+          <Text style={styles.heading}>
+            {isRegister ? 'Comece sua jornada' : 'Bem-vindo de volta'}
+          </Text>
+          <Text style={styles.subheading}>
+            {isRegister
+              ? 'Crie sua conta para acessar seu diagnóstico.'
+              : 'Acesse para continuar de onde parou.'}
+          </Text>
+        </View>
+
+        {/* Form */}
+        <View style={styles.formBlock}>
+          {isRegister ? (
+            <View style={styles.inputWrap}>
+              <Text style={styles.inputLabel}>Nome completo</Text>
               <TextInput
                 autoCapitalize="words"
                 autoComplete="name"
-                placeholder="Nome completo"
-                placeholderTextColor="#8692A3"
-                style={styles.inlineInput}
+                placeholder="Seu nome completo"
+                placeholderTextColor={palette.mutedDim}
+                style={styles.input}
                 value={fullName}
                 onChangeText={setFullName}
               />
-            ) : null}
+            </View>
+          ) : null}
 
+          <View style={styles.inputWrap}>
+            <Text style={styles.inputLabel}>E-mail</Text>
             <TextInput
               autoCapitalize="none"
               autoComplete="email"
               keyboardType="email-address"
-              placeholder="Seu e-mail"
-              placeholderTextColor="#8A94A5"
-              style={styles.inlineInput}
+              placeholder="seu@email.com"
+              placeholderTextColor={palette.mutedDim}
+              style={styles.input}
               value={email}
               onChangeText={setEmail}
             />
+          </View>
 
+          <View style={styles.inputWrap}>
+            <Text style={styles.inputLabel}>Senha</Text>
             <TextInput
               autoCapitalize="none"
               autoComplete={isRegister ? 'new-password' : 'current-password'}
               secureTextEntry
-              placeholder="Sua senha"
-              placeholderTextColor="#8A94A5"
-              style={styles.inlineInput}
+              placeholder="••••••••"
+              placeholderTextColor={palette.mutedDim}
+              style={styles.input}
               value={password}
               onChangeText={setPassword}
             />
           </View>
 
-          <View style={styles.privacyCard}>
-            <Text style={styles.privacyIcon}>⌘</Text>
-            <Text style={styles.privacyText}>
-              Seus dados são tratados com segurança e usados apenas para liberar sua jornada no app.
-            </Text>
-          </View>
+          {message ? <Text style={styles.successText}>{message}</Text> : null}
+          {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
-          <Pressable style={styles.primaryButton} onPress={() => void handlePasswordAction()} disabled={isSubmitting}>
+          <Pressable
+            style={[styles.primaryButton, isSubmitting && styles.primaryButtonDisabled]}
+            onPress={() => void handlePasswordAction()}
+            disabled={isSubmitting}>
             {isSubmitting ? (
-              <ActivityIndicator color={palette.cream} />
+              <ActivityIndicator color={palette.background} />
             ) : (
               <Text style={styles.primaryButtonLabel}>
-                {isRegister ? 'Continuar' : 'Entrar'}
+                {isRegister ? 'Criar conta' : 'Entrar'}
               </Text>
             )}
           </Pressable>
 
-          <SocialButton
-            label={isRegister ? 'Continuar com Google' : 'Entrar com Google'}
-            icon="G"
-            onPress={() => void handleSocialAuth('google')}
-            disabled={isSubmitting}
-          />
-
-          {message ? <Text style={styles.successText}>{message}</Text> : null}
-          {error ? <Text style={styles.errorText}>{error}</Text> : null}
-
-          <View style={styles.footerRow}>
-            <Text style={styles.footerText}>{isRegister ? 'Já tem conta?' : 'Ainda não tem conta?'}</Text>
-            <Link href={isRegister ? '/auth/login' : '/auth/register'} asChild>
-              <Pressable>
-                <Text style={styles.footerLink}>{isRegister ? 'Entrar' : 'Registrar'}</Text>
-              </Pressable>
-            </Link>
+          {/* Divider */}
+          <View style={styles.orRow}>
+            <View style={styles.orLine} />
+            <Text style={styles.orLabel}>ou</Text>
+            <View style={styles.orLine} />
           </View>
+
+          {/* Google */}
+          <Pressable
+            style={styles.socialButton}
+            onPress={() => void handleSocialAuth('google')}
+            disabled={isSubmitting}>
+            <View style={styles.socialIconShell}>
+              <Text style={styles.socialIconLabel}>G</Text>
+            </View>
+            <Text style={styles.socialButtonLabel}>
+              {isRegister ? 'Continuar com Google' : 'Entrar com Google'}
+            </Text>
+          </Pressable>
+        </View>
+
+        {/* Footer switch */}
+        <View style={styles.footerRow}>
+          <Text style={styles.footerText}>
+            {isRegister ? 'Já tem conta?' : 'Ainda não tem conta?'}
+          </Text>
+          <Link href={isRegister ? '/auth/login' : '/auth/register'} asChild>
+            <Pressable>
+              <Text style={styles.footerLink}>
+                {isRegister ? 'Entrar' : 'Registrar'}
+              </Text>
+            </Pressable>
+          </Link>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -253,173 +228,155 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: palette.background,
   },
+  glowTop: {
+    position: 'absolute',
+    top: -40,
+    alignSelf: 'center',
+    width: 340,
+    height: 340,
+    borderRadius: 999,
+    backgroundColor: palette.goldGlow,
+  },
+  glowBottom: {
+    position: 'absolute',
+    bottom: -80,
+    alignSelf: 'center',
+    width: 280,
+    height: 200,
+    borderRadius: 999,
+    backgroundColor: 'rgba(11, 31, 59, 0.5)',
+  },
   content: {
     flexGrow: 1,
-    justifyContent: 'space-between',
-    paddingHorizontal: 22,
-    paddingTop: 8,
-    paddingBottom: 22,
+    paddingHorizontal: 28,
+    paddingTop: 24,
+    paddingBottom: 32,
+    gap: 28,
+  },
+
+  // Brand
+  brandBlock: {
+    alignItems: 'center',
     gap: 14,
   },
-  topBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    minHeight: 48,
-  },
-  iconButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 999,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  iconButtonLabel: {
-    color: palette.text,
-    fontSize: 24,
-    lineHeight: 24,
-  },
-  wordmark: {
-    color: palette.text,
-    fontSize: 18,
-    fontWeight: '800',
-    letterSpacing: 1.5,
-  },
-  heroFrame: {
-    paddingTop: 8,
-    gap: 18,
-  },
-  mosaic: {
-    flexDirection: 'row',
-    gap: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  tile: {
-    flex: 1,
-    minHeight: 108,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: palette.border,
-    padding: 16,
-    justifyContent: 'flex-end',
-  },
-  tileShade: {
-    display: 'none',
-  },
-  tileTitle: {
-    color: palette.text,
-    fontSize: 17,
-    lineHeight: 22,
-    fontWeight: '700',
-  },
-  tileSubtitle: {
-    color: palette.gold,
-    fontSize: 11,
-    fontWeight: '700',
-    letterSpacing: 1.3,
-    textTransform: 'uppercase',
-  },
-  logoMedallion: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: 94,
-    height: 94,
-    borderRadius: 999,
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: palette.border,
-    shadowColor: '#0E1B2D',
-    shadowOpacity: 0.08,
-    shadowRadius: 20,
-    shadowOffset: { width: 0, height: 10 },
-  },
   logo: {
-    width: 42,
-    height: 42,
+    width: 120,
+    height: 120,
   },
-  heroCopy: {
+  wordmarkBlock: {
     alignItems: 'center',
     gap: 8,
-    paddingHorizontal: 8,
   },
-  title: {
-    color: palette.text,
-    fontSize: 28,
-    lineHeight: 36,
-    fontWeight: '600',
+  brandName: {
+    color: palette.cream,
+    fontSize: 34,
+    fontWeight: '800',
+    letterSpacing: 5,
+  },
+  dividerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: palette.gold,
+    maxWidth: 32,
+    opacity: 0.5,
+  },
+  brandTagline: {
+    color: palette.gold,
+    fontSize: 12,
+    fontWeight: '500',
+    letterSpacing: 0.5,
+  },
+
+  // Heading
+  headingBlock: {
+    alignItems: 'center',
+    gap: 8,
+  },
+  heading: {
+    color: palette.cream,
+    fontSize: 24,
+    fontWeight: '700',
+    letterSpacing: 0.3,
     textAlign: 'center',
   },
-  titleAccent: {
-    color: palette.gold,
-    fontWeight: '700',
-  },
-  subtitle: {
+  subheading: {
     color: palette.muted,
     fontSize: 14,
     lineHeight: 20,
     textAlign: 'center',
     maxWidth: 300,
   },
-  actionStack: {
-    gap: 10,
+
+  // Form
+  formBlock: {
+    gap: 14,
   },
-  inputStack: {
-    gap: 10,
+  inputWrap: {
+    gap: 6,
   },
-  inlineInput: {
+  inputLabel: {
+    color: palette.muted,
+    fontSize: 12,
+    fontWeight: '600',
+    letterSpacing: 0.8,
+    textTransform: 'uppercase',
+    marginLeft: 4,
+  },
+  input: {
     minHeight: 54,
-    borderRadius: 16,
-    backgroundColor: '#FFFFFF',
+    borderRadius: 14,
+    backgroundColor: palette.inputBackground,
     borderWidth: 1,
-    borderColor: 'rgba(47, 103, 246, 0.34)',
+    borderColor: palette.inputBorder,
     paddingHorizontal: 18,
     paddingVertical: 12,
-    color: palette.text,
+    color: palette.cream,
     fontSize: 15,
-  },
-  privacyCard: {
-    minHeight: 76,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: palette.border,
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 14,
-    paddingVertical: 14,
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 12,
-  },
-  privacyIcon: {
-    color: palette.muted,
-    fontSize: 18,
-    lineHeight: 20,
-  },
-  privacyText: {
-    flex: 1,
-    color: palette.muted,
-    fontSize: 13,
-    lineHeight: 18,
   },
   primaryButton: {
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 16,
-    backgroundColor: palette.surface,
+    borderRadius: 14,
+    backgroundColor: palette.gold,
     minHeight: 54,
     paddingHorizontal: 18,
+    marginTop: 4,
+  },
+  primaryButtonDisabled: {
+    opacity: 0.7,
   },
   primaryButtonLabel: {
-    color: palette.cream,
+    color: palette.background,
     fontSize: 17,
     fontWeight: '800',
+    letterSpacing: 0.3,
+  },
+  orRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  orLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: 'rgba(138, 155, 176, 0.25)',
+  },
+  orLabel: {
+    color: palette.muted,
+    fontSize: 13,
+    fontWeight: '500',
   },
   socialButton: {
     minHeight: 54,
-    borderRadius: 16,
+    borderRadius: 14,
     borderWidth: 1,
-    borderColor: palette.border,
-    backgroundColor: '#FFFFFF',
+    borderColor: 'rgba(212, 175, 55, 0.20)',
+    backgroundColor: palette.surface,
     paddingHorizontal: 18,
     flexDirection: 'row',
     alignItems: 'center',
@@ -430,43 +387,46 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 999,
-    backgroundColor: palette.blueSoft,
+    backgroundColor: 'rgba(212, 175, 55, 0.15)',
     alignItems: 'center',
     justifyContent: 'center',
   },
   socialIconLabel: {
-    color: palette.blue,
+    color: palette.gold,
     fontSize: 14,
     fontWeight: '800',
   },
   socialButtonLabel: {
-    color: palette.text,
+    color: palette.cream,
     fontSize: 15,
-    fontWeight: '700',
+    fontWeight: '600',
   },
   successText: {
     color: palette.success,
     fontSize: 13,
     lineHeight: 20,
+    textAlign: 'center',
   },
   errorText: {
     color: palette.danger,
     fontSize: 13,
     lineHeight: 20,
+    textAlign: 'center',
   },
+
+  // Footer
   footerRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
-    paddingTop: 4,
   },
   footerText: {
     color: palette.muted,
     fontSize: 14,
   },
   footerLink: {
-    color: palette.blue,
+    color: palette.gold,
     fontSize: 14,
     fontWeight: '700',
   },

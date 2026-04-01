@@ -31,26 +31,26 @@ const styles = StyleSheet.create({
 const toneStyles = {
   success: StyleSheet.create({
     container: {
-      backgroundColor: '#dff6df',
+      backgroundColor: 'rgba(76, 175, 125, 0.15)',
     },
     label: {
-      color: '#146c2e',
+      color: '#4CAF7D',
     },
   }),
   error: StyleSheet.create({
     container: {
-      backgroundColor: '#fde7e3',
+      backgroundColor: 'rgba(224, 92, 92, 0.15)',
     },
     label: {
-      color: '#9f2d20',
+      color: '#E05C5C',
     },
   }),
   neutral: StyleSheet.create({
     container: {
-      backgroundColor: '#e9efe5',
+      backgroundColor: 'rgba(212, 175, 55, 0.15)',
     },
     label: {
-      color: '#44513f',
+      color: '#D4AF37',
     },
   }),
 };

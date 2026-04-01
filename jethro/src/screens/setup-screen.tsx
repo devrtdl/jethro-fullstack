@@ -6,16 +6,16 @@ import { useAuthSession } from '@/src/hooks/use-auth-session';
 import { authService } from '@/src/services/auth/auth-service';
 
 const palette = {
-  background: '#070D18',
-  surface: '#0D1B2A',
-  surfaceAlt: '#1E2D40',
-  cardBorder: 'rgba(232, 201, 122, 0.18)',
-  gold: '#C9A84C',
+  background: '#0B1F3B',
+  surface: '#112440',
+  surfaceAlt: '#163050',
+  cardBorder: 'rgba(212, 175, 55, 0.20)',
+  gold: '#D4AF37',
   goldSoft: '#E8C97A',
-  cream: '#F7F3EC',
-  muted: '#98A4B5',
-  success: '#8DBA88',
-  danger: '#E07C6C',
+  cream: '#F8F9FA',
+  muted: '#8A9BB0',
+  success: '#4CAF7D',
+  danger: '#E05C5C',
 };
 
 const providerCards = [

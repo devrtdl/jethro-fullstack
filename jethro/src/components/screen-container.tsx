@@ -21,7 +21,7 @@ export function ScreenContainer({ children, padded = true, backgroundColor, cont
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#f4f7f1',
+    backgroundColor: '#0B1F3B',
   },
   content: {
     flexGrow: 1,
