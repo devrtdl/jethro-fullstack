@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Jethro — Relatório de Combinações de Diagnóstico</title>
+  <style>
+    :root {
+      --bg: #0b1220;
+      --panel: #132238;
+      --panel-soft: #1b2d47;
+      --text: #f7f4ea;
+      --muted: #b9c3d3;
+      --gold: #e8cc73;
+      --line: #2d3f5c;
+      --accent: #8bb5ff;
+      --danger: #f2b2a5;
+      --green: #7dd3a8;
+      --orange: #f5a97f;
+      --purple: #c9a6f5;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      font-size: 11.5px;
+      line-height: 1.6;
+      padding: 32px 40px;
+    }
+    header {
+      border-bottom: 2px solid var(--gold);
+      padding-bottom: 14px;
+      margin-bottom: 24px;
+    }
+    header h1 { font-size: 19px; color: var(--gold); font-weight: 700; }
+    header p { color: var(--muted); font-size: 10.5px; margin-top: 4px; }
+
+    /* LEGENDA GERAL */
+    .legend {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin-bottom: 24px;
+      page-break-inside: avoid;
+    }
+    .legend h2 { font-size: 11px; color: var(--accent); text-transform: uppercase; letter-spacing: .8px; margin-bottom: 10px; }
+    .legend-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px 24px; }
+    .legend-row { display: flex; gap: 8px; font-size: 10.5px; }
+    .legend-row .code { font-family: monospace; color: var(--gold); min-width: 30px; }
+    .legend-row .desc { color: var(--muted); }
+
+    /* CARD DE MODELO */
+    .model-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      margin-bottom: 18px;
+      page-break-inside: avoid;
+      overflow: hidden;
+    }
+    .model-header {
+      display: flex; align-items: center; gap: 12px;
+      padding: 11px 16px;
+      border-bottom: 1px solid var(--line);
+    }
+    .badge {
+      width: 30px; height: 30px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 13px; flex-shrink: 0;
+    }
+    .model-header .title { font-size: 13px; font-weight: 600; }
+    .model-header .trigger { font-size: 10px; color: var(--muted); font-family: monospace; margin-top: 2px; }
+    .model-body { padding: 12px 16px; }
+
+    /* TABELA DE COMBINAÇÕES */
+    .combo-section { margin-bottom: 12px; }
+    .combo-section:last-child { margin-bottom: 0; }
+    .combo-title { font-size: 10.5px; font-weight: 600; color: var(--accent); margin-bottom: 7px; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 10.5px; margin-bottom: 8px; }
+    th {
+      background: var(--panel-soft); color: var(--muted);
+      text-align: left; padding: 4px 8px;
+      font-size: 10px; text-transform: uppercase; letter-spacing: .5px;
+      border-bottom: 1px solid var(--line);
+    }
+    td { padding: 4px 8px; border-bottom: 1px solid rgba(45,63,92,.5); vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+
+    td.q   { font-family: monospace; color: var(--gold); white-space: nowrap; width: 130px; }
+    td.val { color: var(--text); }
+    td.eff { font-family: monospace; font-size: 10px; }
+    .ok  { color: var(--green); }
+    .grd { color: var(--danger); font-size: 10px; }
+    .neu { color: var(--muted); }
+
+    .note {
+      background: rgba(242,178,165,.07);
+      border: 1px solid rgba(242,178,165,.2);
+      border-radius: 4px;
+      padding: 7px 10px;
+      font-size: 10px; color: var(--danger);
+      margin-top: 6px;
+    }
+    .note strong { display: block; margin-bottom: 2px; }
+
+    .divider { height: 1px; background: var(--line); margin: 10px 0; }
+
+    /* CORES DE BADGE */
+    .bi { background:#1a3a5c; color:#8bb5ff; }
+    .be { background:#1a3a5c; color:#8bb5ff; }
+    .bg { background:#3a1a1a; color:#f2b2a5; }
+    .bd { background:#3a1a1a; color:#f2b2a5; }
+    .bh { background:#2a2a1a; color:#e8cc73; }
+    .ba { background:#2a1a2a; color:#c9a6f5; }
+    .bf { background:#1a2a2a; color:#7dd3a8; }
+    .bc { background:#1a2a1a; color:#7dd3a8; }
+    .bb { background:#1a2a3a; color:#8bb5ff; }
+    .bfb{ background:#252525; color:#b9c3d3; }
+
+    .pos { font-size: 9px; color: var(--muted); margin-left: 6px; }
+
+    footer {
+      margin-top: 28px; border-top: 1px solid var(--line);
+      padding-top: 10px; color: var(--muted); font-size: 10px;
+      display: flex; justify-content: space-between;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>JETHRO MENTOR PBN — Relatório de Combinações de Diagnóstico</h1>
+  <p>Motor v2.4 · 9 modelos × combinações de respostas · Gerado em 04/04/2026</p>
+</header>
+
+<!-- LEGENDA -->
+<div class="legend">
+  <h2>Mapeamento de perguntas</h2>
+  <div class="legend-grid">
+    <div class="legend-row"><span class="code">Q5</span><span class="desc">fase_negocio — A=Ideia · B=Início · C=Crescimento · D=Consolidado</span></div>
+    <div class="legend-row"><span class="code">Q6</span><span class="desc">conexao_dons — A=Sim · B=Parcial · C=Não</span></div>
+    <div class="legend-row"><span class="code">Q7</span><span class="desc">proposito_negocio — A=Claro · B=Tem ideia · C=Sem clareza</span></div>
+    <div class="legend-row"><span class="code">Q8</span><span class="desc">estrutura_negocio — A=Sim · B=Em desenvolvimento · C=Não</span></div>
+    <div class="legend-row"><span class="code">Q9</span><span class="desc">organizacao_financeira — A=Estruturada · B=Básica · C=Desorganizada</span></div>
+    <div class="legend-row"><span class="code">Q10</span><span class="desc">formalizacao — nao_comecou · informal · formalizada · medio_grande_porte · outro</span></div>
+    <div class="legend-row"><span class="code">Q11</span><span class="desc">faturamento_mensal → A=sem · B=até R$5k · C=R$5k–20k · D=R$20k+</span></div>
+    <div class="legend-row"><span class="code">Q12</span><span class="desc">lucro_crescimento — A=Crescendo · B=Estável · C=Regredindo</span></div>
+    <div class="legend-row"><span class="code">Q15</span><span class="desc">canal_aquisicao — A=Indicação · B=Instagram · C=Tráfego pago · D=LinkedIn · E=Ativo · F=Vários · G=Outro</span></div>
+    <div class="legend-row"><span class="code">Q16</span><span class="desc">capacidade_operacional — A=Normal · B=Reorganiza · C=Colapso</span></div>
+    <div class="legend-row"><span class="code">Q17</span><span class="desc">horas_semana — A=&lt;10h · B=10–20h · C=20–40h · D=40–60h · E=+60h</span></div>
+    <div class="legend-row"><span class="code">Q18*</span><span class="desc">derivada: nao_comecou→A · fase=A→C · demais→B</span></div>
+  </div>
+</div>
+
+<!-- ═══ MODELO A (named) ═══ -->
+<div class="model-card">
+  <div class="model-header">
+    <div class="badge ba">A</div>
+    <div>
+      <div class="title">Negócio Travado + Financeiro Bagunçado + Sem Visão <span class="pos">posição 5</span></div>
+      <div class="trigger">Q9='C' AND Q8∈[B,C] AND Q12∈[B,C] AND (Q6='C' OR Q7='C')</div>
+    </div>
+  </div>
+  <div class="model-body">
+    <div class="combo-section">
+      <div class="combo-title">Combinação 1 — Desorganizado, sem estrutura, sem propósito claro</div>
+      <table>
+        <tr><th>Pergunta</th><th>Resposta</th><th>Efeito</th></tr>
+        <tr><td class="q">Q9 financeiro</td><td class="val">C — Desorganizado</td><td class="eff ok">→ Q9=C ✓</td></tr>
+        <tr><td class="q">Q8 estrutura</td><td class="val">B ou C</td><td class="eff ok">→ Q8∈[B,C] ✓</td></tr>
+        <tr><td class="q">Q12 lucro</td><td class="val">B ou C</td><td class="eff ok">→ Q12∈[B,C] ✓</td></tr>
+        <tr><td class="q">Q6 conexao_dons</td><td class="val">C — Não conectado</td><td class="eff ok">→ Q6=C ✓</td></tr>
+        <tr><td class="q">Q11 faturamento</td><td class="val">Até R$5k ou acima</td><td class="eff grd">Q11≥B evita I/E</td></tr>
+        <tr><td class="q">Q16 capacidade</td><td class="val">A ou B</td><td class="eff grd">evita G (pos.2)</td></tr>
+        <tr><td class="q">Q17 horas</td><td class="val">A, B ou C</td><td class="eff grd">evita H (pos.4)</td></tr>
+        <tr><td class="q">Q15 canal</td><td class="val">B ou outro ≠A</td><td class="eff grd">evita F (pos.6)</td></tr>
+      </table>
+    </div>
+    <div class="divider"></div>
+    <div class="combo-section">
+      <div class="combo-title">Combinação 2 — Desorganizado, sem estrutura, sem clareza de propósito</div>
+      <table>
+        <tr><th>Pergunta</th><th>Resposta</th><th>Efeito</th></tr>
+        <tr><td class="q">Q9 financeiro</td><td class="val">C — Desorganizado</td><td class="eff ok">→ Q9=C ✓</td></tr>
+        <tr><td class="q">Q8 estrutura</td><td class="val">B ou C</td><td class="eff ok">→ Q8∈[B,C] ✓</td></tr>
+        <tr><td class="q">Q12 lucro</td><td class="val">B ou C</td><td class="eff ok">→ Q12∈[B,C] ✓</td></tr>
+        <tr><td class="q">Q7 proposito</td><td class="val">C — Sem clareza</td><td class="eff ok">→ Q7=C ✓</td></tr>
+        <tr><td class="q">Q6 conexao_dons</td><td class="val">A ou B (Q6≠C, mas Q7=C basta)</td><td class="eff ok">condição OR satisfeita ✓</td></tr>
+        <tr><td class="q">Q11 faturamento</td><td class="val">Até R$5k ou acima</td><td class="eff grd">Q11≥B evita I/E</td></tr>
+        <tr><td class="q">Q16, Q17, Q15</td><td class="val">ver guards acima</td><td class="eff grd">mesmos guards</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODELO B ═══ -->
+<div class="model-card">
+  <div class="model-header">
+    <div class="badge bb">B</div>
+    <div>
+      <div class="title">Negócio Saudável, Mas Travado no Platô <span class="pos">posição 8</span></div>
+      <div class="trigger">Q9∈[A,B] AND Q8∈[A,B] AND Q11≥'B' AND Q12='B' AND Q15≠'A'</div>
+    </div>
+  </div>
+  <div class="model-body">
+    <div class="combo-section">
+      <div class="combo-title">Combinação 1 — Estruturado, estável, canal ativo (não indicação)</div>
+      <table>
+        <tr><th>Pergunta</th><th>Resposta</th><th>Efeito</th></tr>
+        <tr><td class="q">Q9 financeiro</td><td class="val">A — Estruturado</td><td class="eff ok">→ Q9∈[A,B] ✓</td></tr>
+        <tr><td class="q">Q8 estrutura</td><td class="val">A — Sim</td><td class="eff ok">→ Q8∈[A,B] ✓</td></tr>
+        <tr><td class="q">Q11 faturamento</td><td class="val">Qualquer ≥B</td><td class="eff ok">→ Q11≥B ✓</td></tr>
+        <tr><td class="q">Q12 lucro</td><td class="val">B — Estável</td><td class="eff ok">→ Q12=B ✓</td></tr>
+        <tr><td class="q">Q15 canal</td><td class="val">B, C, D, E, F ou G</td><td class="eff ok">→ Q15≠A ✓</td></tr>
+        <tr><td class="q">Q16 capacidade</td><td class="val">A ou B</td><td class="eff grd">evita G (pos.2)</td></tr>
+        <tr><td class="q">Q17 horas</td><td class="val">A, B ou C</td><td class="eff grd">evita H (pos.4)</td></tr>
+        <tr><td class="q">Q5 fase</td><td class="val">C ou D</td><td class="eff grd">evita E caso Q11=B</td></tr>
+      </table>
+    </div>
+    <div class="divider"></div>
+    <div class="combo-section">
+      <div class="combo-title">Combinação 2 — Estrutura básica, fatura bem, canal diversificado</div>
+      <table>
+        <tr><th>Pergunta</th><th>Resposta</th><th>Efeito</th></tr>
+        <tr><td class="q">Q9 financeiro</td><td class="val">B — Básico</td><td class="eff ok">→ Q9∈[A,B] ✓</td></tr>
+        <tr><td class="q">Q8 estrutura</td><td class="val">B — Em desenvolvimento</td><td class="eff ok">→ Q8∈[A,B] ✓</td></tr>
+        <tr><td class="q">Q11 faturamento</td><td class="val">R$5k–20k ou R$20k+</td><td class="eff ok">→ Q11≥B ✓</td></tr>
+        <tr><td class="q">Q12 lucro</td><td class="val">B — Estável</td><td class="eff ok">→ Q12=B ✓</td></tr>
+        <tr><td class="q">Q15 canal</td><td class="val">F — Usa vários canais</td><td class="eff ok">→ Q15≠A ✓</td></tr>
+        <tr><td class="q">guards</td><td class="val">ver acima</td><td class="eff grd">mesmos guards</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODELO C ═══ -->
+<div class="model-card">
+  <div class="model-header">
+    <div class="badge bc">C</div>
+    <div>
+      <div class="title">Boa Base, Mas Aperto de Caixa + Sem Visão <span class="pos">posição 7</span></div>
+      <div class="trigger">Q6∈[A,B] AND Q7∈[A,B] AND Q9∈[B,C] AND Q12∈[B,C]</div>
+    </div>
+  </div>
+  <div class="model-body">
+    <div class="combo-section">
+      <div class="combo-title">Combinação 1 — Propósito claro, organização básica, não cresce</div>
+      <table>
+        <tr><th>Pergunta</th><th>Resposta</th><th>Efeito</th></tr>
+        <tr><td class="q">Q6 conexao_dons</td><td class="val">A — Sim, totalmente</td><td class="eff ok">→ Q6∈[A,B] ✓</td></tr>
+        <tr><td class="q">Q7 proposito</td><td class="val">A — Muito claro</td><td class="eff ok">→ Q7∈[A,B] ✓</td></tr>
+        <tr><td class="q">Q9 financeiro</td><td class="val">B — Básico</td><td class="eff ok">→ Q9∈[B,C] ✓</td></tr>
+        <tr><td class="q">Q12 lucro</td><td class="val">B ou C</td><td class="eff ok">→ Q12∈[B,C] ✓</td></tr>
+        <tr><td class="q">Q11 faturamento</td><td class="val">Qualquer ≥B</td><td class="eff grd">evita I/E</td></tr>
+        <tr><td class="q">Q15 canal</td><td class="val">B ou outro ≠A</td><td class="eff grd">evita F (pos.6)</td></tr>
+        <tr><td class="q">Q16 capacidade</td><td class="val">A ou B</td><td class="eff grd">evita G (pos.2)</td></tr>
+        <tr><td class="q">Q17 horas</td><td class="val">A, B ou C</td><td class="eff grd">evita H (pos.4)</td></tr>
+      </table>
+    </div>
+    <div class="divider"></div>
+    <div class="combo-section">
+      <div class="combo-title">Combinação 2 — Parcialmente conectado, financeiro desorganizado</div>
+      <table>
+        <tr><th>Pergunta</th><th>Resposta</th><th>Efeito</th></tr>
+        <tr><td class="q">Q6 conexao_dons</td><td class="val">B — Parcialmente</td><td class="eff ok">→ Q6∈[A,B] ✓</td></tr>
+        <tr><td class="q">Q7 proposito</td><td class="val">B — Tem ideia</td><td class="eff ok">→ Q7∈[A,B] ✓</td></tr>
+        <tr><td class="q">Q9 financeiro</td><td class="val">C — Desorganizado</td><td class="eff ok">→ Q9∈[B,C] ✓</td></tr>
+        <tr><td class="q">Q12 lucro</td><td class="val">B ou C</td><td class="eff ok">→ Q12∈[B,C] ✓</td></tr>
+        <tr><td class="q">guards</td><td class="val">ver acima</td><td class="eff grd">mesmos guards</td></tr>
+      </table>
+      <div class="note"><strong>Atenção</strong>Q9=C não bloqueia C desde que Q6 e Q7 sejam A ou B. A-named exige Q9=C + Q8∈[B,C] + Q12∈[B,C] + (Q6=C OU Q7=C) — aqui Q6 e Q7 não são C, então A-named não ativa.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODELO D ═══ -->
+<div class="model-card">
+  <div class="model-header">
+    <div class="badge bd">D</div>
+    <div>
+      <div class="title">Fatura, Mas Sangra — Ilusão de Faturamento <span class="pos">posição 3</span></div>
+      <div class="trigger">Q11≥'B' AND Q12='C'</div>
+    </div>
+  </div>
+  <div class="model-body">
+    <div class="combo-section">
+      <div class="combo-title">Combinação 1 — Fatura pouco e regride (Q11=B)</div>
+      <table>
+        <tr><th>Pergunta</th><th>Resposta</th><th>Efeito</th></tr>
+        <tr><td class="q">Q11 faturamento</td><td class="val">Até R$5k</td><td class="eff ok">→ Q11=B ✓</td></tr>
+        <tr><td class="q">Q12 lucro</td><td class="val">C — Não, estamos regredindo</td><td class="eff ok">→ Q12=C ✓</td></tr>
+        <tr><td class="q">Q16 capacidade</td><td class="val">A ou B</td><td class="eff grd">evita G (pos.2)</td></tr>
+        <tr><td class="q">demais</td><td class="val">qualquer</td><td class="eff neu">—</td></tr>
+      </table>
+    </div>
+    <div class="divider"></div>
+    <div class="combo-section">
+      <div class="combo-title">Combinação 2 — Fatura mais e regride (Q11=C ou D)</div>
+      <table>
+        <tr><th>Pergunta</th><th>Resposta</th><th>Efeito</th></tr>
+        <tr><td class="q">Q11 faturamento</td><td class="val">R$5k–20k ou R$20k+</td><td class="eff ok">→ Q11≥C ✓</td></tr>
+        <tr><td class="q">Q12 lucro</td><td class="val">C — Regredindo</td><td class="eff ok">→ Q12=C ✓</td></tr>
+        <tr><td class="q">Q16 capacidade</td><td class="val">A ou B</td><td class="eff grd">evita G (pos.2)</td></tr>
+        <tr><td class="q">demais</td><td class="val">qualquer</td><td class="eff neu">—</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODELO E ═══ -->
+<div class="model-card">
+  <div class="model-header">
+    <div class="badge be">E</div>
+    <div>
+      <div class="title">Pré-Receita — Já Começou, Mas Não Validou no Mercado <span class="pos">posição 1</span></div>
+      <div class="trigger">(Q11='A' AND Q18='B')  OU  (Q5≤'B' AND Q11='B' AND Q15='A')</div>
+    </div>
+  </div>
+  <div class="model-body">
+    <div class="combo-section">
+      <div class="combo-title">Combinação 1 — Tem negócio mas não fatura ainda</div>
+      <table>
+        <tr><th>Pergunta</th><th>Resposta</th><th>Efeito</th></tr>
+        <tr><td class="q">Q5 fase_negocio</td><td class="val">B — Início (0–1 ano)</td><td class="eff ok">→ Q18=B ✓</td></tr>
+        <tr><td class="q">Q10 formalizacao</td><td class="val">informal</td><td class="eff ok">→ Q18=B ✓</td></tr>
+        <tr><td class="q">Q11 faturamento</td><td class="val">Sem faturamento</td><td class="eff ok">→ Q11=A ✓</td></tr>
+        <tr><td class="q">demais</td><td class="val">qualquer</td><td class="eff neu">—</td></tr>
+      </table>
+    </div>
+    <div class="divider"></div>
+    <div class="combo-section">
+      <div class="combo-title">Combinação 2 — Início, fatura pouco, só indicação</div>
+      <table>
+        <tr><th>Pergunta</th><th>Resposta</th><th>Efeito</th></tr>
+        <tr><td class="q">Q5 fase_negocio</td><td class="val">A ou B</td><td class="eff ok">→ Q5≤B ✓</td></tr>
+        <tr><td class="q">Q11 faturamento</td><td class="val">Até R$5k</td><td class="eff ok">→ Q11=B ✓</td></tr>
+        <tr><td class="q">Q15 canal_aquisicao</td><td class="val">A — Indicação</td><td class="eff ok">→ Q15=A ✓</td></tr>
+        <tr><td class="q">demais</td><td class="val">qualquer</td><td class="eff neu">—</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODELO F ═══ -->
+<div class="model-card">
+  <div class="model-header">
+    <div class="badge bf">F</div>
+    <div>
+      <div class="title">Vende, Mas Sem Motor — Depende de Indicação <span class="pos">posição 6</span></div>
+      <div class="trigger">Q11≥'B' AND Q15='A' AND Q12∈[B,C]</div>
+    </div>
+  </div>
+  <div class="model-body">
+    <div class="combo-section">
+      <div class="combo-title">Combinação 1 — Fatura pouco, só indicação, estável (Q12=B)</div>
+      <table>
+        <tr><th>Pergunta</th><th>Resposta</th><th>Efeito</th></tr>
+        <tr><td class="q">Q11 faturamento</td><td class="val">Até R$5k</td><td class="eff ok">→ Q11=B ✓</td></tr>
+        <tr><td class="q">Q15 canal</td><td class="val">A — Indicação</td><td class="eff ok">→ Q15=A ✓</td></tr>
+        <tr><td class="q">Q12 lucro</td><td class="val">B — Estável</td><td class="eff ok">→ Q12=B ✓</td></tr>
+        <tr><td class="q">Q9 financeiro</td><td class="val">A ou B</td><td class="eff grd">evita A-named (pos.5)</td></tr>
+        <tr><td class="q">Q6 ou Q7</td><td class="val">A ou B (ambos)</td><td class="eff grd">evita A-named (pos.5)</td></tr>
+        <tr><td class="q">Q16 capacidade</td><td class="val">A ou B</td><td class="eff grd">evita G (pos.2)</td></tr>
+        <tr><td class="q">Q17 horas</td><td class="val">A, B ou C</td><td class="eff grd">evita H (pos.4)</td></tr>
+        <tr><td class="q">Q5 fase</td><td class="val">C ou D</td><td class="eff grd">evita E caso Q11=B</td></tr>
+      </table>
+    </div>
+    <div class="divider"></div>
+    <div class="combo-section">
+      <div class="combo-title">Combinação 2 — Fatura mais, só indicação, regredindo (Q12=C)</div>
+      <table>
+        <tr><th>Pergunta</th><th>Resposta</th><th>Efeito</th></tr>
+        <tr><td class="q">Q11 faturamento</td><td class="val">R$5k–20k ou R$20k+</td><td class="eff ok">→ Q11≥C ✓</td></tr>
+        <tr><td class="q">Q15 canal</td><td class="val">A — Indicação</td><td class="eff ok">→ Q15=A ✓</td></tr>
+        <tr><td class="q">Q12 lucro</td><td class="val">C — Regredindo</td><td class="eff ok">→ Q12=C ✓</td></tr>
+        <tr><td class="q">Q16 capacidade</td><td class="val">A ou B</td><td class="eff grd">evita G (pos.2) — crítico aqui</td></tr>
+        <tr><td class="q">Q9, Q6, Q7</td><td class="val">ver guards acima</td><td class="eff grd">evita A-named (pos.5)</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODELO G ═══ -->
+<div class="model-card">
+  <div class="model-header">
+    <div class="badge bg">G</div>
+    <div>
+      <div class="title">Operação no Limite — Crescer Piora Tudo <span class="pos">posição 2</span></div>
+      <div class="trigger">Q11≥'C' AND Q16='C'</div>
+    </div>
+  </div>
+  <div class="model-body">
+    <div class="combo-section">
+      <div class="combo-title">Combinação única — Fatura bem, mas dobraria entraria em colapso</div>
+      <table>
+        <tr><th>Pergunta</th><th>Resposta</th><th>Efeito</th></tr>
+        <tr><td class="q">Q11 faturamento</td><td class="val">R$5k–20k ou R$20k+</td><td class="eff ok">→ Q11≥C ✓</td></tr>
+        <tr><td class="q">Q16 capacidade</td><td class="val">C — A operação entraria em colapso</td><td class="eff ok">→ Q16=C ✓</td></tr>
+        <tr><td class="q">Q12 lucro</td><td class="val">A ou B (recomendado)</td><td class="eff grd">evita Modelo D (pos.3)</td></tr>
+        <tr><td class="q">demais</td><td class="val">qualquer</td><td class="eff neu">—</td></tr>
+      </table>
+      <div class="note"><strong>Atenção</strong>Se Q12='C' (regredindo), o Modelo D ativa primeiro. Para forçar G: use Q12='A' ou Q12='B'.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODELO H ═══ -->
+<div class="model-card">
+  <div class="model-header">
+    <div class="badge bh">H</div>
+    <div>
+      <div class="title">Gargalo É o Dono — Sem Governo Pessoal <span class="pos">posição 4</span></div>
+      <div class="trigger">Q17='D' AND Q11≥'B'  (código também aceita Q17='E')</div>
+    </div>
+  </div>
+  <div class="model-body">
+    <div class="combo-section">
+      <div class="combo-title">Combinação 1 — 40–60h/semana com qualquer faturamento</div>
+      <table>
+        <tr><th>Pergunta</th><th>Resposta</th><th>Efeito</th></tr>
+        <tr><td class="q">Q11 faturamento</td><td class="val">Até R$5k ou acima</td><td class="eff ok">→ Q11≥B ✓</td></tr>
+        <tr><td class="q">Q17 horas</td><td class="val">D — 40 a 60h/semana</td><td class="eff ok">→ Q17=D ✓</td></tr>
+        <tr><td class="q">Q12 lucro</td><td class="val">A ou B</td><td class="eff grd">evita D (pos.3)</td></tr>
+        <tr><td class="q">Q16 capacidade</td><td class="val">A ou B</td><td class="eff grd">evita G (pos.2)</td></tr>
+        <tr><td class="q">demais</td><td class="val">qualquer</td><td class="eff neu">—</td></tr>
+      </table>
+    </div>
+    <div class="divider"></div>
+    <div class="combo-section">
+      <div class="combo-title">Combinação 2 — +60h/semana (desvio do PDF, mas aceito pelo código)</div>
+      <table>
+        <tr><th>Pergunta</th><th>Resposta</th><th>Efeito</th></tr>
+        <tr><td class="q">Q11 faturamento</td><td class="val">Até R$5k ou acima</td><td class="eff ok">→ Q11≥B ✓</td></tr>
+        <tr><td class="q">Q17 horas</td><td class="val">E — Mais de 60h/semana</td><td class="eff ok">→ Q17=E ✓ (código)</td></tr>
+        <tr><td class="q">Q12 lucro</td><td class="val">A ou B</td><td class="eff grd">evita D (pos.3)</td></tr>
+        <tr><td class="q">Q16 capacidade</td><td class="val">A ou B</td><td class="eff grd">evita G (pos.2)</td></tr>
+        <tr><td class="q">demais</td><td class="val">qualquer</td><td class="eff neu">—</td></tr>
+      </table>
+      <div class="note"><strong>Desvio documentado</strong>PDF v2.4 especifica apenas Q17='D'. O código inclui Q17='E'. Decisão intencional — quem trabalha +60h também é gargalo do dono.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODELO I ═══ -->
+<div class="model-card">
+  <div class="model-header">
+    <div class="badge bi">I</div>
+    <div>
+      <div class="title">Pré-Receita — Ainda Não Começou / Quer Iniciar <span class="pos">posição 0</span></div>
+      <div class="trigger">Q11='A' AND Q18 in ['A','C','D']  ·  fallback: Q11='A'</div>
+    </div>
+  </div>
+  <div class="model-body">
+    <div class="combo-section">
+      <div class="combo-title">Combinação 1 — Nunca começou (Q18=A)</div>
+      <table>
+        <tr><th>Pergunta</th><th>Resposta</th><th>Efeito</th></tr>
+        <tr><td class="q">Q10 formalizacao</td><td class="val">nao_comecou</td><td class="eff ok">→ Q18=A ✓</td></tr>
+        <tr><td class="q">Q11 faturamento</td><td class="val">Sem faturamento</td><td class="eff ok">→ Q11=A ✓</td></tr>
+        <tr><td class="q">demais</td><td class="val">qualquer</td><td class="eff neu">—</td></tr>
+      </table>
+    </div>
+    <div class="divider"></div>
+    <div class="combo-section">
+      <div class="combo-title">Combinação 2 — Tem ideia, fase inicial, sem faturamento (Q18=C)</div>
+      <table>
+        <tr><th>Pergunta</th><th>Resposta</th><th>Efeito</th></tr>
+        <tr><td class="q">Q5 fase_negocio</td><td class="val">A — Ideia</td><td class="eff ok">→ Q18=C ✓</td></tr>
+        <tr><td class="q">Q10 formalizacao</td><td class="val">informal (≠ nao_comecou)</td><td class="eff neu">garante Q18≠A</td></tr>
+        <tr><td class="q">Q11 faturamento</td><td class="val">Sem faturamento</td><td class="eff ok">→ Q11=A ✓</td></tr>
+        <tr><td class="q">demais</td><td class="val">qualquer</td><td class="eff neu">—</td></tr>
+      </table>
+    </div>
+    <div class="divider"></div>
+    <div class="combo-section">
+      <div class="combo-title">Combinação 3 — Fallback (payload antigo sem Q18)</div>
+      <table>
+        <tr><th>Pergunta</th><th>Resposta</th><th>Efeito</th></tr>
+        <tr><td class="q">Q11 faturamento</td><td class="val">Sem faturamento</td><td class="eff ok">→ Q11=A ✓</td></tr>
+        <tr><td class="q">Q18 derivada</td><td class="val">ausente / inválida</td><td class="eff ok">→ fallback I ✓</td></tr>
+        <tr><td class="q">demais</td><td class="val">qualquer</td><td class="eff neu">—</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ FALLBACK A ═══ -->
+<div class="model-card">
+  <div class="model-header">
+    <div class="badge bfb">A</div>
+    <div>
+      <div class="title">Fallback — Perfil Difuso / Negócio Sem Eixo Claro <span class="pos">posição final</span></div>
+      <div class="trigger">Ativa quando nenhum dos 9 modelos acima é satisfeito</div>
+    </div>
+  </div>
+  <div class="model-body">
+    <div class="combo-section">
+      <div class="combo-title">Exemplo de combinação que ativa o fallback</div>
+      <table>
+        <tr><th>Pergunta</th><th>Resposta</th><th>Por que não ativa outro modelo</th></tr>
+        <tr><td class="q">Q11 faturamento</td><td class="val">Até R$5k (B)</td><td class="eff neu">Q11=B → não é A (evita I/E)</td></tr>
+        <tr><td class="q">Q12 lucro</td><td class="val">B — Estável</td><td class="eff neu">Q12≠C → não ativa D</td></tr>
+        <tr><td class="q">Q15 canal</td><td class="val">A — Indicação</td><td class="eff neu">impede B; mas F não ativa pois Q9=C</td></tr>
+        <tr><td class="q">Q9 financeiro</td><td class="val">C — Desorganizado</td><td class="eff neu">impede B e C; mas Q8=A evita A-named</td></tr>
+        <tr><td class="q">Q8 estrutura</td><td class="val">A — Bem estruturado</td><td class="eff neu">Q8∉[B,C] → bloqueia A-named</td></tr>
+        <tr><td class="q">Q6 conexao_dons</td><td class="val">A — Sim</td><td class="eff neu">Q6≠C → bloqueia A-named</td></tr>
+        <tr><td class="q">Q7 proposito</td><td class="val">A — Claro</td><td class="eff neu">Q7≠C → bloqueia A-named</td></tr>
+        <tr><td class="q">Q16 capacidade</td><td class="val">A — Normal</td><td class="eff neu">não ativa G</td></tr>
+        <tr><td class="q">Q17 horas</td><td class="val">B — 10–20h</td><td class="eff neu">não ativa H</td></tr>
+        <tr><td class="q">Q5 fase</td><td class="val">C — Em crescimento</td><td class="eff neu">não ativa E</td></tr>
+      </table>
+      <div class="note"><strong>Por que cai no Fallback?</strong>Q15=A ativaria F, mas F precisa que Q9 e Q6/Q7 não sejam C — aqui Q9=C impede que o perfil seja "saudável o suficiente" para F. Nenhuma regra domina claramente. Esse é o diagnóstico correto para perfis genuinamente híbridos.</div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <span>Jethro Mentor PBN · Motor v2.4 · Relatório de Combinações de Diagnóstico</span>
+  <span>04/04/2026 · Uso interno</span>
+</footer>
+
+</body>
+</html>

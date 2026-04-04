@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jethro — Roteiro de Respostas por Modelo de Diagnóstico</title>
+  <style>
+    :root {
+      --bg: #0b1220;
+      --panel: #132238;
+      --panel-soft: #1b2d47;
+      --text: #f7f4ea;
+      --muted: #b9c3d3;
+      --gold: #e8cc73;
+      --line: #2d3f5c;
+      --accent: #8bb5ff;
+      --danger: #f2b2a5;
+      --green: #7dd3a8;
+      --orange: #f5a97f;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      font-size: 12px;
+      line-height: 1.6;
+      padding: 32px 40px;
+    }
+
+    header {
+      border-bottom: 2px solid var(--gold);
+      padding-bottom: 16px;
+      margin-bottom: 28px;
+    }
+
+    header h1 {
+      font-size: 20px;
+      color: var(--gold);
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    header p {
+      color: var(--muted);
+      font-size: 11px;
+      margin-top: 4px;
+    }
+
+    /* LEGENDA */
+    .legend {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 28px;
+      page-break-inside: avoid;
+    }
+
+    .legend h2 {
+      font-size: 13px;
+      color: var(--accent);
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .legend-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px 24px;
+    }
+
+    .legend-item {
+      display: flex;
+      gap: 8px;
+      align-items: baseline;
+    }
+
+    .legend-item .code {
+      font-family: monospace;
+      color: var(--gold);
+      font-size: 11px;
+      min-width: 36px;
+    }
+
+    .legend-item .label {
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .derivation-box {
+      background: var(--panel-soft);
+      border-left: 3px solid var(--orange);
+      padding: 10px 14px;
+      border-radius: 4px;
+      margin-top: 12px;
+    }
+
+    .derivation-box .title {
+      color: var(--orange);
+      font-size: 11px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .derivation-box .rule {
+      color: var(--muted);
+      font-size: 11px;
+      margin-bottom: 3px;
+    }
+
+    .derivation-box .rule span {
+      color: var(--text);
+      font-family: monospace;
+    }
+
+    /* MODELO CARD */
+    .model-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      margin-bottom: 20px;
+      page-break-inside: avoid;
+      overflow: hidden;
+    }
+
+    .model-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .model-badge {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+
+    .model-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .model-trigger {
+      font-size: 10px;
+      color: var(--muted);
+      font-family: monospace;
+      margin-top: 2px;
+    }
+
+    .model-body {
+      padding: 14px 16px;
+    }
+
+    /* CASOS */
+    .case {
+      margin-bottom: 14px;
+    }
+
+    .case:last-child {
+      margin-bottom: 0;
+    }
+
+    .case-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+
+    /* TABELA */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+    }
+
+    th {
+      background: var(--panel-soft);
+      color: var(--muted);
+      text-align: left;
+      padding: 5px 8px;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 10px;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    td {
+      padding: 5px 8px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    td:first-child {
+      font-family: monospace;
+      color: var(--gold);
+      white-space: nowrap;
+      width: 160px;
+    }
+
+    td:nth-child(2) {
+      color: var(--text);
+    }
+
+    td:nth-child(3) {
+      font-family: monospace;
+      font-size: 10px;
+    }
+
+    .tag-motor {
+      color: var(--green);
+    }
+
+    .tag-guard {
+      color: var(--danger);
+      font-size: 10px;
+    }
+
+    /* NOTA DE GUARDA */
+    .guard-note {
+      background: rgba(242, 178, 165, 0.08);
+      border: 1px solid rgba(242, 178, 165, 0.25);
+      border-radius: 4px;
+      padding: 8px 12px;
+      margin-top: 10px;
+      font-size: 10px;
+      color: var(--danger);
+    }
+
+    .guard-note strong {
+      display: block;
+      margin-bottom: 3px;
+      font-size: 10px;
+    }
+
+    /* SEPARADOR */
+    .divider {
+      height: 1px;
+      background: var(--line);
+      margin: 10px 0;
+    }
+
+    /* CORES POR MODELO */
+    .m-i   { background: #1a3a5c; color: #8bb5ff; }
+    .m-e   { background: #1a3a5c; color: #8bb5ff; }
+    .m-g   { background: #3a1a1a; color: #f2b2a5; }
+    .m-d   { background: #3a1a1a; color: #f2b2a5; }
+    .m-h   { background: #2a2a1a; color: #e8cc73; }
+    .m-a   { background: #2a1a2a; color: #c9a6f5; }
+    .m-f   { background: #1a2a2a; color: #7dd3a8; }
+    .m-c   { background: #1a2a1a; color: #7dd3a8; }
+    .m-b   { background: #1a2a3a; color: #8bb5ff; }
+    .m-fb  { background: #2a2a2a; color: #b9c3d3; }
+
+    footer {
+      margin-top: 32px;
+      border-top: 1px solid var(--line);
+      padding-top: 12px;
+      color: var(--muted);
+      font-size: 10px;
+      display: flex;
+      justify-content: space-between;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>JETHRO MENTOR PBN — Roteiro de Respostas por Modelo de Diagnóstico</h1>
+  <p>Motor v2.4 · Referência para QA e testes manuais · Gerado em 02/04/2026</p>
+</header>
+
+<!-- LEGENDA -->
+<div class="legend">
+  <h2>Legenda de Perguntas do Formulário</h2>
+  <div class="legend-grid">
+    <div class="legend-item"><span class="code">Q5</span><span class="label">fase_negocio — Fase do negócio (A=Ideia, B=Início, C=Crescimento, D=Consolidado)</span></div>
+    <div class="legend-item"><span class="code">Q6</span><span class="label">conexao_dons — Conectado com seus dons? (A=Sim, B=Parcial, C=Não)</span></div>
+    <div class="legend-item"><span class="code">Q7</span><span class="label">proposito_negocio — Sabe o propósito? (A=Claro, B=Ideia, C=Sem clareza)</span></div>
+    <div class="legend-item"><span class="code">Q8</span><span class="label">estrutura_negocio — Tem estrutura? (A=Sim, B=Em dev., C=Não)</span></div>
+    <div class="legend-item"><span class="code">Q9</span><span class="label">organizacao_financeira — Org. financeira (A=Estruturada, B=Básica, C=Desorganizada)</span></div>
+    <div class="legend-item"><span class="code">Q10</span><span class="label">formalizacao — nao_comecou / informal / formalizada / medio_grande_porte / outro</span></div>
+    <div class="legend-item"><span class="code">Q11</span><span class="label">faturamento_mensal → A=sem faturamento, B=até R$5k, C=R$5k–20k, D=R$20k+</span></div>
+    <div class="legend-item"><span class="code">Q12</span><span class="label">lucro_crescimento — Gerando lucro? (A=Crescendo, B=Estável, C=Regredindo)</span></div>
+    <div class="legend-item"><span class="code">Q15</span><span class="label">canal_aquisicao — Como clientes chegam (A=Indicação, B=Instagram, C=Tráfego pago…)</span></div>
+    <div class="legend-item"><span class="code">Q16</span><span class="label">capacidade_operacional — Se dobrar clientes (A=Normal, B=Reorganiza, C=Colapso)</span></div>
+    <div class="legend-item"><span class="code">Q17</span><span class="label">horas_semana — Horas/semana (A=&lt;10h, B=10-20h, C=20-40h, D=40-60h, E=+60h)</span></div>
+  </div>
+
+  <div class="derivation-box">
+    <div class="title">Q18 — Derivado internamente (não é pergunta direta)</div>
+    <div class="rule"><span>formalizacao = 'nao_comecou'</span> → Q18 = A</div>
+    <div class="rule"><span>fase_negocio = 'A'</span> (e formalizacao ≠ nao_comecou) → Q18 = C</div>
+    <div class="rule">qualquer outro caso → Q18 = B</div>
+  </div>
+</div>
+
+<!-- MODELO I -->
+<div class="model-card">
+  <div class="model-header">
+    <div class="model-badge m-i">I</div>
+    <div>
+      <div class="model-title">Pré-Receita — Ainda Não Começou / Quer Iniciar</div>
+      <div class="model-trigger">Trigger: Q11='A' AND Q18 in ['A','C','D'] · Posição 0 (máxima prioridade)</div>
+    </div>
+  </div>
+  <div class="model-body">
+    <div class="case">
+      <div class="case-title">Caso 1 — Nunca começou</div>
+      <table>
+        <tr><th>Pergunta</th><th>Resposta</th><th>Efeito no Motor</th></tr>
+        <tr><td>Q10 formalizacao</td><td>nao_comecou</td><td class="tag-motor">→ Q18 = A ✓</td></tr>
+        <tr><td>Q11 faturamento</td><td>Sem faturamento</td><td class="tag-motor">→ Q11 = A ✓</td></tr>
+        <tr><td>demais perguntas</td><td>qualquer valor</td><td>—</td></tr>
+      </table>
+    </div>
+    <div class="divider"></div>
+    <div class="case">
+      <div class="case-title">Caso 2 — Tem ideia, fase inicial, sem faturamento</div>
+      <table>
+        <tr><th>Pergunta</th><th>Resposta</th><th>Efeito no Motor</th></tr>
+        <tr><td>Q5 fase_negocio</td><td>A — Ideia</td><td class="tag-motor">→ Q18 = C ✓</td></tr>
+        <tr><td>Q10 formalizacao</td><td>informal (ou qualquer ≠ nao_comecou)</td><td>garante Q18 ≠ A</td></tr>
+        <tr><td>Q11 faturamento</td><td>Sem faturamento</td><td class="tag-motor">→ Q11 = A ✓</td></tr>
+        <tr><td>demais perguntas</td><td>qualquer valor</td><td>—</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- MODELO E -->
+<div class="model-card">
+  <div class="model-header">
+    <div class="model-badge m-e">E</div>
+    <div>
+      <div class="model-title">Pré-Receita — Já Começou, Mas Não Validou no Mercado</div>
+      <div class="model-trigger">Trigger: (Q11='A' AND Q18='B') OU (Q5≤'B' AND Q11='B' AND Q15='A') · Posição 1</div>
+    </div>
+  </div>
+  <div class="model-body">
+    <div class="case">
+      <div class="case-title">Caso 1 — Tem negócio em andamento mas ainda não fatura</div>
+      <table>
+        <tr><th>Pergunta</th><th>Resposta</th><th>Efeito no Motor</th></tr>
+        <tr><td>Q5 fase_negocio</td><td>B — Início (0-1 ano)</td><td>garante Q18 = B</td></tr>
+        <tr><td>Q10 formalizacao</td><td>informal</td><td class="tag-motor">→ Q18 = B ✓</td></tr>
+        <tr><td>Q11 faturamento</td><td>Sem faturamento</td><td class="tag-motor">→ Q11 = A ✓</td></tr>
+        <tr><td>demais perguntas</td><td>qualquer valor</td><td>—</td></tr>
+      </table>
+    </div>
+    <div class="divider"></div>
+    <div class="case">
+      <div class="case-title">Caso 2 — Início ou ideia, fatura pouco, depende só de indicação</div>
+      <table>
+        <tr><th>Pergunta</th><th>Resposta</th><th>Efeito no Motor</th></tr>
+        <tr><td>Q5 fase_negocio</td><td>A (Ideia) ou B (Início)</td><td class="tag-motor">→ Q5 ≤ B ✓</td></tr>
+        <tr><td>Q11 faturamento</td><td>Até R$5k</td><td class="tag-motor">→ Q11 = B ✓</td></tr>
+        <tr><td>Q15 canal_aquisicao</td><td>A — Indicação</td><td class="tag-motor">→ Q15 = A ✓</td></tr>
+        <tr><td>demais perguntas</td><td>qualquer valor</td><td>—</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- MODELO G -->
+<div class="model-card">
+  <div class="model-header">
+    <div class="model-badge m-g">G</div>
+    <div>
+      <div class="model-title">Operação no Limite — Crescer Piora Tudo</div>
+      <div class="model-trigger">Trigger: Q11≥'C' AND Q16='C' · Posição 2</div>
+    </div>
+  </div>
+  <div class="model-body">
+    <div class="case">
+      <table>
+        <tr><th>Pergunta</th><th>Resposta</th><th>Efeito no Motor</th></tr>
+        <tr><td>Q11 faturamento</td><td>R$5k–20k ou acima</td><td class="tag-motor">→ Q11 ≥ C ✓</td></tr>
+        <tr><td>Q16 capacidade_operacional</td><td>C — A operação entraria em colapso</td><td class="tag-motor">→ Q16 = C ✓</td></tr>
+        <tr><td>Q12 lucro_crescimento</td><td>A — Crescendo (recomendado)</td><td class="tag-guard">evita Modelo D (pos. 3)</td></tr>
+        <tr><td>demais perguntas</td><td>qualquer valor</td><td>—</td></tr>
+      </table>
+      <div class="guard-note"><strong>Guarda importante</strong>Se Q12='C' (regredindo), o Modelo D (pos. 3) ativa primeiro. Para garantir G, use Q12='A' ou Q12='B'.</div>
+    </div>
+  </div>
+</div>
+
+<!-- MODELO D -->
+<div class="model-card">
+  <div class="model-header">
+    <div class="model-badge m-d">D</div>
+    <div>
+      <div class="model-title">Fatura, Mas Sangra — Ilusão de Faturamento</div>
+      <div class="model-trigger">Trigger: Q11≥'B' AND Q12='C' · Posição 3</div>
+    </div>
+  </div>
+  <div class="model-body">
+    <div class="case">
+      <table>
+        <tr><th>Pergunta</th><th>Resposta</th><th>Efeito no Motor</th></tr>
+        <tr><td>Q11 faturamento</td><td>Até R$5k ou acima</td><td class="tag-motor">→ Q11 ≥ B ✓</td></tr>
+        <tr><td>Q12 lucro_crescimento</td><td>C — Não, estamos regredindo</td><td class="tag-motor">→ Q12 = C ✓</td></tr>
+        <tr><td>Q16 capacidade_operacional</td><td>A ou B (recomendado)</td><td class="tag-guard">evita Modelo G (pos. 2)</td></tr>
+        <tr><td>demais perguntas</td><td>qualquer valor</td><td>—</td></tr>
+      </table>
+      <div class="guard-note"><strong>Guarda importante</strong>Se Q16='C' e Q11≥C, o Modelo G ativa antes. Para garantir D, use Q16='A' ou Q16='B'.</div>
+    </div>
+  </div>
+</div>
+
+<!-- MODELO H -->
+<div class="model-card">
+  <div class="model-header">
+    <div class="model-badge m-h">H</div>
+    <div>
+      <div class="model-title">Gargalo É o Dono — Sem Governo Pessoal</div>
+      <div class="model-trigger">Trigger: Q17='D' AND Q11≥'B' · Posição 4 (código também aceita Q17='E')</div>
+    </div>
+  </div>
+  <div class="model-body">
+    <div class="case">
+      <table>
+        <tr><th>Pergunta</th><th>Resposta</th><th>Efeito no Motor</th></tr>
+        <tr><td>Q11 faturamento</td><td>Até R$5k ou acima</td><td class="tag-motor">→ Q11 ≥ B ✓</td></tr>
+        <tr><td>Q17 horas_semana</td><td>D — 40 a 60h por semana</td><td class="tag-motor">→ Q17 = D ✓</td></tr>
+        <tr><td>Q12 lucro_crescimento</td><td>A ou B (recomendado)</td><td class="tag-guard">evita Modelo D (pos. 3)</td></tr>
+        <tr><td>Q16 capacidade_operacional</td><td>A ou B (recomendado)</td><td class="tag-guard">evita Modelo G (pos. 2)</td></tr>
+        <tr><td>demais perguntas</td><td>qualquer valor</td><td>—</td></tr>
+      </table>
+      <div class="guard-note"><strong>Nota de desvio</strong>O PDF v2.4 define apenas Q17='D'. O código implementado aceita também Q17='E' (+60h). Ambos ativam Modelo H.</div>
+    </div>
+  </div>
+</div>
+
+<!-- MODELO A (named) -->
+<div class="model-card">
+  <div class="model-header">
+    <div class="model-badge m-a">A</div>
+    <div>
+      <div class="model-title">Negócio Travado + Financeiro Bagunçado + Sem Visão</div>
+      <div class="model-trigger">Trigger: Q9='C' AND Q8∈[B,C] AND Q12∈[B,C] AND (Q6='C' OR Q7='C') · Posição 5</div>
+    </div>
+  </div>
+  <div class="model-body">
+    <div class="case">
+      <table>
+        <tr><th>Pergunta</th><th>Resposta</th><th>Efeito no Motor</th></tr>
+        <tr><td>Q9 organizacao_financeira</td><td>C — Desorganizada / Confusa</td><td class="tag-motor">→ Q9 = C ✓</td></tr>
+        <tr><td>Q8 estrutura_negocio</td><td>B ou C</td><td class="tag-motor">→ Q8 ∈ [B,C] ✓</td></tr>
+        <tr><td>Q12 lucro_crescimento</td><td>B ou C</td><td class="tag-motor">→ Q12 ∈ [B,C] ✓</td></tr>
+        <tr><td>Q6 conexao_dons</td><td>C — Não, ainda não</td><td class="tag-motor">→ Q6 = C ✓</td></tr>
+        <tr><td>Q11 faturamento</td><td>Até R$5k ou acima</td><td class="tag-guard">evita I/E (Q11≥B)</td></tr>
+        <tr><td>Q16 capacidade_operacional</td><td>A ou B</td><td class="tag-guard">evita G (pos. 2)</td></tr>
+        <tr><td>Q17 horas_semana</td><td>A, B ou C</td><td class="tag-guard">evita H (pos. 4)</td></tr>
+        <tr><td>Q15 canal_aquisicao</td><td>B ou outro ≠ A</td><td class="tag-guard">evita F (pos. 6)</td></tr>
+        <tr><td>Q5 fase_negocio</td><td>C ou D (recomendado)</td><td class="tag-guard">evita E (pos. 1)</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- MODELO F -->
+<div class="model-card">
+  <div class="model-header">
+    <div class="model-badge m-f">F</div>
+    <div>
+      <div class="model-title">Vende, Mas Sem Motor — Depende de Indicação</div>
+      <div class="model-trigger">Trigger: Q11≥'B' AND Q15='A' AND Q12∈[B,C] · Posição 6</div>
+    </div>
+  </div>
+  <div class="model-body">
+    <div class="case">
+      <table>
+        <tr><th>Pergunta</th><th>Resposta</th><th>Efeito no Motor</th></tr>
+        <tr><td>Q11 faturamento</td><td>Até R$5k ou acima</td><td class="tag-motor">→ Q11 ≥ B ✓</td></tr>
+        <tr><td>Q15 canal_aquisicao</td><td>A — Indicação</td><td class="tag-motor">→ Q15 = A ✓</td></tr>
+        <tr><td>Q12 lucro_crescimento</td><td>B ou C</td><td class="tag-motor">→ Q12 ∈ [B,C] ✓</td></tr>
+        <tr><td>Q16 capacidade_operacional</td><td>A ou B</td><td class="tag-guard">evita G (pos. 2)</td></tr>
+        <tr><td>Q17 horas_semana</td><td>A, B ou C</td><td class="tag-guard">evita H (pos. 4)</td></tr>
+        <tr><td>Q9 organizacao_financeira</td><td>A ou B</td><td class="tag-guard">evita A-named (pos. 5)</td></tr>
+        <tr><td>Q6 conexao_dons</td><td>A ou B</td><td class="tag-guard">evita A-named (pos. 5)</td></tr>
+        <tr><td>Q5 fase_negocio</td><td>C ou D</td><td class="tag-guard">evita E caso Q11=B</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- MODELO C -->
+<div class="model-card">
+  <div class="model-header">
+    <div class="model-badge m-c">C</div>
+    <div>
+      <div class="model-title">Boa Base, Mas Aperto de Caixa + Sem Visão</div>
+      <div class="model-trigger">Trigger: Q6∈[A,B] AND Q7∈[A,B] AND Q9∈[B,C] AND Q12∈[B,C] · Posição 7</div>
+    </div>
+  </div>
+  <div class="model-body">
+    <div class="case">
+      <table>
+        <tr><th>Pergunta</th><th>Resposta</th><th>Efeito no Motor</th></tr>
+        <tr><td>Q6 conexao_dons</td><td>A ou B</td><td class="tag-motor">→ Q6 ∈ [A,B] ✓</td></tr>
+        <tr><td>Q7 proposito_negocio</td><td>A ou B</td><td class="tag-motor">→ Q7 ∈ [A,B] ✓</td></tr>
+        <tr><td>Q9 organizacao_financeira</td><td>B ou C</td><td class="tag-motor">→ Q9 ∈ [B,C] ✓</td></tr>
+        <tr><td>Q12 lucro_crescimento</td><td>B ou C</td><td class="tag-motor">→ Q12 ∈ [B,C] ✓</td></tr>
+        <tr><td>Q11 faturamento</td><td>Até R$5k ou acima</td><td class="tag-guard">Q11≥B evita I/E</td></tr>
+        <tr><td>Q15 canal_aquisicao</td><td>B ou outro ≠ A</td><td class="tag-guard">evita F (pos. 6)</td></tr>
+        <tr><td>Q16 capacidade_operacional</td><td>A ou B</td><td class="tag-guard">evita G (pos. 2)</td></tr>
+        <tr><td>Q17 horas_semana</td><td>A, B ou C</td><td class="tag-guard">evita H (pos. 4)</td></tr>
+        <tr><td>Q5 fase_negocio</td><td>C ou D</td><td class="tag-guard">evita E caso Q11=B</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- MODELO B -->
+<div class="model-card">
+  <div class="model-header">
+    <div class="model-badge m-b">B</div>
+    <div>
+      <div class="model-title">Negócio Saudável, Mas Travado no Platô</div>
+      <div class="model-trigger">Trigger: Q9∈[A,B] AND Q8∈[A,B] AND Q11≥'B' AND Q12='B' AND Q15≠'A' · Posição 8</div>
+    </div>
+  </div>
+  <div class="model-body">
+    <div class="case">
+      <table>
+        <tr><th>Pergunta</th><th>Resposta</th><th>Efeito no Motor</th></tr>
+        <tr><td>Q9 organizacao_financeira</td><td>A ou B</td><td class="tag-motor">→ Q9 ∈ [A,B] ✓</td></tr>
+        <tr><td>Q8 estrutura_negocio</td><td>A ou B</td><td class="tag-motor">→ Q8 ∈ [A,B] ✓</td></tr>
+        <tr><td>Q11 faturamento</td><td>Até R$5k ou acima</td><td class="tag-motor">→ Q11 ≥ B ✓</td></tr>
+        <tr><td>Q12 lucro_crescimento</td><td>B — Estável, sem crescimento</td><td class="tag-motor">→ Q12 = B ✓</td></tr>
+        <tr><td>Q15 canal_aquisicao</td><td>B, C, D, E, F ou G (qualquer ≠ A)</td><td class="tag-motor">→ Q15 ≠ A ✓</td></tr>
+        <tr><td>Q16 capacidade_operacional</td><td>A ou B</td><td class="tag-guard">evita G (pos. 2)</td></tr>
+        <tr><td>Q17 horas_semana</td><td>A, B ou C</td><td class="tag-guard">evita H (pos. 4)</td></tr>
+        <tr><td>Q5 fase_negocio</td><td>C ou D</td><td class="tag-guard">evita E caso Q11=B</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- FALLBACK A -->
+<div class="model-card">
+  <div class="model-header">
+    <div class="model-badge m-fb">A</div>
+    <div>
+      <div class="model-title">Fallback — Negócio Travado + Bagunça + Sem Clareza (Perfil Difuso)</div>
+      <div class="model-trigger">Ativa quando nenhum dos 9 modelos anteriores é satisfeito · Posição final</div>
+    </div>
+  </div>
+  <div class="model-body">
+    <div class="case">
+      <div class="case-title">Exemplo de perfil que ativa o fallback</div>
+      <table>
+        <tr><th>Pergunta</th><th>Resposta</th><th>Por que não ativa outro modelo</th></tr>
+        <tr><td>Q11 faturamento</td><td>Até R$5k</td><td>Q11=B (não é A, não ativa I/E)</td></tr>
+        <tr><td>Q12 lucro_crescimento</td><td>B — Estável</td><td>não ativa D (Q12≠C)</td></tr>
+        <tr><td>Q15 canal_aquisicao</td><td>A — Indicação</td><td>impede B; mas F não ativa pois Q9=C</td></tr>
+        <tr><td>Q9 organizacao_financeira</td><td>C — Desorganizada</td><td>impede B e C</td></tr>
+        <tr><td>Q8 estrutura_negocio</td><td>A — Bem estruturado</td><td>impede A-named (Q8∉[B,C])</td></tr>
+        <tr><td>Q6 conexao_dons</td><td>A — Sim, totalmente</td><td>impede A-named (Q6≠C)</td></tr>
+        <tr><td>Q7 proposito_negocio</td><td>A — Muito claro</td><td>impede A-named (Q7≠C)</td></tr>
+        <tr><td>Q16 capacidade_operacional</td><td>A — Daria conta</td><td>não ativa G</td></tr>
+        <tr><td>Q17 horas_semana</td><td>B — 10 a 20h</td><td>não ativa H</td></tr>
+        <tr><td>Q5 fase_negocio</td><td>C — Em crescimento</td><td>não ativa E</td></tr>
+      </table>
+      <div class="guard-note"><strong>Por que cai no Fallback?</strong>Q9=C impede F (mas Q15=A seria trigger de F — porém F exige Q9∉C implicitamente por prioridade). Nenhuma condição domina claramente. Perfil genuinamente difuso.</div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <span>Jethro Mentor PBN · Motor de Diagnóstico v2.4 · Roteiro de Testes por Modelo</span>
+  <span>02/04/2026 · Uso interno</span>
+</footer>
+
+</body>
+</html>

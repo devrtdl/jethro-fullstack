@@ -74,6 +74,22 @@ export type SubmissionPayload = {
   }>;
 };
 
+export type DiagnosticSummary = {
+  status: 'ready' | 'pending';
+  modelCode: string;
+  variant: string;
+  block1Title: string;
+  block1Body: string;
+  rootCause?: string;
+  palavraIntro?: string;
+  scriptureVerse?: string;
+  scriptureText?: string;
+  block2Title: string;
+  block2Body: string;
+  ctaLabel: string;
+  generatedAt: string;
+};
+
 export type SubmissionResponse = {
   success: true;
   data: {
@@ -82,12 +98,7 @@ export type SubmissionResponse = {
       title: string;
       message: string;
     };
-    diagnostic: {
-      status: 'pending';
-      title: string;
-      message: string;
-      generatedAt: string;
-    };
+    diagnostic: DiagnosticSummary;
     derived: {
       score: number;
       scoreBand: 'baixo' | 'medio' | 'alto';

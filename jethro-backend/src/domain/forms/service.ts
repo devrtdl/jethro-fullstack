@@ -608,7 +608,7 @@ async function buildDiagnosticSummary(
          from diagnostic_messages dmgs
          inner join diagnostic_models dm on dm.code = dmgs.model_code
          where dmgs.model_code = $1
-         order by cast(substring(dmgs.variant from 2) as integer) desc
+         order by random()
          limit 1`,
         [classified.code]
       );
@@ -1067,13 +1067,23 @@ export class FormsService {
 
       const diagnosticInsert = await client.query<{ id: string }>(
         `insert into diagnostico_respostas (
-          user_id, modelo_identificado, q11_faturamento, q15_canal, q16_capacidade, q17_horas, q18_status_empresa, score, payload_raw, answers_by_code
-        ) values ($1, $2, $3, $4, $5, $6, $7, $8, $9::jsonb, $10::jsonb)
+          user_id, modelo_identificado,
+          q5_fase, q6_conexao_dons, q7_proposito, q8_estrutura, q9_financeiro,
+          q11_faturamento, q12_lucro,
+          q15_canal, q16_capacidade, q17_horas, q18_status_empresa,
+          score, payload_raw, answers_by_code
+        ) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15::jsonb, $16::jsonb)
         returning id`,
         [
           userId,
           input.classified.code,
+          typeof input.answersBySlug.fase_negocio === 'string' ? input.answersBySlug.fase_negocio : null,
+          typeof input.answersBySlug.conexao_dons === 'string' ? input.answersBySlug.conexao_dons : null,
+          typeof input.answersBySlug.proposito_negocio === 'string' ? input.answersBySlug.proposito_negocio : null,
+          typeof input.answersBySlug.estrutura_negocio === 'string' ? input.answersBySlug.estrutura_negocio : null,
+          typeof input.answersBySlug.organizacao_financeira === 'string' ? input.answersBySlug.organizacao_financeira : null,
           revenue?.faixa ?? null,
+          typeof input.answersBySlug.lucro_crescimento === 'string' ? input.answersBySlug.lucro_crescimento : null,
           typeof input.answersBySlug.canal_aquisicao === 'string' ? input.answersBySlug.canal_aquisicao : null,
           typeof input.answersBySlug.capacidade_operacional === 'string' ? input.answersBySlug.capacidade_operacional : null,
           String(input.answersBySlug.horas_semana ?? ''),

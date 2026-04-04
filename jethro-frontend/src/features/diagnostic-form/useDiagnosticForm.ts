@@ -42,7 +42,7 @@ export function useDiagnosticForm() {
   const [isLoading, setIsLoading] = useState(true);
   const [submitResult, setSubmitResult] = useState<{
     confirmation: { title: string; message: string };
-    diagnostic: { title: string; message: string; status: 'pending'; generatedAt: string };
+    diagnostic: import('../../types/form').DiagnosticSummary;
   } | null>(null);
 
   useEffect(() => {

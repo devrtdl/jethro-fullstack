@@ -62,24 +62,45 @@ export function DiagnosticFormPage() {
   }
 
   if (submitResult) {
+    const d = submitResult.diagnostic;
     return (
       <div className="page-shell">
         <div className="layout">
           <aside className="hero-card">
-            <span className="eyebrow">Confirmacao</span>
+            <span className="eyebrow">Diagnóstico</span>
             <h1>{submitResult.confirmation.title}</h1>
             <p>{submitResult.confirmation.message}</p>
           </aside>
           <section className="form-card">
             <div className="summary-block">
-              <h2>{submitResult.diagnostic.title}</h2>
-              {/* deixei esse bloco simples de proposito.
-                  se a gente quiser virar uma tela de confirmacao mais elaborada, o lugar certo e aqui. */}
-              {/* TODO Pollynerd: transformar isso numa tela de confirmacao melhor.
-                  HINT: usar esse retorno para mostrar proximo passo, CTA e talvez resumo do que foi enviado. */}
-              <p>{submitResult.diagnostic.message}</p>
-              <a className="button-primary" href={APP_DOWNLOAD_URL} target="_blank" rel="noreferrer">
-                Baixar o app
+              {d.status === 'ready' ? (
+                <>
+                  <h2>{d.block1Title}</h2>
+                  <p style={{ whiteSpace: 'pre-line' }}>{d.block1Body}</p>
+
+                  {d.rootCause && (
+                    <p className="field-helper" style={{ marginTop: '12px' }}>
+                      <strong>Causa raiz:</strong> {d.rootCause}
+                    </p>
+                  )}
+
+                  {(d.palavraIntro || d.scriptureVerse) && (
+                    <blockquote style={{ margin: '16px 0', paddingLeft: '12px', borderLeft: '3px solid currentColor', opacity: 0.85 }}>
+                      {d.palavraIntro && <p style={{ marginBottom: '6px' }}>{d.palavraIntro}</p>}
+                      {d.scriptureText && <p><em>"{d.scriptureText}"</em></p>}
+                      {d.scriptureVerse && <footer style={{ marginTop: '4px', fontSize: '0.85em' }}>— {d.scriptureVerse}</footer>}
+                    </blockquote>
+                  )}
+
+                  <h3 style={{ marginTop: '20px' }}>{d.block2Title}</h3>
+                  <p style={{ whiteSpace: 'pre-line' }}>{d.block2Body}</p>
+                </>
+              ) : (
+                <p>Seu diagnóstico está sendo processado. Você receberá o resultado em breve.</p>
+              )}
+
+              <a className="button-primary" href={APP_DOWNLOAD_URL} target="_blank" rel="noreferrer" style={{ marginTop: '24px', display: 'inline-block' }}>
+                {d.status === 'ready' && d.ctaLabel ? d.ctaLabel : 'Baixar o app'}
               </a>
             </div>
           </section>
