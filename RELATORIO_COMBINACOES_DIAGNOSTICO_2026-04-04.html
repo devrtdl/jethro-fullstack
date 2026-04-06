@@ -315,7 +315,7 @@
     <div class="badge be">E</div>
     <div>
       <div class="title">Pré-Receita — Já Começou, Mas Não Validou no Mercado <span class="pos">posição 1</span></div>
-      <div class="trigger">(Q11='A' AND Q18='B')  OU  (Q5≤'B' AND Q11='B' AND Q15='A')</div>
+      <div class="trigger">(Q11='A' AND Q18='B')  OU  (Q5≤'B' AND Q11='B')</div>
     </div>
   </div>
   <div class="model-body">
@@ -331,12 +331,11 @@
     </div>
     <div class="divider"></div>
     <div class="combo-section">
-      <div class="combo-title">Combinação 2 — Início, fatura pouco, só indicação</div>
+      <div class="combo-title">Combinação 2 — Início ou ideia, fatura pouco</div>
       <table>
         <tr><th>Pergunta</th><th>Resposta</th><th>Efeito</th></tr>
         <tr><td class="q">Q5 fase_negocio</td><td class="val">A ou B</td><td class="eff ok">→ Q5≤B ✓</td></tr>
         <tr><td class="q">Q11 faturamento</td><td class="val">Até R$5k</td><td class="eff ok">→ Q11=B ✓</td></tr>
-        <tr><td class="q">Q15 canal_aquisicao</td><td class="val">A — Indicação</td><td class="eff ok">→ Q15=A ✓</td></tr>
         <tr><td class="q">demais</td><td class="val">qualquer</td><td class="eff neu">—</td></tr>
       </table>
     </div>
@@ -349,7 +348,7 @@
     <div class="badge bf">F</div>
     <div>
       <div class="title">Vende, Mas Sem Motor — Depende de Indicação <span class="pos">posição 6</span></div>
-      <div class="trigger">Q11≥'B' AND Q15='A' AND Q12∈[B,C]</div>
+      <div class="trigger">Q11≥'B' AND Q15='A' AND Q12='B' AND Q9∈[A,B]</div>
     </div>
   </div>
   <div class="model-body">
@@ -360,25 +359,13 @@
         <tr><td class="q">Q11 faturamento</td><td class="val">Até R$5k</td><td class="eff ok">→ Q11=B ✓</td></tr>
         <tr><td class="q">Q15 canal</td><td class="val">A — Indicação</td><td class="eff ok">→ Q15=A ✓</td></tr>
         <tr><td class="q">Q12 lucro</td><td class="val">B — Estável</td><td class="eff ok">→ Q12=B ✓</td></tr>
-        <tr><td class="q">Q9 financeiro</td><td class="val">A ou B</td><td class="eff grd">evita A-named (pos.5)</td></tr>
-        <tr><td class="q">Q6 ou Q7</td><td class="val">A ou B (ambos)</td><td class="eff grd">evita A-named (pos.5)</td></tr>
+        <tr><td class="q">Q9 financeiro</td><td class="val">A ou B</td><td class="eff ok">→ Q9∈[A,B] ✓</td></tr>
         <tr><td class="q">Q16 capacidade</td><td class="val">A ou B</td><td class="eff grd">evita G (pos.2)</td></tr>
         <tr><td class="q">Q17 horas</td><td class="val">A, B ou C</td><td class="eff grd">evita H (pos.4)</td></tr>
         <tr><td class="q">Q5 fase</td><td class="val">C ou D</td><td class="eff grd">evita E caso Q11=B</td></tr>
       </table>
     </div>
-    <div class="divider"></div>
-    <div class="combo-section">
-      <div class="combo-title">Combinação 2 — Fatura mais, só indicação, regredindo (Q12=C)</div>
-      <table>
-        <tr><th>Pergunta</th><th>Resposta</th><th>Efeito</th></tr>
-        <tr><td class="q">Q11 faturamento</td><td class="val">R$5k–20k ou R$20k+</td><td class="eff ok">→ Q11≥C ✓</td></tr>
-        <tr><td class="q">Q15 canal</td><td class="val">A — Indicação</td><td class="eff ok">→ Q15=A ✓</td></tr>
-        <tr><td class="q">Q12 lucro</td><td class="val">C — Regredindo</td><td class="eff ok">→ Q12=C ✓</td></tr>
-        <tr><td class="q">Q16 capacidade</td><td class="val">A ou B</td><td class="eff grd">evita G (pos.2) — crítico aqui</td></tr>
-        <tr><td class="q">Q9, Q6, Q7</td><td class="val">ver guards acima</td><td class="eff grd">evita A-named (pos.5)</td></tr>
-      </table>
-    </div>
+    <div class="note"><strong>Atenção</strong>Se Q12='C' (regredindo), o Modelo D (posição 3) ativa antes e captura o caso. Além disso, no Modelo F o financeiro deve estar em Q9∈[A,B].</div>
   </div>
 </div>
 

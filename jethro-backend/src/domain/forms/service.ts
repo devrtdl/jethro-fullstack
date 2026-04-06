@@ -554,7 +554,7 @@ function classifyDiagnostic(answersBySlug: Record<string, JsonValue>): Classifie
   if (q11 === 'A' && ['A', 'C', 'D'].includes(q18)) return { code: 'I' };
   // 1. MODELO E — ja comecou mas nao validou
   if (q11 === 'A' && q18 === 'B') return { code: 'E' };
-  if (q5 <= 'B' && q11 === 'B' && q15 === 'A') return { code: 'E' };
+  if (q5 <= 'B' && q11 === 'B') return { code: 'E' };
   // fallback I (q11='A' sem Q18 valida)
   if (q11 === 'A') return { code: 'I' };
   // 2. MODELO G — operacao no limite
@@ -566,7 +566,7 @@ function classifyDiagnostic(answersBySlug: Record<string, JsonValue>): Classifie
   // 5. MODELO A — negocio travado e baguncado
   if (q9 === 'C' && ['B', 'C'].includes(q8) && ['B', 'C'].includes(q12) && (q6 === 'C' || q7 === 'C')) return { code: 'A' };
   // 6. MODELO F — vende mas sem motor comercial
-  if (q11 >= 'B' && q15 === 'A' && ['B', 'C'].includes(q12)) return { code: 'F' };
+  if (q11 >= 'B' && q15 === 'A' && q12 === 'B' && ['A', 'B'].includes(q9)) return { code: 'F' };
   // 7. MODELO C — boa base, caixa apertado
   if (['A', 'B'].includes(q6) && ['A', 'B'].includes(q7) && ['B', 'C'].includes(q9) && ['B', 'C'].includes(q12)) return { code: 'C' };
   // 8. MODELO B — negocio saudavel no plato

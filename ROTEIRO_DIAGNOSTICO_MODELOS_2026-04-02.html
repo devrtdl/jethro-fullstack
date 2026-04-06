@@ -352,7 +352,7 @@
     <div class="model-badge m-e">E</div>
     <div>
       <div class="model-title">Pré-Receita — Já Começou, Mas Não Validou no Mercado</div>
-      <div class="model-trigger">Trigger: (Q11='A' AND Q18='B') OU (Q5≤'B' AND Q11='B' AND Q15='A') · Posição 1</div>
+      <div class="model-trigger">Trigger: (Q11='A' AND Q18='B') OU (Q5≤'B' AND Q11='B') · Posição 1</div>
     </div>
   </div>
   <div class="model-body">
@@ -368,12 +368,11 @@
     </div>
     <div class="divider"></div>
     <div class="case">
-      <div class="case-title">Caso 2 — Início ou ideia, fatura pouco, depende só de indicação</div>
+      <div class="case-title">Caso 2 — Início ou ideia, fatura pouco</div>
       <table>
         <tr><th>Pergunta</th><th>Resposta</th><th>Efeito no Motor</th></tr>
         <tr><td>Q5 fase_negocio</td><td>A (Ideia) ou B (Início)</td><td class="tag-motor">→ Q5 ≤ B ✓</td></tr>
         <tr><td>Q11 faturamento</td><td>Até R$5k</td><td class="tag-motor">→ Q11 = B ✓</td></tr>
-        <tr><td>Q15 canal_aquisicao</td><td>A — Indicação</td><td class="tag-motor">→ Q15 = A ✓</td></tr>
         <tr><td>demais perguntas</td><td>qualquer valor</td><td>—</td></tr>
       </table>
     </div>
@@ -483,7 +482,7 @@
     <div class="model-badge m-f">F</div>
     <div>
       <div class="model-title">Vende, Mas Sem Motor — Depende de Indicação</div>
-      <div class="model-trigger">Trigger: Q11≥'B' AND Q15='A' AND Q12∈[B,C] · Posição 6</div>
+      <div class="model-trigger">Trigger: Q11≥'B' AND Q15='A' AND Q12='B' AND Q9∈[A,B] · Posição 6</div>
     </div>
   </div>
   <div class="model-body">
@@ -492,13 +491,13 @@
         <tr><th>Pergunta</th><th>Resposta</th><th>Efeito no Motor</th></tr>
         <tr><td>Q11 faturamento</td><td>Até R$5k ou acima</td><td class="tag-motor">→ Q11 ≥ B ✓</td></tr>
         <tr><td>Q15 canal_aquisicao</td><td>A — Indicação</td><td class="tag-motor">→ Q15 = A ✓</td></tr>
-        <tr><td>Q12 lucro_crescimento</td><td>B ou C</td><td class="tag-motor">→ Q12 ∈ [B,C] ✓</td></tr>
+        <tr><td>Q12 lucro_crescimento</td><td>B — Estável</td><td class="tag-motor">→ Q12 = B ✓</td></tr>
+        <tr><td>Q9 organizacao_financeira</td><td>A ou B</td><td class="tag-motor">→ Q9 ∈ [A,B] ✓</td></tr>
         <tr><td>Q16 capacidade_operacional</td><td>A ou B</td><td class="tag-guard">evita G (pos. 2)</td></tr>
         <tr><td>Q17 horas_semana</td><td>A, B ou C</td><td class="tag-guard">evita H (pos. 4)</td></tr>
-        <tr><td>Q9 organizacao_financeira</td><td>A ou B</td><td class="tag-guard">evita A-named (pos. 5)</td></tr>
-        <tr><td>Q6 conexao_dons</td><td>A ou B</td><td class="tag-guard">evita A-named (pos. 5)</td></tr>
         <tr><td>Q5 fase_negocio</td><td>C ou D</td><td class="tag-guard">evita E caso Q11=B</td></tr>
       </table>
+      <div class="guard-note"><strong>Guarda importante</strong>Se Q12='C' (regredindo), o Modelo D (pos. 3) ativa primeiro e captura o caso. Além disso, se Q9='C', o Modelo F não ativa.</div>
     </div>
   </div>
 </div>
