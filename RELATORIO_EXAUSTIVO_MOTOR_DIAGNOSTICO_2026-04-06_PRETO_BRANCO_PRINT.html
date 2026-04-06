@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<title>Relatorio Exaustivo do Motor - Preto e Branco</title>
+<style>
+@page { size: A4 portrait; margin: 10mm; }
+body { font-family: "Times New Roman", serif; color:#000; background:#fff; margin:0; padding:0; }
+.wrap { padding: 10mm; }
+h1, h2 { margin: 0 0 8px 0; }
+p, li { font-size: 12px; line-height: 1.4; }
+table { width:100%; border-collapse: collapse; margin: 10px 0 18px 0; font-size: 11px; }
+th, td { border:1px solid #000; padding:4px 6px; vertical-align: top; }
+th { background:#fff; font-weight:700; }
+.small { font-size: 10px; }
+.page-break { page-break-before: always; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Relatorio Exaustivo do Motor de Diagnostico</h1>
+<p><strong>Data:</strong> 06/04/2026</p>
+<p><strong>Total de cenarios processados:</strong> 2.041.200</p>
+<p class="small">Relatorio em preto e branco para impressao. O detalhamento completo de cada combinacao esta no CSV exaustivo.</p>
+
+<h2>Distribuicao por Modelo</h2>
+<table>
+<tr><th>Modelo</th><th>Titulo</th><th>Cenarios</th><th>Consequencia pratica</th></tr>
+<tr><td>A</td><td>Negocio travado e baguncado</td><td>249.480</td><td>Operacao desorganizada e sem clareza; priorizar estrutura, financeiro e direcionamento.</td></tr><tr><td>B</td><td>Negocio saudavel no plato</td><td>55.440</td><td>Base boa com estagnacao; foco em alavancas de crescimento e escala sustentavel.</td></tr><tr><td>C</td><td>Boa base, caixa apertado</td><td>51.480</td><td>Existe fundamento, mas caixa e previsibilidade limitam; foco em margem e recorrencia.</td></tr><tr><td>D</td><td>Fatura, mas sangra</td><td>311.850</td><td>Ha faturamento com regressao; ajuste urgente de lucratividade e custos para evitar deterioracao.</td></tr><tr><td>E</td><td>Ja comecou, mas nao validou</td><td>561.330</td><td>Validacao comercial insuficiente; foco em proposta, oferta e tracao inicial.</td></tr><tr><td>F</td><td>Vende sem motor comercial</td><td>17.820</td><td>Dependencia de canal fragil; construir aquisicao previsivel e processo comercial.</td></tr><tr><td>G</td><td>Operacao no limite</td><td>340.200</td><td>Crescimento gera colapso operacional; padronizar processos e capacidade antes de escalar.</td></tr><tr><td>H</td><td>Gargalo do dono</td><td>249.480</td><td>Sobrecarga cronica do fundador; redistribuir execucao e governanca pessoal.</td></tr><tr><td>I</td><td>Pre-receita / ainda nao comecou</td><td>204.120</td><td>Sem tracao de receita; foco em validacao rapida e primeiras vendas.</td></tr>
+</table>
+
+<div class="page-break"></div>
+<h2>Cenarios Homogeneos (Tudo A/B/C/D/E)</h2>
+<table>
+<tr>
+<th>Padrao</th><th>Q5</th><th>Q6</th><th>Q7</th><th>Q8</th><th>Q9</th>
+<th>Q10</th><th>Q11</th><th>Q12</th><th>Q15</th><th>Q16</th><th>Q17</th>
+<th>Modelo</th><th>Motivo</th><th>Consequencia pratica</th>
+</tr>
+<tr>
+<td>Tudo A</td>
+<td>A</td><td>A</td><td>A</td><td>A</td><td>A</td>
+<td>nao_comecou</td><td>A</td><td>A</td><td>A</td><td>A</td><td>A</td>
+<td>I</td><td>Q11='A' e Q18 em [A,C,D]</td><td>Sem tracao de receita; foco em validacao rapida e primeiras vendas.</td>
+</tr><tr>
+<td>Tudo B</td>
+<td>B</td><td>B</td><td>B</td><td>B</td><td>B</td>
+<td>informal</td><td>B</td><td>B</td><td>B</td><td>B</td><td>B</td>
+<td>E</td><td>Q5<='B' e Q11='B'</td><td>Validacao comercial insuficiente; foco em proposta, oferta e tracao inicial.</td>
+</tr><tr>
+<td>Tudo C</td>
+<td>C</td><td>C</td><td>C</td><td>C</td><td>C</td>
+<td>formalizada</td><td>C</td><td>C</td><td>C</td><td>C</td><td>C</td>
+<td>G</td><td>Q11>='C' e Q16='C'</td><td>Crescimento gera colapso operacional; padronizar processos e capacidade antes de escalar.</td>
+</tr><tr>
+<td>Tudo D</td>
+<td>D</td><td>C</td><td>C</td><td>C</td><td>C</td>
+<td>formalizada</td><td>D</td><td>C</td><td>D</td><td>C</td><td>D</td>
+<td>G</td><td>Q11>='C' e Q16='C'</td><td>Crescimento gera colapso operacional; padronizar processos e capacidade antes de escalar.</td>
+</tr><tr>
+<td>Tudo E</td>
+<td>D</td><td>C</td><td>C</td><td>C</td><td>C</td>
+<td>formalizada</td><td>D</td><td>C</td><td>E</td><td>C</td><td>E</td>
+<td>G</td><td>Q11>='C' e Q16='C'</td><td>Crescimento gera colapso operacional; padronizar processos e capacidade antes de escalar.</td>
+</tr>
+</table>
+
+<p class="small">CSV completo: RELATORIO_EXAUSTIVO_MOTOR_DIAGNOSTICO_2026-04-06.csv</p>
+</div>
+</body>
+</html>

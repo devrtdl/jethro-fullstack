@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<title>Respostas que Ativam Cada Modelo - Motor v2.4</title>
+<style>
+@page { size: A4 portrait; margin: 12mm 10mm; }
+* { box-sizing: border-box; }
+body { font-family: "Times New Roman", serif; color: #000; background: #fff; margin: 0; padding: 0; font-size: 11px; line-height: 1.4; }
+.wrap { padding: 0 4mm; }
+
+h1 { font-size: 16px; margin: 0 0 2px 0; }
+h2 { font-size: 13px; margin: 14px 0 4px 0; border-bottom: 1.5px solid #000; padding-bottom: 2px; }
+h3 { font-size: 11px; margin: 10px 0 3px 0; font-weight: bold; }
+p { margin: 2px 0 6px 0; }
+.meta { font-size: 10px; margin-bottom: 8px; }
+.label { font-weight: bold; }
+
+table { width: 100%; border-collapse: collapse; margin: 6px 0 10px 0; font-size: 10px; }
+th { border: 1px solid #000; padding: 4px 5px; background: #000; color: #fff; text-align: left; font-weight: bold; }
+td { border: 1px solid #000; padding: 4px 5px; vertical-align: top; }
+td.center { text-align: center; }
+td.bold { font-weight: bold; }
+
+.model-block { border: 1.5px solid #000; margin-bottom: 12px; page-break-inside: avoid; }
+.model-header { background: #000; color: #fff; padding: 5px 8px; }
+.model-header .modelo-code { font-size: 18px; font-weight: bold; display: inline; margin-right: 8px; }
+.model-header .modelo-title { font-size: 12px; font-weight: bold; display: inline; }
+.model-header .modelo-sub { font-size: 10px; display: block; margin-top: 1px; opacity: 0.9; }
+.model-body { padding: 7px 8px; }
+
+.cond-table { width: 100%; border-collapse: collapse; font-size: 10px; margin: 0; }
+.cond-table th { border: 1px solid #555; padding: 3px 5px; background: #e0e0e0; color: #000; font-weight: bold; font-size: 9.5px; }
+.cond-table td { border: 1px solid #888; padding: 3px 5px; vertical-align: top; }
+.cond-table .q { font-weight: bold; white-space: nowrap; }
+.cond-table .req { background: #f5f5f5; }
+.cond-table .exc { background: #fff; }
+
+.consequencia { margin-top: 6px; border-top: 1px dashed #888; padding-top: 5px; font-size: 10.5px; }
+.consequencia .label { font-weight: bold; }
+
+.legenda-box { border: 1px solid #000; padding: 6px 8px; margin-bottom: 10px; font-size: 10px; }
+.legenda-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
+
+.page-break { page-break-before: always; }
+
+.prioridade-tag { font-size: 9px; background: #fff; color: #000; border: 1px solid #000; padding: 1px 4px; display: inline-block; margin-left: 6px; vertical-align: middle; }
+
+.note { font-size: 9.5px; font-style: italic; color: #333; margin: 3px 0; }
+
+.resumo-table th { background: #000; color: #fff; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Motor de Diagnóstico Jethro — Respostas que Ativam Cada Modelo</h1>
+<p class="meta">
+  <strong>Motor:</strong> v2.4 &nbsp;|&nbsp;
+  <strong>Arquivo de referência:</strong> jethro-backend/src/domain/forms/service.ts &nbsp;|&nbsp;
+  <strong>Data:</strong> 06/04/2026
+</p>
+<p class="meta">
+  Este relatório documenta, para cada um dos 9 modelos diagnósticos e o fallback, quais combinações
+  de respostas ativam aquele modelo. A ordem de prioridade do motor é respeitada: uma vez que
+  a condição de um modelo é satisfeita, os modelos de menor prioridade não são avaliados.
+</p>
+
+<!-- LEGENDA DAS PERGUNTAS -->
+<div class="legenda-box">
+  <strong>Legenda das perguntas utilizadas pelo motor</strong>
+  <div class="legenda-grid" style="margin-top:4px;">
+    <div>
+      <strong>Q5</strong> Fase do negócio<br>
+      &nbsp;&nbsp;A = Ideia &nbsp;|&nbsp; B = Início (0-1 ano) &nbsp;|&nbsp; C = Crescimento (1-3 anos) &nbsp;|&nbsp; D = Consolidado (3+ anos)
+    </div>
+    <div>
+      <strong>Q6</strong> Conexão dons/talentos<br>
+      &nbsp;&nbsp;A = Sim, totalmente &nbsp;|&nbsp; B = Parcialmente &nbsp;|&nbsp; C = Não, ainda não
+    </div>
+    <div style="margin-top:4px;">
+      <strong>Q7</strong> Propósito do negócio<br>
+      &nbsp;&nbsp;A = Muito claro &nbsp;|&nbsp; B = Tenho ideia, não definido &nbsp;|&nbsp; C = Sem clareza
+    </div>
+    <div style="margin-top:4px;">
+      <strong>Q8</strong> Estrutura / planejamento estratégico<br>
+      &nbsp;&nbsp;A = Bem estruturado &nbsp;|&nbsp; B = Em desenvolvimento &nbsp;|&nbsp; C = Ainda não
+    </div>
+    <div style="margin-top:4px;">
+      <strong>Q9</strong> Organização financeira<br>
+      &nbsp;&nbsp;A = Estruturada &nbsp;|&nbsp; B = Básica &nbsp;|&nbsp; C = Desorganizada
+    </div>
+    <div style="margin-top:4px;">
+      <strong>Q10</strong> Formalização<br>
+      &nbsp;&nbsp;nao_comecou / informal / formalizada / medio_grande_porte / outro
+    </div>
+    <div style="margin-top:4px;">
+      <strong>Q11</strong> Faturamento mensal → banda interna<br>
+      &nbsp;&nbsp;A = Sem receita &nbsp;|&nbsp; B = Baixo (até R$5k / €2k / $2k)<br>
+      &nbsp;&nbsp;C = Médio (R$5k-20k / €2k-10k / $2k-10k) &nbsp;|&nbsp; D = Alto (acima)
+    </div>
+    <div style="margin-top:4px;">
+      <strong>Q12</strong> Lucro e crescimento<br>
+      &nbsp;&nbsp;A = Crescendo &nbsp;|&nbsp; B = Estável, sem crescimento &nbsp;|&nbsp; C = Regredindo
+    </div>
+    <div style="margin-top:4px;">
+      <strong>Q15</strong> Canal de aquisição de clientes <em>(interno)</em><br>
+      &nbsp;&nbsp;A = Indicação &nbsp;|&nbsp; B = Instagram &nbsp;|&nbsp; C = Tráfego pago<br>
+      &nbsp;&nbsp;D = LinkedIn &nbsp;|&nbsp; E = Prospecção ativa &nbsp;|&nbsp; F = Vários canais &nbsp;|&nbsp; G = Outro
+    </div>
+    <div style="margin-top:4px;">
+      <strong>Q16</strong> Capacidade operacional<br>
+      &nbsp;&nbsp;A = Daria conta &nbsp;|&nbsp; B = Precisaria reorganizar &nbsp;|&nbsp; C = Entraria em colapso
+    </div>
+    <div style="margin-top:4px;">
+      <strong>Q17</strong> Horas/semana dedicadas ao negócio<br>
+      &nbsp;&nbsp;A = &lt;10h &nbsp;|&nbsp; B = 10-20h &nbsp;|&nbsp; C = 20-40h &nbsp;|&nbsp; D = 40-60h &nbsp;|&nbsp; E = &gt;60h
+    </div>
+    <div style="margin-top:4px;">
+      <strong>Q18</strong> Status da empresa <em>(derivada — não exibida ao usuário)</em><br>
+      &nbsp;&nbsp;A = Q10=nao_comecou &nbsp;|&nbsp; B = Q5≥B e Q10≠nao_comecou &nbsp;|&nbsp; C = Q5=A e Q10≠nao_comecou
+    </div>
+  </div>
+</div>
+
+<!-- RESUMO DE PRIORIDADES -->
+<h2>Ordem de Prioridade do Motor (v2.4)</h2>
+<table class="resumo-table">
+  <tr>
+    <th>Prioridade</th>
+    <th>Modelo</th>
+    <th>Título</th>
+    <th>Condição principal</th>
+  </tr>
+  <tr><td class="center">0</td><td class="bold center">I</td><td>Pré-receita / ainda não começou</td><td>Q11=A e Q18 ∈ {A,C}</td></tr>
+  <tr><td class="center">1</td><td class="bold center">E</td><td>Já começou, mas não validou</td><td>Q11=A e Q18=B &nbsp;|&nbsp; ou Q5≤B e Q11=B</td></tr>
+  <tr><td class="center">—</td><td class="bold center">I*</td><td>Fallback pré-receita</td><td>Q11=A (Q18 inválida ou ausente)</td></tr>
+  <tr><td class="center">2</td><td class="bold center">G</td><td>Operação no limite</td><td>Q11≥C e Q16=C</td></tr>
+  <tr><td class="center">3</td><td class="bold center">D</td><td>Fatura, mas sangra</td><td>Q11≥B e Q12=C</td></tr>
+  <tr><td class="center">4</td><td class="bold center">H</td><td>Gargalo do dono</td><td>Q11≥B e Q17 ∈ {D,E}</td></tr>
+  <tr><td class="center">5</td><td class="bold center">A</td><td>Negócio travado e bagunçado</td><td>Q9=C e Q8∈{B,C} e Q12∈{B,C} e (Q6=C ou Q7=C)</td></tr>
+  <tr><td class="center">6</td><td class="bold center">F</td><td>Vende sem motor comercial</td><td>Q11≥B e Q15=A e Q12=B e Q9∈{A,B}</td></tr>
+  <tr><td class="center">7</td><td class="bold center">C</td><td>Boa base, caixa apertado</td><td>Q6∈{A,B} e Q7∈{A,B} e Q9∈{B,C} e Q12∈{B,C}</td></tr>
+  <tr><td class="center">8</td><td class="bold center">B</td><td>Negócio saudável no platô</td><td>Q9∈{A,B} e Q8∈{A,B} e Q11≥B e Q12=B e Q15≠A</td></tr>
+  <tr><td class="center">—</td><td class="bold center">A*</td><td>Fallback geral</td><td>Nenhuma regra anterior satisfeita</td></tr>
+</table>
+
+<div class="page-break"></div>
+
+<!-- ===== MODELO I ===== -->
+<div class="model-block">
+  <div class="model-header">
+    <span class="modelo-code">I</span>
+    <span class="modelo-title">Pré-receita / Ainda não começou</span>
+    <span class="prioridade-tag">Prioridade 0</span>
+    <span class="modelo-sub">204.120 cenários &nbsp;|&nbsp; Ativado antes de qualquer outro modelo quando Q11=A</span>
+  </div>
+  <div class="model-body">
+    <h3>Condição de ativação</h3>
+    <p>Q11 = A (não fatura) <strong>E</strong> Q18 ∈ {A, C}</p>
+    <p class="note">Q18 é derivada: A quando Q10=nao_comecou; C quando Q5=A e Q10≠nao_comecou.</p>
+
+    <table class="cond-table">
+      <tr>
+        <th>Pergunta</th><th>Resposta(s) necessária(s)</th><th>Observação</th>
+      </tr>
+      <tr class="req">
+        <td class="q">Q11 (faturamento)</td>
+        <td><strong>A</strong> — Ainda não fatura (not_revenue)</td>
+        <td>Condição obrigatória e suficiente na dimensão receita</td>
+      </tr>
+      <tr class="req">
+        <td class="q">Q18 (derivada)</td>
+        <td><strong>A</strong> ou <strong>C</strong></td>
+        <td>A: Q10=nao_comecou; C: Q5=A e Q10≠nao_comecou</td>
+      </tr>
+      <tr>
+        <td class="q">Q5 (fase)</td>
+        <td>Qualquer (A, B, C, D)</td>
+        <td>Mas se Q5=A e Q10≠nao_comecou → Q18=C → ativa I</td>
+      </tr>
+      <tr>
+        <td class="q">Q10 (formalização)</td>
+        <td>nao_comecou → Q18=A; informal/formalizada/etc com Q5=A → Q18=C</td>
+        <td></td>
+      </tr>
+    </table>
+
+    <h3>Cenários concretos que ativam o Modelo I</h3>
+    <table class="cond-table">
+      <tr><th>Cenário</th><th>Q5</th><th>Q10</th><th>Q11</th><th>Q18 resultante</th></tr>
+      <tr><td>Não começou nada</td><td>A, B, C ou D</td><td>nao_comecou</td><td>A</td><td>A → Modelo I</td></tr>
+      <tr><td>Tem ideia, não estruturou</td><td>A</td><td>informal, formalizada, outro</td><td>A</td><td>C → Modelo I</td></tr>
+    </table>
+
+    <div class="consequencia">
+      <span class="label">Consequência prática:</span> Sem nenhuma tração de receita. O empreendedor ainda não saiu do papel ou está na fase de ideia sem produto/serviço ativo. O foco deve ser validação rápida da oferta e primeiras vendas — antes de qualquer estruturação ou escala.
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODELO E ===== -->
+<div class="model-block">
+  <div class="model-header">
+    <span class="modelo-code">E</span>
+    <span class="modelo-title">Já Começou, Mas Não Validou</span>
+    <span class="prioridade-tag">Prioridade 1</span>
+    <span class="modelo-sub">561.330 cenários &nbsp;|&nbsp; Maior volume — dois gatilhos independentes</span>
+  </div>
+  <div class="model-body">
+    <h3>Dois gatilhos independentes (qualquer um ativa o modelo)</h3>
+
+    <p><strong>Gatilho 1:</strong> Q11 = A e Q18 = B</p>
+    <table class="cond-table">
+      <tr><th>Pergunta</th><th>Resposta necessária</th><th>Observação</th></tr>
+      <tr class="req"><td class="q">Q11 (faturamento)</td><td><strong>A</strong> — Sem receita</td><td>Modelo I já foi descartado (Q18≠A e Q18≠C)</td></tr>
+      <tr class="req"><td class="q">Q18 (derivada)</td><td><strong>B</strong> — Tem empresa, fase ≥ B</td><td>Q5 ∈ {B,C,D} e Q10 ≠ nao_comecou</td></tr>
+      <tr><td class="q">Q5 (fase)</td><td>B, C ou D</td><td>Tem negócio ativo mas sem faturamento</td></tr>
+      <tr><td class="q">Q10 (formalização)</td><td>informal, formalizada, medio_grande_porte, ou outro</td><td></td></tr>
+    </table>
+
+    <p style="margin-top:8px;"><strong>Gatilho 2:</strong> Q5 ≤ B e Q11 = B (fase inicial com faturamento baixo)</p>
+    <table class="cond-table">
+      <tr><th>Pergunta</th><th>Resposta necessária</th><th>Observação</th></tr>
+      <tr class="req"><td class="q">Q5 (fase)</td><td><strong>A</strong> ou <strong>B</strong> (Ideia ou Início 0-1 ano)</td><td>Negócio muito jovem ou ainda na ideia</td></tr>
+      <tr class="req"><td class="q">Q11 (faturamento)</td><td><strong>B</strong> — Faturamento baixo<br>(até R$5k / €2k / $2k)</td><td>Alguma receita, mas insignificante</td></tr>
+    </table>
+
+    <div class="consequencia">
+      <span class="label">Consequência prática:</span> Validação comercial insuficiente. O empreendedor deu os primeiros passos, mas ainda não tem uma oferta testada com demanda comprovada. Prioridade: definir proposta de valor, estruturar a oferta e conquistar as primeiras vendas consistentes antes de qualquer investimento em estrutura ou escala.
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODELO G ===== -->
+<div class="model-block">
+  <div class="model-header">
+    <span class="modelo-code">G</span>
+    <span class="modelo-title">Operação no Limite</span>
+    <span class="prioridade-tag">Prioridade 2</span>
+    <span class="modelo-sub">340.200 cenários &nbsp;|&nbsp; Avaliado apenas quando Q11≥C (receita média ou alta)</span>
+  </div>
+  <div class="model-body">
+    <h3>Condição de ativação</h3>
+    <p>Q11 ≥ C (fatura acima do mínimo) <strong>E</strong> Q16 = C (operação entraria em colapso)</p>
+
+    <table class="cond-table">
+      <tr><th>Pergunta</th><th>Resposta(s) necessária(s)</th><th>Observação</th></tr>
+      <tr class="req">
+        <td class="q">Q11 (faturamento)</td>
+        <td><strong>C</strong> ou <strong>D</strong><br>(R$5k+ / €2k+ / $2k+)</td>
+        <td>Tem receita média ou alta. Faturamento baixo (B) não ativa G</td>
+      </tr>
+      <tr class="req">
+        <td class="q">Q16 (capacidade operacional)</td>
+        <td><strong>C</strong> — "A operação entraria em colapso"</td>
+        <td>Este é o gatilho definitivo. A ou B não ativam G</td>
+      </tr>
+      <tr>
+        <td class="q">Q5, Q6, Q7, Q8, Q9, Q12, Q15, Q17</td>
+        <td>Qualquer valor</td>
+        <td>Irrelevantes quando Q11≥C e Q16=C</td>
+      </tr>
+    </table>
+
+    <p class="note">Nota: Q16=C com Q11=B também cumpriria a regra Q11≥B, mas o motor exige Q11≥C para Modelo G. Q11=B com Q16=C pode cair em D, H, A ou fallback dependendo das outras respostas.</p>
+
+    <div class="consequencia">
+      <span class="label">Consequência prática:</span> O crescimento está gerando colapso operacional. O negócio fatura, mas a estrutura de entrega, equipe ou processos não comporta mais demanda. A prioridade é padronizar processos, ampliar capacidade operacional e sistematizar entregas antes de qualquer esforço adicional de escala ou aquisição de clientes.
+    </div>
+  </div>
+</div>
+
+<div class="page-break"></div>
+
+<!-- ===== MODELO D ===== -->
+<div class="model-block">
+  <div class="model-header">
+    <span class="modelo-code">D</span>
+    <span class="modelo-title">Fatura, Mas Sangra</span>
+    <span class="prioridade-tag">Prioridade 3</span>
+    <span class="modelo-sub">311.850 cenários &nbsp;|&nbsp; Qualquer faturamento + regressão financeira</span>
+  </div>
+  <div class="model-body">
+    <h3>Condição de ativação</h3>
+    <p>Q11 ≥ B (fatura algo) <strong>E</strong> Q12 = C (regredindo)</p>
+    <p class="note">Neste ponto, Modelo G já foi descartado (Q16 ≠ C ou Q11 = B).</p>
+
+    <table class="cond-table">
+      <tr><th>Pergunta</th><th>Resposta(s) necessária(s)</th><th>Observação</th></tr>
+      <tr class="req">
+        <td class="q">Q11 (faturamento)</td>
+        <td><strong>B</strong>, <strong>C</strong> ou <strong>D</strong><br>(qualquer nível de receita)</td>
+        <td>Tem faturamento mas está perdendo dinheiro</td>
+      </tr>
+      <tr class="req">
+        <td class="q">Q12 (lucro/crescimento)</td>
+        <td><strong>C</strong> — "Não, estamos regredindo"</td>
+        <td>Sinal de deterioração financeira — gatilho principal</td>
+      </tr>
+      <tr>
+        <td class="q">Q16 (capacidade operacional)</td>
+        <td>A ou B (C já ativou G antes)</td>
+        <td>Implícito: G já foi descartado</td>
+      </tr>
+      <tr>
+        <td class="q">Q5, Q6, Q7, Q8, Q9, Q15, Q17</td>
+        <td>Qualquer valor</td>
+        <td>Irrelevantes nesta regra</td>
+      </tr>
+    </table>
+
+    <div class="consequencia">
+      <span class="label">Consequência prática:</span> O negócio fatura, mas está consumindo mais do que gera. Há regressão financeira ativa. Ação urgente em lucratividade: revisar precificação, cortar custos desnecessários e identificar onde o dinheiro está vazando. Sem correção do financeiro, a empresa continuará deteriorando mesmo com crescimento de vendas.
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODELO H ===== -->
+<div class="model-block">
+  <div class="model-header">
+    <span class="modelo-code">H</span>
+    <span class="modelo-title">Gargalo do Dono</span>
+    <span class="prioridade-tag">Prioridade 4</span>
+    <span class="modelo-sub">249.480 cenários &nbsp;|&nbsp; Sobrecarga crônica do fundador com receita positiva</span>
+  </div>
+  <div class="model-body">
+    <h3>Condição de ativação</h3>
+    <p>Q11 ≥ B (fatura algo) <strong>E</strong> Q17 ∈ {D, E} (40+ horas/semana)</p>
+    <p class="note">Neste ponto, G e D já foram descartados (Q16≠C e Q12≠C).</p>
+
+    <table class="cond-table">
+      <tr><th>Pergunta</th><th>Resposta(s) necessária(s)</th><th>Observação</th></tr>
+      <tr class="req">
+        <td class="q">Q11 (faturamento)</td>
+        <td><strong>B</strong>, <strong>C</strong> ou <strong>D</strong></td>
+        <td>Tem receita — não é pré-receita</td>
+      </tr>
+      <tr class="req">
+        <td class="q">Q17 (horas/semana)</td>
+        <td><strong>D</strong> — 40-60h/semana<br><strong>E</strong> — Mais de 60h/semana</td>
+        <td>Sinal claro de sobrecarga e centralização no dono</td>
+      </tr>
+      <tr>
+        <td class="q">Q12 (lucro)</td>
+        <td>A ou B (C ativaria D antes)</td>
+        <td>Implícito: D já foi descartado</td>
+      </tr>
+      <tr>
+        <td class="q">Q16 (capacidade)</td>
+        <td>A ou B (C ativaria G antes)</td>
+        <td>Implícito: G já foi descartado</td>
+      </tr>
+      <tr>
+        <td class="q">Q5, Q6, Q7, Q8, Q9, Q15</td>
+        <td>Qualquer valor</td>
+        <td>Irrelevantes nesta regra</td>
+      </tr>
+    </table>
+
+    <div class="consequencia">
+      <span class="label">Consequência prática:</span> O dono é o gargalo da operação. Mais de 40 horas semanais indica que o negócio depende inteiramente do fundador para funcionar — sem delegação, sem processos autônomos. A prioridade é redistribuir execução, criar processos que funcionem sem o dono e construir governança pessoal para liberar tempo estratégico.
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODELO A ===== -->
+<div class="model-block">
+  <div class="model-header">
+    <span class="modelo-code">A</span>
+    <span class="modelo-title">Negócio Travado e Bagunçado</span>
+    <span class="prioridade-tag">Prioridade 5</span>
+    <span class="modelo-sub">249.480 cenários (regra 5) + fallback geral &nbsp;|&nbsp; Caos operacional e financeiro</span>
+  </div>
+  <div class="model-body">
+    <h3>Condição de ativação pela regra 5</h3>
+    <p>Q9 = C <strong>E</strong> Q8 ∈ {B,C} <strong>E</strong> Q12 ∈ {B,C} <strong>E</strong> (Q6 = C <strong>OU</strong> Q7 = C)</p>
+    <p class="note">Neste ponto, G, D e H já foram descartados.</p>
+
+    <table class="cond-table">
+      <tr><th>Pergunta</th><th>Resposta(s) necessária(s)</th><th>Observação</th></tr>
+      <tr class="req">
+        <td class="q">Q9 (organização financeira)</td>
+        <td><strong>C</strong> — "Desorganizada / Confusa"</td>
+        <td>Condição obrigatória — sem caos financeiro não ativa A</td>
+      </tr>
+      <tr class="req">
+        <td class="q">Q8 (estrutura/planejamento)</td>
+        <td><strong>B</strong> — Em desenvolvimento<br><strong>C</strong> — Ainda não</td>
+        <td>Sem estrutura sólida</td>
+      </tr>
+      <tr class="req">
+        <td class="q">Q12 (lucro/crescimento)</td>
+        <td><strong>B</strong> — Estável, sem crescimento<br><strong>C</strong> — Regredindo (mas D foi descartado)</td>
+        <td>Q12=C só chega aqui se Q11=A (sem receita)</td>
+      </tr>
+      <tr class="req">
+        <td class="q">Q6 (conexão dons) <em>OU</em> Q7 (propósito)</td>
+        <td>Pelo menos um = <strong>C</strong><br>(Q6=C: "Não, ainda não" / Q7=C: "Sem clareza")</td>
+        <td>Ausência de alinhamento de propósito ou identidade</td>
+      </tr>
+      <tr>
+        <td class="q">Q5, Q11, Q15, Q16, Q17</td>
+        <td>Qualquer (com restrições implícitas de modelos anteriores)</td>
+        <td></td>
+      </tr>
+    </table>
+
+    <h3>Fallback geral (sem nenhuma regra anterior satisfeita)</h3>
+    <p>Quando todas as condições dos modelos B, C, E, F, G, H e I forem falsas, o motor retorna A como padrão.</p>
+    <p class="note">Cenários que chegam ao fallback geralmente têm combinações inconsistentes ou respostas que não se encaixam em nenhum padrão definido do motor.</p>
+
+    <div class="consequencia">
+      <span class="label">Consequência prática:</span> Operação desorganizada, sem clareza financeira, sem estrutura e sem conexão com propósito. O negócio está travado por múltiplas frentes simultâneas. A prioridade é estruturação básica: separar finanças pessoais das empresariais, definir processos mínimos e reconectar com o propósito antes de qualquer tentativa de crescimento.
+    </div>
+  </div>
+</div>
+
+<div class="page-break"></div>
+
+<!-- ===== MODELO F ===== -->
+<div class="model-block">
+  <div class="model-header">
+    <span class="modelo-code">F</span>
+    <span class="modelo-title">Vende Sem Motor Comercial</span>
+    <span class="prioridade-tag">Prioridade 6</span>
+    <span class="modelo-sub">17.820 cenários &nbsp;|&nbsp; Menor volume — condições muito específicas</span>
+  </div>
+  <div class="model-body">
+    <h3>Condição de ativação</h3>
+    <p>Q11 ≥ B <strong>E</strong> Q15 = A (só indicação) <strong>E</strong> Q12 = B (estável) <strong>E</strong> Q9 ∈ {A,B} (financeiro ok)</p>
+    <p class="note">Neste ponto, G, D, H e A já foram descartados.</p>
+
+    <table class="cond-table">
+      <tr><th>Pergunta</th><th>Resposta(s) necessária(s)</th><th>Observação</th></tr>
+      <tr class="req">
+        <td class="q">Q11 (faturamento)</td>
+        <td><strong>B</strong>, <strong>C</strong> ou <strong>D</strong></td>
+        <td>Tem receita — vende, mas sem processo</td>
+      </tr>
+      <tr class="req">
+        <td class="q">Q15 (canal de aquisição)</td>
+        <td><strong>A</strong> — "Indicação"</td>
+        <td>Único canal = indicação passiva. B, C, D, E, F, G não ativam F</td>
+      </tr>
+      <tr class="req">
+        <td class="q">Q12 (lucro/crescimento)</td>
+        <td><strong>B</strong> — "Estável, sem crescimento"</td>
+        <td>Não está crescendo nem regredindo</td>
+      </tr>
+      <tr class="req">
+        <td class="q">Q9 (organização financeira)</td>
+        <td><strong>A</strong> — Estruturada<br><strong>B</strong> — Básica</td>
+        <td>C ativaria A antes (com outras condições)</td>
+      </tr>
+      <tr>
+        <td class="q">Q12 (regredindo)</td>
+        <td>B apenas (C ativaria D, A foi descartado neste ponto)</td>
+        <td></td>
+      </tr>
+    </table>
+
+    <div class="consequencia">
+      <span class="label">Consequência prática:</span> O negócio vende, mas 100% por indicação passiva — canal frágil e não escalável. Sem processo de aquisição ativa, o crescimento depende de sorte e rede. A prioridade é construir um motor comercial previsível: definir canais de aquisição recorrentes, criar processo de prospecção e reduzir dependência de indicação.
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODELO C ===== -->
+<div class="model-block">
+  <div class="model-header">
+    <span class="modelo-code">C</span>
+    <span class="modelo-title">Boa Base, Caixa Apertado</span>
+    <span class="prioridade-tag">Prioridade 7</span>
+    <span class="modelo-sub">51.480 cenários &nbsp;|&nbsp; Fundamento sólido mas pressão de caixa</span>
+  </div>
+  <div class="model-body">
+    <h3>Condição de ativação</h3>
+    <p>Q6 ∈ {A,B} <strong>E</strong> Q7 ∈ {A,B} <strong>E</strong> Q9 ∈ {B,C} <strong>E</strong> Q12 ∈ {B,C}</p>
+    <p class="note">Neste ponto, G, D, H, A e F já foram descartados.</p>
+
+    <table class="cond-table">
+      <tr><th>Pergunta</th><th>Resposta(s) necessária(s)</th><th>Observação</th></tr>
+      <tr class="req">
+        <td class="q">Q6 (conexão dons)</td>
+        <td><strong>A</strong> — "Sim, totalmente"<br><strong>B</strong> — "Parcialmente"</td>
+        <td>C excluído — boa conexão com dons/identidade</td>
+      </tr>
+      <tr class="req">
+        <td class="q">Q7 (propósito)</td>
+        <td><strong>A</strong> — "Muito claro"<br><strong>B</strong> — "Tenho ideia, não definido"</td>
+        <td>C excluído — tem senso de propósito</td>
+      </tr>
+      <tr class="req">
+        <td class="q">Q9 (organização financeira)</td>
+        <td><strong>B</strong> — "Básica"<br><strong>C</strong> — "Desorganizada"</td>
+        <td>A excluído — financeiro não está estruturado</td>
+      </tr>
+      <tr class="req">
+        <td class="q">Q12 (lucro/crescimento)</td>
+        <td><strong>B</strong> — "Estável, sem crescimento"<br><strong>C</strong> — "Regredindo"</td>
+        <td>A excluído — sem crescimento real</td>
+      </tr>
+      <tr>
+        <td class="q">Q5, Q8, Q11, Q15, Q16, Q17</td>
+        <td>Qualquer valor permitido (com restrições anteriores)</td>
+        <td></td>
+      </tr>
+    </table>
+
+    <div class="consequencia">
+      <span class="label">Consequência prática:</span> O fundamento está lá — propósito claro, identidade definida — mas o caixa e a previsibilidade financeira limitam o avanço. O foco deve ser melhorar margem por cliente, construir recorrência e previsibilidade de receita. Não é falta de produto, é falta de gestão financeira e monetização eficiente.
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODELO B ===== -->
+<div class="model-block">
+  <div class="model-header">
+    <span class="modelo-code">B</span>
+    <span class="modelo-title">Negócio Saudável no Platô</span>
+    <span class="prioridade-tag">Prioridade 8</span>
+    <span class="modelo-sub">55.440 cenários &nbsp;|&nbsp; Avaliado por último entre os modelos nomeados</span>
+  </div>
+  <div class="model-body">
+    <h3>Condição de ativação</h3>
+    <p>Q9 ∈ {A,B} <strong>E</strong> Q8 ∈ {A,B} <strong>E</strong> Q11 ≥ B <strong>E</strong> Q12 = B <strong>E</strong> Q15 ≠ A</p>
+    <p class="note">Neste ponto, todos os modelos de maior prioridade já foram descartados.</p>
+
+    <table class="cond-table">
+      <tr><th>Pergunta</th><th>Resposta(s) necessária(s)</th><th>Observação</th></tr>
+      <tr class="req">
+        <td class="q">Q9 (organização financeira)</td>
+        <td><strong>A</strong> — "Estruturada"<br><strong>B</strong> — "Básica"</td>
+        <td>C excluído</td>
+      </tr>
+      <tr class="req">
+        <td class="q">Q8 (estrutura/planejamento)</td>
+        <td><strong>A</strong> — "Bem estruturado"<br><strong>B</strong> — "Em desenvolvimento"</td>
+        <td>C excluído — tem alguma estrutura</td>
+      </tr>
+      <tr class="req">
+        <td class="q">Q11 (faturamento)</td>
+        <td><strong>B</strong>, <strong>C</strong> ou <strong>D</strong></td>
+        <td>Tem receita real</td>
+      </tr>
+      <tr class="req">
+        <td class="q">Q12 (lucro/crescimento)</td>
+        <td><strong>B</strong> — "Estável, sem crescimento"</td>
+        <td>Exatamente B — A (crescendo) ou C (regredindo) não ativam B</td>
+      </tr>
+      <tr class="req">
+        <td class="q">Q15 (canal de aquisição)</td>
+        <td>Qualquer <strong>exceto A</strong> (indicação)<br>B, C, D, E, F ou G</td>
+        <td>Tem pelo menos um canal além de indicação pura</td>
+      </tr>
+      <tr>
+        <td class="q">Q5, Q6, Q7, Q16, Q17</td>
+        <td>Qualquer valor</td>
+        <td>Irrelevantes nesta regra</td>
+      </tr>
+    </table>
+
+    <div class="consequencia">
+      <span class="label">Consequência prática:</span> Negócio com boa base — estrutura, financeiro e canais funcionando — mas crescimento estagnado. O empreendedor atingiu um platô. A prioridade é identificar as alavancas de crescimento: novos mercados, novas ofertas, aumento de ticket médio ou escalabilidade de canais existentes para romper o teto atual.
+    </div>
+  </div>
+</div>
+
+<div class="page-break"></div>
+
+<!-- ===== TABELA COMPARATIVA FINAL ===== -->
+<h2>Tabela Comparativa: Perguntas Decisivas por Modelo</h2>
+<table>
+  <tr>
+    <th>Modelo</th>
+    <th>Q5</th>
+    <th>Q6</th>
+    <th>Q7</th>
+    <th>Q8</th>
+    <th>Q9</th>
+    <th>Q10→Q18</th>
+    <th>Q11</th>
+    <th>Q12</th>
+    <th>Q15</th>
+    <th>Q16</th>
+    <th>Q17</th>
+  </tr>
+  <tr>
+    <td><strong>I</strong> Pré-receita</td>
+    <td>—</td><td>—</td><td>—</td><td>—</td><td>—</td>
+    <td>Q18=A ou C</td>
+    <td><strong>=A</strong></td>
+    <td>—</td><td>—</td><td>—</td><td>—</td>
+  </tr>
+  <tr>
+    <td><strong>E</strong> Não validou</td>
+    <td>≤B (g2)</td><td>—</td><td>—</td><td>—</td><td>—</td>
+    <td>Q18=B (g1)</td>
+    <td>=A (g1)<br>=B (g2)</td>
+    <td>—</td><td>—</td><td>—</td><td>—</td>
+  </tr>
+  <tr>
+    <td><strong>G</strong> Op. no limite</td>
+    <td>—</td><td>—</td><td>—</td><td>—</td><td>—</td>
+    <td>—</td>
+    <td><strong>≥C</strong></td>
+    <td>—</td><td>—</td>
+    <td><strong>=C</strong></td>
+    <td>—</td>
+  </tr>
+  <tr>
+    <td><strong>D</strong> Fatura/sangra</td>
+    <td>—</td><td>—</td><td>—</td><td>—</td><td>—</td>
+    <td>—</td>
+    <td><strong>≥B</strong></td>
+    <td><strong>=C</strong></td>
+    <td>—</td><td>≠C</td><td>—</td>
+  </tr>
+  <tr>
+    <td><strong>H</strong> Gargalo dono</td>
+    <td>—</td><td>—</td><td>—</td><td>—</td><td>—</td>
+    <td>—</td>
+    <td><strong>≥B</strong></td>
+    <td>≠C</td>
+    <td>—</td><td>≠C</td>
+    <td><strong>∈{D,E}</strong></td>
+  </tr>
+  <tr>
+    <td><strong>A</strong> Travado</td>
+    <td>—</td>
+    <td>C (ou)</td>
+    <td>C (ou)</td>
+    <td><strong>∈{B,C}</strong></td>
+    <td><strong>=C</strong></td>
+    <td>—</td>
+    <td>—</td>
+    <td><strong>∈{B,C}</strong></td>
+    <td>—</td><td>—</td><td>—</td>
+  </tr>
+  <tr>
+    <td><strong>F</strong> Sem motor</td>
+    <td>—</td><td>—</td><td>—</td><td>—</td>
+    <td>∈{A,B}</td>
+    <td>—</td>
+    <td><strong>≥B</strong></td>
+    <td><strong>=B</strong></td>
+    <td><strong>=A</strong></td>
+    <td>—</td><td>—</td>
+  </tr>
+  <tr>
+    <td><strong>C</strong> Caixa apertado</td>
+    <td>—</td>
+    <td><strong>∈{A,B}</strong></td>
+    <td><strong>∈{A,B}</strong></td>
+    <td>—</td>
+    <td><strong>∈{B,C}</strong></td>
+    <td>—</td>
+    <td>—</td>
+    <td><strong>∈{B,C}</strong></td>
+    <td>—</td><td>—</td><td>—</td>
+  </tr>
+  <tr>
+    <td><strong>B</strong> Platô</td>
+    <td>—</td><td>—</td><td>—</td>
+    <td>∈{A,B}</td>
+    <td><strong>∈{A,B}</strong></td>
+    <td>—</td>
+    <td><strong>≥B</strong></td>
+    <td><strong>=B</strong></td>
+    <td><strong>≠A</strong></td>
+    <td>—</td><td>—</td>
+  </tr>
+  <tr>
+    <td><strong>A*</strong> Fallback</td>
+    <td colspan="11" style="text-align:center;">Nenhuma das condições acima satisfeita</td>
+  </tr>
+</table>
+<p class="note">Células com "—" indicam que a variável não é determinante para aquele modelo naquela prioridade (pode assumir qualquer valor dentro do permitido pelos modelos anteriores já descartados). Valores em <strong>negrito</strong> são os gatilhos primários.</p>
+
+<h2>Análise de Gaps e Zonas de Ambiguidade</h2>
+<table>
+  <tr><th>Situação</th><th>O que acontece</th><th>Consequência</th></tr>
+  <tr>
+    <td>Q11=B, Q16=C, Q12=A, Q17=C</td>
+    <td>G exige Q11≥C — não ativa. D exige Q12=C — não ativa. H exige Q17∈{D,E} — não ativa. Depende de Q9, Q6, Q7, Q8 para A; ou cai em F, C, B</td>
+    <td>Empreendedor com faturamento baixo e operação frágil pode não receber G mesmo relatando colapso operacional</td>
+  </tr>
+  <tr>
+    <td>Q9=C, Q12=C, Q11=B, Q16=A, Q17=C</td>
+    <td>D ativa (Q11≥B e Q12=C) — antes de A</td>
+    <td>Modelo D prevalece mesmo com caos financeiro Q9=C — D captura o aspecto de regressão antes de A</td>
+  </tr>
+  <tr>
+    <td>Q11=C, Q12=A (crescendo), Q16=A, Q17=C, Q15=A</td>
+    <td>G descartado (Q16≠C), D descartado (Q12≠C), H descartado (Q17≠D/E), A descartado (Q9,Q6,Q7 dependentes), F descartado (Q12≠B). Depende de Q6/Q7/Q8/Q9 para C ou cai em B</td>
+    <td>Negócio crescendo e saudável tende a B ou C dependendo da organização financeira</td>
+  </tr>
+  <tr>
+    <td>Q5=A, Q10=nao_comecou, Q11=A</td>
+    <td>Q18=A → Modelo I</td>
+    <td>Mesmo com Q5=Ideia e sem formalização, a resposta é pré-receita (I), não validação (E)</td>
+  </tr>
+  <tr>
+    <td>Q5=D (consolidado), Q11=A (sem receita)</td>
+    <td>Q18=B (Q5=D≠A, Q10 qualquer ≠ nao_comecou) → E (gatilho 1)</td>
+    <td>Empresa "consolidada" sem receita é classificada como não-validada (E) — pode indicar dados inconsistentes</td>
+  </tr>
+</table>
+
+<p style="margin-top: 20px; font-size: 10px; text-align: center;">
+  Motor v2.4 &nbsp;|&nbsp; jethro-backend/src/domain/forms/service.ts &nbsp;|&nbsp; 06/04/2026 &nbsp;|&nbsp; Documento para impressão em preto e branco
+</p>
+
+</div>
+</body>
+</html>
