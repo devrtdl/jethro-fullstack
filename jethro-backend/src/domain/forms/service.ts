@@ -515,9 +515,15 @@ type ActionPlanRow = {
 };
 
 
-// Q18 status_empresa é derivada — não exibida ao usuário.
-// Baseada em Q5 (fase_negocio) e Q10 (formalizacao).
+// Q18 status_empresa: usa resposta direta do usuário quando disponível.
+// Fallback: derivada de Q5 (fase_negocio) e Q10 (formalizacao) quando Q18 não foi respondida.
+// A derivação também serve como lógica de display — Q18 só precisa ser exibida quando ambígua
+// (Q5='A' + Q10≠'nao_comecou'). Nos demais casos a resposta pode ser inferida.
 function deriveStatusEmpresa(answersBySlug: Record<string, JsonValue>): string {
+  const direct = String(answersBySlug.status_empresa ?? '');
+  if (['A', 'B', 'C', 'D'].includes(direct)) return direct;
+
+  // Fallback por derivação quando Q18 não foi enviada
   const formalizacao = String(answersBySlug.formalizacao ?? '');
   const fase = String(answersBySlug.fase_negocio ?? '');
   if (formalizacao === 'nao_comecou') return 'A'; // não comecei
