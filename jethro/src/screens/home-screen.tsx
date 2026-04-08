@@ -667,7 +667,7 @@ export function HomeScreen() {
                       {diagnostic.isSubmitting ? (
                         <ActivityIndicator color={palette.surface} />
                       ) : (
-                          <Text style={styles.primaryButtonLabel}>Enviar diagnóstico</Text>
+                          <Text style={styles.primaryButtonLabel}>Quero meu diagnóstico</Text>
                       )}
                     </Pressable>
                   ) : (
