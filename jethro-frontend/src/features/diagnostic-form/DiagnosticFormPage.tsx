@@ -156,7 +156,7 @@ export function DiagnosticFormPage() {
             {currentStepIndex === steps.length - 1 ? (
               // submit ficou no ultimo step para manter o fluxo linear e mais facil de entender.
               <button className="button-primary" type="button" onClick={() => void handleSubmit()} disabled={isSubmitting}>
-                {isSubmitting ? 'Enviando...' : 'Enviar diagnostico'}
+                {isSubmitting ? 'Enviando...' : 'Quero meu diagnóstico'}
               </button>
             ) : (
               <button className="button-primary" type="button" onClick={nextStep}>

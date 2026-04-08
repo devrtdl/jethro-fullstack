@@ -43,28 +43,33 @@ const revenueBandsByCountry: DynamicOptionMap = {
     { id: 'rev_br_1', label: 'Até R$5k', value: 'upto_5k', order: 1, metadata: { currency: 'BRL' } },
     { id: 'rev_br_2', label: 'R$5k-R$20k', value: '5k_20k', order: 2, metadata: { currency: 'BRL' } },
     { id: 'rev_br_3', label: 'R$20k-R$50k', value: '20k_50k', order: 3, metadata: { currency: 'BRL' } },
-    { id: 'rev_br_4', label: 'Acima de R$50k', value: 'above_50k', order: 4, metadata: { currency: 'BRL' } },
+    { id: 'rev_br_4', label: 'R$50k-R$100k', value: '50k_100k', order: 4, metadata: { currency: 'BRL' } },
+    { id: 'rev_br_5', label: 'R$100k-R$200k', value: '100k_200k', order: 5, metadata: { currency: 'BRL' } },
+    { id: 'rev_br_6', label: 'Acima de R$200k', value: 'above_200k', order: 6, metadata: { currency: 'BRL' } },
   ],
   PT: [
     { id: 'rev_pt_0', label: 'Ainda não fatura', value: 'not_revenue', order: 0, metadata: { currency: 'EUR' } },
     { id: 'rev_pt_1', label: 'Até EUR2k', value: 'upto_2k', order: 1, metadata: { currency: 'EUR' } },
     { id: 'rev_pt_2', label: 'EUR2k-EUR10k', value: '2k_10k', order: 2, metadata: { currency: 'EUR' } },
     { id: 'rev_pt_3', label: 'EUR10k-EUR25k', value: '10k_25k', order: 3, metadata: { currency: 'EUR' } },
-    { id: 'rev_pt_4', label: 'Acima de EUR25k', value: 'above_25k', order: 4, metadata: { currency: 'EUR' } },
+    { id: 'rev_pt_4', label: 'EUR25k-EUR50k', value: '25k_50k', order: 4, metadata: { currency: 'EUR' } },
+    { id: 'rev_pt_5', label: 'Acima de EUR50k', value: 'above_50k', order: 5, metadata: { currency: 'EUR' } },
   ],
   US: [
     { id: 'rev_us_0', label: 'Ainda não fatura', value: 'not_revenue', order: 0, metadata: { currency: 'USD' } },
     { id: 'rev_us_1', label: 'Até USD2k', value: 'upto_2k', order: 1, metadata: { currency: 'USD' } },
     { id: 'rev_us_2', label: 'USD2k-USD10k', value: '2k_10k', order: 2, metadata: { currency: 'USD' } },
     { id: 'rev_us_3', label: 'USD10k-USD25k', value: '10k_25k', order: 3, metadata: { currency: 'USD' } },
-    { id: 'rev_us_4', label: 'Acima de USD25k', value: 'above_25k', order: 4, metadata: { currency: 'USD' } },
+    { id: 'rev_us_4', label: 'USD25k-USD50k', value: '25k_50k', order: 4, metadata: { currency: 'USD' } },
+    { id: 'rev_us_5', label: 'Acima de USD50k', value: 'above_50k', order: 5, metadata: { currency: 'USD' } },
   ],
   DEFAULT: [
     { id: 'rev_default_0', label: 'Ainda não fatura', value: 'not_revenue', order: 0, metadata: { currency: 'USD' } },
     { id: 'rev_default_1', label: 'Até USD2k', value: 'upto_2k', order: 1, metadata: { currency: 'USD' } },
     { id: 'rev_default_2', label: 'USD2k-USD10k', value: '2k_10k', order: 2, metadata: { currency: 'USD' } },
     { id: 'rev_default_3', label: 'USD10k-USD25k', value: '10k_25k', order: 3, metadata: { currency: 'USD' } },
-    { id: 'rev_default_4', label: 'Acima de USD25k', value: 'above_25k', order: 4, metadata: { currency: 'USD' } },
+    { id: 'rev_default_4', label: 'USD25k-USD50k', value: '25k_50k', order: 4, metadata: { currency: 'USD' } },
+    { id: 'rev_default_5', label: 'Acima de USD50k', value: 'above_50k', order: 5, metadata: { currency: 'USD' } },
   ],
 };
 
@@ -425,8 +430,12 @@ const scoreMaps = {
   capacidade_operacional: { A: 4, B: 2, C: 1 },
   horas_semana: { A: 0, B: 1, C: 2, D: 3, E: 4 },
   faturamento_mensal: {
+    above_200k: 4,
+    '100k_200k': 4,
+    '50k_100k': 4,
     above_50k: 4,
     above_25k: 4,
+    '25k_50k': 4,
     '20k_50k': 3,
     '10k_25k': 3,
     '5k_20k': 2,
@@ -535,7 +544,8 @@ function mapRevenueToMotorBand(faixa: string | undefined) {
   if (!faixa || faixa === 'not_revenue') return 'A';
   if (faixa === 'upto_5k' || faixa === 'upto_2k') return 'B';
   if (faixa === '5k_20k' || faixa === '2k_10k') return 'C';
-  return 'D';
+  if (faixa === '20k_50k' || faixa === '10k_25k') return 'D';
+  return 'E';
 }
 
 function classifyDiagnostic(answersBySlug: Record<string, JsonValue>): ClassifiedDiagnostic {

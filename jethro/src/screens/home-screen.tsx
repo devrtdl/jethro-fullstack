@@ -526,7 +526,7 @@ export function HomeScreen() {
                 <Text style={styles.bodyText}>Gerado em {formatDate(diagnostic.submitResult.diagnostic.generatedAt)}.</Text>
 
                 <Pressable style={styles.primaryButton} onPress={() => setResultStep('block2')}>
-                  <Text style={styles.primaryButtonLabel}>Ver o próximo passo</Text>
+                  <Text style={styles.primaryButtonLabel}>Ir para a parte final do diagnóstico</Text>
                 </Pressable>
                 <Pressable
                   style={styles.secondaryButton}
