@@ -570,7 +570,7 @@ export function HomeScreen() {
                         onPress={() => {
                           setDiagnosticRating(star);
                           const submissionId = diagnostic.submitResult?.submissionId;
-                          const email = typeof diagnostic.values.email === 'string' ? diagnostic.values.email : '';
+                          const email = session?.user?.email;
                           if (submissionId && email) {
                             void diagnosticService.submitRating({ submissionId, email, stars: star });
                           }
