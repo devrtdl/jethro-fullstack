@@ -16,7 +16,8 @@ export async function createRatingsService() {
       const id = createId('rating');
       await client.query(
         `insert into diagnostic_ratings (id, submission_id, email, stars)
-         values ($1, $2, lower($3), $4)`,
+         values ($1, $2, lower($3), $4)
+         on conflict (submission_id) do update set stars = excluded.stars, updated_at = now()`,
         [id, input.submissionId, input.email, input.stars]
       );
       return { id };

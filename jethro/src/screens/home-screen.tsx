@@ -568,7 +568,6 @@ export function HomeScreen() {
                         key={star}
                         style={styles.starButton}
                         onPress={() => {
-                          if (diagnosticRating !== 0) return;
                           setDiagnosticRating(star);
                           const submissionId = diagnostic.submitResult?.submissionId;
                           const email = typeof diagnostic.values.email === 'string' ? diagnostic.values.email : '';
