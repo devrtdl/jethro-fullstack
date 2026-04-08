@@ -261,8 +261,16 @@ export function useDiagnosticForm({ enabled, prefillEmail, prefillName }: UseDia
   const steps = form?.steps ?? [];
   const questions = form?.questions ?? [];
   const currentStep = steps[currentStepIndex];
+  const showQ18 =
+    String(state.values.fase_negocio ?? '') === 'A' &&
+    String(state.values.formalizacao ?? '') !== 'nao_comecou';
+
   const currentQuestions = questions
-    .filter((question) => question.stepId === currentStep?.id && !question.internalOnly)
+    .filter((question) => {
+      if (question.stepId !== currentStep?.id || question.internalOnly) return false;
+      if (question.slug === 'status_empresa' && !showQ18) return false;
+      return true;
+    })
     .sort((left, right) => left.order - right.order);
   const selectedCountryIso = getCountryIsoFromState(state.values);
 
@@ -325,7 +333,11 @@ export function useDiagnosticForm({ enabled, prefillEmail, prefillName }: UseDia
 
     try {
       const answers = questions
-        .filter((question) => !question.internalOnly)
+        .filter((question) => {
+          if (question.internalOnly) return false;
+          if (question.slug === 'status_empresa' && !showQ18) return false;
+          return true;
+        })
         .map((question) => ({
           questionId: question.id,
           value: getQuestionValue(state.values, question),

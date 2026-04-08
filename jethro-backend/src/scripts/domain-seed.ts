@@ -364,81 +364,87 @@ const diagnosticMessages: DiagnosticMessageSeed[] = [
     variant: 'v1',
     block1Title: 'Realidade Direta',
     block1Body:
-      '[NOME], o seu negócio está gritando — e você ainda não ouviu.\n' +
-      'Você trabalha. Às vezes até demais. Mas quando para e olha para os números... o silêncio constrange.\n' +
-      'Não é falta de esforço. É falta de governo.\n' +
-      'Seu diagnóstico revela três feridas abertas:\n' +
-      '→ Financeiro confuso — você não sabe quanto sobra, se é que sobra\n' +
-      '→ Metas soltas — decisões no feeling, sem painel, sem ritmo\n' +
-      '→ Sem rota — cada semana parece recomeçar do zero',
+      'Há um momento — geralmente à noite, depois que todo mundo foi embora ou dormiu — em que você para e olha para o que construiu.\n\n' +
+      'E sente aquela mistura estranha: orgulho de ter chegado até aqui. E uma inquietação que não passa. Você não fala sobre isso. Continua. Mas a sensação fica.\n\n' +
+      'O Jethro identificou o que essa sensação está tentando te dizer.\n\n' +
+      '[NOME], isso não é fraqueza. É o seu discernimento — funcionando.\n' +
+      'O Jethro identificou algo específico no seu negócio:\n' +
+      '→ Financeiro confuso — o dinheiro entra, circula e some antes de você entender o que aconteceu\n' +
+      '→ Decisões no feeling — sem painel, sem ritmo, cada semana começa como se fosse a primeira\n' +
+      '→ Sem rota — você trabalha muito, mas não sabe exatamente para onde está indo',
     rootCause: 'caos financeiro + ausência de direção + falta de governo semanal',
     palavraIntro: 'Deus é Deus de ordem — e onde há desordem, a prosperidade não pousa.',
     scriptureVerse: '1 Coríntios 14:40',
-    scriptureText: 'Tudo, porém, seja feito com decência e ordem.',
-    block2Title: 'O que acontece se você continuar assim?',
+    scriptureText: '"Mas tudo deve ser feito com ordem e propriedade."',
+    block2Title: 'O que o negócio não consegue te dizer sozinho:',
     block2Body:
-      'Se nada mudar nos próximos 90 dias, o padrão se aprofunda:\n' +
-      '⚠ Você continuará trabalhando muito para provar pouco\n' +
-      '⚠ O caixa continuará mandando em você — não o contrário\n' +
-      '⚠ A família sentirá o peso do que o negócio drena\n' +
-      '⚠ E um dia você vai olhar para trás e perceber que anos se foram no mesmo ciclo\n\n' +
+      'E aqui está o que ninguém te diz:\n' +
+      'O custo disso não é só financeiro.\n' +
+      '⚠ É a conversa que você evita ter em casa — porque o negócio não está onde deveria\n' +
+      '⚠ É a oração que começa com pedido e termina com culpa silenciosa\n' +
+      '⚠ É o testemunho que deveria inspirar — e que você ainda não consegue dar\n' +
+      '⚠ É o chamado que você sente sendo adiado — mês após mês\n\n' +
       '"Sem visão o povo perece." — Provérbios 29:18\n' +
       'Não é poesia. É diagnóstico.\n\n' +
       "Você vai continuar chamando isso de 'fase'... ou vai agir antes que vire destino?",
-    ctaLabel: 'QUERO MEU PLANO DE AÇÃO',
+    ctaLabel: 'ESTOU PRONTO PARA MUDAR ISSO',
   },
   {
     modelCode: 'A',
     variant: 'v2',
     block1Title: 'Realidade Direta',
     block1Body:
+      'Tem um número que você evita olhar.\n\n' +
+      'Não porque não sabe onde está — mas porque sabe o que vai ver. E ver confirma o que você ainda não quer admitir em voz alta.\n\n' +
+      'Esse comportamento tem um nome. E o Jethro o reconhece com precisão.\n\n' +
       '[NOME], o problema não é o mercado. É o espelho.\n' +
-      'Você já sentiu aquela sensação de correr em círculos? Esforço máximo, resultado mínimo.\n' +
-      'O diagnóstico do Jethro identificou algo preciso no seu negócio:\n' +
-      '→ Números que você evita olhar — porque sabe que não vai gostar\n' +
+      'O Jethro identificou algo específico no seu negócio:\n' +
+      '→ Números que você adia olhar — porque sabe que não vai gostar\n' +
       '→ Decisões tomadas na emoção do mês, não na inteligência do plano\n' +
-      '→ Um negócio que sobrevive — mas não avança',
+      '→ Um negócio que sobrevive — mas que você sabe, lá no fundo, que não está avançando',
     rootCause: 'ausência de painel de governo + falta de cadência estratégica',
-    palavraIntro:
-      'Prosperidade sem governo vira ansiedade. Deus quer te ver prosperar com paz — e isso exige ordem.',
+    palavraIntro: 'Prosperidade sem governo vira ansiedade. Deus quer te ver prosperar com paz — e isso exige ordem.',
     scriptureVerse: 'Provérbios 21:5',
-    scriptureText: 'Os planos do diligente tendem para a abundância.',
-    block2Title: 'O precipício que poucos enxergam a tempo:',
+    scriptureText: '"Os planos do diligente levam à abundância, assim como a pressa leva à pobreza."',
+    block2Title: 'O que o negócio não consegue te dizer sozinho:',
     block2Body:
-      'O risco aqui não é quebrar de repente. É pior: é continuar por anos no mesmo lugar — e um dia perceber que desperdiçou tempo, energia e chamado.\n' +
-      '⚠ Negócio estagnado → renda estagnada → visão que murcha\n' +
-      '⚠ Gestor reativo → desgaste → família que sente o peso\n' +
-      '⚠ Fé com esforço, mas sem fruto visível → crise de identidade\n\n' +
-      '"Onde não há visão profética o povo se solta." — Provérbios 29:18\n\n' +
+      'O que poucos percebem a tempo:\n' +
+      'O risco aqui não é quebrar de repente. É pior.\n' +
+      '⚠ Gestor reativo → desgaste → família que sente o peso sem entender a origem\n' +
+      '⚠ Fé com esforço, mas sem fruto visível → a dúvida que ninguém ouve, mas todos sentem\n' +
+      '⚠ Anos que passam no mesmo ciclo — e a sensação crescente de que o tempo está cobrando\n' +
+      '⚠ O chamado que existia vai ficando mais distante — e você vai chamando isso de realidade\n\n' +
+      '"Onde não há visão profética, o povo se solta." — Provérbios 29:18\n\n' +
       'Você quer continuar sendo governado pelo mês... ou quer aprender a governar o mês?',
-    ctaLabel: 'QUERO MEU PLANO DE AÇÃO',
+    ctaLabel: 'ESTOU PRONTO PARA MUDAR ISSO',
   },
   {
     modelCode: 'A',
     variant: 'v3',
     block1Title: 'Realidade Direta',
     block1Body:
-      '[NOME], você está construindo em cima de areia — e sente isso.\n' +
-      'Há uma diferença entre empreendedor ocupado e empreendedor que governa.\n' +
-      'Seu diagnóstico mostra que hoje você está no primeiro grupo. Não por falta de vontade — mas por falta de estrutura:\n' +
+      'Você já disse para si mesmo: "é só essa fase passar."\n\n' +
+      'Você diz isso há quanto tempo?\n\n' +
+      'Não é julgamento. É a pergunta que o Jethro precisa fazer — porque a resposta muda tudo.\n\n' +
+      '[NOME], você está construindo em cima de areia — e uma parte de você já sabe disso.\n' +
+      'O Jethro identificou algo específico no seu negócio:\n' +
       '→ Sem clareza financeira: o dinheiro entra, sai e some sem rastro\n' +
-      '→ Sem plano claro: você reage ao que aparece, não ao que planejou\n' +
-      '→ Sem rota de 90 dias: cada mês começa como se fosse o primeiro',
+      '→ Sem plano real: você reage ao que aparece, não ao que planejou\n' +
+      '→ Sem rota de 90 dias: cada mês começa como se o anterior não tivesse acontecido',
     rootCause: 'gestão reativa disfarçada de dedicação',
-    palavraIntro:
-      "Jetro disse a Moisés: 'Você se consumirá, você e este povo.' Aquela palavra é para você hoje.",
+    palavraIntro: 'Jetro disse a Moisés: "Você vai se esgotar." Essa palavra é para você hoje.',
     scriptureVerse: 'Êxodo 18:18',
-    scriptureText: 'Certamente definhará, tanto você como este povo que está contigo.',
-    block2Title: 'O que está em jogo se você não mudar agora:',
+    scriptureText: '"Você e o povo que está com você vão se esgotar, pois o trabalho é pesado demais para você; não conseguirá realizá-lo sozinho."',
+    block2Title: 'O que o negócio não consegue te dizer sozinho:',
     block2Body:
-      'Não estamos falando só de números. Estamos falando de:\n' +
-      '⚠ Sua saúde emocional — desgaste silencioso que acumula\n' +
-      '⚠ Sua autoridade em casa — quando o negócio pressiona, a família sente\n' +
-      '⚠ Seu chamado — o que Deus depositou em você merece fundamento real\n' +
-      '⚠ Seu testemunho — empreendedor cristão que não prospera não inspira\n\n' +
-      '"O prudente vê o perigo e se esconde; o inexperiente segue em frente e sofre as consequências." — Provérbios 22:3\n\n' +
+      'O que está em jogo — e não é só o negócio:\n' +
+      '⚠ Sua saúde emocional — o desgaste silencioso que ninguém nomeia mas todo mundo sente em você\n' +
+      '⚠ Sua presença em casa — você está lá fisicamente, mas a cabeça está sempre no negócio\n' +
+      '⚠ Seu chamado — o que Deus depositou em você merece fundamento real, não areia\n' +
+      '⚠ Seu testemunho — empreendedor cristão que não prospera não inspira. E você sabe disso.\n\n' +
+      '"O prudente vê o perigo e se refugia, mas o inexperiente segue em frente e sofre as consequências." — Provérbios 22:3\n\n' +
       'Você vai esperar a conta chegar... ou vai escolher sabedoria agora?',
-    ctaLabel: 'QUERO MEU PLANO DE AÇÃO',
+    ctaLabel: 'ESTOU PRONTO PARA MUDAR ISSO',
   },
 
   // ─── MODELO B — Negócio Saudável, Mas Travado no Platô ──────────────────────
@@ -447,83 +453,89 @@ const diagnosticMessages: DiagnosticMessageSeed[] = [
     variant: 'v1',
     block1Title: 'Realidade Direta',
     block1Body:
+      'Há um momento — quando você vê outro negócio crescendo, talvez menor que o seu, talvez com menos qualidade — em que uma pergunta passa rápido pela sua cabeça.\n\n' +
+      'Você não fala em voz alta. Mas a pergunta fica: "Por que eles estão crescendo e eu estou no mesmo lugar?"\n\n' +
+      'O Jethro identificou a resposta.\n\n' +
       '[NOME], você construiu algo que funciona. Agora precisa de algo que multiplica.\n' +
-      'Parabéns pelo que já existe. Operação funciona. Entrega acontece. Você chegou longe.\n' +
-      'Mas há um sinal que o Jethro identificou no seu negócio — e ele precisa ser endereçado agora:\n' +
+      'O Jethro identificou algo específico no seu negócio:\n' +
       '→ O crescimento travou — mesma receita, mesmos clientes, mesmos canais\n' +
-      "→ Você sente que 'está tudo certo... menos o avanço'\n" +
+      '→ Você sente que "está tudo certo... menos o avanço"\n' +
       '→ O esforço aumentou, mas o resultado não acompanhou',
-    rootCause: 'falta motor de multiplicação — aquisição + oferta + recorrência + metas',
-    palavraIntro:
-      'Talentos enterrados não honram quem os deu. O Senhor espera fruto — não só preservação.',
+    rootCause: 'falta de motor de multiplicação — aquisição + oferta + recorrência + metas',
+    palavraIntro: 'Talentos enterrados não honram quem os deu. O Senhor espera fruto — não só preservação.',
     scriptureVerse: 'Mateus 25:27',
-    scriptureText:
-      'Devias ter entregado o meu dinheiro aos banqueiros, e eu, quando viesse, receberia o que é meu com juros.',
-    block2Title: 'O que acontece com quem fica no platô por muito tempo:',
+    scriptureText: '"Devia, portanto, ter depositado o meu dinheiro nos bancos, para que, quando eu voltasse, o recebesse com juros."',
+    block2Title: 'O que o negócio não consegue te dizer sozinho:',
     block2Body:
-      'O platô parece seguro. Mas tem uma física própria:\n' +
-      '⚠ Seu custo fixo sobe — mesmo sem crescer\n' +
-      '⚠ Seu mercado muda — mesmo você ficando no mesmo lugar\n' +
-      "⚠ Seus concorrentes evoluem — enquanto você 'mantém'\n" +
-      "⚠ E um dia o 'negócio ok' vira 'negócio em risco'\n\n" +
-      '"O preguiçoso não lavra no outono; na ceifa procura, e não há nada." — Provérbios 20:4\n' +
+      'O que acontece com quem fica no platô por muito tempo:\n' +
+      'O platô parece seguro. Mas tem um custo que vai além dos números:\n' +
+      '⚠ Seu custo fixo sobe — mesmo sem crescer; a margem corrói em silêncio\n' +
+      '⚠ A animação que tinha no começo foi sumindo — e você sente, mas não nomeia\n' +
+      '⚠ Em casa, a pergunta não dita é: "até quando vai ser assim?"\n' +
+      '⚠ O chamado que te motivou a empreender vai ficando enterrado debaixo da rotina\n\n' +
+      '"O preguiçoso não ara no tempo adequado; na colheita procura, mas nada encontra." — Provérbios 20:4\n' +
       'Platô prolongado é procrastinação estratégica.\n\n' +
-      "Você vai ficar 'bem' enquanto o mercado passa... ou vai decidir ser grande?",
-    ctaLabel: 'QUERO MEU PLANO DE AÇÃO',
+      'Você vai ficar "bem" enquanto o mercado passa... ou vai decidir ser grande?',
+    ctaLabel: 'ESTOU PRONTO PARA MUDAR ISSO',
   },
   {
     modelCode: 'B',
     variant: 'v2',
     block1Title: 'Realidade Direta',
     block1Body:
+      'Tem uma decisão que você vem adiando.\n\n' +
+      'Você sabe qual é. Já pensou nela mais de uma vez. Já disse "quando tiver mais tempo" ou "quando o movimento baixar".\n\n' +
+      'O problema é que o momento certo nunca chega — porque você não criou o sistema que o faz chegar. O Jethro identificou exatamente isso.\n\n' +
       '[NOME], o que te trouxe até aqui não te leva pro próximo nível.\n' +
-      'Há uma lei no mundo dos negócios que ninguém te avisa: o que funciona hoje tem prazo de validade.\n' +
-      'Seu diagnóstico mostra um padrão específico:\n' +
+      'O Jethro identificou algo específico no seu negócio:\n' +
       '→ Você tem estrutura, mas não tem aceleração\n' +
       '→ Tem clientes, mas não tem sistema de aquisição previsível\n' +
       '→ Tem resultado, mas não tem escada de crescimento',
     rootCause: 'crescimento sem sistema — funil sem rotina, oferta sem esteira',
-    palavraIntro:
-      "Multiplicação é princípio bíblico — não opcional. 'Sede fecundos e multiplicai-vos.'",
+    palavraIntro: 'Multiplicação é princípio bíblico — não opcional.',
     scriptureVerse: 'Gênesis 1:28',
-    scriptureText: 'Sede fecundos, multiplicai-vos.',
-    block2Title: 'O custo invisível do platô:',
+    scriptureText: '"Sejam fecundos e multipliquem-se."',
+    block2Title: 'O que o negócio não consegue te dizer sozinho:',
     block2Body:
+      'O custo invisível do platô:\n' +
       'Você não perde de uma vez. Perde aos poucos — e isso é mais perigoso:\n' +
-      '⚠ Motivação que cai sem razão aparente\n' +
-      '⚠ Equipe que sente a estagnação antes de você\n' +
-      '⚠ Oportunidades que passam porque você não tem estrutura para capturar\n' +
-      "⚠ Um negócio que entra em declínio silencioso enquanto parece 'estável'\n\n" +
-      '"O negligente no seu trabalho é irmão do que desperdiça." — Provérbios 18:9\n\n' +
-      'Você vai repetir o mesmo ano mais uma vez... ou vai comprar a rota para o próximo nível?',
-    ctaLabel: 'QUERO MEU PLANO DE AÇÃO',
+      '⚠ Motivação que cai sem razão aparente — o negócio funciona, mas não anima mais\n' +
+      '⚠ Equipe que sente a estagnação antes de você — e os melhores começam a olhar para fora\n' +
+      '⚠ Em casa, a energia que sobra depois do trabalho vai diminuindo junto com o entusiasmo\n' +
+      '⚠ O propósito que existia no começo vai ficando difícil de explicar — para você e para Deus\n\n' +
+      '"Aquele que é negligente no seu trabalho é irmão daquele que destrói." — Provérbios 18:9\n\n' +
+      'Você vai repetir o mesmo ano mais uma vez... ou vai construir a rota para o próximo nível?',
+    ctaLabel: 'ESTOU PRONTO PARA MUDAR ISSO',
   },
   {
     modelCode: 'B',
     variant: 'v3',
     block1Title: 'Realidade Direta',
     block1Body:
+      'Você já disse para si mesmo: "quando eu escalar, aí..."\n\n' +
+      'Mas escalar nunca acontece — porque escalar não é consequência de esperar. É consequência de construir.\n\n' +
+      'Essa frase que você repete tem um nome. E o Jethro reconhece o padrão.\n\n' +
       '[NOME], o mercado não espera. E o seu potencial também não pode esperar.\n' +
-      'Existe uma diferença entre negócio que funciona e negócio que multiplica.\n' +
-      'O Jethro identificou que você está no primeiro — e tem tudo para estar no segundo:\n' +
+      'O Jethro identificou algo específico no seu negócio:\n' +
       '→ Canal de aquisição fraco ou dependente de acaso\n' +
       '→ Oferta sem escada — falta entrada, principal e recorrência\n' +
       '→ Meta sem sistema — esforço sem método não escala',
     rootCause: 'ausência de motor de crescimento estruturado',
-    palavraIntro:
-      'A parábola dos talentos não é sobre preservar — é sobre multiplicar. Deus é sócio que espera retorno.',
+    palavraIntro: 'A parábola dos talentos não é sobre preservar — é sobre multiplicar. Deus é sócio que espera retorno.',
     scriptureVerse: 'Mateus 25:29',
-    scriptureText: 'A quem tem, mais lhe será dado; mas ao que não tem, até o que tem lhe será tirado.',
-    block2Title: 'Se o platô continuar nos próximos 6 meses:',
+    scriptureText: '"Pois a quem tem, mais será dado, e terá em abundância. Mas ao que não tem, até o que tem lhe será tirado."',
+    block2Title: 'O que o negócio não consegue te dizer sozinho:',
     block2Body:
+      'Se o platô continuar nos próximos 6 meses:\n' +
       'O cenário não é dramático. É silencioso — e por isso mais perigoso:\n' +
-      '⚠ Você vai trabalhar igual e ganhar menos em termos reais\n' +
-      '⚠ A inflação e os custos vão corroer sua margem sem aviso\n' +
-      '⚠ E você vai acordar um dia com a sensação de que trabalhou anos pra nada\n\n' +
-      '"Há quem pareça rico e não tem nada; e quem pareça pobre e tem grandes riquezas." — Provérbios 13:7\n' +
+      '⚠ Você vai trabalhar igual e ganhar menos em termos reais — a inflação não espera o motor\n' +
+      '⚠ A família percebe que o negócio consome mas não avança — e essa percepção pesa\n' +
+      '⚠ Você vai acordar um dia com a sensação de que trabalhou anos para preservar, não para multiplicar\n' +
+      '⚠ E o talento que Deus depositou em você vai ter gerado preservação — não fruto\n\n' +
+      '"Há quem aparente riqueza, mas nada tem; há quem aparente pobreza, mas tem grande riqueza." — Provérbios 13:7\n' +
       'Estagnação com aparência de estabilidade é o pior dos cenários.\n\n' +
       'Você quer continuar parecendo que está bem... ou quer realmente multiplicar o que Deus te deu?',
-    ctaLabel: 'QUERO MEU PLANO DE AÇÃO',
+    ctaLabel: 'ESTOU PRONTO PARA MUDAR ISSO',
   },
 
   // ─── MODELO C — Boa Base, Mas Aperto de Caixa + Sem Visão ───────────────────
@@ -532,87 +544,90 @@ const diagnosticMessages: DiagnosticMessageSeed[] = [
     variant: 'v1',
     block1Title: 'Realidade Direta',
     block1Body:
+      'Tem um momento — logo depois que você fecha um serviço ou entrega um trabalho — em que você sente aquela sensação incômoda.\n\n' +
+      'Não é arrependimento. É a percepção de que entregou mais do que cobrou. Que o cliente saiu satisfeito demais para o que pagou.\n\n' +
+      'Você não fala sobre isso. Agradece. E vai para o próximo. O Jethro identificou o custo acumulado desse padrão.\n\n' +
       '[NOME], você tem o coração certo. Falta o sistema que sustenta.\n' +
-      'Você entrega valor. Você tem propósito. Você cuida das pessoas.\n' +
-      'E ainda assim, todo mês é uma luta silenciosa com o caixa.\n' +
-      'O Jethro identificou a raiz disso:\n' +
+      'O Jethro identificou algo específico no seu negócio:\n' +
       '→ Você cobra menos do que entrega — e todo mês o caixa prova isso\n' +
       '→ O fluxo financeiro é uma corda bamba — aperta, você dá desconto\n' +
       '→ A visão existe no coração, mas não existe no papel como plano real',
     rootCause: 'propósito sem modelo financeiro + caixa sem governo',
-    palavraIntro:
-      'Deus honra o chamado com provisão — mas a provisão exige mordomia. Cuida do rebanho e conhece o estado de teu ganho.',
+    palavraIntro: 'Deus honra o chamado com provisão — mas a provisão exige mordomia.',
     scriptureVerse: 'Provérbios 27:23',
-    scriptureText: 'Cuida bem de teu rebanho, tem atenção ao teu gado.',
-    block2Title: 'O que o aperto crônico faz com quem tem chamado:',
+    scriptureText: '"Cuide bem de seus rebanhos, preste atenção aos seus gados."',
+    block2Title: 'O que o negócio não consegue te dizer sozinho:',
     block2Body:
+      'O que o aperto crônico faz com quem tem chamado:\n' +
       'O caixa apertado não machuca só o banco. Machuca a alma:\n' +
-      '⚠ Você começa a aceitar clientes errados — só pra pagar conta\n' +
-      '⚠ Você para de sonhar grande porque o presente é sufocante\n' +
-      "⚠ Você duvida do chamado — 'se Deus me chamou, por que apertar tanto?'\n" +
-      '⚠ E o propósito que era chama vira brasa que mal aquece\n\n' +
-      '"O rico domina os pobres, e o que toma emprestado é servo do que empresta." — Provérbios 22:7\n' +
+      '⚠ Você começa a aceitar clientes errados — só pra pagar conta — e isso drena mais do que o dinheiro\n' +
+      '⚠ Em casa, a tensão financeira que você tenta esconder vai aparecendo nas entrelinhas\n' +
+      '⚠ Você começa a duvidar do chamado: "se Deus me chamou, por que apertar tanto?"\n' +
+      '⚠ E o propósito que era chama vai virando brasa que mal aquece\n\n' +
+      '"O rico governa os pobres, e o devedor é escravo do credor." — Provérbios 22:7\n' +
       'Aperto de caixa rouba liberdade — e liberdade é parte do chamado.\n\n' +
       'Você vai continuar sendo governado pelo boleto... ou vai retomar o governo do seu chamado?',
-    ctaLabel: 'QUERO MEU PLANO DE AÇÃO',
+    ctaLabel: 'ESTOU PRONTO PARA MUDAR ISSO',
   },
   {
     modelCode: 'C',
     variant: 'v2',
     block1Title: 'Realidade Direta',
     block1Body:
+      'Tem um comportamento que acontece antes mesmo de o cliente perguntar o preço.\n\n' +
+      'Você já começa a justificar internamente por que vai cobrar menos. Já calcula o desconto antes de apresentar a proposta.\n\n' +
+      'Esse comportamento tem um nome. E o Jethro o reconhece com precisão.\n\n' +
       '[NOME], o problema não é o quanto você vale. É o quanto você está cobrando.\n' +
-      'Existe uma injustiça silenciosa acontecendo no seu negócio.\n' +
-      'Você entrega mais do que cobra — e o mercado aproveita isso.\n' +
-      'Seu diagnóstico revela com precisão:\n' +
+      'O Jethro identificou algo específico no seu negócio:\n' +
       '→ Precificação abaixo do valor real entregue\n' +
       '→ Condições de pagamento que drenam o caixa antes de completar o ciclo\n' +
-      "→ Falta de visão estratégica de 90 dias — você vive no 'agora'",
+      '→ Falta de visão estratégica de 90 dias — você vive no "agora"',
     rootCause: 'valor sem modelo + caixa sem regra',
-    palavraIntro:
-      'Jesus ensinou sobre mordomia — não sobre se sacrificar por quem não valoriza. Você foi chamado para prosperar, não apenas servir no limite.',
+    palavraIntro: 'Jesus ensinou sobre mordomia — não sobre se sacrificar por quem não valoriza. Você foi chamado para prosperar, não apenas servir no limite.',
     scriptureVerse: 'João 10:10',
-    scriptureText:
-      'O ladrão vem apenas para roubar, matar e destruir; eu vim para que tenham vida e a tenham em abundância.',
-    block2Title: 'O que acontece com quem vive no limite por muito tempo:',
+    scriptureText: '"O ladrão vem apenas para roubar, matar e destruir; eu vim para que tenham vida, e a tenham plenamente."',
+    block2Title: 'O que o negócio não consegue te dizer sozinho:',
     block2Body:
+      'O que acontece com quem vive no limite por muito tempo:\n' +
       'O aperto crônico tem um custo que vai além do financeiro:\n' +
-      '⚠ Desgaste que acumula até virar esgotamento\n' +
-      '⚠ Decisões tomadas no medo — não na fé e estratégia\n' +
-      '⚠ Relacionamentos que sentem o peso do que você carrega\n' +
-      '⚠ Uma vida abundante que Deus prometeu sendo trocada por sobrevivência\n\n' +
-      '"Filho, não te esqueças da minha lei; e o teu coração guarde os meus mandamentos, porque eles aumentarão os teus dias." — Provérbios 3:1-2\n' +
+      '⚠ Desgaste que acumula até virar esgotamento — e esgotamento não avisa antes de chegar\n' +
+      '⚠ Decisões tomadas no medo — não na fé e estratégia que seu chamado merece\n' +
+      '⚠ Relacionamentos em casa que sentem o peso do que você carrega — mesmo sem entender de onde vem\n' +
+      '⚠ Uma vida abundante que Deus prometeu sendo trocada por sobrevivência — mês após mês\n\n' +
+      '"Filho meu, não se esqueça do meu ensino; guarde no seu coração os meus mandamentos, pois eles prolongarão por muitos anos a sua vida." — Provérbios 3:1-2\n' +
       'Guardar a sabedoria financeira é ato de fé, não de frieza.\n\n' +
       'Você quer continuar entregando ouro e recebendo bronze... ou vai reposicionar o que você vale?',
-    ctaLabel: 'QUERO MEU PLANO DE AÇÃO',
+    ctaLabel: 'ESTOU PRONTO PARA MUDAR ISSO',
   },
   {
     modelCode: 'C',
     variant: 'v3',
     block1Title: 'Realidade Direta',
     block1Body:
+      'Você cresceu ouvindo — ou sentindo — que cobrar bem era quase ganância. Que o verdadeiro servo cobra menos. Que humildade e preço andam juntos.\n\n' +
+      'Nunca ninguém te disse diretamente. Mas a crença foi se instalando.\n\n' +
+      'E hoje ela está custando caro — não só ao seu negócio. Ao seu chamado.\n\n' +
       '[NOME], propósito sem sustentabilidade não é humildade. É risco.\n' +
-      'Há uma crença no meio cristão que precisa ser quebrada: que cobrar menos é mais espiritual.\n' +
-      'O Jethro identificou que essa crença está custando caro ao seu negócio:\n' +
+      'O Jethro identificou algo específico no seu negócio:\n' +
       '→ Caixa que aperta todo mês — não por falta de clientes, mas por falta de margem\n' +
       '→ Visão que existe, mas não tem rota — fica no sonho sem se tornar plano\n' +
       '→ Um negócio que serve bem mas não se sustenta bem',
     rootCause: 'ausência de modelo financeiro sustentável + precificação abaixo do valor',
-    palavraIntro:
-      'Jetro ensinou Moisés a estruturar — porque missão sem estrutura colapsa. Você precisa das mesmas palavras hoje.',
+    palavraIntro: 'Jetro ensinou Moisés a estruturar — porque missão sem estrutura colapsa.',
     scriptureVerse: 'Êxodo 18:18',
-    scriptureText:
-      'Certamente definharás, tanto tu como este povo que está contigo; porque este trabalho é pesado demais para ti.',
-    block2Title: 'O precipício do bom coração sem governo financeiro:',
+    scriptureText: '"Você e o povo que está com você vão se esgotar, pois o trabalho é pesado demais para você; não conseguirá realizá-lo sozinho."',
+    block2Title: 'O que o negócio não consegue te dizer sozinho:',
     block2Body:
+      'O destino do propósito sem governo financeiro:\n' +
       'Quando propósito e sistema não andam juntos, o destino é sempre o mesmo:\n' +
       '⚠ Você esgota — e o negócio para com você\n' +
-      '⚠ Você toma decisões reativas — e abre mão de clientes, produtos e padrões que importam\n' +
-      '⚠ O testemunho que deveria ser de prosperidade vira de sobrevivência\n\n' +
-      '"Honra ao Senhor com os teus bens." — Provérbios 3:9\n' +
-      'Honrar com os bens exige ter bens — e isso exige governo.\n\n' +
+      '⚠ Toma decisões reativas — abre mão de clientes, padrões e limites que importam\n' +
+      '⚠ O testemunho que deveria ser de prosperidade vira testemunho de sobrevivência\n' +
+      '⚠ E Deus, que te chamou para o muito, vê o fiel no mínimo sendo consumido antes do tempo\n\n' +
+      '"Honre o Senhor com as suas riquezas, com as primícias de toda a sua colheita." — Provérbios 3:9\n' +
+      'Honrar com as riquezas exige ter riquezas — e isso exige governo.\n\n' +
       'Você vai continuar pagando o preço da generosidade sem sistema... ou vai construir sustentabilidade para o seu chamado?',
-    ctaLabel: 'QUERO MEU PLANO DE AÇÃO',
+    ctaLabel: 'ESTOU PRONTO PARA MUDAR ISSO',
   },
 
   // ─── MODELO D — Fatura, Mas Sangra — Ilusão de Faturamento ─────────────────
@@ -621,83 +636,90 @@ const diagnosticMessages: DiagnosticMessageSeed[] = [
     variant: 'v1',
     block1Title: 'Realidade Direta',
     block1Body:
+      'Tem um momento — geralmente no final do mês, quando você para para fechar as contas — em que o número no extrato não fecha com o que você esperava.\n\n' +
+      'O movimento foi bom. Você vendeu. Entregou. Trabalhou.\n\n' +
+      'E mesmo assim, sobrou menos do que deveria. Ou não sobrou nada. O Jethro identificou exatamente onde está o buraco.\n\n' +
       '[NOME], você está correndo em direção a uma parede — e chamando isso de crescimento.\n' +
-      'Existe um tipo de falência que não avisa. Ela não chega com a empresa vazia.\n' +
-      'Ela chega com a empresa cheia de clientes, cheia de movimento — e sem dinheiro no final.\n' +
-      'O Jethro identificou exatamente isso no seu negócio:\n' +
+      'O Jethro identificou algo específico no seu negócio:\n' +
       '→ Faturamento existe — lucro é ilusão\n' +
       '→ Você não sabe a margem real de cada produto ou serviço\n' +
       '→ O dinheiro entra, circula e some antes de você sentir que existiu',
     rootCause: 'custo invisível + precificação sem margem + ilusão de faturamento',
-    palavraIntro:
-      'Faturamento sem lucro não é bênção — é trabalho em vão. Deus chama ao fruto real, não à aparência de produtividade.',
+    palavraIntro: 'Faturamento sem lucro não é bênção — é trabalho em vão. Deus chama ao fruto real, não à aparência de produtividade.',
     scriptureVerse: 'Lucas 14:28',
-    scriptureText: 'Qual de vocês, querendo construir uma torre, não se senta primeiro para calcular o custo?',
-    block2Title: 'O que acontece quando o sangramento continua:',
+    scriptureText: '"Qual de vocês, querendo construir uma torre, não se senta primeiro e calcula o custo?"',
+    block2Title: 'O que o negócio não consegue te dizer sozinho:',
     block2Body:
-      'A lógica é cruel mas precisa:\n' +
-      '⚠ Mais vendas → mais operação → mais custo → menos lucro\n' +
-      '⚠ Menos lucro → mais pressão → mais desconto → mais sangramento\n' +
-      '⚠ Mais sangramento → caixa negativo → crise → colapso\n\n' +
-      '"O prudente vê o perigo e se esconde; o inexperiente segue em frente e sofre as consequências." — Provérbios 22:3\n' +
+      'O que acontece quando o sangramento continua:\n' +
+      'A lógica é cruel mas precisa — e vai além do caixa:\n' +
+      '⚠ Mais vendas → mais operação → mais custo → menos lucro → mais pressão\n' +
+      '⚠ A pressão financeira chega em casa mesmo quando você não fala — e a família sente\n' +
+      '⚠ Você ora por provisão mas o sistema que constrói trabalha contra a provisão\n' +
+      '⚠ E um dia o negócio que você construiu com fé fecha — não por falta de cliente, mas por falta de margem\n\n' +
+      '"O prudente vê o perigo e se refugia, mas o inexperiente segue em frente e sofre as consequências." — Provérbios 22:3\n' +
       'Você está vendo o perigo agora. A decisão é sua.\n\n' +
       'Você quer continuar crescendo o faturamento... ou quer começar a crescer o lucro?',
-    ctaLabel: 'QUERO MEU PLANO DE AÇÃO',
+    ctaLabel: 'ESTOU PRONTO PARA MUDAR ISSO',
   },
   {
     modelCode: 'D',
     variant: 'v2',
     block1Title: 'Realidade Direta',
     block1Body:
+      'Quando alguém pergunta como vai o negócio, você responde "está bem". Talvez até "está crescendo".\n\n' +
+      'Mas por dentro, você sabe que o número bonito no faturamento não corresponde ao que você sente no bolso.\n\n' +
+      'Você não fala sobre isso. Continua. Mas a dissonância fica. O Jethro colocou nome nessa dissonância.\n\n' +
       '[NOME], o seu negócio pode estar te enganando.\n' +
-      'Número bonito no extrato. Sensação feia no bolso.\n' +
-      'Esse é o perfil mais perigoso do mundo empresarial — porque a dor é real mas o diagnóstico é invisível.\n' +
-      'O Jethro identificou com precisão o que está acontecendo:\n' +
+      'O Jethro identificou algo específico no seu negócio:\n' +
       '→ Desconto virou hábito — e cada desconto tem um custo que você não calcula\n' +
       '→ Custo fixo cresceu com o negócio — mas a margem não acompanhou\n' +
       '→ Você não sabe qual produto ou serviço paga a conta — e qual está te custando',
     rootCause: 'precificação sem lógica + custo invisível + ausência de DRE real',
-    palavraIntro:
-      "Prosperidade bíblica tem paz, ordem e resultado — não ilusão. 'A bênção do Senhor enriquece, e não acrescenta tristeza com ela.'",
+    palavraIntro: 'Prosperidade bíblica tem paz, ordem e resultado — não ilusão.',
     scriptureVerse: 'Provérbios 10:22',
-    scriptureText: 'A bênção do Senhor enriquece, e não acrescenta tristeza com ela.',
-    block2Title: 'O que está em jogo nos próximos 90 dias:',
+    scriptureText: '"A bênção do Senhor traz riqueza, sem que venha tristeza com ela."',
+    block2Title: 'O que o negócio não consegue te dizer sozinho:',
     block2Body:
-      'Se o padrão continuar, três consequências são certas:\n' +
-      '⚠ O caixa vai apertar de forma que você não conseguirá esconder\n' +
-      '⚠ Você será forçado a tomar decisões de desespero — não de estratégia\n' +
-      '⚠ E quando a crise vier, ela virá com pressa — porque o sangramento silencioso não avisa hora\n\n' +
-      '"Há caminhos que ao homem parecem direitos, mas ao fim deles há caminhos de morte." — Provérbios 14:12\n' +
+      'O que está em jogo nos próximos 90 dias:\n' +
+      'Se o padrão continuar, três consequências são certas — e nenhuma fica só no negócio:\n' +
+      '⚠ O caixa vai apertar de forma que você não conseguirá esconder — de si mesmo nem de casa\n' +
+      '⚠ Você será forçado a tomar decisões de desespero — não de fé e estratégia\n' +
+      '⚠ A família, que confiou no seu chamado, vai sentir o peso sem entender a origem\n' +
+      '⚠ E o testemunho que o negócio cristão deveria dar vai sendo silenciado pela crise\n\n' +
+      '"Há um caminho que parece certo ao homem, mas o fim desse caminho é a morte." — Provérbios 14:12\n' +
       'Faturamento que parece vitória pode ser o caminho para a falência.\n\n' +
       'Você vai esperar o caixa gritar para ouvir a verdade... ou vai agir agora que o Jethro te mostrou?',
-    ctaLabel: 'QUERO MEU PLANO DE AÇÃO',
+    ctaLabel: 'ESTOU PRONTO PARA MUDAR ISSO',
   },
   {
     modelCode: 'D',
     variant: 'v3',
     block1Title: 'Realidade Direta',
     block1Body:
+      'Você já disse para si mesmo: "o próximo mês vai ser diferente."\n\n' +
+      'E no próximo mês, o movimento foi bom. Mas no final — a mesma sensação.\n\n' +
+      'Não é azar. É um sistema construído para produzir exatamente esse resultado. O Jethro identificou onde está esse sistema — e como corrigir.\n\n' +
       '[NOME], trabalhar para sustentar vazamento é a armadilha mais cruel do empreendedorismo.\n' +
-      'Você acorda cedo. Trabalha até tarde. Vende.\n' +
-      'E no final do mês — nada sobra.\n' +
-      'Não é falta de esforço. É falta de margem. E o Jethro identificou exatamente onde está o buraco:\n' +
+      'O Jethro identificou algo específico no seu negócio:\n' +
       '→ Você não sabe o custo real de cada hora trabalhada\n' +
       '→ A estrutura cresceu — mas o lucro por venda diminuiu\n' +
-      '→ O mix de produtos/serviços tem itens que sangram e você ainda não sabe quais',
+      '→ O mix de produtos ou serviços tem itens que sangram — e você ainda não sabe quais',
     rootCause: 'ausência de visão de margem por item + estrutura de custo descontrolada',
     palavraIntro: 'Mordomia é saber o que entra e o que sai. Sem isso, não há como ser fiel no muito.',
     scriptureVerse: 'Lucas 16:10',
-    scriptureText: 'Quem é fiel no mínimo também é fiel no muito.',
-    block2Title: 'O destino de quem não resolve o sangramento:',
+    scriptureText: '"Quem é fiel nas coisas pequenas também é fiel nas grandes."',
+    block2Title: 'O que o negócio não consegue te dizer sozinho:',
     block2Body:
-      'A conta chega — e quando chega, ela cobra com juros:\n' +
+      'O destino de quem não resolve o sangramento:\n' +
+      'A conta chega — e quando chega, ela cobra com juros em todas as frentes:\n' +
       '⚠ Você acumula dívidas para sustentar uma operação que não dá lucro\n' +
-      '⚠ Sua reserva vai a zero — e o primeiro imprevisto derruba tudo\n' +
-      '⚠ E o negócio que você construiu com fé e suor fecha — não por falta de cliente, mas por falta de margem\n\n' +
-      '"O devedor é escravo do credor." — Provérbios 22:7\n' +
+      '⚠ A reserva vai a zero — e o primeiro imprevisto derruba tudo que você construiu\n' +
+      '⚠ Em casa, a tensão financeira vai corroendo o que o chamado deveria estar construindo\n' +
+      '⚠ E o negócio que você ergueu com fé e suor fecha — não por falta de cliente, mas por falta de margem\n\n' +
+      '"O rico governa os pobres, e o devedor é escravo do credor." — Provérbios 22:7\n' +
       'Sangramento não corrigido vira escravidão financeira.\n\n' +
       'Você vai continuar trabalhando para sustentar o vazamento... ou vai fechar o buraco agora?',
-    ctaLabel: 'QUERO MEU PLANO DE AÇÃO',
+    ctaLabel: 'ESTOU PRONTO PARA MUDAR ISSO',
   },
 
   // ─── MODELO E — Pré-Receita — Ainda Não Validou no Mercado ─────────────────
@@ -706,83 +728,90 @@ const diagnosticMessages: DiagnosticMessageSeed[] = [
     variant: 'v1',
     block1Title: 'Realidade Direta',
     block1Body:
+      'Tem um momento — quando alguém pergunta "e aí, como vai o negócio?" — em que você sente aquela hesitação de meio segundo antes de responder.\n\n' +
+      'Não é mentira o que você diz. Mas também não é toda a verdade.\n\n' +
+      'Porque a verdade é que ainda não saiu do papel da forma que você esperava. O Jethro identificou exatamente onde está o travamento.\n\n' +
       '[NOME], a semente existe. Falta plantar — de verdade.\n' +
-      'Você tem ideia. Tem vontade. Às vezes até tem público.\n' +
-      'Mas ainda não tem o que o mercado reconhece como real: a venda consistente.\n' +
-      'O Jethro identificou onde você está preso:\n' +
+      'O Jethro identificou algo específico no seu negócio:\n' +
       '→ A oferta ainda não está clara o suficiente para o mercado dizer sim\n' +
       '→ O canal não está testado — as vendas que existem vieram da rede pessoal, não do mercado\n' +
       '→ A rotina de primeira venda ainda não foi instalada',
     rootCause: 'validação fraca + oferta não posicionada + execução travada',
     palavraIntro: 'Fé sem obra é morta. O Senhor não bênça semente que ninguém plantou.',
     scriptureVerse: 'Tiago 2:17',
-    scriptureText: 'A fé sem obras é morta.',
-    block2Title: "O risco do 'quase começando' que dura meses:",
+    scriptureText: '"Assim também a fé, por si só, se não for acompanhada de obras, está morta."',
+    block2Title: 'O que o negócio não consegue te dizer sozinho:',
     block2Body:
-      'Existe um padrão perigoso nesta fase — e o Jethro o reconhece:\n' +
-      '⚠ Cada semana tem um ajuste novo na oferta — mas nenhuma venda\n' +
-      '⚠ O medo de aparecer vira medo de falhar vira paralisação\n' +
-      '⚠ O tempo passa, a confiança cai — e o chamado começa a parecer ilusão\n\n' +
-      '"Quem observa o vento não semeará, e quem olha as nuvens não segará." — Eclesiastes 11:4\n' +
+      'O risco do "quase começando" que dura meses:\n' +
+      'Existe um padrão perigoso nesta fase — e o custo vai além da venda que não veio:\n' +
+      '⚠ Cada semana tem um ajuste novo na oferta — mas nenhuma venda; o ciclo se repete\n' +
+      '⚠ O medo de aparecer vira medo de falhar vira paralisação — e paralisação tem prazo de validade\n' +
+      '⚠ Em casa, o tempo e a energia investidos começam a pesar sem resultado visível\n' +
+      '⚠ O chamado que era claro começa a parecer ilusão — quando o problema era só o método\n\n' +
+      '"Quem fica observando o vento, não semeia; quem fica olhando para as nuvens, não colhe." — Eclesiastes 11:4\n' +
       'Esperar a hora perfeita é a desculpa mais comum para não entrar no jogo.\n\n' +
       'Você vai continuar se preparando para começar... ou vai começar de verdade?',
-    ctaLabel: 'QUERO MEU PLANO DE AÇÃO',
+    ctaLabel: 'ESTOU PRONTO PARA MUDAR ISSO',
   },
   {
     modelCode: 'E',
     variant: 'v2',
     block1Title: 'Realidade Direta',
     block1Body:
+      'Tem um comportamento que você conhece bem — você ajusta a oferta, melhora a apresentação, aperfeiçoa o produto.\n\n' +
+      'Mas não vai ao mercado.\n\n' +
+      'Cada ajuste é real. Cada melhoria faz sentido. E cada uma delas adia o momento de verdade. O Jethro identificou esse padrão — e tem uma saída precisa.\n\n' +
       '[NOME], o mundo não compra potencial. Compra oferta clara.\n' +
-      'Você pode ter o maior talento do mercado.\n' +
-      'Mas se o mercado não consegue entender o que você vende, para quem e qual resultado entrega — o talento fica sem palco.\n' +
-      'O diagnóstico revelou:\n' +
+      'O Jethro identificou algo específico no seu negócio:\n' +
       '→ Sua oferta ainda não está em 1 frase que gera decisão de compra\n' +
       '→ Você ainda não testou canais de aquisição fora da sua rede pessoal\n' +
       '→ A rotina de prospecção não existe — e sem rotina, não há consistência',
     rootCause: 'oferta não posicionada + canal não validado + rotina ausente',
-    palavraIntro:
-      'Deus deu dons para servir — mas servir exige aparecer, oferecer e ser pago pelo valor entregue.',
+    palavraIntro: 'Deus deu dons para servir — mas servir exige aparecer, oferecer e ser pago pelo valor entregue.',
     scriptureVerse: 'Provérbios 18:16',
-    scriptureText: 'O dom do homem abre caminho para ele e o leva à presença dos grandes.',
-    block2Title: "O que o 'eterno começo' está custando:",
+    scriptureText: '"O presente do homem lhe abre caminho e o introduz na presença dos grandes."',
+    block2Title: 'O que o negócio não consegue te dizer sozinho:',
     block2Body:
+      'O que o "eterno começo" está custando:\n' +
       'Cada mês sem venda consistente tem um custo triplo:\n' +
-      '⚠ Financeiro: você financia o negócio do próprio bolso sem retorno\n' +
-      '⚠ Emocional: a autoconfiança vai diminuindo com cada semana sem resultado\n' +
-      '⚠ Espiritual: você começa a questionar se o chamado era real — quando o problema é só o método\n\n' +
-      '"O preguiçoso diz: há um leão lá fora, serei morto na praça." — Provérbios 22:13\n' +
+      '⚠ Financeiro: você financia o negócio do próprio bolso — sem retorno, sem prazo definido\n' +
+      '⚠ Emocional: a autoconfiança vai diminuindo com cada semana sem resultado — silenciosamente\n' +
+      '⚠ Em casa, o projeto que você acredita vai ficando difícil de defender com entusiasmo\n' +
+      '⚠ Espiritual: você começa a questionar se o chamado era real — quando o problema era só o método\n\n' +
+      '"O preguiçoso diz: Há um leão lá fora! Serei morto se sair à rua!" — Provérbios 22:13\n' +
       'Todo obstáculo parece maior quando você ainda não entrou no jogo.\n\n' +
       'Você vai continuar esperando estar pronto... ou vai descobrir que pronto se aprende fazendo?',
-    ctaLabel: 'QUERO MEU PLANO DE AÇÃO',
+    ctaLabel: 'ESTOU PRONTO PARA MUDAR ISSO',
   },
   {
     modelCode: 'E',
     variant: 'v3',
     block1Title: 'Realidade Direta',
     block1Body:
+      'Você já disse para si mesmo: "falta só mais uma coisa — aí eu começo."\n\n' +
+      'Só que a lista do que falta nunca acaba.\n\n' +
+      'Não é preguiça. É medo de rejeição disfarçado de preparo. E o Jethro reconhece esse padrão — porque ele tem uma saída.\n\n' +
       '[NOME], o seu maior inimigo agora não é o mercado. É o adiamento.\n' +
-      'Há um vírus silencioso que mata mais negócios do que concorrência, crise ou falta de dinheiro.\n' +
-      "Ele se chama 'ainda não estou pronto'.\n" +
-      'O Jethro identificou que você está nessa armadilha:\n' +
+      'O Jethro identificou algo específico no seu negócio:\n' +
       '→ Você ajusta a oferta — mas não vende\n' +
       '→ Você estuda o mercado — mas não testa\n' +
       '→ Você acredita no chamado — mas não age com consistência',
     rootCause: 'medo de rejeição disfarçado de preparo + ausência de método de primeira venda',
-    palavraIntro:
-      'Deus chamou Pedro para sair do barco — não para estudar a física da água. A fé que multiplica é a que pisa no mar.',
+    palavraIntro: 'Deus chamou Pedro para sair do barco — não para estudar a física da água. A fé que multiplica é a que pisa no mar.',
     scriptureVerse: 'Mateus 14:29',
-    scriptureText: 'Pedro saiu do barco e andou sobre as águas em direção a Jesus.',
-    block2Title: 'Se o padrão de adiamento continuar:',
+    scriptureText: '"Então Pedro desceu do barco, andou sobre as águas e foi ao encontro de Jesus."',
+    block2Title: 'O que o negócio não consegue te dizer sozinho:',
     block2Body:
+      'Se o padrão de adiamento continuar:\n' +
       'O risco não é imediato. É progressivo — e por isso mais destrutivo:\n' +
-      "⚠ 6 meses: você ainda está 'quase pronto' — com mais conhecimento e menos confiança\n" +
-      '⚠ 1 ano: a janela de mercado que existia pode ter fechado\n' +
-      '⚠ 2 anos: o sonho começa a parecer ingênuo — mas o problema era só método\n\n' +
-      '"Tudo tem o seu tempo determinado; há tempo para todo propósito debaixo do céu." — Eclesiastes 3:1\n' +
+      '⚠ 6 meses: você ainda está "quase pronto" — com mais conhecimento e menos confiança\n' +
+      '⚠ 1 ano: a janela de mercado que existia pode ter fechado — e a energia de lançamento também\n' +
+      '⚠ Em casa, o projeto começa a virar "aquela coisa que ele ainda vai fazer"\n' +
+      '⚠ O chamado que você sente começa a parecer ingenuidade — mas o problema era só método\n\n' +
+      '"Tudo tem a sua ocasião determinada; há tempo certo para cada propósito debaixo do céu." — Eclesiastes 3:1\n' +
       'O seu tempo é agora — não quando você sentir que está perfeito.\n\n' +
       'Você vai continuar adiando a sua história... ou vai dar o primeiro passo com método e acompanhamento?',
-    ctaLabel: 'QUERO MEU PLANO DE AÇÃO',
+    ctaLabel: 'ESTOU PRONTO PARA MUDAR ISSO',
   },
 
   // ─── MODELO F — Vende, Mas Sem Motor — Depende de Indicação ─────────────────
@@ -791,85 +820,90 @@ const diagnosticMessages: DiagnosticMessageSeed[] = [
     variant: 'v1',
     block1Title: 'Realidade Direta',
     block1Body:
+      'Tem um momento — geralmente no começo do mês, quando você olha para a agenda — em que a pergunta aparece sem ser chamada.\n\n' +
+      'De onde vem o próximo cliente?\n\n' +
+      'Você não sabe responder com certeza. Depende. Talvez apareça uma indicação. O Jethro identificou o custo desse talvez como modelo de negócio.\n\n' +
       '[NOME], você tem negócio. Não tem sistema. E essa diferença está custando caro.\n' +
-      'Mês bom. Mês ruim. Mês bom. Mês ruim.\n' +
-      'Você conhece esse ritmo. É a montanha-russa do empreendedor que depende do acaso para vender.\n' +
-      'O Jethro identificou a raiz desse padrão:\n' +
+      'O Jethro identificou algo específico no seu negócio:\n' +
       '→ Quase 100% dos clientes chegam por indicação — e indicação não escala\n' +
       '→ Você não tem processo de vendas definido — cada fechamento é um improviso\n' +
       '→ Não há rotina de aquisição — sem prospecção ativa, você espera o mercado te achar',
     rootCause: 'ausência de motor comercial — aquisição + funil + follow-up + recorrência',
-    palavraIntro:
-      'Prudência é construir o que não depende do vento. Indicação é vento — boa quando aparece, mortal quando some.',
+    palavraIntro: 'Prudência é construir o que não depende do vento. Indicação é vento — boa quando aparece, mortal quando some.',
     scriptureVerse: 'Provérbios 22:3',
-    scriptureText: 'O homem prudente vê o mal e se esconde.',
-    block2Title: 'O que acontece quando a indicação seca:',
+    scriptureText: '"O prudente vê o perigo e se refugia, mas o inexperiente segue em frente e sofre as consequências."',
+    block2Title: 'O que o negócio não consegue te dizer sozinho:',
     block2Body:
+      'O que acontece quando a indicação seca:\n' +
       'E ela vai secar. Não é pessimismo — é física de mercado:\n' +
-      '⚠ Você aceita clientes que não deveria — porque precisa do caixa\n' +
-      '⚠ Você baixa o preço — porque a alternativa é não fechar\n' +
-      '⚠ Você acorda às 3h — porque a próxima venda não tem data para chegar\n' +
-      '⚠ E o negócio que era chamado começa a parecer fardo\n\n' +
-      '"O negligente no seu trabalho é irmão do que desperdiça." — Provérbios 18:9\n' +
+      '⚠ Você aceita clientes que não deveria — porque precisa do caixa; e isso tem um preço emocional alto\n' +
+      '⚠ Você acorda às 3h — porque a próxima venda não tem data para chegar e a cabeça não desliga\n' +
+      '⚠ Em casa, a instabilidade do negócio chega mesmo quando você tenta deixá-la do lado de fora\n' +
+      '⚠ E o negócio que era chamado começa a parecer fardo — porque fardo não tem motor, tem peso\n\n' +
+      '"Aquele que é negligente no seu trabalho é irmão daquele que destrói." — Provérbios 18:9\n' +
       'Depender só de indicação é negligenciar o motor do crescimento.\n\n' +
       'Você vai continuar vivendo de milagre mensal... ou vai instalar um sistema que não depende de sorte?',
-    ctaLabel: 'QUERO MEU PLANO DE AÇÃO',
+    ctaLabel: 'ESTOU PRONTO PARA MUDAR ISSO',
   },
   {
     modelCode: 'F',
     variant: 'v2',
     block1Title: 'Realidade Direta',
     block1Body:
+      'Tem um comportamento que você provavelmente não nomeou ainda — mas reconhece quando vê.\n\n' +
+      'Você espera. Espera o telefone tocar. Espera a mensagem chegar. Espera alguém indicar.\n\n' +
+      'E nos meses bons, funciona. Nos meses ruins, a espera pesa. O Jethro identificou o padrão — e tem uma saída que não depende de esperar.\n\n' +
       '[NOME], você provou que sabe entregar. Agora precisa provar que sabe crescer.\n' +
-      'Há dois tipos de negócio: o que vende quando aparece cliente — e o que vai buscar o cliente.\n' +
-      'O Jethro identificou que você está no primeiro grupo:\n' +
+      'O Jethro identificou algo específico no seu negócio:\n' +
       '→ Seu canal comercial é frágil — depende da boa vontade do mercado\n' +
       '→ Você não tem script de abordagem, funil de follow-up ou rotina de prospecção\n' +
       '→ O crescimento é instável porque o sistema de entrada não existe',
     rootCause: 'canal único e frágil + ausência de processo comercial repetível',
-    palavraIntro:
-      'Deus recompensa o diligente — mas diligência em vendas exige rotina, não rezar para aparecer cliente.',
+    palavraIntro: 'Deus recompensa o diligente — mas diligência em vendas exige rotina, não rezar para aparecer cliente.',
     scriptureVerse: 'Provérbios 21:5',
-    scriptureText:
-      'Os planos do diligente tendem para a abundância; mas todo aquele que se apressa com ansiedade chega à pobreza.',
-    block2Title: 'O que a instabilidade comercial produz a longo prazo:',
+    scriptureText: '"Os planos do diligente levam à abundância, assim como a pressa leva à pobreza."',
+    block2Title: 'O que o negócio não consegue te dizer sozinho:',
     block2Body:
+      'O que a instabilidade comercial produz a longo prazo:\n' +
       'Não é só o caixa que sofre:\n' +
-      '⚠ Sua precificação fica comprometida — você não tem poder de negociação sem fluxo de leads\n' +
-      '⚠ Sua autoestima empresarial oscila com o mês — isso não é sustentável\n' +
-      '⚠ Sua capacidade de investir e crescer depende de meses que não se repetem\n\n' +
-      '"Constrói a tua casa sobre a rocha." — Mateus 7:24\n' +
+      '⚠ Sua precificação fica comprometida — sem fluxo de leads, você não tem poder de negociação\n' +
+      '⚠ Sua autoestima empresarial oscila com o mês — e isso não é sustentável por muito tempo\n' +
+      '⚠ Em casa, os meses ruins chegam como clima — mesmo sem palavras, todos sentem\n' +
+      '⚠ E o chamado que deveria crescer fica preso no tamanho da última indicação\n\n' +
+      '"Todo aquele que ouve estas minhas palavras e as pratica é como um homem sensato que construiu a sua casa sobre a rocha." — Mateus 7:24\n' +
       'Negócio sem sistema comercial está edificado sobre areia.\n\n' +
       'Você vai continuar sendo refém da indicação... ou vai construir o motor que te liberta?',
-    ctaLabel: 'QUERO MEU PLANO DE AÇÃO',
+    ctaLabel: 'ESTOU PRONTO PARA MUDAR ISSO',
   },
   {
     modelCode: 'F',
     variant: 'v3',
     block1Title: 'Realidade Direta',
     block1Body:
+      'Você já disse para si mesmo: "esse mês vai aparecer alguma coisa."\n\n' +
+      'E às vezes aparece. Nos meses bons, você acredita no negócio. Nos meses ruins, você questiona tudo.\n\n' +
+      'A montanha-russa não é do mercado. É da ausência de sistema. O Jethro identificou como sair dela.\n\n' +
       '[NOME], seu negócio funciona quando você tem sorte. Precisa funcionar quando você tem sistema.\n' +
-      'Existe uma palavra que define o que está faltando no seu comercial: previsibilidade.\n' +
-      'Previsibilidade é saber que amanhã vai aparecer cliente — porque você construiu o caminho para isso.\n' +
-      'O Jethro identificou que esse caminho ainda não existe:\n' +
+      'O Jethro identificou algo específico no seu negócio:\n' +
       '→ Você não sabe quantos leads qualificados chegam por semana\n' +
       '→ Você não tem um processo definido de conversão de interessado em cliente\n' +
       '→ Você não tem recorrência ou esteira — cada venda começa do zero',
     rootCause: 'ausência do ciclo completo — atrair → converter → reter',
-    palavraIntro:
-      'Quem semeia com avareza, com avareza também ceifará. O motor comercial é a semeadura sistemática.',
+    palavraIntro: 'Quem semeia pouco, pouco também colherá. O motor comercial é a semeadura sistemática.',
     scriptureVerse: '2 Coríntios 9:6',
-    scriptureText: 'O que semeia com parcimônia, com parcimônia também ceifará.',
-    block2Title: 'O futuro de quem não instala o motor comercial:',
+    scriptureText: '"Aquele que semeia pouco, pouco também colherá; e aquele que semeia com fartura, com fartura também colherá."',
+    block2Title: 'O que o negócio não consegue te dizer sozinho:',
     block2Body:
-      'A instabilidade tem um custo composto:\n' +
-      '⚠ Cada mês ruim corrói a reserva que um mês bom construiu\n' +
-      '⚠ A ansiedade de caixa vira estilo de vida — e estilos de vida se solidificam\n' +
-      '⚠ E quando você finalmente quiser instalar o sistema, o terreno estará mais difícil\n\n' +
-      '"Há tempo para todo propósito debaixo do céu." — Eclesiastes 3:1\n' +
+      'O futuro de quem não instala o motor comercial:\n' +
+      'A instabilidade tem um custo composto que vai além do financeiro:\n' +
+      '⚠ Cada mês ruim corrói a reserva que um mês bom construiu — e a reserva nunca cresce de verdade\n' +
+      '⚠ A ansiedade de caixa vira estilo de vida — e estilos de vida se solidificam sem que você perceba\n' +
+      '⚠ Em casa, a incerteza chega como clima — mesmo sem palavras, todos sentem\n' +
+      '⚠ E o chamado que Deus depositou em você fica limitado ao tamanho da última indicação\n\n' +
+      '"Tudo tem a sua ocasião determinada; há tempo certo para cada propósito debaixo do céu." — Eclesiastes 3:1\n' +
       'O tempo para instalar o motor é agora — não depois que a seca chegar.\n\n' +
       'Você vai esperar o próximo mês ruim para agir... ou vai agir agora que ainda tem fôlego?',
-    ctaLabel: 'QUERO MEU PLANO DE AÇÃO',
+    ctaLabel: 'ESTOU PRONTO PARA MUDAR ISSO',
   },
 
   // ─── MODELO G — Operação no Limite — Crescer Piora Tudo ─────────────────────
@@ -878,86 +912,90 @@ const diagnosticMessages: DiagnosticMessageSeed[] = [
     variant: 'v1',
     block1Title: 'Realidade Direta',
     block1Body:
+      'Tem um momento — quando um cliente novo entra em contato ou um negócio novo aparece — em que você deveria sentir alegria.\n\n' +
+      'Mas o que sente é ansiedade.\n\n' +
+      'Porque por dentro você já sabe: vai ter que se desdobrar para entregar. Vai ter que carregar mais. O Jethro identificou o que esse sinal está dizendo.\n\n' +
       '[NOME], você está num paradoxo perigoso: vender mais está te quebrando.\n' +
-      'Existe uma fase onde o crescimento vira inimigo.\n' +
-      'Quando a operação não tem estrutura para o que já existe, vender mais significa entregar pior.\n' +
-      'O Jethro identificou exatamente esse ponto no seu negócio:\n' +
+      'O Jethro identificou algo específico no seu negócio:\n' +
       '→ Sua capacidade operacional está no limite — mais demanda gera mais caos\n' +
       '→ Tudo passa por você — a equipe executa, mas depende das suas decisões\n' +
       '→ Não há processos documentados: o que funciona hoje não se repete amanhã',
     rootCause: 'ausência de sistema operacional — processo + padrão + capacidade estruturada',
-    palavraIntro:
-      'Sabedoria constrói a casa — não a preenche de qualquer forma. Estrutura é ato de fé, não de medo.',
+    palavraIntro: 'Sabedoria constrói a casa — não a preenche de qualquer forma. Estrutura é ato de fé, não de medo.',
     scriptureVerse: 'Provérbios 9:1',
-    scriptureText: 'A sabedoria edificou a sua casa; lavrou as suas sete colunas.',
-    block2Title: 'O que acontece quando a operação sem estrutura tenta crescer:',
+    scriptureText: '"A sabedoria construiu a sua casa e esculpiu as suas sete colunas."',
+    block2Title: 'O que o negócio não consegue te dizer sozinho:',
     block2Body:
-      'A lógica é matemática e implacável:\n' +
-      '⚠ Mais vendas → mais atraso → mais reclamação\n' +
-      '⚠ Mais reclamação → mais retrabalho → mais custo invisível\n' +
-      '⚠ Mais custo → menos margem → crescimento que sangra\n' +
-      '⚠ E no final: perda de reputação — que é o ativo mais difícil de recuperar\n\n' +
-      '"Um bom nome é preferível às grandes riquezas." — Provérbios 22:1\n' +
+      'O que acontece quando a operação sem estrutura tenta crescer:\n' +
+      'A lógica é matemática e implacável — e não fica só no operacional:\n' +
+      '⚠ Mais vendas → mais atraso → mais reclamação → reputação que você levou anos para construir\n' +
+      '⚠ O cansaço operacional chega em casa — você está lá, mas não está presente de verdade\n' +
+      '⚠ Você carrega tudo sozinho — e esse peso é pesado demais para qualquer chamado sustentável\n' +
+      '⚠ E um dia você vai perceber que construiu uma prisão dourada — ocupada demais para crescer\n\n' +
+      '"É preferível ter boa reputação a muitas riquezas; ser estimado é melhor que prata e ouro." — Provérbios 22:1\n' +
       'Cresce sem estrutura e você pagará com o nome da sua empresa.\n\n' +
       'Você vai continuar crescendo o caos... ou vai primeiro construir a casa que aguenta o crescimento?',
-    ctaLabel: 'QUERO MEU PLANO DE AÇÃO',
+    ctaLabel: 'ESTOU PRONTO PARA MUDAR ISSO',
   },
   {
     modelCode: 'G',
     variant: 'v2',
     block1Title: 'Realidade Direta',
     block1Body:
+      'Tem um comportamento que acontece no momento de fechar um novo pedido ou contrato.\n\n' +
+      'Você aceita. Sorri. Agradece.\n\n' +
+      'E por dentro já está calculando como vai conseguir entregar — sabendo que a operação não tem espaço para mais isso. O Jethro reconhece esse comportamento. Ele tem um nome.\n\n' +
       '[NOME], o seu gargalo não está no mercado. Está na sua operação.\n' +
-      'Há negócios que param de vender porque o mercado recua.\n' +
-      'O seu está num cenário diferente — e mais perigoso: você poderia vender mais, mas a operação não aguenta.\n' +
-      'O diagnóstico revelou:\n' +
+      'O Jethro identificou algo específico no seu negócio:\n' +
       '→ Você está escalando urgência, não sistema — cada entrega é um esforço novo\n' +
       '→ A equipe executa, mas sem padrão — e sem padrão, a qualidade oscila\n' +
       '→ O dono é o gargalo central: tudo trava quando você não está',
     rootCause: 'operação reativa + ausência de padrão + centralização excessiva no fundador',
-    palavraIntro:
-      'Jetro ensinou Moisés a delegar porque missão sem estrutura consome o líder e decepciona o povo.',
+    palavraIntro: 'Jetro ensinou Moisés a delegar porque missão sem estrutura consome o líder e decepciona o povo.',
     scriptureVerse: 'Êxodo 18:18',
-    scriptureText: 'Você certamente se consumirá, tanto você como este povo que está contigo.',
-    block2Title: 'O que o teto operacional produz a médio prazo:',
+    scriptureText: '"Você e o povo que está com você vão se esgotar, pois o trabalho é pesado demais para você; não conseguirá realizá-lo sozinho."',
+    block2Title: 'O que o negócio não consegue te dizer sozinho:',
     block2Body:
+      'O que o teto operacional produz a médio prazo:\n' +
       'Se a estrutura não mudar antes da próxima onda de crescimento:\n' +
-      '⚠ Você vai perder clientes que vieram — e contar com eles não terá base\n' +
+      '⚠ Você vai perder clientes que vieram — e a reputação construída vai junto\n' +
       '⚠ Sua equipe vai desengajar — sem padrão, o melhor profissional não fica\n' +
-      '⚠ Você vai se tornar prisioneiro da operação — sem férias, sem estratégia, sem visão\n\n' +
-      '"Deus não é Deus de confusão, mas de paz." — 1 Coríntios 14:33\n' +
+      '⚠ Em casa, você está presente no corpo mas ausente na cabeça — e eles sentem\n' +
+      '⚠ Você vai se tornar prisioneiro da operação — sem férias, sem estratégia, sem visão de futuro\n\n' +
+      '"pois Deus não é Deus de desordem, mas de paz." — 1 Coríntios 14:33\n' +
       'Uma operação em caos não glorifica o Deus de ordem.\n\n' +
       'Você vai continuar crescendo o problema... ou vai construir o sistema que multiplica sem implodir?',
-    ctaLabel: 'QUERO MEU PLANO DE AÇÃO',
+    ctaLabel: 'ESTOU PRONTO PARA MUDAR ISSO',
   },
   {
     modelCode: 'G',
     variant: 'v3',
     block1Title: 'Realidade Direta',
     block1Body:
+      'Para quem olha de fora, o negócio parece estar indo bem.\n\n' +
+      'Você sabe que não é bem assim. É correria, retrabalho, improviso. É carregar mais do que deveria.\n\n' +
+      'Você não fala sobre isso. Segue. Mas o peso fica. O Jethro mapeou com precisão o que está acontecendo.\n\n' +
       '[NOME], o seu negócio está crescendo por fora e sofrendo por dentro.\n' +
-      'Para quem de fora olha, parece que está indo bem.\n' +
-      'Para quem está dentro — você sabe a verdade: é correria, retrabalho, erro e improviso.\n' +
-      'O Jethro mapeou com precisão o que está acontecendo:\n' +
+      'O Jethro identificou algo específico no seu negócio:\n' +
       '→ Processos não documentados: cada entrega é uma reinvenção\n' +
       '→ Capacidade no limite: um pico de demanda coloca tudo em risco\n' +
       '→ Equipe sem autonomia: sem você, a operação trava',
-    rootCause: 'estrutura que não acompanhou o crescimento — fundamento fraco para o prédio sendo erguido',
-    palavraIntro:
-      'Todo bom construtor assenta o fundamento antes de subir as paredes. Você está subindo paredes sem fundamento.',
+    rootCause: 'estrutura que não acompanhou o crescimento — fundamento fraco para o prédio que está sendo erguido',
+    palavraIntro: 'Todo bom construtor assenta o fundamento antes de subir as paredes. Você está subindo paredes sem fundamento.',
     scriptureVerse: 'Mateus 7:24',
-    scriptureText:
-      'Qualquer, pois, que ouve estas minhas palavras e as pratica será comparado a um homem prudente que edificou a sua casa sobre a rocha.',
-    block2Title: 'O precipício que aparece quando menos se espera:',
+    scriptureText: '"Todo aquele que ouve estas minhas palavras e as pratica é como um homem sensato que construiu a sua casa sobre a rocha."',
+    block2Title: 'O que o negócio não consegue te dizer sozinho:',
     block2Body:
-      'Operação sem estrutura tem uma janela de tolerância — e quando ela fecha:\n' +
-      '⚠ Um cliente grande que reclama e vai embora com ruído\n' +
-      '⚠ Uma entrega que falha no momento mais visível\n' +
-      '⚠ Uma equipe que pede demissão no pior momento possível\n\n' +
-      '"A casa edificada sobre a areia: desabou, e foi grande a sua ruína." — Mateus 7:27\n' +
+      'O que aparece quando menos se espera:\n' +
+      'Operação sem estrutura tem uma janela de tolerância — e quando ela fecha, o custo é amplo:\n' +
+      '⚠ Um cliente grande que reclama e vai embora com ruído — reputação construída em anos, perdida em dias\n' +
+      '⚠ Uma entrega que falha no momento mais visível — e você não tem sistema para impedir\n' +
+      '⚠ Em casa, o cansaço que você acumula vai chegando como distância — silenciosa mas real\n' +
+      '⚠ E o chamado que motivou tudo isso vai ficando enterrado debaixo do operacional urgente\n\n' +
+      '"e ela caiu. E foi grande a sua queda!" — Mateus 7:27\n' +
       'Estrutura não é burocracia — é proteção do que você construiu.\n\n' +
       'Você vai esperar o colapso para construir fundamento... ou vai agir antes que a parede caia?',
-    ctaLabel: 'QUERO MEU PLANO DE AÇÃO',
+    ctaLabel: 'ESTOU PRONTO PARA MUDAR ISSO',
   },
 
   // ─── MODELO H — Gargalo É o Dono — Sem Governo Pessoal ──────────────────────
@@ -966,181 +1004,195 @@ const diagnosticMessages: DiagnosticMessageSeed[] = [
     variant: 'v1',
     block1Title: 'Realidade Direta',
     block1Body:
+      'Tem um momento — quando alguém menciona férias, descanso, ou simplesmente "desligar por uma semana" — em que você percebe algo que prefere não admitir.\n\n' +
+      'Você não pode.\n\n' +
+      'Não é falta de vontade. É que o negócio para quando você para. E você sabe disso. O Jethro identificou o que esse padrão está custando.\n\n' +
       '[NOME], o seu negócio tem o tamanho do seu fôlego. E o seu fôlego está acabando.\n' +
-      'Não há nada de errado com trabalhar duro.\n' +
-      "O problema é quando 'trabalhar duro' virou o único modo de operação — e você parou de liderar para sobreviver.\n" +
-      'O diagnóstico do Jethro identificou com clareza:\n' +
+      'O Jethro identificou algo específico no seu negócio:\n' +
       '→ Você está dentro do negócio — não sobre ele. Operacional, não estratégico\n' +
       '→ Sua agenda não tem blocos protegidos: tudo é urgência, nada é prioridade\n' +
       '→ Você carrega o que deveria estar distribuído — e esse peso está fazendo o negócio parar de crescer',
     rootCause: 'ausência de governo pessoal — agenda, prioridade, delegação e ritmo semanal',
-    palavraIntro:
-      "Jetro disse isso a Moisés: 'O que fazes não é bom.' Às vezes a palavra mais profética é a que fala da sua rotina.",
+    palavraIntro: 'Jetro disse isso a Moisés: "O que você está fazendo não está certo." Às vezes a palavra mais profética é a que fala da sua rotina.',
     scriptureVerse: 'Êxodo 18:17-18',
-    scriptureText: 'O que fazes não é bom. Certamente definharás, tanto tu como este povo.',
-    block2Title: 'O custo de um líder sem governo:',
+    scriptureText: '"O que você está fazendo não está certo. Você e o povo que está com você vão se esgotar."',
+    block2Title: 'O que o negócio não consegue te dizer sozinho:',
     block2Body:
-      'A conta não chega só no caixa. Ela chega em três lugares:\n' +
+      'O custo de um líder sem governo:\n' +
+      'A conta não chega só no caixa. Ela chega em quatro lugares ao mesmo tempo:\n' +
       '⚠ Na sua mente: dispersão, ansiedade, sensação de nunca estar fazendo o suficiente\n' +
-      '⚠ No seu corpo: cansaço que não passa, saúde que cede\n' +
-      '⚠ Na sua família: presença física sem presença real — e eles sentem a diferença\n\n' +
-      '"Vinde a mim, todos os que estais cansados e sobrecarregados, e eu vos aliviarei." — Mateus 11:28\n' +
+      '⚠ No seu corpo: cansaço que não passa com uma boa noite de sono\n' +
+      '⚠ Na sua família: presença física sem presença real — e eles sentem a diferença, mesmo em silêncio\n' +
+      '⚠ No seu chamado: um líder que não tem governo pessoal não tem autoridade para liderar outros\n\n' +
+      '"Venham a mim, todos os que estão cansados e sobrecarregados, e eu lhes darei descanso." — Mateus 11:28\n' +
       'Jesus não chamou ao esforço infinito. Chamou ao jugo certo — com método e descanso.\n\n' +
       'Você vai continuar confundindo sobrecarga com compromisso... ou vai aprender a liderar com governo?',
-    ctaLabel: 'QUERO MEU PLANO DE AÇÃO',
+    ctaLabel: 'ESTOU PRONTO PARA MUDAR ISSO',
   },
   {
     modelCode: 'H',
     variant: 'v2',
     block1Title: 'Realidade Direta',
     block1Body:
+      'Você não desliga o celular nos fins de semana. Nem nas férias, se conseguir tirar alguma.\n\n' +
+      'Não é vício. É que você sabe que se não estiver disponível, algo trava.\n\n' +
+      'Esse comportamento tem um nome técnico no diagnóstico do Jethro — e ele é mais grave do que parece.\n\n' +
       '[NOME], você está ocupado. Mas está avançando?\n' +
-      'Existe uma armadilha sofisticada para empreendedores comprometidos.\n' +
-      'Ela se chama: ocupação disfarçada de produtividade.\n' +
-      'O diagnóstico identificou exatamente esse padrão:\n' +
+      'O Jethro identificou algo específico no seu negócio:\n' +
       '→ Você trabalha mais de 60h por semana — e ainda sente que não deu conta\n' +
       '→ Não há ritual semanal de revisão e metas: você reage ao que aparece\n' +
       '→ O negócio não cresce porque você não tem tempo para pensar no crescimento — só para entregar',
     rootCause: 'falta de governo pessoal — dispersão + centralização + ausência de ritmo estratégico',
-    palavraIntro:
-      'Domínio próprio é fruto do Espírito — e sem domínio da agenda, o líder é governado pela urgência, não pelo propósito.',
+    palavraIntro: 'Domínio próprio é fruto do Espírito — e sem domínio da agenda, o líder é governado pela urgência, não pelo propósito.',
     scriptureVerse: 'Provérbios 25:28',
-    scriptureText: 'Como cidade aberta e sem muros, assim é o homem que não refreia o seu espírito.',
-    block2Title: 'O que acontece com o líder sem governo por muito tempo:',
+    scriptureText: '"Como cidade aberta e sem muros, assim é o homem que não refreia o seu espírito."',
+    block2Title: 'O que o negócio não consegue te dizer sozinho:',
     block2Body:
+      'O que acontece com o líder sem governo por muito tempo:\n' +
       'A degradação é progressiva — e silenciosa até não ser:\n' +
-      '⚠ Você perde as melhores decisões — porque toma decisões cansado\n' +
+      '⚠ Você perde as melhores decisões — porque toma decisões cansado, sem clareza estratégica\n' +
       '⚠ Você perde as melhores pessoas — porque líderes sobrecarregados não lideram bem\n' +
+      '⚠ Em casa, você está lá — mas a cabeça está sempre no negócio, e todos ao redor sabem\n' +
       '⚠ Você perde a visão — porque quem está apagando incêndio não consegue enxergar o horizonte\n\n' +
-      '"O homem que não refreia o seu espírito é como uma cidade sem muros." — Provérbios 25:28\n' +
+      '"Como cidade aberta e sem muros, assim é o homem que não refreia o seu espírito." — Provérbios 25:28\n' +
       'Sem governo pessoal, qualquer ataque penetra. Sua empresa fica vulnerável.\n\n' +
       'Você vai continuar sendo o gargalo do seu próprio chamado... ou vai se tornar o líder que o negócio precisa?',
-    ctaLabel: 'QUERO MEU PLANO DE AÇÃO',
+    ctaLabel: 'ESTOU PRONTO PARA MUDAR ISSO',
   },
   {
     modelCode: 'H',
     variant: 'v3',
     block1Title: 'Realidade Direta',
     block1Body:
+      'Você já disse para si mesmo — ou já pensou — "ninguém faz como eu faço."\n\n' +
+      'E provavelmente é verdade. Você tem um padrão de qualidade alto. Uma entrega que é sua.\n\n' +
+      'O problema não é o padrão. É que esse padrão virou corrente. E a corrente só tem um tamanho: o do seu tempo. O Jethro identificou como transformar isso.\n\n' +
       '[NOME], quando o dono para, o negócio para. Isso não é liderança — é dependência.\n' +
-      'Há um teste simples para saber se você é líder ou operário do seu próprio negócio:\n' +
-      'Se você tirar 2 semanas de férias — o que acontece?\n' +
-      'O Jethro identificou que a resposta para você é preocupante:\n' +
+      'O Jethro identificou algo específico no seu negócio:\n' +
       '→ Tudo passa pelas suas mãos — decisão, execução, controle\n' +
       '→ A equipe não tem autonomia porque os processos não foram estruturados\n' +
       '→ Você é insubstituível — e isso, no negócio, é fraqueza, não força',
     rootCause: 'centralização excessiva + falta de estrutura de liderança + ausência de delegação real',
-    palavraIntro:
-      'Moisés tentou julgar o povo sozinho. Jetro interveio. O que te libertará hoje não é mais esforço — é estrutura de governo.',
+    palavraIntro: 'Moisés tentou julgar o povo sozinho. Jetro interveio. O que te libertará hoje não é mais esforço — é estrutura de governo.',
     scriptureVerse: 'Êxodo 18:21-22',
-    scriptureText: 'Escolhe dentre o povo homens capazes... e eles te ajudarão a carregar o fardo.',
-    block2Title: 'O futuro de um negócio que depende integralmente do dono:',
+    scriptureText: '"Escolha dentre o povo homens capazes... e eles compartilharão o fardo com você."',
+    block2Title: 'O que o negócio não consegue te dizer sozinho:',
     block2Body:
-      'Três cenários possíveis — todos perigosos:\n' +
-      '⚠ Você adoece: o negócio para — e as contas não param\n' +
-      '⚠ Você quer crescer: mas não há estrutura que sustente o crescimento sem você\n' +
-      '⚠ Você quer vender ou escalar: impossível — não existe negócio sem o fundador\n\n' +
-      '"Há vitória na multidão de conselheiros." — Provérbios 11:14\n' +
+      'O futuro de um negócio que depende integralmente do dono:\n' +
+      'Três cenários possíveis — todos com custo além do negócio:\n' +
+      '⚠ Você adoece: o negócio para — e as contas não param; a família arca com o que você não estruturou\n' +
+      '⚠ Você quer crescer: mas não há estrutura que sustente o crescimento sem você no centro de tudo\n' +
+      '⚠ Em casa, a ausência real — mesmo quando está fisicamente presente — vai criando distância\n' +
+      '⚠ E o chamado que deveria escalar fica limitado ao tamanho do seu fôlego — para sempre\n\n' +
+      '"Sem orientação o povo cai, mas havendo muitos conselheiros, há segurança." — Provérbios 11:14\n' +
       'Liderar sozinho não é força. É risco que você não precisa correr.\n\n' +
       'Você vai continuar sendo o teto do seu negócio... ou vai se tornar a plataforma que lança outros?',
-    ctaLabel: 'QUERO MEU PLANO DE AÇÃO',
+    ctaLabel: 'ESTOU PRONTO PARA MUDAR ISSO',
   },
 
-  // ─── MODELO I — Pré-Receita — Ainda Não Começou / Quer Iniciar ──────────────
+  // ─── MODELO I — Pré-Receita — Ainda Não Começou / Quer Iniciar ───────────────
   {
     modelCode: 'I',
     variant: 'v1',
     block1Title: 'Realidade Direta',
     block1Body:
+      'Tem um momento — quando você vê alguém ao seu redor lançar um negócio, um projeto, uma ideia — em que um pensamento passa rápido.\n\n' +
+      'Eu também poderia fazer isso. Eu tenho mais preparo do que ele.\n\n' +
+      'E então você volta para o que estava fazendo. A visão existe. O que falta é o caminho entre onde você está e o primeiro passo real. O Jethro identificou exatamente esse caminho.\n\n' +
       '[NOME], o maior negócio que você pode abrir começa pelo método — não pela vontade.\n' +
-      'Você tem a vontade. Provavelmente também tem o talento. E há algo dentro de você que sabe que chegou a hora.\n' +
-      'Mas o Jethro identificou um padrão exato no seu diagnóstico — e ele precisa de ser nomeado antes que você dê o primeiro passo:\n' +
+      'O Jethro identificou algo específico no seu negócio:\n' +
       '→ A sua rotina atual não tem espaço real para o que você quer construir\n' +
       '→ O MVP — a versão mínima da sua oferta — ainda não está escrito em lugar nenhum\n' +
       '→ Você ainda não foi ao mercado perguntar: existe aqui alguém disposto a pagar?',
     rootCause: 'rotina sem espaço para o projeto + MVP não documentado + validação inexistente',
-    palavraIntro:
-      "Planejamento não é desconfiança da providência — é honrar o que Deus colocou na sua mão.",
+    palavraIntro: 'Planejamento não é desconfiança da providência — é honrar o que Deus colocou na sua mão.',
     scriptureVerse: 'Lucas 14:28',
-    scriptureText: 'Quem de vós, querendo edificar uma torre, não se assenta primeiro a calcular a despesa?',
-    block2Title: 'O que acontece a quem começa sem método:',
+    scriptureText: '"Qual de vocês, querendo construir uma torre, não se senta primeiro e calcula o custo?"',
+    block2Title: 'O que o negócio não consegue te dizer sozinho:',
     block2Body:
-      '⚠ Você trabalha meses num produto que o mercado não quer — e só descobre depois\n' +
-      '⚠ Você investe tempo e dinheiro antes de ter uma única prova de que alguém paga\n' +
+      'O que acontece a quem começa sem método:\n' +
+      'O que está em jogo não é só o negócio que ainda não começou:\n' +
+      '⚠ Você trabalha meses num produto que o mercado não quer — e só descobre depois de investir\n' +
       '⚠ A motivação que parecia inabalável começa a ceder quando os primeiros meses não trazem resultado\n' +
-      '⚠ E o chamado que era de Deus começa a parecer ingenuidade sua\n\n' +
-      '"O prudente vê o perigo e se esconde; o inexperiente segue em frente e sofre as consequências." — Provérbios 22:3\n' +
+      '⚠ Em casa, o projeto que você acredita vai ficando difícil de defender com o mesmo entusiasmo\n' +
+      '⚠ E o chamado que era de Deus começa a parecer ingenuidade sua — quando o problema era só o método\n\n' +
+      '"O prudente vê o perigo e se refugia, mas o inexperiente segue em frente e sofre as consequências." — Provérbios 22:3\n' +
       'Começar sem método não é fé. É imprudência disfarçada de coragem.\n\n' +
       'Você vai entrar no mercado às cegas... ou vai entrar com o mapa na mão?',
-    ctaLabel: 'QUERO MEU PLANO DE AÇÃO',
+    ctaLabel: 'ESTOU PRONTO PARA MUDAR ISSO',
   },
   {
     modelCode: 'I',
     variant: 'v2',
     block1Title: 'Realidade Direta',
     block1Body:
-      '[NOME], o que está a travar o seu início não é o mercado. É a ausência de um sistema para começar.\n' +
-      'Há dois tipos de empreendedor cristão que nunca chegam a lançar:\n' +
-      'O que espera que esteja perfeito. E o que age sem saber o que faz.\n' +
-      'O Jethro identificou o seu perfil — e há uma saída precisa:\n' +
+      'Tem um comportamento que você provavelmente reconhece em si mesmo.\n\n' +
+      'Você pesquisa. Salva referências. Anota ideias. Faz planos.\n\n' +
+      'Mas o passo seguinte — ir ao mercado, testar, oferecer — ainda não aconteceu. Não é preguiça. É um padrão. E o Jethro o reconhece com precisão.\n\n' +
+      '[NOME], o que está travando o seu início não é o mercado. É a ausência de um sistema para começar.\n' +
+      'O Jethro identificou algo específico no seu negócio:\n' +
       '→ Você não mapeou quanto tempo real tem por semana para este projeto\n' +
       '→ A sua oferta ainda não está testada fora do seu círculo pessoal\n' +
       '→ Você ainda não sabe quem são as pessoas que pagariam pela sua solução hoje',
     rootCause: 'tempo não mapeado + oferta não validada externamente + mercado-alvo desconhecido',
     palavraIntro: 'Deus não bênça o que você não plantou. A fé que age é a fé que recebe.',
     scriptureVerse: 'Eclesiastes 11:4',
-    scriptureText: 'Quem observa o vento não semeará, e quem olha as nuvens não segará.',
-    block2Title: 'O custo invisível de adiar o início:',
+    scriptureText: '"Quem fica observando o vento, não semeia; quem fica olhando para as nuvens, não colhe."',
+    block2Title: 'O que o negócio não consegue te dizer sozinho:',
     block2Body:
-      '⚠ Cada mês sem estrutura é um mês a financiar o negócio com energia — sem retorno\n' +
+      'O custo invisível de adiar o início:\n' +
+      'O custo de adiar vai além do financeiro:\n' +
+      '⚠ Cada mês sem estrutura é um mês a financiar o projeto com energia — sem retorno\n' +
       '⚠ A janela de mercado que existe hoje pode não existir no próximo ano\n' +
-      '⚠ A confiança que precisaria para agir vai diminuindo com cada semana de adiamento\n' +
-      '⚠ E quando finalmente começar, terá que reconstruir o que podia ter construído hoje\n\n' +
-      '"Tudo tem o seu tempo determinado; há tempo para todo propósito debaixo do céu." — Eclesiastes 3:1\n' +
+      '⚠ Em casa, o projeto que você acredita vai perdendo o brilho aos olhos de quem você ama\n' +
+      '⚠ E a confiança que precisaria para agir vai diminuindo com cada semana de adiamento\n\n' +
+      '"Tudo tem a sua ocasião determinada; há tempo certo para cada propósito debaixo do céu." — Eclesiastes 3:1\n' +
       'O seu tempo é agora — não quando você se sentir completamente pronto.\n\n' +
       'Você vai continuar a esperar o momento certo... ou vai criar o método que faz o momento chegar?',
-    ctaLabel: 'QUERO MEU PLANO DE AÇÃO',
+    ctaLabel: 'ESTOU PRONTO PARA MUDAR ISSO',
   },
   {
     modelCode: 'I',
     variant: 'v3',
     block1Title: 'Realidade Direta',
     block1Body:
+      'Você já disse para si mesmo: "quando o momento for certo, eu começo."\n\n' +
+      'Mas o momento certo não chega — porque ele não existe. Ele é construído.\n\n' +
+      'E a frase que parece prudência é, na verdade, o maior obstáculo entre você e o seu chamado. O Jethro identificou como transformar essa frase em primeiro passo.\n\n' +
       '[NOME], você tem a visão. O que falta é o caminho entre onde está e onde quer chegar.\n' +
-      'Existe uma diferença que a maioria dos empreendedores cristãos nunca percebe a tempo:\n' +
-      'Ter uma chamada é diferente de ter um negócio.\n' +
-      'A chamada vem de Deus. O negócio é construído por você — com método, com disciplina, com as ferramentas certas.\n' +
+      'O Jethro identificou algo específico no seu negócio:\n' +
       '→ Você tem o chamado — mas ainda não tem a oferta escrita em linguagem de mercado\n' +
       '→ Você tem o talento — mas ainda não sabe quem paga por ele e quanto\n' +
-      '→ Você tem o tempo disponível — mas ele não está organizado em torno do projeto',
+      '→ Você tem tempo disponível — mas ele não está organizado em torno do projeto',
     rootCause: 'visão sem estrutura operacional + oferta por definir + disponibilidade não alocada',
-    palavraIntro:
-      'A visão que não está escrita não tem endereço. Deus disse a Habacuque: escreve, para que quem a leia possa correr.',
+    palavraIntro: 'A visão que não está escrita não tem endereço. Deus disse a Habacuque: escreve, para que quem a leia possa correr.',
     scriptureVerse: 'Habacuque 2:2',
-    scriptureText: 'Escreve a visão e grava-a em tábuas, para que a possa ler correndo.',
-    block2Title: 'O que acontece à visão sem estrutura:',
+    scriptureText: '"Escreve a visão e grava-a em tábuas, para que a possa ler correndo."',
+    block2Title: 'O que o negócio não consegue te dizer sozinho:',
     block2Body:
-      '⚠ Você investe anos num sonho que nunca se torna negócio — porque faltou o método\n' +
-      '⚠ As pessoas à sua volta deixam de acreditar — porque o tempo passa e nada muda\n' +
-      '⚠ E o pior: você começa a questionar se o chamado era real — quando o problema era apenas o caminho\n' +
-      '⚠ O chamado não morre. Mas a janela de tempo para honrá-lo tem limite\n\n' +
-      '"A esperança que se prolonga enfraquece o coração." — Provérbios 13:12\n' +
+      'O que acontece à visão sem estrutura:\n' +
+      'O que está em jogo não é só o negócio — é o que ele representa:\n' +
+      '⚠ Você investe anos num sonho que nunca se torna negócio — porque faltou o método, não a fé\n' +
+      '⚠ As pessoas à sua volta deixam de acreditar — porque o tempo passa e nada muda externamente\n' +
+      '⚠ Em casa, a visão que um dia animou começa a pesar — porque visão sem progresso vira pressão\n' +
+      '⚠ O chamado não morre. Mas a janela de tempo para honrá-lo tem limite — e você sabe disso\n\n' +
+      '"A esperança que se prolonga adoece o coração." — Provérbios 13:12\n' +
       'Visão sem plano não é fé — é desejo. E desejo sem método não gera fruto.\n\n' +
-      'Você vai continuar a ter a visão... ou vai finalmente construir o caminho até ela?',
-    ctaLabel: 'QUERO MEU PLANO DE AÇÃO',
+      'Você vai continuar tendo a visão... ou vai finalmente construir o caminho até ela?',
+    ctaLabel: 'ESTOU PRONTO PARA MUDAR ISSO',
   },
 ];
 
 const diagnosticMessageRootCauses: Record<string, string> = {
   A: 'caos financeiro + ausência de direção + falta de governo semanal.',
-  B: 'falta motor de multiplicação — aquisição + oferta + recorrência + metas.',
+  B: 'falta de motor de multiplicação — aquisição + oferta + recorrência + metas.',
   C: 'propósito sem modelo financeiro + caixa sem governo.',
   D: 'custo invisível + precificação sem margem + ilusão de faturamento.',
-  E: 'oferta sem validação real + canal sem prova + ausência de rotina de venda.',
-  F: 'ausência de motor comercial estruturado.',
+  E: 'validação fraca + oferta não posicionada + execução travada.',
+  F: 'ausência de motor comercial — aquisição + funil + follow-up + recorrência.',
   G: 'ausência de sistema operacional — processo + padrão + capacidade estruturada.',
-  H: 'centralização excessiva + falta de governo pessoal + delegação insuficiente.',
-  I: 'falta de método inicial, validação prática e estrutura mínima para começar.',
+  H: 'ausência de governo pessoal — agenda, prioridade, delegação e ritmo semanal.',
+  I: 'rotina sem espaço para o projeto + MVP não documentado + validação inexistente.',
 };
 
 const rogerioQuotes: RogerioQuoteSeed[] = [

@@ -208,7 +208,6 @@ function AuthCard() {
 
 function QuestionInput({
   question,
-  questionNumber,
   value,
   error,
   onChange,
@@ -216,19 +215,19 @@ function QuestionInput({
   selectedCountryIso,
 }: {
   question: FormQuestion;
-  questionNumber: number;
   value: JsonValue;
   error?: string;
   onChange: (value: JsonValue) => void;
   getRevenueOptions: (question: FormQuestion) => QuestionOption[];
   selectedCountryIso: string;
 }) {
+  const questionCode = `q${question.order + 1}`;
   const options = question.type === 'money_range' ? getRevenueOptions(question) : question.options;
 
   return (
     <View style={styles.questionBlock}>
       <Text style={styles.questionLabel}>
-        <Text style={styles.questionNumber}>{questionNumber}. </Text>
+        <Text style={styles.questionNumber}>{questionCode} </Text>
         {question.label}
       </Text>
       {question.helperText ? <Text style={styles.questionHelper}>{question.helperText}</Text> : null}
@@ -615,7 +614,6 @@ export function HomeScreen() {
                     <QuestionInput
                       key={question.id}
                       question={question}
-                      questionNumber={question.order + 1}
                       value={diagnostic.getQuestionValue(diagnostic.values, question)}
                       error={diagnostic.errors[question.slug]}
                       onChange={(value) => diagnostic.setFieldValue(question, value)}
