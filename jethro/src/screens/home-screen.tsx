@@ -16,6 +16,7 @@ import { useAuthSession } from '@/src/hooks/use-auth-session';
 import { useDiagnosticForm } from '@/src/hooks/use-diagnostic-form';
 import { hasSupabaseConfig } from '@/src/lib/supabase';
 import { authService } from '@/src/services/auth/auth-service';
+import { diagnosticService } from '@/src/services/diagnostic/diagnostic-service';
 import type { FormQuestion, JsonValue, QuestionOption } from '@/src/types/diagnostic-form';
 
 const palette = {
@@ -440,6 +441,7 @@ function GrowthChartCard() {
 export function HomeScreen() {
   const { session, isReady, errorMessage } = useAuthSession();
   const [resultStep, setResultStep] = useState<'block1' | 'block2' | 'paywall'>('block1');
+  const [diagnosticRating, setDiagnosticRating] = useState<number>(0);
   const [isSigningOut, setIsSigningOut] = useState(false);
   const scrollRef = useRef<ScrollView>(null);
   const diagnostic = useDiagnosticForm({
@@ -557,6 +559,35 @@ export function HomeScreen() {
                   }}>
                   <Text style={styles.secondaryButtonLabel}>Responder novamente</Text>
                 </Pressable>
+
+                <View style={styles.ratingCard}>
+                  <Text style={styles.ratingQuestion}>Esse diagnóstico fez sentido pra você?</Text>
+                  <View style={styles.starsRow}>
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <Pressable
+                        key={star}
+                        style={styles.starButton}
+                        onPress={() => {
+                          if (diagnosticRating !== 0) return;
+                          setDiagnosticRating(star);
+                          const submissionId = diagnostic.submitResult?.submissionId;
+                          const email = typeof diagnostic.values.email === 'string' ? diagnostic.values.email : '';
+                          if (submissionId && email) {
+                            void diagnosticService.submitRating({ submissionId, email, stars: star });
+                          }
+                        }}>
+                        <Text style={[styles.starIcon, star <= diagnosticRating ? styles.starFilled : styles.starEmpty]}>
+                          ★
+                        </Text>
+                      </Pressable>
+                    ))}
+                  </View>
+                  {diagnosticRating > 0 ? (
+                    <Text style={styles.ratingThanks}>
+                      {diagnosticRating >= 4 ? 'Fico feliz que tenha feito sentido.' : 'Obrigado pelo feedback.'}
+                    </Text>
+                  ) : null}
+                </View>
               </>
             ) : (
               <View style={styles.paywallCard}>
@@ -1300,6 +1331,40 @@ const styles = StyleSheet.create({
   chartFootnote: {
     color: palette.muted,
     fontSize: 12,
+    textAlign: 'center',
+  },
+  ratingCard: {
+    marginTop: 8,
+    paddingTop: 20,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(232, 201, 122, 0.15)',
+    alignItems: 'center',
+    gap: 12,
+  },
+  ratingQuestion: {
+    color: palette.muted,
+    fontSize: 14,
+    textAlign: 'center',
+  },
+  starsRow: {
+    flexDirection: 'row',
+    gap: 6,
+  },
+  starButton: {
+    padding: 4,
+  },
+  starIcon: {
+    fontSize: 32,
+  },
+  starFilled: {
+    color: palette.goldSoft,
+  },
+  starEmpty: {
+    color: 'rgba(232, 201, 122, 0.25)',
+  },
+  ratingThanks: {
+    color: palette.muted,
+    fontSize: 13,
     textAlign: 'center',
   },
 });

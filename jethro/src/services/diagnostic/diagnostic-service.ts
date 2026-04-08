@@ -17,4 +17,8 @@ export const diagnosticService = {
     const response = await apiClient.post<SubmissionResponse>(`/forms/${FORM_SLUG}/submissions`, payload);
     return response.data;
   },
+
+  async submitRating(payload: { submissionId: string; email: string; stars: number }) {
+    await apiClient.post('/diagnostic-ratings', payload);
+  },
 };

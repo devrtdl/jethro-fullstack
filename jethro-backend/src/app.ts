@@ -8,6 +8,7 @@ import { isAppError } from './lib/errors.js';
 import { registerAuthBridgeRoutes } from './routes/auth-bridge.js';
 import { registerFormRoutes } from './routes/forms.js';
 import { registerHealthRoutes } from './routes/health.js';
+import { registerRatingRoutes } from './routes/ratings.js';
 
 export function createApp() {
   const app = Fastify({
@@ -30,6 +31,7 @@ export function createApp() {
   app.register(registerAuthBridgeRoutes);
   app.register(registerHealthRoutes);
   app.register(registerFormRoutes);
+  app.register(registerRatingRoutes);
   app.addHook('onClose', async () => {
     await closeDbPool();
   });
