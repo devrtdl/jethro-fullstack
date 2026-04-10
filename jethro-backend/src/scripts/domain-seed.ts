@@ -194,6 +194,17 @@ const diagnosticQuestions: DiagnosticQuestionSeed[] = [
     ],
   },
   {
+    code: 'q_precificacao',
+    orderIndex: 12,
+    label: 'Você sente que cobra o valor justo pelo que entrega?',
+    questionType: 'single_select',
+    options: [
+      { label: 'Sim, cobro o valor que merece', value: 'A' },
+      { label: 'Às vezes cobro abaixo do valor real', value: 'B' },
+      { label: 'Frequentemente cobro abaixo do que entrego', value: 'C' },
+    ],
+  },
+  {
     code: 'q13_objetivo_futuro',
     orderIndex: 13,
     label: 'Onde você deseja estar com seu negócio nos próximos 6 a 12 meses?',
@@ -212,8 +223,6 @@ const diagnosticQuestions: DiagnosticQuestionSeed[] = [
     orderIndex: 15,
     label: 'Como a maioria dos seus clientes chega até você hoje?',
     questionType: 'single_select',
-    isRequired: false,
-    isInternal: true,
     options: [
       { label: 'Instagram', value: 'B' },
       { label: 'Indicação', value: 'A' },
@@ -633,7 +642,7 @@ const diagnosticMessages: DiagnosticMessageSeed[] = [
       'O Jethro identificou algo específico no seu negócio:\n' +
       '→ Faturamento existe — lucro é ilusão\n' +
       '→ Você não sabe a margem real de cada produto ou serviço\n' +
-      '→ O dinheiro entra, circula e some antes de você sentir que existiu',
+      '→ O dinheiro entra, o custo absorve — e a margem que deveria sobrar some antes de se tornar resultado',
     rootCause: 'custo invisível + precificação sem margem + ilusão de faturamento',
     palavraIntro: 'Faturamento sem lucro não é bênção — é trabalho em vão. Deus chama ao fruto real, não à aparência de produtividade.',
     scriptureVerse: 'Lucas 14:28',
@@ -939,11 +948,11 @@ const diagnosticMessages: DiagnosticMessageSeed[] = [
       'O Jethro identificou algo específico no seu negócio:\n' +
       '→ Você está escalando urgência, não sistema — cada entrega é um esforço novo\n' +
       '→ A equipe executa, mas sem padrão — e sem padrão, a qualidade oscila\n' +
-      '→ O dono é o gargalo central: tudo trava quando você não está',
-    rootCause: 'operação reativa + ausência de padrão + centralização excessiva no fundador',
-    palavraIntro: 'Jetro ensinou Moisés a delegar porque missão sem estrutura consome o líder e decepciona o povo.',
-    scriptureVerse: 'Êxodo 18:18',
-    scriptureText: '"Você e o povo que está com você vão se esgotar, pois o trabalho é pesado demais para você; não conseguirá realizá-lo sozinho."',
+      '→ Não há processo documentado: quando alguém falta ou sai, a operação regride',
+    rootCause: 'operação reativa + ausência de padrão + capacidade estrutural insuficiente',
+    palavraIntro: 'Casa construída sem estrutura cai com a primeira carga pesada. Processo não é burocracia — é proteção do que você construiu.',
+    scriptureVerse: 'Provérbios 24:3',
+    scriptureText: '"Pela sabedoria a casa se edifica; pela inteligência se firma."',
     block2Title: 'O que o negócio não consegue te dizer sozinho:',
     block2Body:
       'O que o teto operacional produz a médio prazo:\n' +

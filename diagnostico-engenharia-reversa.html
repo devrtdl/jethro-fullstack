@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jethro — Engenharia Reversa dos Modelos de Diagnóstico</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Georgia', serif;
+    font-size: 11pt;
+    line-height: 1.6;
+    color: #1a1a1a;
+    background: #fff;
+    padding: 40px 50px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  h1 {
+    font-size: 20pt;
+    font-weight: bold;
+    color: #1a1a1a;
+    border-bottom: 3px solid #1a1a1a;
+    padding-bottom: 10px;
+    margin-bottom: 6px;
+  }
+  .subtitle {
+    font-size: 10pt;
+    color: #555;
+    margin-bottom: 30px;
+  }
+  h2 {
+    font-size: 14pt;
+    font-weight: bold;
+    color: #1a1a1a;
+    margin-top: 32px;
+    margin-bottom: 10px;
+    border-left: 4px solid #1a1a1a;
+    padding-left: 10px;
+  }
+  h3 {
+    font-size: 11.5pt;
+    font-weight: bold;
+    color: #333;
+    margin-top: 22px;
+    margin-bottom: 8px;
+  }
+  h4 {
+    font-size: 10.5pt;
+    font-weight: bold;
+    color: #222;
+    margin-top: 14px;
+    margin-bottom: 6px;
+  }
+  p { margin-bottom: 8px; }
+  ul { margin-left: 20px; margin-bottom: 10px; }
+  li { margin-bottom: 4px; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 14px 0;
+    font-size: 10pt;
+  }
+  th {
+    background: #1a1a1a;
+    color: #fff;
+    padding: 7px 10px;
+    text-align: left;
+    font-weight: bold;
+  }
+  td {
+    padding: 6px 10px;
+    border-bottom: 1px solid #ddd;
+    vertical-align: top;
+  }
+  tr:nth-child(even) td { background: #f7f7f7; }
+  .model-block {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+    page-break-inside: avoid;
+  }
+  .model-block h3 {
+    margin-top: 0;
+  }
+  .quote {
+    font-style: italic;
+    color: #444;
+    background: #f5f5f5;
+    border-left: 3px solid #aaa;
+    padding: 6px 12px;
+    margin: 8px 0;
+    font-size: 10pt;
+  }
+  .anchor-box {
+    background: #1a1a1a;
+    color: #fff;
+    padding: 6px 12px;
+    border-radius: 3px;
+    display: inline-block;
+    font-family: 'Courier New', monospace;
+    font-size: 9.5pt;
+    margin: 6px 0;
+  }
+  .risk-high { color: #c0392b; font-weight: bold; }
+  .risk-med { color: #e67e22; font-weight: bold; }
+  .risk-low { color: #27ae60; font-weight: bold; }
+  .tag-unique {
+    background: #e8f5e9;
+    border: 1px solid #a5d6a7;
+    color: #2e7d32;
+    padding: 2px 7px;
+    border-radius: 3px;
+    font-size: 9pt;
+    font-family: monospace;
+  }
+  .tag-risk {
+    background: #fce4ec;
+    border: 1px solid #f48fb1;
+    color: #c62828;
+    padding: 2px 7px;
+    border-radius: 3px;
+    font-size: 9pt;
+    font-family: monospace;
+  }
+  .section-divider {
+    border: none;
+    border-top: 2px solid #e0e0e0;
+    margin: 28px 0;
+  }
+  .legend-table td:first-child {
+    font-family: monospace;
+    font-weight: bold;
+    white-space: nowrap;
+  }
+  @media print {
+    body { padding: 20px 30px; }
+    .model-block { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<h1>Engenharia Reversa — Modelos de Diagnóstico Jethro</h1>
+<p class="subtitle">Análise dos textos dos 8 modelos × respostas do formulário &nbsp;|&nbsp; Gerado em: Abril 2026</p>
+
+<h2>Perguntas Discriminadoras</h2>
+<p>Questões de seleção única utilizadas como discriminadores (Q1–Q4, Q13, Q14 são texto livre e ignoradas nesta análise):</p>
+
+<table class="legend-table">
+  <thead><tr><th>Código</th><th>Pergunta</th><th>Opções</th></tr></thead>
+  <tbody>
+    <tr><td>Q5</td><td>Fase do negócio</td><td>A=Ideia / B=Início / C=Crescendo / D=Consolidado</td></tr>
+    <tr><td>Q6</td><td>Conexão com dons</td><td>A=Totalmente / B=Parcialmente / C=Não</td></tr>
+    <tr><td>Q7</td><td>Clareza do propósito</td><td>A=Muito claro / B=Tenho ideia / C=Sem clareza</td></tr>
+    <tr><td>Q8</td><td>Estrutura / planejamento</td><td>A=Estruturado / B=Em dev / C=Ainda não</td></tr>
+    <tr><td>Q9</td><td>Organização financeira</td><td>A=Estruturada / B=Básica / C=Desorganizada</td></tr>
+    <tr><td>Q11</td><td>Faturamento mensal</td><td>A=zero/mínimo → F=maior (tiers dinâmicos)</td></tr>
+    <tr><td>Q12</td><td>Lucro e crescimento</td><td>A=Crescendo / B=Estável / C=Regredindo</td></tr>
+    <tr><td>Q15</td><td>Canal de aquisição</td><td>A=Indicação / B=Instagram / C=Tráfego / D=LinkedIn / E=Ativo / F=Vários / G=Outro</td></tr>
+    <tr><td>Q16</td><td>Capacidade operacional</td><td>A=Daria conta / B=Reorganizaria / C=Colapso</td></tr>
+    <tr><td>Q17</td><td>Horas por semana</td><td>A=&lt;10h / B=10–20h / C=20–40h / D=40–60h / E=&gt;60h</td></tr>
+  </tbody>
+</table>
+
+<hr class="section-divider">
+
+<h2>Análise por Modelo</h2>
+
+<!-- MODELO E -->
+<div class="model-block">
+  <h3>Modelo E — Pré-Receita / Validação Inicial</h3>
+  <p><em>Núcleo textual:</em></p>
+  <div class="quote">"A rotina de primeira venda ainda não foi instalada"</div>
+  <div class="quote">"As vendas que existem vieram da rede pessoal, não do mercado"</div>
+  <div class="quote">"Você ajusta a oferta — mas não vende"</div>
+
+  <table>
+    <thead><tr><th>Q</th><th>Valores consistentes</th><th>Justificativa textual</th></tr></thead>
+    <tbody>
+      <tr><td>Q5</td><td>A, B</td><td>Fase inicial explícita — "primeira venda", "saiu do papel"</td></tr>
+      <tr><td>Q11</td><td><strong>A</strong></td><td>Âncora mais forte — sem validação de mercado = sem receita</td></tr>
+      <tr><td>Q15</td><td>A (indicação)</td><td>"Rede pessoal" = círculo próximo, não canal estruturado</td></tr>
+      <tr><td>Q12</td><td>B, C</td><td>Não crescendo — ainda não há venda consistente</td></tr>
+      <tr><td>Q16</td><td>A, B</td><td>Sem pressão operacional ainda</td></tr>
+      <tr><td>Q18</td><td>B, C, D</td><td>Tem ideia/empresa mas sem execução real</td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>Âncora exclusiva:</strong></p>
+  <div class="anchor-box">Q11 = A</div>
+  <p>Com faturamento zero, nenhum outro modelo é textualmente consistente. E está seguro.</p>
+  <p><span class="tag-risk">Risco</span> Com Q11=B + Q15=A → sobreposição com <strong>Modelo F</strong></p>
+</div>
+
+<!-- MODELO F -->
+<div class="model-block">
+  <h3>Modelo F — Vende, Mas Sem Motor Comercial</h3>
+  <p><em>Núcleo textual:</em></p>
+  <div class="quote">"Quase 100% dos clientes chegam por indicação — e indicação não escala"</div>
+  <div class="quote">"Você não tem processo de vendas definido — cada fechamento é um improviso"</div>
+  <div class="quote">"Negócio funciona quando você tem sorte. Precisa funcionar quando você tem sistema"</div>
+
+  <table>
+    <thead><tr><th>Q</th><th>Valores consistentes</th><th>Justificativa textual</th></tr></thead>
+    <tbody>
+      <tr><td>Q11</td><td><strong>B, C, D+</strong></td><td>Tem receita — diferencia de E</td></tr>
+      <tr><td>Q15</td><td><strong>A</strong></td><td>Discriminador textual explícito e exclusivo</td></tr>
+      <tr><td>Q12</td><td>B, C</td><td>Instável ou regredindo</td></tr>
+      <tr><td>Q8</td><td>B, C</td><td>"Sem processo de vendas" = sem estrutura comercial</td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>Âncora exclusiva:</strong></p>
+  <div class="anchor-box">Q15 = A &nbsp;+&nbsp; Q11 &ge; B</div>
+  <p><span class="tag-unique">Seguro</span> Q15=A é o discriminador mais limpo deste modelo. Sem ele, F se confunde com B.</p>
+  <p><span class="tag-risk">Risco</span> Com Q12=C + Q15=A + Q11≥B → possível sobreposição parcial com <strong>Modelo D</strong></p>
+</div>
+
+<!-- MODELO D -->
+<div class="model-block">
+  <h3>Modelo D — Fatura Mas Sangra</h3>
+  <p><em>Núcleo textual:</em></p>
+  <div class="quote">"Faturamento existe — lucro é ilusão"</div>
+  <div class="quote">"O movimento foi bom. Você vendeu. Entregou. E mesmo assim, sobrou menos do que deveria"</div>
+  <div class="quote">"A estrutura cresceu — mas o lucro por venda diminuiu"</div>
+
+  <table>
+    <thead><tr><th>Q</th><th>Valores consistentes</th><th>Justificativa textual</th></tr></thead>
+    <tbody>
+      <tr><td>Q11</td><td><strong>B, C, D+</strong></td><td>"Faturamento existe" — receita real e mensurável</td></tr>
+      <tr><td>Q12</td><td><strong>C</strong></td><td>"Lucro é ilusão", "sobrou menos do que deveria"</td></tr>
+      <tr><td>Q9</td><td><strong>B</strong></td><td>D implica noção básica dos números (custo fixo crescendo) — não caos total</td></tr>
+      <tr><td>Q8</td><td>B</td><td>Estrutura básica existe; diferente do caos de A</td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>Âncora exclusiva:</strong></p>
+  <div class="anchor-box">Q12 = C &nbsp;+&nbsp; Q9 = B &nbsp;+&nbsp; Q11 &ge; B</div>
+
+  <h4>⚠ Frase quase idêntica com Modelo A:</h4>
+  <table>
+    <thead><tr><th>A v1</th><th>D v1</th></tr></thead>
+    <tbody>
+      <tr><td><em>"O dinheiro entra, circula e some antes de você <strong>entender</strong> o que aconteceu"</em></td>
+          <td><em>"O dinheiro entra, circula e some antes de você <strong>sentir</strong> que existiu"</em></td></tr>
+    </tbody>
+  </table>
+  <p>Q9 é o único separador: D=B (básica), A=C (caos). A frase em si não discrimina.</p>
+</div>
+
+<!-- MODELO A -->
+<div class="model-block">
+  <h3>Modelo A — Negócio Travado, Bagunçado e Sem Visão</h3>
+  <p><em>Núcleo textual:</em></p>
+  <div class="quote">"Financeiro confuso — o dinheiro entra, circula e some"</div>
+  <div class="quote">"Decisões no feeling — sem painel, sem ritmo, cada semana começa como se fosse a primeira"</div>
+  <div class="quote">"Gestão reativa disfarçada de dedicação"</div>
+
+  <table>
+    <thead><tr><th>Q</th><th>Valores consistentes</th><th>Justificativa textual</th></tr></thead>
+    <tbody>
+      <tr><td>Q9</td><td><strong>C</strong></td><td>"Financeiro confuso" — discriminador central do modelo</td></tr>
+      <tr><td>Q8</td><td>B, C</td><td>"Sem planejamento estratégico", "sem visão de futuro"</td></tr>
+      <tr><td>Q7</td><td>B, C</td><td>"Sem rota", "sem clareza de propósito"</td></tr>
+      <tr><td>Q6</td><td>C (ou B+Q7=C)</td><td>Sem conexão com propósito — distingue de C</td></tr>
+      <tr><td>Q12</td><td>B, C</td><td>Não crescendo</td></tr>
+      <tr><td>Q11</td><td>B, C+</td><td>Tem negócio ativo — se Q11=A, seria E</td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>Âncora exclusiva:</strong></p>
+  <div class="anchor-box">Q9 = C &nbsp;+&nbsp; (Q6 = C ou Q7 = C) &nbsp;+&nbsp; Q11 &ge; B</div>
+  <p><span class="tag-unique">Seguro</span> Q9=C distingue de B. Q6/Q7=C distingue de C.</p>
+</div>
+
+<!-- MODELO C -->
+<div class="model-block">
+  <h3>Modelo C — Boa Base, Mas Caixa Apertado</h3>
+  <p><em>Núcleo textual:</em></p>
+  <div class="quote">"Entregou mais do que cobrou — e todo mês o caixa prova isso"</div>
+  <div class="quote">"Propósito sem sustentabilidade não é humildade. É risco"</div>
+  <div class="quote">"Não por falta de clientes, mas por falta de margem"</div>
+
+  <table>
+    <thead><tr><th>Q</th><th>Valores consistentes</th><th>Justificativa textual</th></tr></thead>
+    <tbody>
+      <tr><td>Q6</td><td><strong>A, B</strong></td><td>Texto pressupõe alinhamento de dons — exclusivo de C</td></tr>
+      <tr><td>Q7</td><td><strong>A, B</strong></td><td>"Sabe o propósito" — claro ou parcialmente claro</td></tr>
+      <tr><td>Q9</td><td>B, C</td><td>Caixa apertado — mas não caótico como A</td></tr>
+      <tr><td>Q12</td><td>B, C</td><td>Não crescendo ou regredindo</td></tr>
+      <tr><td>Q8</td><td>B, C</td><td>Visão existe mas sem tradução em plano financeiro</td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>Âncora exclusiva:</strong></p>
+  <div class="anchor-box">Q6 = A/B &nbsp;+&nbsp; Q7 = A/B &nbsp;+&nbsp; Q9 &ne; A &nbsp;+&nbsp; Q12 &ne; A</div>
+
+  <h4>Ponto cego do formulário:</h4>
+  <p>O modelo C é fundamentalmente sobre <strong>precificação abaixo do valor</strong>, mas nenhuma pergunta captura diretamente esse comportamento. A discriminação de C vs B depende de Q9 (organização financeira), mas alguém com Q9=B pode estar em B ou C dependendo de como precifica — e o formulário não pergunta isso.</p>
+</div>
+
+<!-- MODELO B -->
+<div class="model-block">
+  <h3>Modelo B — Negócio Saudável, Travado no Platô</h3>
+  <p><em>Núcleo textual:</em></p>
+  <div class="quote">"Você construiu algo que funciona. Agora precisa de algo que multiplica"</div>
+  <div class="quote">"Crescimento travou — mesma receita, mesmos clientes, mesmos canais"</div>
+  <div class="quote">"Tem estrutura, mas não tem aceleração"</div>
+
+  <table>
+    <thead><tr><th>Q</th><th>Valores consistentes</th><th>Justificativa textual</th></tr></thead>
+    <tbody>
+      <tr><td>Q8</td><td><strong>A, B</strong></td><td>"Tem estrutura" — bem estruturado ou em desenvolvimento</td></tr>
+      <tr><td>Q9</td><td><strong>A, B</strong></td><td>Financeiro organizado — não caótico; diferencia de A</td></tr>
+      <tr><td>Q12</td><td><strong>B</strong></td><td>"Travado no platô" = exatamente estável, sem crescimento</td></tr>
+      <tr><td>Q11</td><td>B, C+</td><td>Tem receita relevante — "construiu algo"</td></tr>
+      <tr><td>Q15</td><td>B, C, D, E, F, G (não A)</td><td>Não exclusivamente por indicação — diferencia de F</td></tr>
+      <tr><td>Q5</td><td>C, D</td><td>Negócio com tempo — "construiu algo que funciona"</td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>Âncora exclusiva:</strong></p>
+  <div class="anchor-box">Q8 = A/B &nbsp;+&nbsp; Q9 = A/B &nbsp;+&nbsp; Q12 = B &nbsp;+&nbsp; Q15 &ne; A</div>
+</div>
+
+<!-- MODELO G -->
+<div class="model-block">
+  <h3>Modelo G — Operação no Limite</h3>
+  <p><em>Núcleo textual:</em></p>
+  <div class="quote">"Sua capacidade operacional está no limite — mais demanda gera mais caos"</div>
+  <div class="quote">"Vender mais está te quebrando"</div>
+  <div class="quote">"Não há processos documentados: o que funciona hoje não se repete amanhã"</div>
+
+  <table>
+    <thead><tr><th>Q</th><th>Valores consistentes</th><th>Justificativa textual</th></tr></thead>
+    <tbody>
+      <tr><td>Q16</td><td><strong>C</strong></td><td>Âncora mais forte — "operação entraria em colapso"</td></tr>
+      <tr><td>Q11</td><td>C, D+</td><td>"O negócio vende" — receita existe e é relevante</td></tr>
+      <tr><td>Q12</td><td>B, C</td><td>Não crescendo plenamente por causa da operação</td></tr>
+      <tr><td>Q17</td><td>C, D, E</td><td>Trabalhando muito para sustentar o caos operacional</td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>Âncora exclusiva:</strong></p>
+  <div class="anchor-box">Q16 = C &nbsp;+&nbsp; Q11 &ge; C</div>
+  <p><span class="tag-unique">Seguro</span> Q16=C com receita substancial é exclusivo de G.</p>
+</div>
+
+<!-- MODELO H -->
+<div class="model-block">
+  <h3>Modelo H — O Gargalo É o Dono</h3>
+  <p><em>Núcleo textual:</em></p>
+  <div class="quote">"O negócio para quando você para"</div>
+  <div class="quote">"Você trabalha mais de 60h por semana — e ainda sente que não deu conta"</div>
+  <div class="quote">"Você é insubstituível — e isso, no negócio, é fraqueza, não força"</div>
+
+  <table>
+    <thead><tr><th>Q</th><th>Valores consistentes</th><th>Justificativa textual</th></tr></thead>
+    <tbody>
+      <tr><td>Q17</td><td><strong>D, E</strong></td><td>H v2 é explícito: "mais de 60h por semana"</td></tr>
+      <tr><td>Q11</td><td>B, C+</td><td>Negócio funciona — apenas dependente do dono</td></tr>
+      <tr><td>Q16</td><td><strong>B</strong></td><td>Se fosse C → seria G; H é sobre governo pessoal, não colapso</td></tr>
+      <tr><td>Q8</td><td>B, C</td><td>Sem delegação estruturada — "tudo passa pelas suas mãos"</td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>Âncora exclusiva:</strong></p>
+  <div class="anchor-box">Q17 = D/E &nbsp;+&nbsp; Q16 = B &nbsp;+&nbsp; Q11 &ge; B</div>
+</div>
+
+<hr class="section-divider">
+
+<h2>Zonas de Sobreposição Textual</h2>
+
+<h3>1. G e H — A Sobreposição Mais Grave</h3>
+<p>Os dois modelos usam quase as mesmas frases e citam o mesmo versículo:</p>
+<table>
+  <thead><tr><th>Modelo G (v2)</th><th>Modelo H (v3)</th></tr></thead>
+  <tbody>
+    <tr><td><em>"o dono é o gargalo central: tudo trava quando você não está"</em></td>
+        <td><em>"quando o dono para, o negócio para"</em></td></tr>
+    <tr><td>Cita Êxodo 18:18 (Jetro / Moisés)</td>
+        <td>Também cita Êxodo 18:18 (Jetro / Moisés)</td></tr>
+    <tr><td><em>"tudo passa por você"</em></td>
+        <td><em>"tudo passa pelas suas mãos"</em></td></tr>
+  </tbody>
+</table>
+<p><strong>Discriminador:</strong> Q16=C → G &nbsp;|&nbsp; Q17=D/E + Q16=B → H &nbsp;|&nbsp; Q16=C + Q17=D/E = <span class="risk-high">ambos fazem sentido</span></p>
+
+<h3>2. A e D — Frase Quase Idêntica</h3>
+<table>
+  <thead><tr><th>A v1</th><th>D v1</th></tr></thead>
+  <tbody>
+    <tr><td><em>"O dinheiro entra, circula e some antes de você <u>entender</u> o que aconteceu"</em></td>
+        <td><em>"O dinheiro entra, circula e some antes de você <u>sentir</u> que existiu"</em></td></tr>
+  </tbody>
+</table>
+<p><strong>Discriminador:</strong> Q9=C → A &nbsp;|&nbsp; Q9=B → D. A frase em si não discrimina — apenas a pergunta de organização financeira resolve.</p>
+
+<h3>3. E e F — Dependência do Q15</h3>
+<p>Ambos descrevem dependência de indicação e ausência de canal estruturado. A diferença está em Q11 (nível de receita) e Q15 (canal). Se o usuário estiver no limiar entre zero e pouco faturamento, a escolha de Q11 determina o modelo — mas o texto dos dois faria sentido para ele.</p>
+<p><strong>Discriminador:</strong> Q11=A → E &nbsp;|&nbsp; Q11≥B + Q15=A → F</p>
+
+<h3>4. C e B — Ponto Cego do Formulário</h3>
+<p>O formulário não tem pergunta sobre precificação. C é fundamentalmente sobre "cobra menos do que vale", mas nenhum Q captura isso. Quando Q9=B + Q12=B + Q6=A/B + Q7=A/B + Q8=B, ambos C e B são textualmente consistentes — o motor decide por prioridade, mas o texto entregue pode não corresponder ao cenário real.</p>
+
+<hr class="section-divider">
+
+<h2>Tabela Resumo — Âncoras por Modelo</h2>
+<table>
+  <thead>
+    <tr><th>Modelo</th><th>Âncora Primária</th><th>Âncora Secundária</th><th>Risco de Sobreposição</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><strong>E</strong> — Pré-receita</td><td>Q11 = A</td><td>Q5 = A/B</td><td class="risk-low">Baixo — Q11=A é exclusivo</td></tr>
+    <tr><td><strong>F</strong> — Sem motor comercial</td><td>Q15 = A + Q11 ≥ B</td><td>Q8 = B/C</td><td class="risk-med">Médio — com D quando Q12=C</td></tr>
+    <tr><td><strong>D</strong> — Fatura mas sangra</td><td>Q12 = C + Q9 = B</td><td>Q11 ≥ B</td><td class="risk-med">Médio — A quando Q9=C (frase idêntica)</td></tr>
+    <tr><td><strong>A</strong> — Travado e sem visão</td><td>Q9 = C + Q6/Q7 = C</td><td>Q11 ≥ B</td><td class="risk-med">Médio — D (frase idêntica nos textos)</td></tr>
+    <tr><td><strong>C</strong> — Boa base, caixa apertado</td><td>Q6 = A/B + Q7 = A/B</td><td>Q9 ≠ A + Q12 ≠ A</td><td class="risk-med">Médio — B (sem Q de precificação)</td></tr>
+    <tr><td><strong>B</strong> — Platô</td><td>Q8 = A/B + Q9 = A/B + Q12 = B</td><td>Q15 ≠ A</td><td class="risk-med">Médio — C e F</td></tr>
+    <tr><td><strong>G</strong> — Operação no limite</td><td>Q16 = C + Q11 ≥ C</td><td>Q17 = C/D/E</td><td class="risk-low">Baixo — Q16=C é forte</td></tr>
+    <tr><td><strong>H</strong> — Gargalo é o dono</td><td>Q17 = D/E + Q16 = B</td><td>Q11 ≥ B</td><td class="risk-low">Baixo — mas texto = G quando Q16=C+Q17=D/E</td></tr>
+  </tbody>
+</table>
+
+<hr class="section-divider">
+
+<h2>Recomendações</h2>
+<ol style="margin-left:20px">
+  <li style="margin-bottom:10px"><strong>Adicionar pergunta sobre precificação</strong> para separar C de B textualmente — ex: <em>"Você já teve a sensação de cobrar menos do que seu serviço realmente vale?"</em></li>
+  <li style="margin-bottom:10px"><strong>Reescrever a frase compartilhada de A e D</strong> — "o dinheiro entra, circula e some" não pode aparecer em dois modelos diferentes. Um dos dois precisa reformular para que o leitor perceba distinção no texto, não apenas na pergunta Q9.</li>
+  <li style="margin-bottom:10px"><strong>Diferenciar os textos de G e H</strong> — ambos citam Êxodo 18:18 e usam "tudo passa por você". Sugestão: G foca exclusivamente em <em>processos e equipe</em>; H foca em <em>agenda, delegação e ritmo semanal pessoal</em>. O Q16 vs Q17 é suficiente como discriminador do motor, mas o texto gera confusão para o leitor.</li>
+  <li style="margin-bottom:10px"><strong>Q15 é discriminador crítico para E e F</strong> — deve permanecer visível e obrigatório no formulário. Se removido ou ocultado, F se torna indistinguível de B pela combinação de respostas.</li>
+</ol>
+
+<p style="margin-top:40px; font-size:9pt; color:#888; border-top: 1px solid #ddd; padding-top:10px;">
+  Documento gerado automaticamente a partir da análise dos textos em <code>domain-seed.ts</code> — Jethro Backend
+</p>
+
+</body>
+</html>

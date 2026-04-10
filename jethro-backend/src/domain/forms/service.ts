@@ -427,6 +427,8 @@ const scoreMaps = {
   organizacao_financeira: { A: 4, B: 2, C: 1 },
   formalizacao: { medio_grande_porte: 4, formalizada: 3, informal: 1, nao_comecou: 0, outro: 1 },
   lucro_crescimento: { A: 4, B: 2, C: 1 },
+  // A=cobra o valor justo (4), B=às vezes abaixo (2), C=frequentemente abaixo (1)
+  precificacao: { A: 4, B: 2, C: 1 },
   capacidade_operacional: { A: 4, B: 2, C: 1 },
   horas_semana: { A: 0, B: 1, C: 2, D: 3, E: 4 },
   faturamento_mensal: {
@@ -559,30 +561,63 @@ function classifyDiagnostic(answersBySlug: Record<string, JsonValue>): Classifie
   const revenue = asObjectRecord(answersBySlug.faturamento_mensal) as RevenueAnswer | undefined;
   const q11 = mapRevenueToMotorBand(revenue?.faixa);
   const q12 = String(answersBySlug.lucro_crescimento ?? '');
+  const qPrec = String(answersBySlug.precificacao ?? '');
   const q15 = String(answersBySlug.canal_aquisicao ?? '');
   const q16 = String(answersBySlug.capacidade_operacional ?? '');
   const q17 = String(answersBySlug.horas_semana ?? '');
 
-  // Motor v2.4 — ordem de prioridade (fonte: 01-Jethro_Motor_v2_4_Daniel.pdf)
-  // 0. MODELO E — pre-receita / ainda nao comecou ou nao validou
+  // Motor v2.5 — ajustado via engenharia reversa dos textos dos modelos
+  // Regra geral: cada modelo tem uma âncora textual exclusiva; Q9 e Q16 são
+  // os principais árbitros de sobreposição entre modelos vizinhos.
+
+  // 1. MODELO E — pre-receita / ainda nao validou no mercado
+  //    Âncora: Q11=A (zero receita) ou fase inicial com receita mínima
   if (q11 === 'A') return { code: 'E' };
   if (q5 <= 'B' && q11 === 'B') return { code: 'E' };
-  // 2. MODELO G — operacao no limite
-  if (q11 >= 'C' && q16 === 'C') return { code: 'G' };
-  // 3. MODELO D — fatura mas sangra
-  if (q11 >= 'B' && q12 === 'C') return { code: 'D' };
-  // 4. MODELO H — gargalo do dono (Q17 D=40-60h ou E=>60h, com receita)
-  if (q11 >= 'B' && ['D', 'E'].includes(q17)) return { code: 'H' };
-  // 5. MODELO A — negocio travado e baguncado
-  if (q9 === 'C' && ['B', 'C'].includes(q8) && ['B', 'C'].includes(q12) && (q6 === 'C' || q7 === 'C')) return { code: 'A' };
-  // 6. MODELO F — vende mas sem motor comercial
-  if (q11 >= 'B' && q15 === 'A' && q12 === 'B' && ['A', 'B'].includes(q9)) return { code: 'F' };
-  // 7. MODELO C — boa base, caixa apertado
-  if (['A', 'B'].includes(q6) && ['A', 'B'].includes(q7) && ['B', 'C'].includes(q9) && ['B', 'C'].includes(q12)) return { code: 'C' };
-  // 8. MODELO B — negocio saudavel no plato
-  if (['A', 'B'].includes(q9) && ['A', 'B'].includes(q8) && q11 >= 'B' && q12 === 'B' && q15 !== 'A') return { code: 'B' };
 
-  return { code: 'A' }; // fallback
+  // 2. MODELO G — operacao no limite
+  //    Âncora: Q16=C (colapso operacional) + receita substancial
+  if (q11 >= 'C' && q16 === 'C') return { code: 'G' };
+
+  // 3. MODELO D — fatura mas sangra
+  //    Âncora: Q12=C + Q9=B — tem noção dos números mas perde margem.
+  //    Q9=C (caos total) pertence ao Modelo A; sem essa guarda D roubaria
+  //    casos com a mesma frase textual ("dinheiro entra, circula e some").
+  if (q11 >= 'B' && q12 === 'C' && q9 !== 'C') return { code: 'D' };
+
+  // 4. MODELO H — gargalo do dono
+  //    Âncora: Q17=D/E (carga horária extrema) + receita + sem colapso operacional.
+  //    Q16=C indica limite de capacidade estrutural → território de G, não de H.
+  if (q11 >= 'B' && ['D', 'E'].includes(q17) && q16 !== 'C') return { code: 'H' };
+
+  // 5. MODELO A — negocio travado, baguncado e sem visao
+  //    Âncora: Q9=C (caos financeiro) + ausência de propósito/dons (Q6 ou Q7 = C)
+  if (q9 === 'C' && ['B', 'C'].includes(q8) && ['B', 'C'].includes(q12) && (q6 === 'C' || q7 === 'C')) return { code: 'A' };
+
+  // 6. MODELO F — vende mas sem motor comercial
+  //    Âncora: Q15=A (100% indicação) + receita + estável/sem crescimento.
+  //    Q9 removido como condição — a RE confirma que o discriminador de F
+  //    é o canal, não a organização financeira.
+  if (q11 >= 'B' && q15 === 'A' && q12 === 'B') return { code: 'F' };
+
+  // 7. MODELO C — boa base, caixa apertado
+  //    Âncora: propósito alinhado (Q6/Q7=A/B) + financeiro fraco + cobra abaixo do valor.
+  //    qPrec=B/C (às vezes ou frequentemente cobra abaixo) separa C de B quando os
+  //    demais sinais se sobrepõem — resolve o "ponto cego" identificado na RE.
+  if (
+    ['A', 'B'].includes(q6) &&
+    ['A', 'B'].includes(q7) &&
+    ['B', 'C'].includes(q9) &&
+    ['B', 'C'].includes(q12) &&
+    ['B', 'C'].includes(qPrec)
+  ) return { code: 'C' };
+
+  // 8. MODELO B — negocio saudavel no plato
+  //    Âncora: estrutura + finanças organizadas + estável + canal diversificado + precificação justa.
+  //    qPrec≠C garante que quem frequentemente cobra abaixo vai para C, não B.
+  if (['A', 'B'].includes(q9) && ['A', 'B'].includes(q8) && q11 >= 'B' && q12 === 'B' && q15 !== 'A' && qPrec !== 'C') return { code: 'B' };
+
+  return { code: 'A' }; // fallback — caos sem demais âncoras definidas
 }
 
 function personalizeDiagnosticText(text: string, fullName: string | undefined) {
