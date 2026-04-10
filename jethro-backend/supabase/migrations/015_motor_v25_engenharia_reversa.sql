@@ -50,13 +50,15 @@ update forms set
 where slug = 'diagnostico-inicial';
 
 -- ─── 2. diagnostic_questions: shift + registra precificacao ─────────────────────
--- Guard: shift só roda se q_precificacao ainda não existe (idempotente)
+-- Guard: shift só roda se q_precificacao ainda não existe (idempotente).
+-- Dois passos para evitar conflito de unique durante o shift em lote:
+--   passo 1 → negativa temporária (sem conflito com positivos existentes)
+--   passo 2 → valor final positivo +1
 do $$
 begin
   if not exists (select 1 from diagnostic_questions where code = 'q_precificacao') then
-    update diagnostic_questions
-    set order_index = order_index + 1
-    where order_index >= 12;
+    update diagnostic_questions set order_index = -order_index - 1 where order_index >= 12;
+    update diagnostic_questions set order_index = -order_index     where order_index  < 0;
   end if;
 end $$;
 

@@ -183,17 +183,6 @@ const diagnosticQuestions: DiagnosticQuestionSeed[] = [
     validation: { source: 'country_dynamic' },
   },
   {
-    code: 'q12_lucro_crescimento',
-    orderIndex: 12,
-    label: 'Você sente que o seu negócio está gerando lucro e crescendo?',
-    questionType: 'single_select',
-    options: [
-      { label: 'Sim, crescendo', value: 'A' },
-      { label: 'Estável, sem crescimento', value: 'B' },
-      { label: 'Não, estamos regredindo', value: 'C' },
-    ],
-  },
-  {
     code: 'q_precificacao',
     orderIndex: 12,
     label: 'Você sente que cobra o valor justo pelo que entrega?',
@@ -205,22 +194,33 @@ const diagnosticQuestions: DiagnosticQuestionSeed[] = [
     ],
   },
   {
-    code: 'q13_objetivo_futuro',
+    code: 'q12_lucro_crescimento',
     orderIndex: 13,
+    label: 'Você sente que o seu negócio está gerando lucro e crescendo?',
+    questionType: 'single_select',
+    options: [
+      { label: 'Sim, crescendo', value: 'A' },
+      { label: 'Estável, sem crescimento', value: 'B' },
+      { label: 'Não, estamos regredindo', value: 'C' },
+    ],
+  },
+  {
+    code: 'q13_objetivo_futuro',
+    orderIndex: 14,
     label: 'Onde você deseja estar com seu negócio nos próximos 6 a 12 meses?',
     questionType: 'textarea',
     validation: { minLength: 20, maxLength: 500 },
   },
   {
     code: 'q14_desafios',
-    orderIndex: 14,
+    orderIndex: 15,
     label: 'Quais são os 3 maiores desafios que você está enfrentando hoje no seu negócio?',
     questionType: 'textarea',
     validation: { minLength: 20, maxLength: 600 },
   },
   {
     code: 'q15_canal_aquisicao',
-    orderIndex: 15,
+    orderIndex: 16,
     label: 'Como a maioria dos seus clientes chega até você hoje?',
     questionType: 'single_select',
     options: [
@@ -235,7 +235,7 @@ const diagnosticQuestions: DiagnosticQuestionSeed[] = [
   },
   {
     code: 'q16_capacidade_operacional',
-    orderIndex: 16,
+    orderIndex: 17,
     label: 'Se o seu número de clientes dobrasse amanhã, o que aconteceria?',
     questionType: 'single_select',
     options: [
@@ -246,7 +246,7 @@ const diagnosticQuestions: DiagnosticQuestionSeed[] = [
   },
   {
     code: 'q17_horas_semana',
-    orderIndex: 17,
+    orderIndex: 18,
     label: 'Quantas horas por semana você dedica ao seu negócio?',
     questionType: 'single_select',
     options: [
@@ -259,7 +259,7 @@ const diagnosticQuestions: DiagnosticQuestionSeed[] = [
   },
   {
     code: 'q18_status_empresa',
-    orderIndex: 18,
+    orderIndex: 19,
     label: 'Em que estado real está a sua empresa ou produto hoje?',
     helperText: 'Pergunta adicionada no motor v2.4 para separar validação de pré-início.',
     questionType: 'single_select',
