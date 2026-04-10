@@ -246,163 +246,22 @@
   <div class="quote">"Você ajusta a oferta — mas não vende"</div>
 
   <table>
-    <thead><tr><th>App q#</th><th>Valores consistentes</th><th>Justificativa textual</th></tr></thead>
+    <thead><tr><th>App q#</th><th>Resposta exata</th><th>Papel no engine</th></tr></thead>
     <tbody>
-      <tr><td>q5</td><td>A, B</td><td>Fase inicial explícita — "primeira venda", "saiu do papel"</td></tr>
-      <tr><td>q11</td><td><strong>A</strong></td><td>Âncora mais forte — sem validação de mercado = sem receita</td></tr>
-      <tr><td>q16</td><td>A (indicação)</td><td>"Rede pessoal" = círculo próximo, não canal estruturado</td></tr>
-      <tr><td>q13</td><td>B, C</td><td>Não crescendo — ainda não há venda consistente</td></tr>
-      <tr><td>q17</td><td>A, B</td><td>Sem pressão operacional ainda</td></tr>
-      <tr><td>q19</td><td>B, C, D</td><td>Tem ideia/empresa mas sem execução real</td></tr>
+      <tr><td>q5</td><td>B — Início (0-1 ano)</td><td>Contextual</td></tr>
+      <tr><td>q6</td><td>B — Parcialmente</td><td>Neutro</td></tr>
+      <tr><td>q7</td><td>B — Tenho ideia, mas não definido</td><td>Neutro</td></tr>
+      <tr><td>q8</td><td>B — Em desenvolvimento</td><td>Neutro</td></tr>
+      <tr><td>q9</td><td>B — Básica</td><td>Neutro (≠C evita A)</td></tr>
+      <tr><td>q10</td><td>nao_comecou — Ainda não comecei</td><td>Neutro</td></tr>
+      <tr style="background:#fff3cd"><td><strong>q11 ★</strong></td><td><strong>Ainda não fatura</strong></td><td><strong>Âncora — dispara E imediatamente</strong></td></tr>
+      <tr><td>q12</td><td>B — Às vezes cobro abaixo</td><td>Neutro</td></tr>
+      <tr><td>q13</td><td>B — Estável, sem crescimento</td><td>Neutro</td></tr>
+      <tr><td>q16</td><td>A — Indicação</td><td>Neutro</td></tr>
+      <tr><td>q17</td><td>B — Precisaria reorganizar</td><td>Neutro</td></tr>
+      <tr><td>q18</td><td>B — 10–20h</td><td>Neutro</td></tr>
     </tbody>
   </table>
-
-  <p><strong>Âncora exclusiva:</strong></p>
-  <div class="anchor-box">q11 = A</div>
-  <p>Com faturamento zero, nenhum outro modelo é textualmente consistente. E está seguro.</p>
-  <p><span class="tag-risk">Risco</span> Com q11=B + q16=A → sobreposição com <strong>Modelo F</strong></p>
-</div>
-
-<!-- MODELO F -->
-<div class="model-block">
-  <h3>Modelo F — Vende, Mas Sem Motor Comercial</h3>
-  <p><em>Núcleo textual:</em></p>
-  <div class="quote">"Quase 100% dos clientes chegam por indicação — e indicação não escala"</div>
-  <div class="quote">"Você não tem processo de vendas definido — cada fechamento é um improviso"</div>
-  <div class="quote">"Negócio funciona quando você tem sorte. Precisa funcionar quando você tem sistema"</div>
-
-  <table>
-    <thead><tr><th>App q#</th><th>Valores consistentes</th><th>Justificativa textual</th></tr></thead>
-    <tbody>
-      <tr><td>q11</td><td><strong>B, C, D+</strong></td><td>Tem receita — diferencia de E</td></tr>
-      <tr><td>q16</td><td><strong>A</strong></td><td>Discriminador textual explícito e exclusivo (indicação)</td></tr>
-      <tr><td>q13</td><td>B</td><td>Estável sem crescimento — F é platô por canal, não regressão</td></tr>
-      <tr><td>q8</td><td>B, C</td><td>"Sem processo de vendas" = sem estrutura comercial</td></tr>
-    </tbody>
-  </table>
-
-  <p><strong>Âncora exclusiva:</strong></p>
-  <div class="anchor-box">q16 = A &nbsp;+&nbsp; q11 &ge; B &nbsp;+&nbsp; q13 = B</div>
-  <p><span class="tag-unique">Seguro</span> q16=A (indicação) é o discriminador mais limpo deste modelo.</p>
-
-  <div class="impl-box">
-    <strong>v2.5 — engine ajustado:</strong> condição endurecida com <code>q12 === 'B'</code> (slug lucro_crescimento, app q13). Q9 removido — canal é o discriminador, não finanças.
-  </div>
-</div>
-
-<!-- MODELO D -->
-<div class="model-block">
-  <h3>Modelo D — Fatura Mas Sangra</h3>
-  <p><em>Núcleo textual:</em></p>
-  <div class="quote">"Faturamento existe — lucro é ilusão"</div>
-  <div class="quote">"O movimento foi bom. Você vendeu. Entregou. E mesmo assim, sobrou menos do que deveria"</div>
-  <div class="quote">"A estrutura cresceu — mas o lucro por venda diminuiu"</div>
-
-  <table>
-    <thead><tr><th>App q#</th><th>Valores consistentes</th><th>Justificativa textual</th></tr></thead>
-    <tbody>
-      <tr><td>q11</td><td><strong>B, C, D+</strong></td><td>"Faturamento existe" — receita real e mensurável</td></tr>
-      <tr><td>q13</td><td><strong>C</strong></td><td>"Lucro é ilusão", "sobrou menos do que deveria"</td></tr>
-      <tr><td>q9</td><td><strong>B</strong></td><td>D implica noção básica dos números (custo fixo crescendo) — não caos total</td></tr>
-      <tr><td>q8</td><td>B</td><td>Estrutura básica existe; diferente do caos de A</td></tr>
-    </tbody>
-  </table>
-
-  <p><strong>Âncora exclusiva:</strong></p>
-  <div class="anchor-box">q13 = C &nbsp;+&nbsp; q9 = B &nbsp;+&nbsp; q11 &ge; B</div>
-
-  <div class="impl-box">
-    <strong>v2.5 — frase diferenciada:</strong> A frase quase idêntica com Modelo A foi reescrita.<br>
-    <del>"→ O dinheiro entra, circula e some antes de você sentir que existiu"</del><br>
-    <strong>→ "→ O dinheiro entra, o custo absorve — e a margem que deveria sobrar some antes de se tornar resultado"</strong><br>
-    D v1 foca em custo/margem; A v1 mantém o caos como narrativa central.
-  </div>
-
-  <div class="impl-box">
-    <strong>v2.5 — engine ajustado:</strong> adicionado <code>q9 !== 'C'</code> (D pressupõe controle básico; q9=C leva a A).
-  </div>
-</div>
-
-<!-- MODELO A -->
-<div class="model-block">
-  <h3>Modelo A — Negócio Travado, Bagunçado e Sem Visão</h3>
-  <p><em>Núcleo textual:</em></p>
-  <div class="quote">"Financeiro confuso — o dinheiro entra, circula e some"</div>
-  <div class="quote">"Decisões no feeling — sem painel, sem ritmo, cada semana começa como se fosse a primeira"</div>
-  <div class="quote">"Gestão reativa disfarçada de dedicação"</div>
-
-  <table>
-    <thead><tr><th>App q#</th><th>Valores consistentes</th><th>Justificativa textual</th></tr></thead>
-    <tbody>
-      <tr><td>q9</td><td><strong>C</strong></td><td>"Financeiro confuso" — discriminador central do modelo</td></tr>
-      <tr><td>q8</td><td>B, C</td><td>"Sem planejamento estratégico", "sem visão de futuro"</td></tr>
-      <tr><td>q7</td><td>B, C</td><td>"Sem rota", "sem clareza de propósito"</td></tr>
-      <tr><td>q6</td><td>C (ou B+q7=C)</td><td>Sem conexão com propósito — distingue de Modelo C</td></tr>
-      <tr><td>q13</td><td>B, C</td><td>Não crescendo</td></tr>
-      <tr><td>q11</td><td>B, C+</td><td>Tem negócio ativo — se q11=A, seria E</td></tr>
-    </tbody>
-  </table>
-
-  <p><strong>Âncora exclusiva:</strong></p>
-  <div class="anchor-box">q9 = C &nbsp;+&nbsp; (q6 = C ou q7 = C) &nbsp;+&nbsp; q11 &ge; B</div>
-  <p><span class="tag-unique">Seguro</span> q9=C distingue de B. q6/q7=C distingue de C.</p>
-</div>
-
-<!-- MODELO C -->
-<div class="model-block">
-  <h3>Modelo C — Boa Base, Mas Caixa Apertado</h3>
-  <p><em>Núcleo textual:</em></p>
-  <div class="quote">"Entregou mais do que cobrou — e todo mês o caixa prova isso"</div>
-  <div class="quote">"Propósito sem sustentabilidade não é humildade. É risco"</div>
-  <div class="quote">"Não por falta de clientes, mas por falta de margem"</div>
-
-  <table>
-    <thead><tr><th>App q#</th><th>Valores consistentes</th><th>Justificativa textual</th></tr></thead>
-    <tbody>
-      <tr><td>q6</td><td><strong>A, B</strong></td><td>Texto pressupõe alinhamento de dons — exclusivo de C</td></tr>
-      <tr><td>q7</td><td><strong>A, B</strong></td><td>"Sabe o propósito" — claro ou parcialmente claro</td></tr>
-      <tr><td>q9</td><td>B, C</td><td>Caixa apertado — mas não caótico como A</td></tr>
-      <tr><td>q13</td><td>B, C</td><td>Não crescendo ou regredindo</td></tr>
-      <tr><td>q8</td><td>B, C</td><td>Visão existe mas sem tradução em plano financeiro</td></tr>
-      <tr class="new-row"><td><strong>q12</strong></td><td><strong>B, C</strong></td><td>Cobra abaixo do valor entregue — discriminador vs Modelo B</td></tr>
-    </tbody>
-  </table>
-
-  <p><strong>Âncora exclusiva (v2.5):</strong></p>
-  <div class="anchor-box">q6 = A/B &nbsp;+&nbsp; q7 = A/B &nbsp;+&nbsp; q12 = B/C</div>
-
-  <div class="impl-box">
-    <strong>v2.5 — ponto cego resolvido:</strong> q12 (precificação) adicionada ao formulário (exibida como "q12", obrigatória). Modelo C agora requer <code>precificacao ∈ {B, C}</code> no engine — cobra abaixo do valor.
-  </div>
-</div>
-
-<!-- MODELO B -->
-<div class="model-block">
-  <h3>Modelo B — Negócio Saudável, Travado no Platô</h3>
-  <p><em>Núcleo textual:</em></p>
-  <div class="quote">"Você construiu algo que funciona. Agora precisa de algo que multiplica"</div>
-  <div class="quote">"Crescimento travou — mesma receita, mesmos clientes, mesmos canais"</div>
-  <div class="quote">"Tem estrutura, mas não tem aceleração"</div>
-
-  <table>
-    <thead><tr><th>App q#</th><th>Valores consistentes</th><th>Justificativa textual</th></tr></thead>
-    <tbody>
-      <tr><td>q8</td><td><strong>A, B</strong></td><td>"Tem estrutura" — bem estruturado ou em desenvolvimento</td></tr>
-      <tr><td>q9</td><td><strong>A, B</strong></td><td>Financeiro organizado — não caótico; diferencia de A</td></tr>
-      <tr><td>q13</td><td><strong>B</strong></td><td>"Travado no platô" = exatamente estável, sem crescimento</td></tr>
-      <tr><td>q11</td><td>B, C+</td><td>Tem receita relevante — "construiu algo"</td></tr>
-      <tr><td>q16</td><td>B, C, D, E, F, G (não A)</td><td>Não exclusivamente por indicação — diferencia de F</td></tr>
-      <tr><td>q5</td><td>C, D</td><td>Negócio com tempo — "construiu algo que funciona"</td></tr>
-      <tr class="new-row"><td><strong>q12</strong></td><td><strong>A, B (não C)</strong></td><td>Precifica dentro do valor — cobra frequentemente abaixo só em C</td></tr>
-    </tbody>
-  </table>
-
-  <p><strong>Âncora exclusiva (v2.5):</strong></p>
-  <div class="anchor-box">q8 = A/B &nbsp;+&nbsp; q9 = A/B &nbsp;+&nbsp; q13 = B &nbsp;+&nbsp; q16 &ne; A &nbsp;+&nbsp; q12 &ne; C</div>
-
-  <div class="impl-box">
-    <strong>v2.5 — engine ajustado:</strong> adicionado <code>precificacao !== 'C'</code> (quem cobra frequentemente abaixo do valor vai para C, não B).
-  </div>
 </div>
 
 <!-- MODELO G -->
@@ -414,29 +273,53 @@
   <div class="quote new">"Não há processo documentado: quando alguém falta ou sai, a operação regride" <span class="tag-impl">NOVO — v2.5</span></div>
 
   <table>
-    <thead><tr><th>App q#</th><th>Valores consistentes</th><th>Justificativa textual</th></tr></thead>
+    <thead><tr><th>App q#</th><th>Resposta exata</th><th>Papel no engine</th></tr></thead>
     <tbody>
-      <tr><td>q17</td><td><strong>C</strong></td><td>Âncora mais forte — "operação entraria em colapso"</td></tr>
-      <tr><td>q11</td><td>C, D+</td><td>"O negócio vende" — receita existe e é relevante</td></tr>
-      <tr><td>q13</td><td>B, C</td><td>Não crescendo plenamente por causa da operação</td></tr>
-      <tr><td>q18</td><td>C, D, E</td><td>Trabalhando muito para sustentar o caos operacional</td></tr>
+      <tr><td>q5</td><td>C — Em crescimento</td><td>Contextual</td></tr>
+      <tr><td>q6</td><td>B — Parcialmente</td><td>Neutro</td></tr>
+      <tr><td>q7</td><td>B — Tenho ideia, mas não definido</td><td>Neutro</td></tr>
+      <tr><td>q8</td><td>B — Em desenvolvimento</td><td>Neutro</td></tr>
+      <tr><td>q9</td><td>B — Básica</td><td>Neutro (≠C evita A)</td></tr>
+      <tr><td>q10</td><td>formalizada — Empresa registrada</td><td>Neutro</td></tr>
+      <tr style="background:#fff3cd"><td><strong>q11 ★</strong></td><td><strong>R$5k–R$20k</strong></td><td><strong>Âncora — q11≥C obrigatório</strong></td></tr>
+      <tr><td>q12</td><td>B — Às vezes cobro abaixo</td><td>Neutro</td></tr>
+      <tr><td>q13</td><td>B — Estável, sem crescimento</td><td>Neutro</td></tr>
+      <tr><td>q16</td><td>B — Instagram</td><td>Neutro (≠A evita F)</td></tr>
+      <tr style="background:#fff3cd"><td><strong>q17 ★</strong></td><td><strong>C — A operação entraria em colapso</strong></td><td><strong>Âncora — dispara G</strong></td></tr>
+      <tr><td>q18</td><td>C — 20–40h</td><td>Contextual</td></tr>
     </tbody>
   </table>
 
-  <p><strong>Âncora exclusiva:</strong></p>
-  <div class="anchor-box">q17 = C &nbsp;+&nbsp; q11 &ge; C</div>
-  <p><span class="tag-unique">Seguro</span> q17=C com receita substancial é exclusivo de G.</p>
-
   <div class="impl-box">
-    <strong>v2.5 — texto diferenciado de H:</strong><br>
-    <del>Êxodo 18:18 (Jetro/Moisés) — compartilhado com H</del><br>
-    <strong>Agora: Provérbios 24:3 — "Pela sabedoria a casa se edifica; pela inteligência se firma."</strong><br>
-    Foco deslocado de delegação pessoal (H) para processos e estrutura (G).
+    <strong>v2.5:</strong> Provérbios 24:3 (não Êxodo 18:18). Foco em ausência de processo, não no dono como gargalo.
   </div>
+</div>
 
-  <div class="impl-box">
-    <strong>v2.5 — engine ajustado:</strong> adicionado <code>q16 !== 'C'</code> ao critério de H (engine var), garantindo que q17=C no app sempre leva a G e nunca a H.
-  </div>
+<!-- MODELO D -->
+<div class="model-block">
+  <h3>Modelo D — Fatura Mas Sangra</h3>
+  <p><em>Núcleo textual:</em></p>
+  <div class="quote">"Faturamento existe — lucro é ilusão"</div>
+  <div class="quote">"O dinheiro entra, o custo absorve — e a margem que deveria sobrar some antes de se tornar resultado"</div>
+  <div class="quote">"A estrutura cresceu — mas o lucro por venda diminuiu"</div>
+
+  <table>
+    <thead><tr><th>App q#</th><th>Resposta exata</th><th>Papel no engine</th></tr></thead>
+    <tbody>
+      <tr><td>q5</td><td>C — Em crescimento</td><td>Contextual</td></tr>
+      <tr><td>q6</td><td>B — Parcialmente</td><td>Neutro</td></tr>
+      <tr><td>q7</td><td>B — Tenho ideia, mas não definido</td><td>Neutro</td></tr>
+      <tr><td>q8</td><td>B — Em desenvolvimento</td><td>Neutro</td></tr>
+      <tr style="background:#fff3cd"><td><strong>q9 ★</strong></td><td><strong>B — Básica</strong></td><td><strong>Discriminador — ≠C separa de A</strong></td></tr>
+      <tr><td>q10</td><td>formalizada — Empresa registrada</td><td>Neutro</td></tr>
+      <tr style="background:#fff3cd"><td><strong>q11 ★</strong></td><td><strong>R$5k–R$20k</strong></td><td><strong>Âncora — q11≥B obrigatório</strong></td></tr>
+      <tr><td>q12</td><td>B — Às vezes cobro abaixo</td><td>Neutro</td></tr>
+      <tr style="background:#fff3cd"><td><strong>q13 ★</strong></td><td><strong>C — Não, estamos regredindo</strong></td><td><strong>Âncora — lucro negativo</strong></td></tr>
+      <tr><td>q16</td><td>B — Instagram</td><td>Neutro</td></tr>
+      <tr><td>q17</td><td>B — Precisaria reorganizar</td><td>Neutro (≠C evita G)</td></tr>
+      <tr><td>q18</td><td>B — 10–20h</td><td>Neutro (≠D/E evita H)</td></tr>
+    </tbody>
+  </table>
 </div>
 
 <!-- MODELO H -->
@@ -448,18 +331,130 @@
   <div class="quote">"Você é insubstituível — e isso, no negócio, é fraqueza, não força"</div>
 
   <table>
-    <thead><tr><th>App q#</th><th>Valores consistentes</th><th>Justificativa textual</th></tr></thead>
+    <thead><tr><th>App q#</th><th>Resposta exata</th><th>Papel no engine</th></tr></thead>
     <tbody>
-      <tr><td>q18</td><td><strong>D, E</strong></td><td>H v2 é explícito: "mais de 60h por semana"</td></tr>
-      <tr><td>q11</td><td>B, C+</td><td>Negócio funciona — apenas dependente do dono</td></tr>
-      <tr><td>q17</td><td><strong>B</strong></td><td>Se fosse C → seria G; H é sobre governo pessoal, não colapso</td></tr>
-      <tr><td>q8</td><td>B, C</td><td>Sem delegação estruturada — "tudo passa pelas suas mãos"</td></tr>
+      <tr><td>q5</td><td>D — Consolidado (3+ anos)</td><td>Contextual</td></tr>
+      <tr><td>q6</td><td>B — Parcialmente</td><td>Neutro</td></tr>
+      <tr><td>q7</td><td>B — Tenho ideia, mas não definido</td><td>Neutro</td></tr>
+      <tr><td>q8</td><td>B — Em desenvolvimento</td><td>Neutro</td></tr>
+      <tr><td>q9</td><td>B — Básica</td><td>Neutro (≠C evita A)</td></tr>
+      <tr><td>q10</td><td>formalizada — Empresa registrada</td><td>Neutro</td></tr>
+      <tr style="background:#fff3cd"><td><strong>q11 ★</strong></td><td><strong>R$5k–R$20k</strong></td><td><strong>Âncora — q11≥B obrigatório</strong></td></tr>
+      <tr><td>q12</td><td>B — Às vezes cobro abaixo</td><td>Neutro</td></tr>
+      <tr><td>q13</td><td>B — Estável, sem crescimento</td><td>Neutro (≠C evita D)</td></tr>
+      <tr><td>q16</td><td>B — Instagram</td><td>Neutro (≠A evita F)</td></tr>
+      <tr style="background:#fff3cd"><td><strong>q17 ★</strong></td><td><strong>B — Precisaria reorganizar</strong></td><td><strong>Discriminador — ≠C separa de G</strong></td></tr>
+      <tr style="background:#fff3cd"><td><strong>q18 ★</strong></td><td><strong>D — 40–60h</strong></td><td><strong>Âncora — carga extrema</strong></td></tr>
     </tbody>
   </table>
+</div>
 
-  <p><strong>Âncora exclusiva:</strong></p>
-  <div class="anchor-box">q18 = D/E &nbsp;+&nbsp; q17 = B &nbsp;+&nbsp; q11 &ge; B</div>
-  <p>Êxodo 18:18 (Jetro/Moisés) permanece exclusivamente em H após v2.5.</p>
+<!-- MODELO A -->
+<div class="model-block">
+  <h3>Modelo A — Negócio Travado, Bagunçado e Sem Visão</h3>
+  <p><em>Núcleo textual:</em></p>
+  <div class="quote">"Financeiro confuso — o dinheiro entra, circula e some"</div>
+  <div class="quote">"Decisões no feeling — sem painel, sem ritmo, cada semana começa como se fosse a primeira"</div>
+  <div class="quote">"Gestão reativa disfarçada de dedicação"</div>
+
+  <table>
+    <thead><tr><th>App q#</th><th>Resposta exata</th><th>Papel no engine</th></tr></thead>
+    <tbody>
+      <tr><td>q5</td><td>C — Em crescimento</td><td>Contextual</td></tr>
+      <tr style="background:#fff3cd"><td><strong>q6 ★</strong></td><td><strong>C — Não</strong></td><td><strong>Discriminador — sem conexão com propósito</strong></td></tr>
+      <tr><td>q7</td><td>B — Tenho ideia, mas não definido</td><td>Neutro</td></tr>
+      <tr><td>q8</td><td>B — Em desenvolvimento</td><td>Neutro</td></tr>
+      <tr style="background:#fff3cd"><td><strong>q9 ★</strong></td><td><strong>C — Desorganizada / Confusa</strong></td><td><strong>Âncora — caos financeiro</strong></td></tr>
+      <tr><td>q10</td><td>informal — Informal</td><td>Contextual</td></tr>
+      <tr style="background:#fff3cd"><td><strong>q11 ★</strong></td><td><strong>R$5k–R$20k</strong></td><td><strong>Âncora — q11≥B (≠A evita E)</strong></td></tr>
+      <tr><td>q12</td><td>B — Às vezes cobro abaixo</td><td>Neutro</td></tr>
+      <tr><td>q13</td><td>B — Estável, sem crescimento</td><td>Neutro</td></tr>
+      <tr><td>q16</td><td>B — Instagram</td><td>Neutro</td></tr>
+      <tr><td>q17</td><td>B — Precisaria reorganizar</td><td>Neutro (≠C evita G)</td></tr>
+      <tr><td>q18</td><td>B — 10–20h</td><td>Neutro (≠D/E evita H)</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- MODELO F -->
+<div class="model-block">
+  <h3>Modelo F — Vende, Mas Sem Motor Comercial</h3>
+  <p><em>Núcleo textual:</em></p>
+  <div class="quote">"Quase 100% dos clientes chegam por indicação — e indicação não escala"</div>
+  <div class="quote">"Você não tem processo de vendas definido — cada fechamento é um improviso"</div>
+  <div class="quote">"Negócio funciona quando você tem sorte. Precisa funcionar quando você tem sistema"</div>
+
+  <table>
+    <thead><tr><th>App q#</th><th>Resposta exata</th><th>Papel no engine</th></tr></thead>
+    <tbody>
+      <tr><td>q5</td><td>C — Em crescimento</td><td>Contextual</td></tr>
+      <tr><td>q6</td><td>B — Parcialmente</td><td>Neutro (≠C com q7≠C evita A)</td></tr>
+      <tr><td>q7</td><td>B — Tenho ideia, mas não definido</td><td>Neutro</td></tr>
+      <tr><td>q8</td><td>B — Em desenvolvimento</td><td>Neutro</td></tr>
+      <tr><td>q9</td><td>B — Básica</td><td>Neutro (≠C evita A)</td></tr>
+      <tr><td>q10</td><td>formalizada — Empresa registrada</td><td>Neutro</td></tr>
+      <tr style="background:#fff3cd"><td><strong>q11 ★</strong></td><td><strong>R$5k–R$20k</strong></td><td><strong>Âncora — q11≥B obrigatório</strong></td></tr>
+      <tr><td>q12</td><td>B — Às vezes cobro abaixo</td><td>Neutro</td></tr>
+      <tr style="background:#fff3cd"><td><strong>q13 ★</strong></td><td><strong>B — Estável, sem crescimento</strong></td><td><strong>Discriminador — estável, não regredindo</strong></td></tr>
+      <tr style="background:#fff3cd"><td><strong>q16 ★</strong></td><td><strong>A — Indicação</strong></td><td><strong>Âncora — 100% indicação</strong></td></tr>
+      <tr><td>q17</td><td>B — Precisaria reorganizar</td><td>Neutro (≠C evita G)</td></tr>
+      <tr><td>q18</td><td>B — 10–20h</td><td>Neutro (≠D/E evita H)</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- MODELO C -->
+<div class="model-block">
+  <h3>Modelo C — Boa Base, Mas Caixa Apertado</h3>
+  <p><em>Núcleo textual:</em></p>
+  <div class="quote">"Entregou mais do que cobrou — e todo mês o caixa prova isso"</div>
+  <div class="quote">"Propósito sem sustentabilidade não é humildade. É risco"</div>
+  <div class="quote">"Não por falta de clientes, mas por falta de margem"</div>
+
+  <table>
+    <thead><tr><th>App q#</th><th>Resposta exata</th><th>Papel no engine</th></tr></thead>
+    <tbody>
+      <tr><td>q5</td><td>C — Em crescimento</td><td>Contextual</td></tr>
+      <tr style="background:#fff3cd"><td><strong>q6 ★</strong></td><td><strong>A — Sim, totalmente</strong></td><td><strong>Âncora — alinhamento com propósito</strong></td></tr>
+      <tr style="background:#fff3cd"><td><strong>q7 ★</strong></td><td><strong>A — Sim, muito claro</strong></td><td><strong>Âncora — clareza de propósito</strong></td></tr>
+      <tr><td>q8</td><td>B — Em desenvolvimento</td><td>Neutro</td></tr>
+      <tr><td>q9</td><td>B — Básica</td><td>Neutro (≠C evita A)</td></tr>
+      <tr><td>q10</td><td>formalizada — Empresa registrada</td><td>Neutro</td></tr>
+      <tr style="background:#fff3cd"><td><strong>q11 ★</strong></td><td><strong>R$5k–R$20k</strong></td><td><strong>Âncora — q11≥B obrigatório</strong></td></tr>
+      <tr style="background:#fff3cd"><td><strong>q12 ★</strong></td><td><strong>C — Frequentemente cobro abaixo do que entrego</strong></td><td><strong>Âncora — discriminador vs B (novo v2.5)</strong></td></tr>
+      <tr><td>q13</td><td>B — Estável, sem crescimento</td><td>Neutro</td></tr>
+      <tr><td>q16</td><td>B — Instagram</td><td>Neutro (≠A evita F)</td></tr>
+      <tr><td>q17</td><td>B — Precisaria reorganizar</td><td>Neutro (≠C evita G)</td></tr>
+      <tr><td>q18</td><td>B — 10–20h</td><td>Neutro (≠D/E evita H)</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- MODELO B -->
+<div class="model-block">
+  <h3>Modelo B — Negócio Saudável, Travado no Platô</h3>
+  <p><em>Núcleo textual:</em></p>
+  <div class="quote">"Você construiu algo que funciona. Agora precisa de algo que multiplica"</div>
+  <div class="quote">"Crescimento travou — mesma receita, mesmos clientes, mesmos canais"</div>
+  <div class="quote">"Tem estrutura, mas não tem aceleração"</div>
+
+  <table>
+    <thead><tr><th>App q#</th><th>Resposta exata</th><th>Papel no engine</th></tr></thead>
+    <tbody>
+      <tr><td>q5</td><td>D — Consolidado (3+ anos)</td><td>Contextual</td></tr>
+      <tr><td>q6</td><td>A — Sim, totalmente</td><td>Neutro</td></tr>
+      <tr><td>q7</td><td>A — Sim, muito claro</td><td>Neutro</td></tr>
+      <tr style="background:#fff3cd"><td><strong>q8 ★</strong></td><td><strong>A — Sim, bem estruturado</strong></td><td><strong>Âncora — estrutura sólida</strong></td></tr>
+      <tr style="background:#fff3cd"><td><strong>q9 ★</strong></td><td><strong>A — Estruturada</strong></td><td><strong>Âncora — financeiro organizado</strong></td></tr>
+      <tr><td>q10</td><td>formalizada — Empresa registrada</td><td>Neutro</td></tr>
+      <tr style="background:#fff3cd"><td><strong>q11 ★</strong></td><td><strong>R$5k–R$20k</strong></td><td><strong>Âncora — q11≥B obrigatório</strong></td></tr>
+      <tr style="background:#fff3cd"><td><strong>q12 ★</strong></td><td><strong>A — Sim, cobro o valor que merece</strong></td><td><strong>Discriminador — ≠C separa de C (novo v2.5)</strong></td></tr>
+      <tr style="background:#fff3cd"><td><strong>q13 ★</strong></td><td><strong>B — Estável, sem crescimento</strong></td><td><strong>Âncora — platô</strong></td></tr>
+      <tr><td>q16</td><td>B — Instagram</td><td>Neutro (≠A evita F)</td></tr>
+      <tr><td>q17</td><td>B — Precisaria reorganizar</td><td>Neutro (≠C evita G)</td></tr>
+      <tr><td>q18</td><td>C — 20–40h</td><td>Neutro (≠D/E evita H)</td></tr>
+    </tbody>
+  </table>
 </div>
 
 <hr class="section-divider">
@@ -550,6 +545,183 @@
     <tr><td><strong>H</strong> — Gargalo é o dono</td><td>q18 = D/E + q17 = B + q11 ≥ B</td><td>q8 = B/C</td><td class="risk-low">Baixo — q17≠C no engine; Êxodo 18:18 exclusivo</td></tr>
   </tbody>
 </table>
+
+<hr class="section-divider">
+
+<h2>Gabarito de Teste — Roteiro por Modelo</h2>
+<p>Para cada modelo, responda <strong>exatamente</strong> como indicado abaixo. Campos de texto (q1 nome, q2 área, q14 objetivo, q15 desafios) aceite qualquer resposta válida — não afetam o diagnóstico. q19 não aparece nestes testes (condição: q5=A + q10≠nao_comecou).</p>
+<p style="font-size:9pt;color:#666">
+  Discriminadores marcados com ★ — são os que determinam o modelo. Os demais têm valores seguros que evitam falsos positivos em outros modelos da cadeia.
+</p>
+
+<style>
+  .roteiro-grid { display:grid; grid-template-columns: 1fr 1fr; gap:16px; margin:16px 0; }
+  .roteiro-card { border:1px solid #ccc; border-radius:6px; padding:14px 16px; page-break-inside:avoid; }
+  .roteiro-card h4 { margin:0 0 10px 0; font-size:12pt; border-bottom:2px solid #1a1a1a; padding-bottom:6px; }
+  .roteiro-card table { margin:0; font-size:9.5pt; }
+  .roteiro-card td { padding:3px 8px; border-bottom:1px solid #eee; }
+  .roteiro-card td:first-child { font-family:monospace; font-weight:bold; color:#555; white-space:nowrap; }
+  .roteiro-card td:nth-child(2) { color:#1a1a1a; }
+  .roteiro-card .anchor td:nth-child(2) { font-weight:bold; color:#1a1a1a; }
+  .roteiro-card .anchor td:first-child::after { content:" ★"; color:#c0392b; }
+  @media print { .roteiro-grid { grid-template-columns:1fr 1fr; } }
+</style>
+
+<div class="roteiro-grid">
+
+  <!-- MODELO E -->
+  <div class="roteiro-card">
+    <h4>Modelo E — Pré-Receita / Validação Inicial</h4>
+    <table>
+      <tr><td>q5</td><td>B — Início (0-1 ano)</td></tr>
+      <tr><td>q6</td><td>B — Parcialmente</td></tr>
+      <tr><td>q7</td><td>B — Tenho ideia, mas não definido</td></tr>
+      <tr><td>q8</td><td>B — Em desenvolvimento</td></tr>
+      <tr><td>q9</td><td>B — Básica</td></tr>
+      <tr><td>q10</td><td>nao_comecou — Ainda não comecei</td></tr>
+      <tr class="anchor"><td>q11</td><td>Ainda não fatura</td></tr>
+      <tr><td>q12</td><td>B — Às vezes cobro abaixo</td></tr>
+      <tr><td>q13</td><td>B — Estável, sem crescimento</td></tr>
+      <tr><td>q16</td><td>A — Indicação</td></tr>
+      <tr><td>q17</td><td>B — Precisaria reorganizar</td></tr>
+      <tr><td>q18</td><td>B — 10–20h</td></tr>
+    </table>
+  </div>
+
+  <!-- MODELO G -->
+  <div class="roteiro-card">
+    <h4>Modelo G — Operação no Limite</h4>
+    <table>
+      <tr><td>q5</td><td>C — Em crescimento</td></tr>
+      <tr><td>q6</td><td>B — Parcialmente</td></tr>
+      <tr><td>q7</td><td>B — Tenho ideia, mas não definido</td></tr>
+      <tr><td>q8</td><td>B — Em desenvolvimento</td></tr>
+      <tr><td>q9</td><td>B — Básica</td></tr>
+      <tr><td>q10</td><td>formalizada — Empresa registrada</td></tr>
+      <tr class="anchor"><td>q11</td><td>R$5k–R$20k</td></tr>
+      <tr><td>q12</td><td>B — Às vezes cobro abaixo</td></tr>
+      <tr><td>q13</td><td>B — Estável, sem crescimento</td></tr>
+      <tr><td>q16</td><td>B — Instagram</td></tr>
+      <tr class="anchor"><td>q17</td><td>C — A operação entraria em colapso</td></tr>
+      <tr><td>q18</td><td>C — 20–40h</td></tr>
+    </table>
+  </div>
+
+  <!-- MODELO D -->
+  <div class="roteiro-card">
+    <h4>Modelo D — Fatura Mas Sangra</h4>
+    <table>
+      <tr><td>q5</td><td>C — Em crescimento</td></tr>
+      <tr><td>q6</td><td>B — Parcialmente</td></tr>
+      <tr><td>q7</td><td>B — Tenho ideia, mas não definido</td></tr>
+      <tr><td>q8</td><td>B — Em desenvolvimento</td></tr>
+      <tr class="anchor"><td>q9</td><td>B — Básica</td></tr>
+      <tr><td>q10</td><td>formalizada — Empresa registrada</td></tr>
+      <tr class="anchor"><td>q11</td><td>R$5k–R$20k</td></tr>
+      <tr><td>q12</td><td>B — Às vezes cobro abaixo</td></tr>
+      <tr class="anchor"><td>q13</td><td>C — Não, estamos regredindo</td></tr>
+      <tr><td>q16</td><td>B — Instagram</td></tr>
+      <tr><td>q17</td><td>B — Precisaria reorganizar</td></tr>
+      <tr><td>q18</td><td>B — 10–20h</td></tr>
+    </table>
+  </div>
+
+  <!-- MODELO H -->
+  <div class="roteiro-card">
+    <h4>Modelo H — O Gargalo É o Dono</h4>
+    <table>
+      <tr><td>q5</td><td>D — Consolidado (3+ anos)</td></tr>
+      <tr><td>q6</td><td>B — Parcialmente</td></tr>
+      <tr><td>q7</td><td>B — Tenho ideia, mas não definido</td></tr>
+      <tr><td>q8</td><td>B — Em desenvolvimento</td></tr>
+      <tr><td>q9</td><td>B — Básica</td></tr>
+      <tr><td>q10</td><td>formalizada — Empresa registrada</td></tr>
+      <tr class="anchor"><td>q11</td><td>R$5k–R$20k</td></tr>
+      <tr><td>q12</td><td>B — Às vezes cobro abaixo</td></tr>
+      <tr><td>q13</td><td>B — Estável, sem crescimento</td></tr>
+      <tr><td>q16</td><td>B — Instagram</td></tr>
+      <tr class="anchor"><td>q17</td><td>B — Precisaria reorganizar</td></tr>
+      <tr class="anchor"><td>q18</td><td>D — 40–60h</td></tr>
+    </table>
+  </div>
+
+  <!-- MODELO A -->
+  <div class="roteiro-card">
+    <h4>Modelo A — Negócio Travado e Sem Visão</h4>
+    <table>
+      <tr><td>q5</td><td>C — Em crescimento</td></tr>
+      <tr class="anchor"><td>q6</td><td>C — Não</td></tr>
+      <tr><td>q7</td><td>B — Tenho ideia, mas não definido</td></tr>
+      <tr><td>q8</td><td>B — Em desenvolvimento</td></tr>
+      <tr class="anchor"><td>q9</td><td>C — Desorganizada / Confusa</td></tr>
+      <tr><td>q10</td><td>informal — Informal</td></tr>
+      <tr class="anchor"><td>q11</td><td>R$5k–R$20k</td></tr>
+      <tr><td>q12</td><td>B — Às vezes cobro abaixo</td></tr>
+      <tr><td>q13</td><td>B — Estável, sem crescimento</td></tr>
+      <tr><td>q16</td><td>B — Instagram</td></tr>
+      <tr><td>q17</td><td>B — Precisaria reorganizar</td></tr>
+      <tr><td>q18</td><td>B — 10–20h</td></tr>
+    </table>
+  </div>
+
+  <!-- MODELO F -->
+  <div class="roteiro-card">
+    <h4>Modelo F — Vende, Mas Sem Motor Comercial</h4>
+    <table>
+      <tr><td>q5</td><td>C — Em crescimento</td></tr>
+      <tr><td>q6</td><td>B — Parcialmente</td></tr>
+      <tr><td>q7</td><td>B — Tenho ideia, mas não definido</td></tr>
+      <tr><td>q8</td><td>B — Em desenvolvimento</td></tr>
+      <tr><td>q9</td><td>B — Básica</td></tr>
+      <tr><td>q10</td><td>formalizada — Empresa registrada</td></tr>
+      <tr class="anchor"><td>q11</td><td>R$5k–R$20k</td></tr>
+      <tr><td>q12</td><td>B — Às vezes cobro abaixo</td></tr>
+      <tr class="anchor"><td>q13</td><td>B — Estável, sem crescimento</td></tr>
+      <tr class="anchor"><td>q16</td><td>A — Indicação</td></tr>
+      <tr><td>q17</td><td>B — Precisaria reorganizar</td></tr>
+      <tr><td>q18</td><td>B — 10–20h</td></tr>
+    </table>
+  </div>
+
+  <!-- MODELO C -->
+  <div class="roteiro-card">
+    <h4>Modelo C — Boa Base, Mas Caixa Apertado</h4>
+    <table>
+      <tr><td>q5</td><td>C — Em crescimento</td></tr>
+      <tr class="anchor"><td>q6</td><td>A — Sim, totalmente</td></tr>
+      <tr class="anchor"><td>q7</td><td>A — Sim, muito claro</td></tr>
+      <tr><td>q8</td><td>B — Em desenvolvimento</td></tr>
+      <tr><td>q9</td><td>B — Básica</td></tr>
+      <tr><td>q10</td><td>formalizada — Empresa registrada</td></tr>
+      <tr class="anchor"><td>q11</td><td>R$5k–R$20k</td></tr>
+      <tr class="anchor"><td>q12</td><td>C — Frequentemente cobro abaixo do que entrego</td></tr>
+      <tr><td>q13</td><td>B — Estável, sem crescimento</td></tr>
+      <tr><td>q16</td><td>B — Instagram</td></tr>
+      <tr><td>q17</td><td>B — Precisaria reorganizar</td></tr>
+      <tr><td>q18</td><td>B — 10–20h</td></tr>
+    </table>
+  </div>
+
+  <!-- MODELO B -->
+  <div class="roteiro-card">
+    <h4>Modelo B — Negócio Saudável, Travado no Platô</h4>
+    <table>
+      <tr><td>q5</td><td>D — Consolidado (3+ anos)</td></tr>
+      <tr><td>q6</td><td>A — Sim, totalmente</td></tr>
+      <tr><td>q7</td><td>A — Sim, muito claro</td></tr>
+      <tr class="anchor"><td>q8</td><td>A — Sim, bem estruturado</td></tr>
+      <tr class="anchor"><td>q9</td><td>A — Estruturada</td></tr>
+      <tr><td>q10</td><td>formalizada — Empresa registrada</td></tr>
+      <tr class="anchor"><td>q11</td><td>R$5k–R$20k</td></tr>
+      <tr class="anchor"><td>q12</td><td>A — Sim, cobro o valor que merece</td></tr>
+      <tr class="anchor"><td>q13</td><td>B — Estável, sem crescimento</td></tr>
+      <tr><td>q16</td><td>B — Instagram</td></tr>
+      <tr><td>q17</td><td>B — Precisaria reorganizar</td></tr>
+      <tr><td>q18</td><td>C — 20–40h</td></tr>
+    </table>
+  </div>
+
+</div>
 
 <hr class="section-divider">
 
