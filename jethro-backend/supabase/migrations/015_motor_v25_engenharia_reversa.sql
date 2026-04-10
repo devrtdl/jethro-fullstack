@@ -49,7 +49,17 @@ update forms set
   updated_at = now()
 where slug = 'diagnostico-inicial';
 
--- ─── 2. diagnostic_questions: registra precificacao ──────────────────────────────
+-- ─── 2. diagnostic_questions: shift + registra precificacao ─────────────────────
+-- Guard: shift só roda se q_precificacao ainda não existe (idempotente)
+do $$
+begin
+  if not exists (select 1 from diagnostic_questions where code = 'q_precificacao') then
+    update diagnostic_questions
+    set order_index = order_index + 1
+    where order_index >= 12;
+  end if;
+end $$;
+
 insert into diagnostic_questions (
   code, order_index, label, question_type, is_required, is_internal, validation, options, metadata
 ) values (
