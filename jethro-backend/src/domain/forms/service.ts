@@ -487,7 +487,7 @@ function buildRespondent(answersBySlug: Record<string, JsonValue>): SubmissionRe
 }
 
 type ClassifiedDiagnostic = {
-  code: 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I';
+  code: 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H';
 };
 
 type DiagnosticMessageRow = {
@@ -562,17 +562,11 @@ function classifyDiagnostic(answersBySlug: Record<string, JsonValue>): Classifie
   const q15 = String(answersBySlug.canal_aquisicao ?? '');
   const q16 = String(answersBySlug.capacidade_operacional ?? '');
   const q17 = String(answersBySlug.horas_semana ?? '');
-  // Q18: derivada de Q5+Q10 — nao exibida ao usuario
-  const q18 = deriveStatusEmpresa(answersBySlug);
 
-  // Motor v2.4 — ordem de prioridade 0-8 (fonte: 01-Jethro_Motor_v2_4_Daniel.pdf)
-  // 0. MODELO I — pre-receita / ainda nao comecou
-  if (q11 === 'A' && ['A', 'C', 'D'].includes(q18)) return { code: 'I' };
-  // 1. MODELO E — ja comecou mas nao validou
-  if (q11 === 'A' && q18 === 'B') return { code: 'E' };
+  // Motor v2.4 — ordem de prioridade (fonte: 01-Jethro_Motor_v2_4_Daniel.pdf)
+  // 0. MODELO E — pre-receita / ainda nao comecou ou nao validou
+  if (q11 === 'A') return { code: 'E' };
   if (q5 <= 'B' && q11 === 'B') return { code: 'E' };
-  // fallback I (q11='A' sem Q18 valida)
-  if (q11 === 'A') return { code: 'I' };
   // 2. MODELO G — operacao no limite
   if (q11 >= 'C' && q16 === 'C') return { code: 'G' };
   // 3. MODELO D — fatura mas sangra

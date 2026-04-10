@@ -266,16 +266,6 @@ const diagnosticQuestions: DiagnosticQuestionSeed[] = [
 
 const diagnosticModels: DiagnosticModelSeed[] = [
   {
-    code: 'I',
-    name: 'Modelo I',
-    title: 'Ainda não começou',
-    summary: 'Perfil sem receita e sem empresa validada. O bloqueio principal ainda é sair da ideia para a execução real.',
-    priorityOrder: 0,
-    rootCause: 'Ausência de início real e validação prática.',
-    pillars: ['P1', 'P2', 'P3'],
-    triggerRules: ["Q11 = 'A' and Q18 in ['A','C','D']", "Fallback: Q11 = 'A' sem Q18 em payload legado"],
-  },
-  {
     code: 'E',
     name: 'Modelo E',
     title: 'Pré-receita ou validação inicial',
@@ -1090,97 +1080,6 @@ const diagnosticMessages: DiagnosticMessageSeed[] = [
     ctaLabel: 'ESTOU PRONTO PARA MUDAR ISSO',
   },
 
-  // ─── MODELO I — Pré-Receita — Ainda Não Começou / Quer Iniciar ───────────────
-  {
-    modelCode: 'I',
-    variant: 'v1',
-    block1Title: 'Realidade Direta',
-    block1Body:
-      'Tem um momento — quando você vê alguém ao seu redor lançar um negócio, um projeto, uma ideia — em que um pensamento passa rápido.\n\n' +
-      'Eu também poderia fazer isso. Eu tenho mais preparo do que ele.\n\n' +
-      'E então você volta para o que estava fazendo. A visão existe. O que falta é o caminho entre onde você está e o primeiro passo real. O Jethro identificou exatamente esse caminho.\n\n' +
-      '[NOME], o maior negócio que você pode abrir começa pelo método — não pela vontade.\n' +
-      'O Jethro identificou algo específico no seu negócio:\n' +
-      '→ A sua rotina atual não tem espaço real para o que você quer construir\n' +
-      '→ O MVP — a versão mínima da sua oferta — ainda não está escrito em lugar nenhum\n' +
-      '→ Você ainda não foi ao mercado perguntar: existe aqui alguém disposto a pagar?',
-    rootCause: 'rotina sem espaço para o projeto + MVP não documentado + validação inexistente',
-    palavraIntro: 'Planejamento não é desconfiança da providência — é honrar o que Deus colocou na sua mão.',
-    scriptureVerse: 'Lucas 14:28',
-    scriptureText: '"Qual de vocês, querendo construir uma torre, não se senta primeiro e calcula o custo?"',
-    block2Title: 'O que o negócio não consegue te dizer sozinho:',
-    block2Body:
-      'O que acontece a quem começa sem método:\n' +
-      'O que está em jogo não é só o negócio que ainda não começou:\n' +
-      '⚠ Você trabalha meses num produto que o mercado não quer — e só descobre depois de investir\n' +
-      '⚠ A motivação que parecia inabalável começa a ceder quando os primeiros meses não trazem resultado\n' +
-      '⚠ Em casa, o projeto que você acredita vai ficando difícil de defender com o mesmo entusiasmo\n' +
-      '⚠ E o chamado que era de Deus começa a parecer ingenuidade sua — quando o problema era só o método\n\n' +
-      '"O prudente vê o perigo e se refugia, mas o inexperiente segue em frente e sofre as consequências." — Provérbios 22:3\n' +
-      'Começar sem método não é fé. É imprudência disfarçada de coragem.\n\n' +
-      'Você vai entrar no mercado às cegas... ou vai entrar com o mapa na mão?',
-    ctaLabel: 'ESTOU PRONTO PARA MUDAR ISSO',
-  },
-  {
-    modelCode: 'I',
-    variant: 'v2',
-    block1Title: 'Realidade Direta',
-    block1Body:
-      'Tem um comportamento que você provavelmente reconhece em si mesmo.\n\n' +
-      'Você pesquisa. Salva referências. Anota ideias. Faz planos.\n\n' +
-      'Mas o passo seguinte — ir ao mercado, testar, oferecer — ainda não aconteceu. Não é preguiça. É um padrão. E o Jethro o reconhece com precisão.\n\n' +
-      '[NOME], o que está travando o seu início não é o mercado. É a ausência de um sistema para começar.\n' +
-      'O Jethro identificou algo específico no seu negócio:\n' +
-      '→ Você não mapeou quanto tempo real tem por semana para este projeto\n' +
-      '→ A sua oferta ainda não está testada fora do seu círculo pessoal\n' +
-      '→ Você ainda não sabe quem são as pessoas que pagariam pela sua solução hoje',
-    rootCause: 'tempo não mapeado + oferta não validada externamente + mercado-alvo desconhecido',
-    palavraIntro: 'Deus não bênça o que você não plantou. A fé que age é a fé que recebe.',
-    scriptureVerse: 'Eclesiastes 11:4',
-    scriptureText: '"Quem fica observando o vento, não semeia; quem fica olhando para as nuvens, não colhe."',
-    block2Title: 'O que o negócio não consegue te dizer sozinho:',
-    block2Body:
-      'O custo invisível de adiar o início:\n' +
-      'O custo de adiar vai além do financeiro:\n' +
-      '⚠ Cada mês sem estrutura é um mês a financiar o projeto com energia — sem retorno\n' +
-      '⚠ A janela de mercado que existe hoje pode não existir no próximo ano\n' +
-      '⚠ Em casa, o projeto que você acredita vai perdendo o brilho aos olhos de quem você ama\n' +
-      '⚠ E a confiança que precisaria para agir vai diminuindo com cada semana de adiamento\n\n' +
-      '"Tudo tem a sua ocasião determinada; há tempo certo para cada propósito debaixo do céu." — Eclesiastes 3:1\n' +
-      'O seu tempo é agora — não quando você se sentir completamente pronto.\n\n' +
-      'Você vai continuar a esperar o momento certo... ou vai criar o método que faz o momento chegar?',
-    ctaLabel: 'ESTOU PRONTO PARA MUDAR ISSO',
-  },
-  {
-    modelCode: 'I',
-    variant: 'v3',
-    block1Title: 'Realidade Direta',
-    block1Body:
-      'Você já disse para si mesmo: "quando o momento for certo, eu começo."\n\n' +
-      'Mas o momento certo não chega — porque ele não existe. Ele é construído.\n\n' +
-      'E a frase que parece prudência é, na verdade, o maior obstáculo entre você e o seu chamado. O Jethro identificou como transformar essa frase em primeiro passo.\n\n' +
-      '[NOME], você tem a visão. O que falta é o caminho entre onde está e onde quer chegar.\n' +
-      'O Jethro identificou algo específico no seu negócio:\n' +
-      '→ Você tem o chamado — mas ainda não tem a oferta escrita em linguagem de mercado\n' +
-      '→ Você tem o talento — mas ainda não sabe quem paga por ele e quanto\n' +
-      '→ Você tem tempo disponível — mas ele não está organizado em torno do projeto',
-    rootCause: 'visão sem estrutura operacional + oferta por definir + disponibilidade não alocada',
-    palavraIntro: 'A visão que não está escrita não tem endereço. Deus disse a Habacuque: escreve, para que quem a leia possa correr.',
-    scriptureVerse: 'Habacuque 2:2',
-    scriptureText: '"Escreve a visão e grava-a em tábuas, para que a possa ler correndo."',
-    block2Title: 'O que o negócio não consegue te dizer sozinho:',
-    block2Body:
-      'O que acontece à visão sem estrutura:\n' +
-      'O que está em jogo não é só o negócio — é o que ele representa:\n' +
-      '⚠ Você investe anos num sonho que nunca se torna negócio — porque faltou o método, não a fé\n' +
-      '⚠ As pessoas à sua volta deixam de acreditar — porque o tempo passa e nada muda externamente\n' +
-      '⚠ Em casa, a visão que um dia animou começa a pesar — porque visão sem progresso vira pressão\n' +
-      '⚠ O chamado não morre. Mas a janela de tempo para honrá-lo tem limite — e você sabe disso\n\n' +
-      '"A esperança que se prolonga adoece o coração." — Provérbios 13:12\n' +
-      'Visão sem plano não é fé — é desejo. E desejo sem método não gera fruto.\n\n' +
-      'Você vai continuar tendo a visão... ou vai finalmente construir o caminho até ela?',
-    ctaLabel: 'ESTOU PRONTO PARA MUDAR ISSO',
-  },
 ];
 
 const diagnosticMessageRootCauses: Record<string, string> = {
@@ -1192,7 +1091,6 @@ const diagnosticMessageRootCauses: Record<string, string> = {
   F: 'ausência de motor comercial — aquisição + funil + follow-up + recorrência.',
   G: 'ausência de sistema operacional — processo + padrão + capacidade estruturada.',
   H: 'ausência de governo pessoal — agenda, prioridade, delegação e ritmo semanal.',
-  I: 'rotina sem espaço para o projeto + MVP não documentado + validação inexistente.',
 };
 
 const rogerioQuotes: RogerioQuoteSeed[] = [
