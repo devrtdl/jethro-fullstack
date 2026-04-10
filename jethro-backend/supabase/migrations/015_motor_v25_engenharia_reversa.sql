@@ -5,12 +5,13 @@
 -- 4. Corrige frase duplicada Modelo D v1 (idêntica à Modelo A)
 -- 5. Remove referência Jetro/Êxodo 18:18 do Modelo G v2 (exclusiva do Modelo H)
 
--- ─── 1. Form: shift orders >= 12, insert precificacao, fix canal_aquisicao ──────
+-- ─── 1. Form: shift orders >= 11, insert precificacao at 11, fix canal_aquisicao ─
+-- Guard: só executa se precificacao ainda não existe no form (idempotente).
 update forms set
   questions = (
     select jsonb_agg(q_final order by (q_final->>'order')::int)
     from (
-      -- Perguntas existentes: shift +1 em order>=12, e remove internalOnly de canal_aquisicao
+      -- Perguntas existentes: shift +1 em order>=11, e remove internalOnly de canal_aquisicao
       select
         case
           when q->>'slug' = 'canal_aquisicao' then
@@ -19,7 +20,7 @@ update forms set
               '{order}',
               to_jsonb((q->>'order')::int + 1)
             )
-          when (q->>'order')::int >= 12 then
+          when (q->>'order')::int >= 11 then
             jsonb_set(q, '{order}', to_jsonb((q->>'order')::int + 1))
           else q
         end as q_final
@@ -27,7 +28,7 @@ update forms set
 
       union all
 
-      -- Nova pergunta: precificacao (order 12, step_operacao)
+      -- Nova pergunta: precificacao (order 11 → exibe como q12, step_operacao)
       select '{
         "id":          "question_precificacao",
         "stepId":      "step_operacao",
@@ -36,7 +37,7 @@ update forms set
         "type":        "single_select",
         "presentation":"radio",
         "required":    true,
-        "order":       12,
+        "order":       11,
         "options": [
           {"id":"prec_a","label":"Sim, cobro o valor que merece",           "value":"A","order":0},
           {"id":"prec_b","label":"As vezes cobro abaixo do valor real",     "value":"B","order":1},
@@ -47,7 +48,11 @@ update forms set
     ) sq
   ),
   updated_at = now()
-where slug = 'diagnostico-inicial';
+where slug = 'diagnostico-inicial'
+  and not exists (
+    select 1 from jsonb_array_elements(questions::jsonb) q
+    where q->>'slug' = 'precificacao'
+  );
 
 -- ─── 2. diagnostic_questions: shift + registra precificacao ─────────────────────
 -- Guard: shift só roda se q_precificacao ainda não existe (idempotente).
