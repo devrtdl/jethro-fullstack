@@ -337,6 +337,22 @@ export const authService = {
     });
   },
 
+  async resetPassword(email: string) {
+    const client = requireSupabase();
+    const redirectTo = getOAuthRedirectUrl();
+    const { error } = await client.auth.resetPasswordForEmail(email, {
+      redirectTo,
+    });
+
+    if (error) {
+      throw new ApiError(error.message, {
+        code: 'HTTP_ERROR',
+        status: 400,
+        details: error,
+      });
+    }
+  },
+
   async signOut() {
     const client = requireSupabase();
     const { error } = await client.auth.signOut();

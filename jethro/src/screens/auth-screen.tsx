@@ -3,6 +3,7 @@ import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, 
 import { Link, router } from 'expo-router';
 import { Image } from 'expo-image';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 
 import { authService } from '@/src/services/auth/auth-service';
 
@@ -32,6 +33,7 @@ export function AuthScreen({ mode }: { mode: AuthScreenMode }) {
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const isRegister = mode === 'register';
 
   async function handlePasswordAction() {
@@ -155,17 +157,38 @@ export function AuthScreen({ mode }: { mode: AuthScreenMode }) {
           </View>
 
           <View style={styles.inputWrap}>
-            <Text style={styles.inputLabel}>Senha</Text>
-            <TextInput
-              autoCapitalize="none"
-              autoComplete={isRegister ? 'new-password' : 'current-password'}
-              secureTextEntry
-              placeholder="••••••••"
-              placeholderTextColor={palette.mutedDim}
-              style={styles.input}
-              value={password}
-              onChangeText={setPassword}
-            />
+            <View style={styles.inputLabelRow}>
+              <Text style={styles.inputLabel}>Senha</Text>
+              {!isRegister ? (
+                <Link href="/auth/forgot-password" asChild>
+                  <Pressable>
+                    <Text style={styles.forgotLink}>Esqueci minha senha</Text>
+                  </Pressable>
+                </Link>
+              ) : null}
+            </View>
+            <View style={styles.inputRow}>
+              <TextInput
+                autoCapitalize="none"
+                autoComplete={isRegister ? 'new-password' : 'current-password'}
+                secureTextEntry={!showPassword}
+                placeholder="••••••••"
+                placeholderTextColor={palette.mutedDim}
+                style={[styles.input, styles.inputWithIcon]}
+                value={password}
+                onChangeText={setPassword}
+              />
+              <Pressable
+                style={styles.eyeButton}
+                onPress={() => setShowPassword(prev => !prev)}
+                hitSlop={8}>
+                <Ionicons
+                  name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                  size={22}
+                  color={palette.muted}
+                />
+              </Pressable>
+            </View>
           </View>
 
           {message ? <Text style={styles.successText}>{message}</Text> : null}
@@ -319,13 +342,28 @@ const styles = StyleSheet.create({
   inputWrap: {
     gap: 6,
   },
+  inputLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginLeft: 4,
+    marginRight: 4,
+  },
   inputLabel: {
     color: palette.muted,
     fontSize: 12,
     fontWeight: '600',
     letterSpacing: 0.8,
     textTransform: 'uppercase',
-    marginLeft: 4,
+  },
+  forgotLink: {
+    color: palette.gold,
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  inputRow: {
+    position: 'relative',
+    justifyContent: 'center',
   },
   input: {
     minHeight: 54,
@@ -337,6 +375,15 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     color: palette.cream,
     fontSize: 15,
+  },
+  inputWithIcon: {
+    paddingRight: 52,
+  },
+  eyeButton: {
+    position: 'absolute',
+    right: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   primaryButton: {
     alignItems: 'center',
