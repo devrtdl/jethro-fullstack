@@ -277,7 +277,7 @@ const diagnosticModels: DiagnosticModelSeed[] = [
   {
     code: 'E',
     name: 'Modelo E',
-    title: 'Pré-receita ou validação inicial',
+    title: 'Começou, Mas o Mercado Ainda Não Respondeu',
     summary: 'Já existe movimento, mas ainda não há validação forte de mercado nem estrutura comercial confiável.',
     priorityOrder: 1,
     rootCause: 'Negócio em fase inicial, com validação fraca ou ainda dependente do círculo próximo.',
@@ -287,7 +287,7 @@ const diagnosticModels: DiagnosticModelSeed[] = [
   {
     code: 'G',
     name: 'Modelo G',
-    title: 'Operação no limite',
+    title: 'A Operação Não Aguenta Crescer',
     summary: 'O negócio vende, mas a estrutura não suporta crescimento sem caos, atrasos ou quebra de qualidade.',
     priorityOrder: 2,
     rootCause: 'Capacidade operacional insuficiente para sustentar escala.',
@@ -297,7 +297,7 @@ const diagnosticModels: DiagnosticModelSeed[] = [
   {
     code: 'D',
     name: 'Modelo D',
-    title: 'Fatura mas sangra',
+    title: 'Fatura, Mas Não Sobra',
     summary: 'Existe receita, porém o negócio opera com margem ruim, prejuízo ou crescimento que não sobra no caixa.',
     priorityOrder: 3,
     rootCause: 'Vazamento financeiro e estrutura econômica frágil.',
@@ -307,7 +307,7 @@ const diagnosticModels: DiagnosticModelSeed[] = [
   {
     code: 'H',
     name: 'Modelo H',
-    title: 'O gargalo é o dono',
+    title: 'Sem Você, Nada Anda',
     summary: 'O negócio depende excessivamente do fundador, que trabalha demais e centraliza tudo.',
     priorityOrder: 4,
     rootCause: 'Falta de governo pessoal, delegação e rotina de decisão.',
@@ -317,7 +317,7 @@ const diagnosticModels: DiagnosticModelSeed[] = [
   {
     code: 'A',
     name: 'Modelo A',
-    title: 'Negócio travado, bagunçado e sem visão',
+    title: 'Negócio Sem Rumo — Várias Frentes Abertas',
     summary: 'Há caos financeiro, pouca estrutura e ausência de direção clara. O negócio precisa recomeçar pela base.',
     priorityOrder: 5,
     rootCause: 'Caos de gestão com falta de clareza e governo semanal.',
@@ -327,7 +327,7 @@ const diagnosticModels: DiagnosticModelSeed[] = [
   {
     code: 'F',
     name: 'Modelo F',
-    title: 'Vende, mas sem motor comercial',
+    title: 'Vende Bem, Mas Não Sabe Trazer o Próximo Cliente',
     summary: 'O negócio depende de indicação ou boca a boca e não possui um sistema previsível de aquisição.',
     priorityOrder: 6,
     rootCause: 'Ausência de motor comercial estruturado.',
@@ -337,7 +337,7 @@ const diagnosticModels: DiagnosticModelSeed[] = [
   {
     code: 'C',
     name: 'Modelo C',
-    title: 'Boa base, mas caixa apertado',
+    title: 'Entrega Bem, Cobra Mal',
     summary: 'Existe alinhamento de propósito, mas falta modelo econômico e sistema para transformar isso em prosperidade sustentável.',
     priorityOrder: 7,
     rootCause: 'Boa intenção sem tradução operacional e financeira suficiente.',
@@ -347,7 +347,7 @@ const diagnosticModels: DiagnosticModelSeed[] = [
   {
     code: 'B',
     name: 'Modelo B',
-    title: 'Negócio saudável, mas travado no platô',
+    title: 'Base Sólida, Faturamento Estagnado',
     summary: 'A operação funciona, mas o crescimento parou. O negócio precisa de multiplicação e sistema de aquisição.',
     priorityOrder: 8,
     rootCause: 'Ausência de motor de crescimento e esteira de oferta.',
@@ -537,7 +537,7 @@ const diagnosticMessages: DiagnosticMessageSeed[] = [
     ctaLabel: 'ESTOU PRONTO PARA MUDAR ISSO',
   },
 
-  // ─── MODELO C — Boa Base, Mas Aperto de Caixa + Sem Visão ───────────────────
+  // ─── MODELO C — Entrega Bem, Cobra Mal ──────────────────────────────────────
   {
     modelCode: 'C',
     variant: 'v1',
@@ -549,9 +549,9 @@ const diagnosticMessages: DiagnosticMessageSeed[] = [
       '[NOME], você tem o coração certo. Falta o sistema que sustenta.\n' +
       'O Jethro identificou algo específico no seu negócio:\n' +
       '→ Você cobra menos do que entrega — e todo mês o caixa prova isso\n' +
-      '→ O fluxo financeiro é uma corda bamba — aperta, você dá desconto\n' +
+      '→ O preço não reflete o valor real do que você faz — e você sabe disso\n' +
       '→ A visão existe no coração, mas não existe no papel como plano real',
-    rootCause: 'propósito sem modelo financeiro + caixa sem governo',
+    rootCause: 'propósito sem modelo financeiro + precificação abaixo do valor real',
     palavraIntro: 'Deus honra o chamado com provisão — mas a provisão exige mordomia.',
     scriptureVerse: 'Provérbios 27:23',
     scriptureText: '"Cuide bem de seus rebanhos, preste atenção aos seus gados."',
@@ -564,7 +564,7 @@ const diagnosticMessages: DiagnosticMessageSeed[] = [
       '⚠ Você começa a duvidar do chamado: "se Deus me chamou, por que apertar tanto?"\n' +
       '⚠ E o propósito que era chama vai virando brasa que mal aquece\n\n' +
       '"O rico governa os pobres, e o devedor é escravo do credor." — Provérbios 22:7\n' +
-      'Aperto de caixa rouba liberdade — e liberdade é parte do chamado.\n\n' +
+      'Cobrar abaixo do que vale rouba liberdade — e liberdade é parte do chamado.\n\n' +
       'Você vai continuar sendo governado pelo boleto... ou vai retomar o governo do seu chamado?',
     ctaLabel: 'ESTOU PRONTO PARA MUDAR ISSO',
   },
@@ -581,7 +581,7 @@ const diagnosticMessages: DiagnosticMessageSeed[] = [
       '→ Precificação abaixo do valor real entregue\n' +
       '→ Condições de pagamento que drenam o caixa antes de completar o ciclo\n' +
       '→ Falta de visão estratégica de 90 dias — você vive no "agora"',
-    rootCause: 'valor sem modelo + caixa sem regra',
+    rootCause: 'valor sem modelo + preço sem regra',
     palavraIntro: 'Jesus ensinou sobre mordomia — não sobre se sacrificar por quem não valoriza. Você foi chamado para prosperar, não apenas servir no limite.',
     scriptureVerse: 'João 10:10',
     scriptureText: '"O ladrão vem apenas para roubar, matar e destruir; eu vim para que tenham vida, e a tenham plenamente."',
@@ -629,7 +629,7 @@ const diagnosticMessages: DiagnosticMessageSeed[] = [
     ctaLabel: 'ESTOU PRONTO PARA MUDAR ISSO',
   },
 
-  // ─── MODELO D — Fatura, Mas Sangra — Ilusão de Faturamento ─────────────────
+  // ─── MODELO D — Fatura, Mas Não Sobra ──────────────────────────────────────
   {
     modelCode: 'D',
     variant: 'v1',
@@ -813,7 +813,7 @@ const diagnosticMessages: DiagnosticMessageSeed[] = [
     ctaLabel: 'ESTOU PRONTO PARA MUDAR ISSO',
   },
 
-  // ─── MODELO F — Vende, Mas Sem Motor — Depende de Indicação ─────────────────
+  // ─── MODELO F — Vende Bem, Mas Não Sabe Trazer o Próximo Cliente ───────────
   {
     modelCode: 'F',
     variant: 'v1',
@@ -852,7 +852,7 @@ const diagnosticMessages: DiagnosticMessageSeed[] = [
       'Tem um comportamento que você provavelmente não nomeou ainda — mas reconhece quando vê.\n\n' +
       'Você espera. Espera o telefone tocar. Espera a mensagem chegar. Espera alguém indicar.\n\n' +
       'E nos meses bons, funciona. Nos meses ruins, a espera pesa. O Jethro identificou o padrão — e tem uma saída que não depende de esperar.\n\n' +
-      '[NOME], você provou que sabe entregar. Agora precisa provar que sabe crescer.\n' +
+      '[NOME], você provou que sabe entregar. Agora precisa provar que sabe atrair.\n' +
       'O Jethro identificou algo específico no seu negócio:\n' +
       '→ Seu canal comercial é frágil — depende da boa vontade do mercado\n' +
       '→ Você não tem script de abordagem, funil de follow-up ou rotina de prospecção\n' +
@@ -905,7 +905,7 @@ const diagnosticMessages: DiagnosticMessageSeed[] = [
     ctaLabel: 'ESTOU PRONTO PARA MUDAR ISSO',
   },
 
-  // ─── MODELO G — Operação no Limite — Crescer Piora Tudo ─────────────────────
+  // ─── MODELO G — A Operação Não Aguenta Crescer ─────────────────────────────
   {
     modelCode: 'G',
     variant: 'v1',
@@ -917,7 +917,7 @@ const diagnosticMessages: DiagnosticMessageSeed[] = [
       '[NOME], você está num paradoxo perigoso: vender mais está te quebrando.\n' +
       'O Jethro identificou algo específico no seu negócio:\n' +
       '→ Sua capacidade operacional está no limite — mais demanda gera mais caos\n' +
-      '→ Tudo passa por você — a equipe executa, mas depende das suas decisões\n' +
+      '→ Não há padrão de entrega: cada projeto é uma reinvenção\n' +
       '→ Não há processos documentados: o que funciona hoje não se repete amanhã',
     rootCause: 'ausência de sistema operacional — processo + padrão + capacidade estruturada',
     palavraIntro: 'Sabedoria constrói a casa — não a preenche de qualquer forma. Estrutura é ato de fé, não de medo.',
@@ -949,10 +949,10 @@ const diagnosticMessages: DiagnosticMessageSeed[] = [
       '→ Você está escalando urgência, não sistema — cada entrega é um esforço novo\n' +
       '→ A equipe executa, mas sem padrão — e sem padrão, a qualidade oscila\n' +
       '→ Não há processo documentado: quando alguém falta ou sai, a operação regride',
-    rootCause: 'operação reativa + ausência de padrão + capacidade estrutural insuficiente',
-    palavraIntro: 'Casa construída sem estrutura cai com a primeira carga pesada. Processo não é burocracia — é proteção do que você construiu.',
+    rootCause: 'operação reativa + ausência de padrão documentado + estrutura que não acompanhou o crescimento',
+    palavraIntro: 'Sem sabedoria, a casa mais bonita desmorona. Estrutura é o que sustenta o que você construiu.',
     scriptureVerse: 'Provérbios 24:3',
-    scriptureText: '"Pela sabedoria a casa se edifica; pela inteligência se firma."',
+    scriptureText: '"Com sabedoria se constrói a casa, e com entendimento ela se firma."',
     block2Title: 'O que o negócio não consegue te dizer sozinho:',
     block2Body:
       'O que o teto operacional produz a médio prazo:\n' +
@@ -962,7 +962,7 @@ const diagnosticMessages: DiagnosticMessageSeed[] = [
       '⚠ Em casa, você está presente no corpo mas ausente na cabeça — e eles sentem\n' +
       '⚠ Você vai se tornar prisioneiro da operação — sem férias, sem estratégia, sem visão de futuro\n\n' +
       '"pois Deus não é Deus de desordem, mas de paz." — 1 Coríntios 14:33\n' +
-      'Uma operação em caos não glorifica o Deus de ordem.\n\n' +
+      'Uma operação sem processo não glorifica o Deus de ordem.\n\n' +
       'Você vai continuar crescendo o problema... ou vai construir o sistema que multiplica sem implodir?',
     ctaLabel: 'ESTOU PRONTO PARA MUDAR ISSO',
   },
@@ -978,7 +978,7 @@ const diagnosticMessages: DiagnosticMessageSeed[] = [
       'O Jethro identificou algo específico no seu negócio:\n' +
       '→ Processos não documentados: cada entrega é uma reinvenção\n' +
       '→ Capacidade no limite: um pico de demanda coloca tudo em risco\n' +
-      '→ Equipe sem autonomia: sem você, a operação trava',
+      '→ Equipe sem autonomia de processo: sem padrão, não há como delegar resultado',
     rootCause: 'estrutura que não acompanhou o crescimento — fundamento fraco para o prédio que está sendo erguido',
     palavraIntro: 'Todo bom construtor assenta o fundamento antes de subir as paredes. Você está subindo paredes sem fundamento.',
     scriptureVerse: 'Mateus 7:24',
@@ -1094,7 +1094,7 @@ const diagnosticMessages: DiagnosticMessageSeed[] = [
 const diagnosticMessageRootCauses: Record<string, string> = {
   A: 'caos financeiro + ausência de direção + falta de governo semanal.',
   B: 'falta de motor de multiplicação — aquisição + oferta + recorrência + metas.',
-  C: 'propósito sem modelo financeiro + caixa sem governo.',
+  C: 'propósito sem modelo financeiro + precificação abaixo do valor real.',
   D: 'custo invisível + precificação sem margem + ilusão de faturamento.',
   E: 'validação fraca + oferta não posicionada + execução travada.',
   F: 'ausência de motor comercial — aquisição + funil + follow-up + recorrência.',
@@ -1496,11 +1496,11 @@ const ragSources = [
     metadata: { category: 'motor', version: '2.4' },
   },
   {
-    slug: 'jethro-mensagens-diagnostico-v1-1',
-    title: 'Jethro Mensagens Diagnostico v1.1',
+    slug: 'jethro-mensagens-diagnostico-v2-1',
+    title: 'Jethro Mensagens Diagnostico v2.1',
     sourceType: 'docx' as const,
-    sourcePath: resolve(process.env.HOME ?? '', 'Downloads', '02-Jethro_Mensagens_Diagnostico_v1_1.docx'),
-    metadata: { category: 'mensagens', version: '1.1' },
+    sourcePath: resolve(process.env.HOME ?? '', 'Downloads', '02-Jethro — Mensagens de Diagnóstico v2.1.docx'),
+    metadata: { category: 'mensagens', version: '2.1' },
   },
   {
     slug: 'jethro-form',

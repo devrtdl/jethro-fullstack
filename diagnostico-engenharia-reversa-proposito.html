@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jethro — Engenharia Reversa com Propósito Contextual</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Georgia', serif;
+    font-size: 11pt;
+    line-height: 1.6;
+    color: #1a1a1a;
+    background: #fff;
+    padding: 40px 50px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  h1 {
+    font-size: 20pt; font-weight: bold; color: #1a1a1a;
+    border-bottom: 3px solid #1a1a1a; padding-bottom: 10px; margin-bottom: 6px;
+  }
+  .subtitle { font-size: 10pt; color: #555; margin-bottom: 8px; }
+  .version-banner {
+    background: #1a1a1a; color: #fff; padding: 8px 14px; border-radius: 4px;
+    font-family: 'Courier New', monospace; font-size: 10pt;
+    display: inline-block; margin-bottom: 28px;
+  }
+  h2 {
+    font-size: 14pt; font-weight: bold; color: #1a1a1a;
+    margin-top: 32px; margin-bottom: 10px;
+    border-left: 4px solid #1a1a1a; padding-left: 10px;
+  }
+  h3 { font-size: 11.5pt; font-weight: bold; color: #333; margin-top: 22px; margin-bottom: 8px; }
+  h4 { font-size: 10.5pt; font-weight: bold; color: #222; margin-top: 14px; margin-bottom: 6px; }
+  p { margin-bottom: 8px; }
+  ul { margin-left: 20px; margin-bottom: 10px; }
+  li { margin-bottom: 4px; }
+  table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 10pt; }
+  th { background: #1a1a1a; color: #fff; padding: 7px 10px; text-align: left; font-weight: bold; }
+  td { padding: 6px 10px; border-bottom: 1px solid #ddd; vertical-align: top; }
+  tr:nth-child(even) td { background: #f7f7f7; }
+  tr.new-row td { background: #e8f5e9 !important; }
+  .model-block {
+    border: 1px solid #ccc; border-radius: 4px;
+    padding: 16px 20px; margin-bottom: 20px; page-break-inside: avoid;
+  }
+  .model-block h3 { margin-top: 0; }
+  .quote {
+    font-style: italic; color: #444; background: #f5f5f5;
+    border-left: 3px solid #aaa; padding: 6px 12px; margin: 8px 0; font-size: 10pt;
+  }
+  .quote.new { border-left-color: #27ae60; background: #f0faf3; }
+  .anchor-box {
+    background: #1a1a1a; color: #fff; padding: 6px 12px; border-radius: 3px;
+    display: inline-block; font-family: 'Courier New', monospace;
+    font-size: 9.5pt; margin: 6px 0;
+  }
+  .risk-high { color: #c0392b; font-weight: bold; }
+  .risk-med  { color: #e67e22; font-weight: bold; }
+  .risk-low  { color: #27ae60; font-weight: bold; }
+  .tag-unique { background: #e8f5e9; border: 1px solid #a5d6a7; color: #2e7d32; padding: 2px 7px; border-radius: 3px; font-size: 9pt; font-family: monospace; }
+  .tag-risk   { background: #fce4ec; border: 1px solid #f48fb1; color: #c62828; padding: 2px 7px; border-radius: 3px; font-size: 9pt; font-family: monospace; }
+  .tag-impl   { background: #e8f5e9; border: 1px solid #66bb6a; color: #1b5e20; padding: 2px 8px; border-radius: 3px; font-size: 9pt; font-family: monospace; font-weight: bold; }
+  .tag-new    { background: #e3f2fd; border: 1px solid #90caf9; color: #0d47a1; padding: 2px 7px; border-radius: 3px; font-size: 9pt; font-family: monospace; }
+  .section-divider { border: none; border-top: 2px solid #e0e0e0; margin: 28px 0; }
+  .legend-table td:first-child { font-family: monospace; font-weight: bold; white-space: nowrap; }
+  .impl-box {
+    background: #f0faf3; border: 1px solid #a5d6a7; border-left: 4px solid #27ae60;
+    border-radius: 4px; padding: 10px 14px; margin: 10px 0; font-size: 10pt;
+  }
+  .impl-box strong { color: #1b5e20; }
+  del { color: #aaa; text-decoration: line-through; }
+  .engine-block {
+    background: #1e1e1e; color: #d4d4d4; font-family: 'Courier New', monospace;
+    font-size: 9pt; padding: 12px 16px; border-radius: 4px; margin: 10px 0;
+    white-space: pre; overflow-x: auto; line-height: 1.5;
+  }
+  .engine-block .add { color: #4ec9b0; }
+  .engine-block .del { color: #f44747; }
+  .engine-block .cmt { color: #6a9955; }
+
+  /* NOVO: propósito contextual */
+  .proposito-contextual {
+    background: #0d1b2a;
+    border-radius: 6px;
+    padding: 14px 18px;
+    margin: 10px 0 14px 0;
+    color: #e8e8e8;
+  }
+  .proposito-contextual .pc-label {
+    font-size: 9pt;
+    font-weight: bold;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #D4AF37;
+    margin-bottom: 8px;
+  }
+  .proposito-contextual .pc-intent {
+    font-size: 10.5pt;
+    color: #fff;
+    margin-bottom: 10px;
+    line-height: 1.5;
+  }
+  .proposito-contextual .pc-diff-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 8px;
+  }
+  .proposito-contextual .pc-diff-item {
+    background: rgba(255,255,255,0.07);
+    border-radius: 4px;
+    padding: 8px 10px;
+    font-size: 9.5pt;
+  }
+  .proposito-contextual .pc-diff-item .pc-diff-title {
+    color: #D4AF37;
+    font-size: 9pt;
+    font-weight: bold;
+    margin-bottom: 4px;
+  }
+  .proposito-contextual .pc-diff-item p {
+    color: #ccc;
+    margin: 0;
+    line-height: 1.4;
+  }
+  .proposito-contextual .pc-key {
+    margin-top: 10px;
+    font-size: 9pt;
+    color: #aaa;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    padding-top: 8px;
+  }
+  .proposito-contextual .pc-key strong {
+    color: #D4AF37;
+  }
+
+  @media print {
+    body { padding: 20px 30px; }
+    .model-block { page-break-inside: avoid; }
+    .proposito-contextual .pc-diff-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<h1>Engenharia Reversa — Propósito Contextual por Modelo</h1>
+<p class="subtitle">Cópia do documento de análise com seção "Propósito Contextual" — o que cada modelo identifica e como se diferencia dos modelos adjacentes &nbsp;|&nbsp; Abril 2026</p>
+<div class="version-banner">Motor v2.5 — Propósito Contextual adicionado para eliminar ambiguidades entre modelos</div>
+
+<h2>Perguntas Discriminadoras</h2>
+<p>Questões de seleção única utilizadas como discriminadores. "q#" = número exibido no app. Texto livre (q1–q4, q14, q15) é ignorado nesta análise.</p>
+
+<table class="legend-table">
+  <thead><tr><th>App (q#)</th><th>Slug / Engine</th><th>Pergunta</th><th>Opções</th></tr></thead>
+  <tbody>
+    <tr><td>q5</td><td>fase_negocio</td><td>Fase do negócio</td><td>A=Ideia / B=Início / C=Crescendo / D=Consolidado</td></tr>
+    <tr><td>q6</td><td>conexao_dons</td><td>Conexão com dons</td><td>A=Totalmente / B=Parcialmente / C=Não</td></tr>
+    <tr><td>q7</td><td>proposito_negocio</td><td>Clareza do propósito</td><td>A=Muito claro / B=Tenho ideia / C=Sem clareza</td></tr>
+    <tr><td>q8</td><td>estrutura_negocio</td><td>Estrutura / planejamento</td><td>A=Estruturado / B=Em dev / C=Ainda não</td></tr>
+    <tr><td>q9</td><td>organizacao_financeira</td><td>Organização financeira</td><td>A=Estruturada / B=Básica / C=Desorganizada</td></tr>
+    <tr><td>q11</td><td>faturamento_mensal</td><td>Faturamento mensal</td><td>A=zero/mínimo → F=maior (tiers dinâmicos)</td></tr>
+    <tr class="new-row"><td><strong>q12</strong></td><td>precificacao (qPrec)</td><td>Precificação <span class="tag-new">NOVA — v2.5</span></td><td>A=Cobra o valor que merece / B=Às vezes abaixo / C=Frequentemente abaixo</td></tr>
+    <tr><td>q13</td><td>lucro_crescimento (q12)</td><td>Lucro e crescimento</td><td>A=Crescendo / B=Estável / C=Regredindo</td></tr>
+    <tr><td>q16</td><td>canal_aquisicao (q15)</td><td>Canal de aquisição <span class="tag-impl">VISÍVEL — v2.5</span></td><td>A=Indicação / B=Instagram / C=Tráfego / D=LinkedIn / E=Ativo / F=Vários / G=Outro</td></tr>
+    <tr><td>q17</td><td>capacidade_operacional (q16)</td><td>Capacidade operacional</td><td>A=Daria conta / B=Reorganizaria / C=Colapso</td></tr>
+    <tr><td>q18</td><td>horas_semana (q17)</td><td>Horas por semana</td><td>A=&lt;10h / B=10–20h / C=20–40h / D=40–60h / E=&gt;60h</td></tr>
+  </tbody>
+</table>
+
+<p style="font-size:9.5pt;color:#666;margin-top:-6px">
+  <em>Nota:</em> A coluna "Slug / Engine" mostra o nome da variável usada em <code>classifyDiagnostic()</code>.
+  q12=lucro, q15=canal, q16=cap, q17=horas são os nomes históricos no engine — os números no app mudaram com a inserção do q12 (precificação).
+</p>
+
+<hr class="section-divider">
+
+<h2>Análise por Modelo</h2>
+
+<!-- MODELO E -->
+<div class="model-block">
+  <h3>Modelo E — Pré-Receita / Validação Inicial</h3>
+
+  <div class="proposito-contextual">
+    <div class="pc-label">Propósito Contextual</div>
+    <div class="pc-intent">Identifica o empreendedor que tem uma oferta em construção mas ainda não converteu clientes fora da sua rede pessoal. A rotina de primeira venda não foi instalada — o problema é de método de acesso ao mercado, não de ideação.</div>
+    <div class="pc-diff-grid">
+      <div class="pc-diff-item">
+        <div class="pc-diff-title">vs Modelo I (mais parecido)</div>
+        <p>I ainda não começou. E já tentou, ajustou a oferta, mas não obteve conversão consistente. A diferença é que E existe no mercado, I não entrou ainda.</p>
+      </div>
+      <div class="pc-diff-item">
+        <div class="pc-diff-title">vs Modelo F</div>
+        <p>F fatura de forma estável (q11≥B). E não tem faturamento real (q11=A). Ambos dependem de indicação, mas E ainda não validou a oferta e F já opera mas sem motor.</p>
+      </div>
+    </div>
+    <div class="pc-key"><strong>Fator discriminador único:</strong> q11=A (zero faturamento) — dispara E imediatamente, independente de qualquer outra resposta. É o único modelo com essa âncora exclusiva.</div>
+  </div>
+
+
+  <table>
+    <thead><tr><th>App q#</th><th>Resposta exata</th><th>Papel no engine</th></tr></thead>
+    <tbody>
+      <tr><td>q5</td><td>B — Início (0-1 ano)</td><td>Contextual</td></tr>
+      <tr><td>q6</td><td>B — Parcialmente</td><td>Neutro</td></tr>
+      <tr><td>q7</td><td>B — Tenho ideia, mas não definido</td><td>Neutro</td></tr>
+      <tr><td>q8</td><td>B — Em desenvolvimento</td><td>Neutro</td></tr>
+      <tr><td>q9</td><td>B — Básica</td><td>Neutro (≠C evita A)</td></tr>
+      <tr><td>q10</td><td>nao_comecou — Ainda não comecei</td><td>Neutro</td></tr>
+      <tr style="background:#fff3cd"><td><strong>q11 ★</strong></td><td><strong>Ainda não fatura</strong></td><td><strong>Âncora — dispara E imediatamente</strong></td></tr>
+      <tr><td>q12</td><td>B — Às vezes cobro abaixo</td><td>Neutro</td></tr>
+      <tr><td>q13</td><td>B — Estável, sem crescimento</td><td>Neutro</td></tr>
+      <tr><td>q16</td><td>A — Indicação</td><td>Neutro</td></tr>
+      <tr><td>q17</td><td>B — Precisaria reorganizar</td><td>Neutro</td></tr>
+      <tr><td>q18</td><td>B — 10–20h</td><td>Neutro</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- MODELO G -->
+<div class="model-block">
+  <h3>Modelo G — Operação no Limite</h3>
+
+  <div class="proposito-contextual">
+    <div class="pc-label">Propósito Contextual</div>
+    <div class="pc-intent">Identifica o negócio onde a estrutura operacional — processos, padrão de entrega, capacidade instalada — é o gargalo que impede o crescimento. O problema não está na pessoa do dono, mas na ausência de sistema: quando alguém falta, a operação regride.</div>
+    <div class="pc-diff-grid">
+      <div class="pc-diff-item">
+        <div class="pc-diff-title">vs Modelo H (mais parecido)</div>
+        <p>H tem problema pessoal: centralização, agenda do dono, ritmo. G tem problema estrutural: sem processo documentado, equipe sem padrão. Mesmo que o dono delegue tudo, G ainda colapsaria — H não.</p>
+      </div>
+      <div class="pc-diff-item">
+        <div class="pc-diff-title">vs Modelo D</div>
+        <p>D perde margem financeira por custo crescente. G perde capacidade operacional por falta de processo. D opera e perde lucro; G opera e gera caos ao crescer.</p>
+      </div>
+    </div>
+    <div class="pc-key"><strong>Fator discriminador único:</strong> q17=C (operação entraria em colapso com demanda extra). Exclusivo de G — nenhum outro modelo exige colapso operacional confirmado.</div>
+  </div>
+
+  <div class="quote new">"Não há processo documentado: quando alguém falta ou sai, a operação regride" <span class="tag-impl">NOVO — v2.5</span></div>
+
+  <table>
+    <thead><tr><th>App q#</th><th>Resposta exata</th><th>Papel no engine</th></tr></thead>
+    <tbody>
+      <tr><td>q5</td><td>C — Em crescimento</td><td>Contextual</td></tr>
+      <tr><td>q6</td><td>B — Parcialmente</td><td>Neutro</td></tr>
+      <tr><td>q7</td><td>B — Tenho ideia, mas não definido</td><td>Neutro</td></tr>
+      <tr><td>q8</td><td>B — Em desenvolvimento</td><td>Neutro</td></tr>
+      <tr><td>q9</td><td>B — Básica</td><td>Neutro (≠C evita A)</td></tr>
+      <tr><td>q10</td><td>formalizada — Empresa registrada</td><td>Neutro</td></tr>
+      <tr style="background:#fff3cd"><td><strong>q11 ★</strong></td><td><strong>R$5k–R$20k</strong></td><td><strong>Âncora — q11≥C obrigatório</strong></td></tr>
+      <tr><td>q12</td><td>B — Às vezes cobro abaixo</td><td>Neutro</td></tr>
+      <tr><td>q13</td><td>B — Estável, sem crescimento</td><td>Neutro</td></tr>
+      <tr><td>q16</td><td>B — Instagram</td><td>Neutro (≠A evita F)</td></tr>
+      <tr style="background:#fff3cd"><td><strong>q17 ★</strong></td><td><strong>C — A operação entraria em colapso</strong></td><td><strong>Âncora — dispara G</strong></td></tr>
+      <tr><td>q18</td><td>C — 20–40h</td><td>Contextual</td></tr>
+    </tbody>
+  </table>
+
+  <div class="impl-box">
+    <strong>v2.5:</strong> Provérbios 24:3 (não Êxodo 18:18). Foco em ausência de processo, não no dono como gargalo.
+  </div>
+</div>
+
+<!-- MODELO D -->
+<div class="model-block">
+  <h3>Modelo D — Fatura Mas Sangra</h3>
+
+  <div class="proposito-contextual">
+    <div class="pc-label">Propósito Contextual</div>
+    <div class="pc-intent">Identifica o negócio com faturamento crescente mas onde a estrutura de custos cresce mais rápido que a receita, consumindo a margem. O empreendedor tem clareza básica das finanças (sabe que o problema existe) mas não consegue isolar onde o lucro some porque a causa é estrutural, não de caos.</div>
+    <div class="pc-diff-grid">
+      <div class="pc-diff-item">
+        <div class="pc-diff-title">vs Modelo A (mais parecido)</div>
+        <p>A tem caos financeiro total (q9=C): não sabe o que entra nem o que sai. D tem organização básica (q9=B): sabe que o lucro está caindo, mas a estrutura de custo absorve a margem.</p>
+      </div>
+      <div class="pc-diff-item">
+        <div class="pc-diff-title">vs Modelo C</div>
+        <p>C perde margem por cobrar menos do que entrega (precificação). D perde margem por custo estrutural crescente — mesmo que precifique corretamente, o lucro diminui porque a operação ficou cara.</p>
+      </div>
+    </div>
+    <div class="pc-key"><strong>Fator discriminador único:</strong> q13=C (lucro regredindo) + q9≠C. É o único modelo com lucro em queda confirmada E com organização financeira básica. D e A dividem o "dinheiro some" — o que os separa é q9.</div>
+  </div>
+
+
+  <table>
+    <thead><tr><th>App q#</th><th>Resposta exata</th><th>Papel no engine</th></tr></thead>
+    <tbody>
+      <tr><td>q5</td><td>C — Em crescimento</td><td>Contextual</td></tr>
+      <tr><td>q6</td><td>B — Parcialmente</td><td>Neutro</td></tr>
+      <tr><td>q7</td><td>B — Tenho ideia, mas não definido</td><td>Neutro</td></tr>
+      <tr><td>q8</td><td>B — Em desenvolvimento</td><td>Neutro</td></tr>
+      <tr style="background:#fff3cd"><td><strong>q9 ★</strong></td><td><strong>B — Básica</strong></td><td><strong>Discriminador — ≠C separa de A</strong></td></tr>
+      <tr><td>q10</td><td>formalizada — Empresa registrada</td><td>Neutro</td></tr>
+      <tr style="background:#fff3cd"><td><strong>q11 ★</strong></td><td><strong>R$5k–R$20k</strong></td><td><strong>Âncora — q11≥B obrigatório</strong></td></tr>
+      <tr><td>q12</td><td>B — Às vezes cobro abaixo</td><td>Neutro</td></tr>
+      <tr style="background:#fff3cd"><td><strong>q13 ★</strong></td><td><strong>C — Não, estamos regredindo</strong></td><td><strong>Âncora — lucro negativo</strong></td></tr>
+      <tr><td>q16</td><td>B — Instagram</td><td>Neutro</td></tr>
+      <tr><td>q17</td><td>B — Precisaria reorganizar</td><td>Neutro (≠C evita G)</td></tr>
+      <tr><td>q18</td><td>B — 10–20h</td><td>Neutro (≠D/E evita H)</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- MODELO H -->
+<div class="model-block">
+  <h3>Modelo H — O Gargalo É o Dono</h3>
+
+  <div class="proposito-contextual">
+    <div class="pc-label">Propósito Contextual</div>
+    <div class="pc-intent">Identifica o negócio cujo teto de crescimento é determinado pela capacidade pessoal do dono — sua carga horária, seu envolvimento em todas as decisões, sua indisponibilidade de delegar. A operação teria capacidade de crescer se o dono reorganizasse sua agenda e governança pessoal.</div>
+    <div class="pc-diff-grid">
+      <div class="pc-diff-item">
+        <div class="pc-diff-title">vs Modelo G (mais parecido)</div>
+        <p>G: a operação colapsaria mesmo que o dono se organize (q17=C) — falta processo e padrão de equipe. H: a operação NÃO colapsaria (q17=B) — o problema é o dono não delegar e trabalhar mais de 40h concentrado em tudo.</p>
+      </div>
+      <div class="pc-diff-item">
+        <div class="pc-diff-title">vs Modelo A</div>
+        <p>A tem caos em múltiplas dimensões (financeiro + propósito + gestão). H tem estrutura funcional mas o dono é o único gargalo — o negócio funciona, mas só até onde o fôlego do dono vai.</p>
+      </div>
+    </div>
+    <div class="pc-key"><strong>Fator discriminador único:</strong> q18=D/E (40–60h ou +60h semanais) + q17=B (operação reorganizaria, não colapsaria). A combinação de carga extrema com capacidade operacional latente é a assinatura de H.</div>
+  </div>
+
+
+  <table>
+    <thead><tr><th>App q#</th><th>Resposta exata</th><th>Papel no engine</th></tr></thead>
+    <tbody>
+      <tr><td>q5</td><td>D — Consolidado (3+ anos)</td><td>Contextual</td></tr>
+      <tr><td>q6</td><td>B — Parcialmente</td><td>Neutro</td></tr>
+      <tr><td>q7</td><td>B — Tenho ideia, mas não definido</td><td>Neutro</td></tr>
+      <tr><td>q8</td><td>B — Em desenvolvimento</td><td>Neutro</td></tr>
+      <tr><td>q9</td><td>B — Básica</td><td>Neutro (≠C evita A)</td></tr>
+      <tr><td>q10</td><td>formalizada — Empresa registrada</td><td>Neutro</td></tr>
+      <tr style="background:#fff3cd"><td><strong>q11 ★</strong></td><td><strong>R$5k–R$20k</strong></td><td><strong>Âncora — q11≥B obrigatório</strong></td></tr>
+      <tr><td>q12</td><td>B — Às vezes cobro abaixo</td><td>Neutro</td></tr>
+      <tr><td>q13</td><td>B — Estável, sem crescimento</td><td>Neutro (≠C evita D)</td></tr>
+      <tr><td>q16</td><td>B — Instagram</td><td>Neutro (≠A evita F)</td></tr>
+      <tr style="background:#fff3cd"><td><strong>q17 ★</strong></td><td><strong>B — Precisaria reorganizar</strong></td><td><strong>Discriminador — ≠C separa de G</strong></td></tr>
+      <tr style="background:#fff3cd"><td><strong>q18 ★</strong></td><td><strong>D — 40–60h</strong></td><td><strong>Âncora — carga extrema</strong></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- MODELO A -->
+<div class="model-block">
+  <h3>Modelo A — Negócio Travado, Bagunçado e Sem Visão</h3>
+
+  <div class="proposito-contextual">
+    <div class="pc-label">Propósito Contextual</div>
+    <div class="pc-intent">Identifica o negócio com maior desordem sistêmica: financeiro caótico, sem conexão com propósito ou dons, sem ritmo de gestão. Não há um único problema específico — há ausência de estrutura em múltiplas dimensões simultaneamente. É o modelo de maior entropia.</div>
+    <div class="pc-diff-grid">
+      <div class="pc-diff-item">
+        <div class="pc-diff-title">vs Modelo D (mais parecido)</div>
+        <p>D tem organização financeira básica (q9=B) — sabe que perde margem. A não tem organização alguma (q9=C) — não sabe nem o que entra ou sai. D tem um problema específico; A tem colapso de governança.</p>
+      </div>
+      <div class="pc-diff-item">
+        <div class="pc-diff-title">vs Modelo C</div>
+        <p>C tem propósito forte e alinhamento com dons (q6=A/B, q7=A/B). A não tem conexão com propósito (q6 ou q7=C). C resolve com sistema financeiro; A precisa reconstruir a fundação inteira.</p>
+      </div>
+    </div>
+    <div class="pc-key"><strong>Fator discriminador único:</strong> q9=C (caos financeiro) + q6 ou q7=C (desconexão de propósito). É o único modelo que exige caos financeiro TOTAL combinado com ausência de propósito. Funciona como fallback do engine também.</div>
+  </div>
+
+
+  <table>
+    <thead><tr><th>App q#</th><th>Resposta exata</th><th>Papel no engine</th></tr></thead>
+    <tbody>
+      <tr><td>q5</td><td>C — Em crescimento</td><td>Contextual</td></tr>
+      <tr style="background:#fff3cd"><td><strong>q6 ★</strong></td><td><strong>C — Não</strong></td><td><strong>Discriminador — sem conexão com propósito</strong></td></tr>
+      <tr><td>q7</td><td>B — Tenho ideia, mas não definido</td><td>Neutro</td></tr>
+      <tr><td>q8</td><td>B — Em desenvolvimento</td><td>Neutro</td></tr>
+      <tr style="background:#fff3cd"><td><strong>q9 ★</strong></td><td><strong>C — Desorganizada / Confusa</strong></td><td><strong>Âncora — caos financeiro</strong></td></tr>
+      <tr><td>q10</td><td>informal — Informal</td><td>Contextual</td></tr>
+      <tr style="background:#fff3cd"><td><strong>q11 ★</strong></td><td><strong>R$5k–R$20k</strong></td><td><strong>Âncora — q11≥B (≠A evita E)</strong></td></tr>
+      <tr><td>q12</td><td>B — Às vezes cobro abaixo</td><td>Neutro</td></tr>
+      <tr><td>q13</td><td>B — Estável, sem crescimento</td><td>Neutro</td></tr>
+      <tr><td>q16</td><td>B — Instagram</td><td>Neutro</td></tr>
+      <tr><td>q17</td><td>B — Precisaria reorganizar</td><td>Neutro (≠C evita G)</td></tr>
+      <tr><td>q18</td><td>B — 10–20h</td><td>Neutro (≠D/E evita H)</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- MODELO F -->
+<div class="model-block">
+  <h3>Modelo F — Vende, Mas Sem Motor Comercial</h3>
+
+  <div class="proposito-contextual">
+    <div class="pc-label">Propósito Contextual</div>
+    <div class="pc-intent">Identifica o negócio que fatura de forma estável mas com 100% de dependência de indicação: sem prospecção ativa, sem funil, sem previsibilidade de aquisição. O negócio funciona nos meses bons e sofre nos meses ruins sem que o dono consiga antecipar ou controlar.</div>
+    <div class="pc-diff-grid">
+      <div class="pc-diff-item">
+        <div class="pc-diff-title">vs Modelo E</div>
+        <p>E não tem faturamento real (q11=A) e ainda não converteu no mercado. F já fatura (q11≥B) com estabilidade mínima, mas o canal é exclusivamente indicação — funciona, porém não escala.</p>
+      </div>
+      <div class="pc-diff-item">
+        <div class="pc-diff-title">vs Modelo B</div>
+        <p>B tem canais diversificados (q16≠A) mas o crescimento estagnaram. F tem canal único e frágil (q16=A, 100% indicação). B precisa de motor de escala; F precisa primeiro ter qualquer canal controlado.</p>
+      </div>
+    </div>
+    <div class="pc-key"><strong>Fator discriminador único:</strong> q16=A (100% indicação) + q11≥B + q13=B (estável). A combinação de faturamento real + estabilidade + dependência exclusiva de indicação é a assinatura de F. Canal agora visível (v2.5) tornou esse discriminador confiável.</div>
+  </div>
+
+
+  <table>
+    <thead><tr><th>App q#</th><th>Resposta exata</th><th>Papel no engine</th></tr></thead>
+    <tbody>
+      <tr><td>q5</td><td>C — Em crescimento</td><td>Contextual</td></tr>
+      <tr><td>q6</td><td>B — Parcialmente</td><td>Neutro (≠C com q7≠C evita A)</td></tr>
+      <tr><td>q7</td><td>B — Tenho ideia, mas não definido</td><td>Neutro</td></tr>
+      <tr><td>q8</td><td>B — Em desenvolvimento</td><td>Neutro</td></tr>
+      <tr><td>q9</td><td>B — Básica</td><td>Neutro (≠C evita A)</td></tr>
+      <tr><td>q10</td><td>formalizada — Empresa registrada</td><td>Neutro</td></tr>
+      <tr style="background:#fff3cd"><td><strong>q11 ★</strong></td><td><strong>R$5k–R$20k</strong></td><td><strong>Âncora — q11≥B obrigatório</strong></td></tr>
+      <tr><td>q12</td><td>B — Às vezes cobro abaixo</td><td>Neutro</td></tr>
+      <tr style="background:#fff3cd"><td><strong>q13 ★</strong></td><td><strong>B — Estável, sem crescimento</strong></td><td><strong>Discriminador — estável, não regredindo</strong></td></tr>
+      <tr style="background:#fff3cd"><td><strong>q16 ★</strong></td><td><strong>A — Indicação</strong></td><td><strong>Âncora — 100% indicação</strong></td></tr>
+      <tr><td>q17</td><td>B — Precisaria reorganizar</td><td>Neutro (≠C evita G)</td></tr>
+      <tr><td>q18</td><td>B — 10–20h</td><td>Neutro (≠D/E evita H)</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- MODELO C -->
+<div class="model-block">
+  <h3>Modelo C — Boa Base, Mas Caixa Apertado</h3>
+
+  <div class="proposito-contextual">
+    <div class="pc-label">Propósito Contextual</div>
+    <div class="pc-intent">Identifica o empreendedor com forte alinhamento de propósito e boa entrega, que sistematicamente cobra menos do que o valor que entrega. O caixa aperta não por falta de clientes nem por custo estrutural crescente — mas porque a precificação está abaixo do valor real da entrega por convicção ou crença limitante.</div>
+    <div class="pc-diff-grid">
+      <div class="pc-diff-item">
+        <div class="pc-diff-title">vs Modelo D (mais parecido)</div>
+        <p>D perde margem por custo crescente — a precificação pode até estar correta, mas a operação ficou cara. C perde margem por cobrar menos do que entrega — a operação pode ser eficiente, mas o preço não captura o valor.</p>
+      </div>
+      <div class="pc-diff-item">
+        <div class="pc-diff-title">vs Modelo B</div>
+        <p>B cobra o valor que merece (qPrec=A ou B sem frequência de subcobrar). C cobra frequentemente abaixo (qPrec=C). B está no platô de crescimento; C está no platô de sustentabilidade financeira.</p>
+      </div>
+    </div>
+    <div class="pc-key"><strong>Fator discriminador único:</strong> q6/q7=A/B (propósito alinhado) + qPrec=B/C (cobra abaixo com frequência). A combinação de propósito forte com subcobrar sistemático é a assinatura exclusiva de C — introduzida no v2.5 com a pergunta de precificação.</div>
+  </div>
+
+
+  <table>
+    <thead><tr><th>App q#</th><th>Resposta exata</th><th>Papel no engine</th></tr></thead>
+    <tbody>
+      <tr><td>q5</td><td>C — Em crescimento</td><td>Contextual</td></tr>
+      <tr style="background:#fff3cd"><td><strong>q6 ★</strong></td><td><strong>A — Sim, totalmente</strong></td><td><strong>Âncora — alinhamento com propósito</strong></td></tr>
+      <tr style="background:#fff3cd"><td><strong>q7 ★</strong></td><td><strong>A — Sim, muito claro</strong></td><td><strong>Âncora — clareza de propósito</strong></td></tr>
+      <tr><td>q8</td><td>B — Em desenvolvimento</td><td>Neutro</td></tr>
+      <tr><td>q9</td><td>B — Básica</td><td>Neutro (≠C evita A)</td></tr>
+      <tr><td>q10</td><td>formalizada — Empresa registrada</td><td>Neutro</td></tr>
+      <tr style="background:#fff3cd"><td><strong>q11 ★</strong></td><td><strong>R$5k–R$20k</strong></td><td><strong>Âncora — q11≥B obrigatório</strong></td></tr>
+      <tr style="background:#fff3cd"><td><strong>q12 ★</strong></td><td><strong>C — Frequentemente cobro abaixo do que entrego</strong></td><td><strong>Âncora — discriminador vs B (novo v2.5)</strong></td></tr>
+      <tr><td>q13</td><td>B — Estável, sem crescimento</td><td>Neutro</td></tr>
+      <tr><td>q16</td><td>B — Instagram</td><td>Neutro (≠A evita F)</td></tr>
+      <tr><td>q17</td><td>B — Precisaria reorganizar</td><td>Neutro (≠C evita G)</td></tr>
+      <tr><td>q18</td><td>B — 10–20h</td><td>Neutro (≠D/E evita H)</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- MODELO B -->
+<div class="model-block">
+  <h3>Modelo B — Negócio Saudável, Travado no Platô</h3>
+
+  <div class="proposito-contextual">
+    <div class="pc-label">Propósito Contextual</div>
+    <div class="pc-intent">Identifica o negócio maduro, com propósito alinhado, financeiro organizado e precificação justa — mas onde o crescimento travou. É o único modelo essencialmente positivo: a base está correta, o problema é que falta o motor de multiplicação para sair do platô.</div>
+    <div class="pc-diff-grid">
+      <div class="pc-diff-item">
+        <div class="pc-diff-title">vs Modelo C (mais parecido)</div>
+        <p>Ambos têm propósito alinhado e financeiro funcional. A diferença é precificação: C cobra abaixo do que entrega (qPrec=B/C frequente). B cobra o que vale (qPrec≠C). C resolve com reposicionamento de preço; B resolve com motor de crescimento.</p>
+      </div>
+      <div class="pc-diff-item">
+        <div class="pc-diff-title">vs Modelo F</div>
+        <p>F depende 100% de indicação (q16=A) e não tem canal. B tem canais diversificados (q16≠A) mas estagnados. F não tem motor; B tem motor, mas ele não está avançando.</p>
+      </div>
+    </div>
+    <div class="pc-key"><strong>Fator discriminador único:</strong> q8=A/B (estrutura sólida) + q9=A/B (financeiro organizado) + qPrec≠C (precificação justa) + q13=B (estável, platô). É o único modelo que combina organização em todas as dimensões com estagnação de crescimento. Diagnóstico de oportunidade, não de crise.</div>
+  </div>
+
+
+  <table>
+    <thead><tr><th>App q#</th><th>Resposta exata</th><th>Papel no engine</th></tr></thead>
+    <tbody>
+      <tr><td>q5</td><td>D — Consolidado (3+ anos)</td><td>Contextual</td></tr>
+      <tr><td>q6</td><td>A — Sim, totalmente</td><td>Neutro</td></tr>
+      <tr><td>q7</td><td>A — Sim, muito claro</td><td>Neutro</td></tr>
+      <tr style="background:#fff3cd"><td><strong>q8 ★</strong></td><td><strong>A — Sim, bem estruturado</strong></td><td><strong>Âncora — estrutura sólida</strong></td></tr>
+      <tr style="background:#fff3cd"><td><strong>q9 ★</strong></td><td><strong>A — Estruturada</strong></td><td><strong>Âncora — financeiro organizado</strong></td></tr>
+      <tr><td>q10</td><td>formalizada — Empresa registrada</td><td>Neutro</td></tr>
+      <tr style="background:#fff3cd"><td><strong>q11 ★</strong></td><td><strong>R$5k–R$20k</strong></td><td><strong>Âncora — q11≥B obrigatório</strong></td></tr>
+      <tr style="background:#fff3cd"><td><strong>q12 ★</strong></td><td><strong>A — Sim, cobro o valor que merece</strong></td><td><strong>Discriminador — ≠C separa de C (novo v2.5)</strong></td></tr>
+      <tr style="background:#fff3cd"><td><strong>q13 ★</strong></td><td><strong>B — Estável, sem crescimento</strong></td><td><strong>Âncora — platô</strong></td></tr>
+      <tr><td>q16</td><td>B — Instagram</td><td>Neutro (≠A evita F)</td></tr>
+      <tr><td>q17</td><td>B — Precisaria reorganizar</td><td>Neutro (≠C evita G)</td></tr>
+      <tr><td>q18</td><td>C — 20–40h</td><td>Neutro (≠D/E evita H)</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<hr class="section-divider">
+
+<h2>Zonas de Sobreposição Textual</h2>
+
+<h3>1. G e H — <span class="tag-impl">Resolvido — v2.5</span></h3>
+<p>Os dois modelos citavam o mesmo versículo e usavam frases quase idênticas:</p>
+<table>
+  <thead><tr><th>Modelo G (v2) — antes</th><th>Modelo G (v2) — depois</th><th>Modelo H (v3) — inalterado</th></tr></thead>
+  <tbody>
+    <tr><td><del><em>"o dono é o gargalo central: tudo trava quando você não está"</em></del></td>
+        <td><em>"Não há processo documentado: quando alguém falta ou sai, a operação regride"</em></td>
+        <td><em>"quando o dono para, o negócio para"</em></td></tr>
+    <tr><td><del>Êxodo 18:18 (Jetro/Moisés)</del></td>
+        <td>Provérbios 24:3 — estrutura e sabedoria</td>
+        <td>Êxodo 18:18 — exclusivo de H</td></tr>
+    <tr><td><del><em>"tudo passa por você"</em></del></td>
+        <td>Foco: processos, padrão, equipe</td>
+        <td>Foco: agenda, delegação, ritmo pessoal</td></tr>
+  </tbody>
+</table>
+<p><strong>Discriminador:</strong> q17=C → G &nbsp;|&nbsp; q18=D/E + q17=B → H</p>
+
+<h3>2. A e D — <span class="tag-impl">Resolvido — v2.5</span></h3>
+<table>
+  <thead><tr><th>A v1 — inalterado</th><th>D v1 — reescrito</th></tr></thead>
+  <tbody>
+    <tr><td><em>"O dinheiro entra, circula e some antes de você <u>entender</u> o que aconteceu"</em></td>
+        <td><del><em>"O dinheiro entra, circula e some antes de você <u>sentir</u> que existiu"</em></del><br>
+            <strong><em>"O dinheiro entra, o custo absorve — e a margem que deveria sobrar some antes de se tornar resultado"</em></strong></td></tr>
+  </tbody>
+</table>
+<p><strong>Discriminador:</strong> q9=C → A &nbsp;|&nbsp; q9=B → D. Agora reforçado textualmente: A=caos total, D=custo crescente absorvendo margem.</p>
+
+<h3>3. E e F — Dependência do q16 (canal)</h3>
+<p>Ambos descrevem dependência de indicação e ausência de canal estruturado. A diferença está em q11 (faturamento) e q16 (canal). Se o usuário estiver no limiar entre zero e pouco faturamento, a escolha de q11 determina o modelo.</p>
+<p><strong>Discriminador:</strong> q11=A → E &nbsp;|&nbsp; q11≥B + q16=A → F</p>
+<p><span class="tag-impl">Mitigado — v2.5</span> q16 (canal) tornou-se visível e obrigatório — antes estava oculto (<code>internalOnly</code>). Discriminador E/F agora opera sobre dados reais.</p>
+
+<h3>4. C e B — <span class="tag-impl">Resolvido — v2.5</span></h3>
+<p>O formulário não tinha pergunta sobre precificação. Modelo C é fundamentalmente sobre "cobra menos do que vale", mas nenhuma pergunta capturava isso.</p>
+<p><strong>Solução:</strong> q12 (precificação) adicionada. Engine: C requer <code>qPrec ∈ {B,C}</code>; B requer <code>qPrec ≠ C</code>.</p>
+
+<hr class="section-divider">
+
+<h2>Engine — Mudanças no classifyDiagnostic (v2.4 → v2.5)</h2>
+<p style="font-size:9.5pt;color:#555">Variáveis do engine usam nomes históricos (q12=lucro, q15=canal, q16=cap, q17=horas). Os números no app são diferentes após a inserção do q12-precificação.</p>
+
+<div class="engine-block"><span class="cmt">// Nova variável (app: q12)</span>
+<span class="add">const qPrec = String(answersBySlug.precificacao ?? '');</span>
+
+<span class="cmt">// Modelo F: canal é o discriminador, q9 removido (app: q16=A)</span>
+<span class="del">- if (q11 >= 'B' && q15 === 'A' && q12 === 'B' && ['A','B'].includes(q9)) return { code: 'F' };</span>
+<span class="add">+ if (q11 >= 'B' && q15 === 'A' && q12 === 'B') return { code: 'F' };</span>
+
+<span class="cmt">// Modelo D: q9≠C obrigatório (app: q9=B)</span>
+<span class="del">- if (q11 >= 'B' && q12 === 'C') return { code: 'D' };</span>
+<span class="add">+ if (q11 >= 'B' && q12 === 'C' && q9 !== 'C') return { code: 'D' };</span>
+
+<span class="cmt">// Modelo H: q16≠C obrigatório (app: q17≠C → G)</span>
+<span class="del">- if (q11 >= 'B' && ['D','E'].includes(q17)) return { code: 'H' };</span>
+<span class="add">+ if (q11 >= 'B' && ['D','E'].includes(q17) && q16 !== 'C') return { code: 'H' };</span>
+
+<span class="cmt">// Modelo C: qPrec obrigatório (B ou C = cobra abaixo, app: q12=B/C)</span>
+<span class="del">- if (['A','B'].includes(q6) && ['A','B'].includes(q7) && ['B','C'].includes(q9) && ['B','C'].includes(q12)) return { code: 'C' };</span>
+<span class="add">+ if (['A','B'].includes(q6) && ['A','B'].includes(q7) && ['B','C'].includes(q9) && ['B','C'].includes(q12) && ['B','C'].includes(qPrec)) return { code: 'C' };</span>
+
+<span class="cmt">// Modelo B: qPrec≠C obrigatório (app: q12≠C)</span>
+<span class="del">- if (['A','B'].includes(q9) && ['A','B'].includes(q8) && q11 >= 'B' && q12 === 'B' && q15 !== 'A') return { code: 'B' };</span>
+<span class="add">+ if (['A','B'].includes(q9) && ['A','B'].includes(q8) && q11 >= 'B' && q12 === 'B' && q15 !== 'A' && qPrec !== 'C') return { code: 'B' };</span></div>
+
+<hr class="section-divider">
+
+<h2>Recomendações — Status de Implementação</h2>
+<ol style="margin-left:20px">
+  <li style="margin-bottom:12px">
+    <span class="tag-impl">Implementado ✓</span>&nbsp;
+    <strong>Pergunta de precificação adicionada (app: q12)</strong> — inserida no formulário antes de lucro_crescimento (q13). Separa C de B no engine: C exige <code>qPrec ∈ {B,C}</code>; B exige <code>qPrec ≠ C</code>.
+  </li>
+  <li style="margin-bottom:12px">
+    <span class="tag-impl">Implementado ✓</span>&nbsp;
+    <strong>Frase compartilhada de A e D reescrita</strong> — D v1 agora foca em custo crescente absorvendo margem; A v1 mantém o caos como narrativa.
+  </li>
+  <li style="margin-bottom:12px">
+    <span class="tag-impl">Implementado ✓</span>&nbsp;
+    <strong>Textos de G e H diferenciados</strong> — G v2 usa Provérbios 24:3; Êxodo 18:18 é exclusivo de H. Frase-âncora de G: ausência de processo documentado (não delegação pessoal).
+  </li>
+  <li style="margin-bottom:12px">
+    <span class="tag-impl">Implementado ✓</span>&nbsp;
+    <strong>Canal de aquisição visível (app: q16)</strong> — flag <code>internalOnly</code> removida. Discriminador E/F e B/F opera sobre dados reais.
+  </li>
+</ol>
+
+<p style="margin-top:40px; font-size:9pt; color:#888; border-top: 1px solid #ddd; padding-top:10px;">
+  Cópia do documento de engenharia reversa com Propósito Contextual adicionado — Jethro Backend &nbsp;|&nbsp;
+  Motor v2.5 aplicado em Abril 2026 &nbsp;|&nbsp; Migrações: <code>015</code> + <code>016_fix_precificacao_order.sql</code>
+</p>
+
+</body>
+</html>

@@ -575,11 +575,11 @@ function classifyDiagnostic(answersBySlug: Record<string, JsonValue>): Classifie
   if (q11 === 'A') return { code: 'E' };
   if (q5 <= 'B' && q11 === 'B') return { code: 'E' };
 
-  // 2. MODELO G — operacao no limite
+  // 2. MODELO G — a operacao nao aguenta crescer
   //    Âncora: Q16=C (colapso operacional) + receita substancial
   if (q11 >= 'C' && q16 === 'C') return { code: 'G' };
 
-  // 3. MODELO D — fatura mas sangra
+  // 3. MODELO D — fatura, mas nao sobra
   //    Âncora: Q12=C + Q9=B — tem noção dos números mas perde margem.
   //    Q9=C (caos total) pertence ao Modelo A; sem essa guarda D roubaria
   //    casos com a mesma frase textual ("dinheiro entra, circula e some").
@@ -600,7 +600,7 @@ function classifyDiagnostic(answersBySlug: Record<string, JsonValue>): Classifie
   //    é o canal, não a organização financeira.
   if (q11 >= 'B' && q15 === 'A' && q12 === 'B') return { code: 'F' };
 
-  // 7. MODELO C — boa base, caixa apertado
+  // 7. MODELO C — entrega bem, cobra mal
   //    Âncora: propósito alinhado (Q6/Q7=A/B) + financeiro fraco + cobra abaixo do valor.
   //    qPrec=B/C (às vezes ou frequentemente cobra abaixo) separa C de B quando os
   //    demais sinais se sobrepõem — resolve o "ponto cego" identificado na RE.

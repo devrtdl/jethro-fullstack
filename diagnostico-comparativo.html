@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jethro — Comparativo: Engenharia Reversa × Mensagens v2.0</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Georgia', serif;
+    font-size: 11pt;
+    line-height: 1.6;
+    color: #1a1a1a;
+    background: #fff;
+    padding: 40px 50px;
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+  h1 {
+    font-size: 20pt; font-weight: bold; color: #1a1a1a;
+    border-bottom: 3px solid #1a1a1a; padding-bottom: 10px; margin-bottom: 6px;
+  }
+  .subtitle { font-size: 10pt; color: #555; margin-bottom: 8px; }
+  .version-banner {
+    background: #1a1a1a; color: #fff; padding: 8px 14px; border-radius: 4px;
+    font-family: 'Courier New', monospace; font-size: 10pt;
+    display: inline-block; margin-bottom: 28px;
+  }
+  h2 {
+    font-size: 14pt; font-weight: bold; color: #1a1a1a;
+    margin-top: 32px; margin-bottom: 10px;
+    border-left: 4px solid #1a1a1a; padding-left: 10px;
+  }
+  h3 { font-size: 12pt; font-weight: bold; color: #333; margin: 20px 0 8px 0; }
+  p { margin-bottom: 8px; }
+  .section-divider { border: none; border-top: 2px solid #e0e0e0; margin: 28px 0; }
+
+  /* Status badges */
+  .ok    { background: #e8f5e9; border: 1px solid #a5d6a7; color: #2e7d32; padding: 2px 8px; border-radius: 3px; font-size: 9pt; font-family: monospace; font-weight: bold; }
+  .err   { background: #fce4ec; border: 1px solid #f48fb1; color: #b71c1c; padding: 2px 8px; border-radius: 3px; font-size: 9pt; font-family: monospace; font-weight: bold; }
+  .warn  { background: #fff8e1; border: 1px solid #ffe082; color: #e65100; padding: 2px 8px; border-radius: 3px; font-size: 9pt; font-family: monospace; font-weight: bold; }
+
+  /* Summary table */
+  table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 10pt; }
+  th { background: #1a1a1a; color: #fff; padding: 7px 10px; text-align: left; font-weight: bold; }
+  td { padding: 7px 10px; border-bottom: 1px solid #ddd; vertical-align: top; }
+  tr:nth-child(even) td { background: #f7f7f7; }
+
+  /* Diff blocks */
+  .diff-block {
+    border: 1px solid #ccc; border-radius: 4px;
+    padding: 16px 20px; margin-bottom: 24px; page-break-inside: avoid;
+  }
+  .diff-block.discrepancy { border-left: 5px solid #e53935; }
+  .diff-block.ok-block    { border-left: 5px solid #43a047; }
+  .diff-block.gap-block   { border-left: 5px solid #fb8c00; }
+
+  .diff-block h3 { margin-top: 0; }
+
+  .side-by-side { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 10px 0; }
+  .col-label {
+    font-size: 9pt; font-weight: bold; letter-spacing: 0.5px;
+    text-transform: uppercase; color: #555; margin-bottom: 6px;
+  }
+  .col-er  { background: #f3f4f6; border: 1px solid #d1d5db; border-radius: 4px; padding: 12px 14px; }
+  .col-pdf { background: #fff3e0; border: 1px solid #ffcc80; border-radius: 4px; padding: 12px 14px; }
+
+  .text-match { font-style: italic; color: #1b5e20; background: #f0faf3; border-left: 3px solid #66bb6a; padding: 6px 10px; margin: 4px 0; font-size: 10pt; }
+  .text-old   { font-style: italic; color: #b71c1c; background: #fce4ec; border-left: 3px solid #e57373; padding: 6px 10px; margin: 4px 0; font-size: 10pt; text-decoration: line-through; }
+  .text-new   { font-style: italic; color: #0d47a1; background: #e3f2fd; border-left: 3px solid #64b5f6; padding: 6px 10px; margin: 4px 0; font-size: 10pt; }
+  .text-neutral { font-style: italic; color: #444; background: #f5f5f5; border-left: 3px solid #aaa; padding: 6px 10px; margin: 4px 0; font-size: 10pt; }
+
+  .action-box {
+    background: #fff8e1; border: 1px solid #ffe082; border-left: 4px solid #ffa000;
+    border-radius: 4px; padding: 10px 14px; margin-top: 12px; font-size: 10pt;
+  }
+  .action-box strong { color: #e65100; }
+
+  @media print {
+    body { padding: 20px 30px; }
+    .side-by-side { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<h1>Comparativo — Engenharia Reversa × Mensagens Diagnóstico</h1>
+<p class="subtitle">Diff entre a análise de engenharia reversa (v2.5) e as mensagens do PDF Mensagens de Diagnóstico v2.0 &nbsp;|&nbsp; Abril 2026</p>
+<div class="version-banner">Objetivo: identificar mensagens que precisam ser atualizadas para refletir o motor v2.5</div>
+
+<h2>Resumo de Status por Modelo</h2>
+<table>
+  <thead>
+    <tr><th>Modelo</th><th>Título</th><th>Causa Raiz — Análise (v2.5)</th><th>Status Mensagem PDF</th><th>Ação</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>A</strong></td>
+      <td>Negócio Travado + Financeiro Bagunçado + Sem Visão</td>
+      <td>caos financeiro + ausência de direção + falta de governo semanal</td>
+      <td><span class="ok">MATCH</span></td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td><strong>B</strong></td>
+      <td>Negócio Saudável, Mas Travado no Platô</td>
+      <td>falta de motor de multiplicação — aquisição + oferta + recorrência + metas</td>
+      <td><span class="ok">MATCH</span></td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td><strong>C</strong></td>
+      <td>Boa Base, Mas Aperto de Caixa</td>
+      <td>propósito sem modelo financeiro + caixa sem governo</td>
+      <td><span class="ok">MATCH</span></td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td><strong>D</strong></td>
+      <td>Fatura, Mas Sangra — Ilusão de Faturamento</td>
+      <td>custo invisível + precificação sem margem + ilusão de faturamento</td>
+      <td><span class="err">DISCREPÂNCIA — V1</span></td>
+      <td>Atualizar texto âncora no V1</td>
+    </tr>
+    <tr>
+      <td><strong>E</strong></td>
+      <td>Pré-Receita — Ainda Não Validou no Mercado</td>
+      <td>validação fraca + oferta não posicionada + execução travada</td>
+      <td><span class="ok">MATCH</span></td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td><strong>F</strong></td>
+      <td>Vende, Mas Sem Motor — Depende de Indicação</td>
+      <td>ausência de motor comercial — aquisição + funil + follow-up + recorrência</td>
+      <td><span class="ok">MATCH</span></td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td><strong>G</strong></td>
+      <td>Operação no Limite — Crescer Piora Tudo</td>
+      <td>ausência de sistema operacional — processo + padrão + capacidade estruturada</td>
+      <td><span class="err">DISCREPÂNCIA — V2</span></td>
+      <td>Atualizar texto âncora + versículo no V2</td>
+    </tr>
+    <tr>
+      <td><strong>H</strong></td>
+      <td>Gargalo É o Dono — Sem Governo Pessoal</td>
+      <td>ausência de governo pessoal — agenda, prioridade, delegação e ritmo semanal</td>
+      <td><span class="ok">MATCH</span></td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td><strong>I</strong></td>
+      <td>Pré-Receita — Ainda Não Começou / Quer Iniciar</td>
+      <td>rotina sem espaço para o projeto + MVP não documentado + validação inexistente</td>
+      <td><span class="warn">AUSENTE na análise ER</span></td>
+      <td>Criar análise de engenharia reversa para o modelo I</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr class="section-divider">
+
+<h2>Detalhamento das Discrepâncias</h2>
+
+<!-- DISCREPÂNCIA 1: MODELO D V1 -->
+<div class="diff-block discrepancy">
+  <h3>Modelo D — V1 &nbsp;<span class="err">DISCREPÂNCIA</span></h3>
+  <p><strong>Problema:</strong> O texto âncora do V1 no PDF ainda usa a frase antiga, que é quase idêntica à frase âncora do Modelo A. A engenharia reversa identificou isso como sobreposição e reescreveu o V1 para focar em custo crescente (não em caos financeiro).</p>
+
+  <div class="side-by-side">
+    <div class="col-er">
+      <div class="col-label">Engenharia Reversa — texto esperado (v2.5)</div>
+      <p style="font-size:9.5pt;color:#555;margin-bottom:8px">Âncora que diferencia D de A:</p>
+      <div class="text-new">"Faturamento existe — lucro é ilusão"</div>
+      <div class="text-new">"O dinheiro entra, o custo absorve — e a margem que deveria sobrar some antes de se tornar resultado"</div>
+      <div class="text-new">"A estrutura cresceu — mas o lucro por venda diminuiu"</div>
+      <p style="font-size:9.5pt;color:#555;margin-top:8px">Discriminador engine: <code>q9=B</code> (não é caos, é custo crescente)</p>
+    </div>
+    <div class="col-pdf">
+      <div class="col-label">PDF Mensagens v2.0 — D V1 (texto atual)</div>
+      <p style="font-size:9.5pt;color:#888;margin-bottom:8px">BLOCO 1 — Realidade Direta:</p>
+      <div class="text-neutral">"[NOME], você está correndo em direção a uma parede — e chamando isso de crescimento."</div>
+      <p style="font-size:9.5pt;color:#888;margin:8px 0 4px 0">Bullets do diagnóstico:</p>
+      <div class="text-neutral">"Faturamento existe — lucro é ilusão" ✓</div>
+      <div class="text-neutral">"Você não sabe a margem real de cada produto ou serviço" ✓</div>
+      <div class="text-old">"O dinheiro entra, circula e some antes de você <u>sentir</u> que existiu"</div>
+      <p style="font-size:9.5pt;color:#888;margin-top:8px">Causa raiz: <em>custo invisível + precificação sem margem + ilusão de faturamento</em> ✓</p>
+    </div>
+  </div>
+
+  <div class="action-box">
+    <strong>Ação:</strong> No PDF / banco de dados, substituir o bullet do Modelo D V1:<br>
+    <span style="color:#b71c1c">DE: <em>"O dinheiro entra, circula e some antes de você <u>sentir</u> que existiu"</em></span><br>
+    <span style="color:#0d47a1">PARA: <em>"O dinheiro entra, o custo absorve — e a margem que deveria sobrar some antes de se tornar resultado"</em></span><br><br>
+    <strong>Por quê:</strong> A versão anterior se confunde com o texto âncora de A v1 ("O dinheiro entra, circula e some antes de você <u>entender</u> o que aconteceu"). A nova frase comunica custo estrutural crescente — não caos financeiro. Discriminador visual alinhado ao engine (<code>q9=B</code> vs <code>q9=C</code>).
+  </div>
+</div>
+
+<!-- DISCREPÂNCIA 2: MODELO G V2 -->
+<div class="diff-block discrepancy">
+  <h3>Modelo G — V2 &nbsp;<span class="err">DISCREPÂNCIA</span></h3>
+  <p><strong>Problema:</strong> O V2 do Modelo G no PDF ainda usa Êxodo 18:18 e a frase "O dono é o gargalo central: tudo trava quando você não está" — exatamente os mesmos elementos do Modelo H. A engenharia reversa identificou isso como sobreposição crítica e definiu que Êxodo 18:18 deve ser exclusivo de H, enquanto G V2 deve usar Provérbios 24:3 e focar em ausência de processo.</p>
+
+  <div class="side-by-side">
+    <div class="col-er">
+      <div class="col-label">Engenharia Reversa — texto esperado (v2.5)</div>
+      <p style="font-size:9.5pt;color:#555;margin-bottom:8px">Foco: ausência de processo, não centralização pessoal:</p>
+      <div class="text-new">"Não há processo documentado: quando alguém falta ou sai, a operação regride"</div>
+      <p style="font-size:9.5pt;color:#555;margin-top:8px">Versículo correto: <strong>Provérbios 24:3</strong> — "Pela sabedoria se constrói a casa..."<br>Foco: estrutura e sabedoria operacional (não delegação pessoal)</p>
+    </div>
+    <div class="col-pdf">
+      <div class="col-label">PDF Mensagens v2.0 — G V2 (texto atual)</div>
+      <p style="font-size:9.5pt;color:#888;margin-bottom:8px">BLOCO 1 — bullets:</p>
+      <div class="text-old">"O dono é o gargalo central: tudo trava quando você não está"</div>
+      <div class="text-neutral">"A equipe executa, mas sem padrão — e sem padrão, a qualidade oscila" ✓ (mantém)</div>
+      <p style="font-size:9.5pt;color:#888;margin-top:8px">Versículo:</p>
+      <div class="text-old">Êxodo 18:18 — "Você e o povo que está com você vão se esgotar..."</div>
+      <p style="font-size:9.5pt;color:#555;margin-top:6px"><em>(Mesmo versículo de H v1 e H v3 — sobreposição direta)</em></p>
+    </div>
+  </div>
+
+  <div class="action-box">
+    <strong>Ação (dois ajustes no G V2):</strong><br><br>
+    1. <strong>Substituir bullet âncora:</strong><br>
+    <span style="color:#b71c1c">DE: <em>"O dono é o gargalo central: tudo trava quando você não está"</em></span><br>
+    <span style="color:#0d47a1">PARA: <em>"Não há processo documentado: quando alguém falta ou sai, a operação regride"</em></span><br><br>
+    2. <strong>Substituir versículo:</strong><br>
+    <span style="color:#b71c1c">DE: Êxodo 18:18</span><br>
+    <span style="color:#0d47a1">PARA: Provérbios 24:3 — "Pela sabedoria se constrói a casa; pelo entendimento ela se consolida."</span><br><br>
+    <strong>Por quê:</strong> G e H compartilhavam o mesmo versículo e frase âncora, causando confusão. G é sobre sistema/processo; H é sobre o dono/pessoa. Êxodo 18:18 (Jetro aconselha Moisés a delegar) pertence semanticamente a H (problema pessoal). Provérbios 24:3 (sabedoria constrói a casa) pertence a G (estrutura operacional).
+  </div>
+</div>
+
+<hr class="section-divider">
+
+<h2>Modelo I — Ausente na Análise de Engenharia Reversa</h2>
+
+<div class="diff-block gap-block">
+  <h3>Modelo I — Pré-Receita / Ainda Não Começou &nbsp;<span class="warn">AUSENTE NA ER</span></h3>
+  <p><strong>Situação:</strong> O Modelo I existe no PDF (3 variantes, páginas 27–29) mas não foi incluído na análise de engenharia reversa. O engine atual retorna I apenas quando <code>q11=A + q10=nao_comecou</code> com condição extra (q5=A ativaria q19). Precisa de análise separada.</p>
+
+  <div class="side-by-side">
+    <div class="col-er">
+      <div class="col-label">Análise ER — dado inexistente</div>
+      <p style="font-size:10pt;color:#888;font-style:italic">Nenhum bloco de análise do Modelo I existe no documento de engenharia reversa. Engine e discriminadores não documentados.</p>
+    </div>
+    <div class="col-pdf">
+      <div class="col-label">PDF Mensagens v2.0 — I (existente)</div>
+      <p style="font-size:9.5pt;color:#888;margin-bottom:8px">Título: <em>Pré-Receita — Ainda Não Começou / Quer Iniciar</em><br>Pilares PBN: P1 → P2 → P3</p>
+      <div class="text-neutral">"A sua rotina atual não tem espaço real para o que você quer construir"</div>
+      <div class="text-neutral">"O MVP — a versão mínima da sua oferta — ainda não está escrito em lugar nenhum"</div>
+      <div class="text-neutral">"Você ainda não foi ao mercado perguntar: existe aqui alguém disposto a pagar?"</div>
+      <p style="font-size:9.5pt;color:#888;margin-top:8px">Causa raiz: <em>rotina sem espaço para o projeto + MVP não documentado + validação inexistente</em></p>
+    </div>
+  </div>
+
+  <div class="action-box">
+    <strong>Ação:</strong> Adicionar bloco Modelo I na análise de engenharia reversa com:<br>
+    — Discriminadores engine (q11=A + q10=nao_comecou + condição q5/q19)<br>
+    — Diferenciação de E (E tentou vender, I ainda não)<br>
+    — Análise de cobertura textual com os 3 V do PDF
+  </div>
+</div>
+
+<hr class="section-divider">
+
+<h2>Confirmações de Alinhamento</h2>
+<p style="color:#555;font-size:10pt;margin-bottom:12px">Modelos onde o PDF está alinhado com a análise v2.5:</p>
+
+<div class="diff-block ok-block" style="padding:14px 20px;">
+  <h3>Modelo A — MATCH ✓</h3>
+  <p>PDF V1: <em>"Financeiro confuso — o dinheiro entra, circula e some antes de você entender o que aconteceu"</em> → alinhado.<br>
+  Causa raiz no PDF: <em>caos financeiro + ausência de direção + falta de governo semanal</em> → alinhado.<br>
+  Discriminador <code>q9=C</code> refletido no texto: "Decisões no feeling — sem painel, sem ritmo" → alinhado.</p>
+</div>
+
+<div class="diff-block ok-block" style="padding:14px 20px;">
+  <h3>Modelo B — MATCH ✓</h3>
+  <p>PDF V1: <em>"você construiu algo que funciona. Agora precisa de algo que multiplica."</em> → alinhado.<br>
+  Causa raiz: <em>falta de motor de multiplicação — aquisição + oferta + recorrência + metas</em> → alinhado.<br>
+  Platô sem escala refletido em todas as variantes.</p>
+</div>
+
+<div class="diff-block ok-block" style="padding:14px 20px;">
+  <h3>Modelo C — MATCH ✓</h3>
+  <p>PDF V1: <em>"Você cobra menos do que entrega — e todo mês o caixa prova isso"</em> → alinhado.<br>
+  PDF V3: <em>"[NOME], propósito sem sustentabilidade não é humildade. É risco."</em> → alinhado com o discriminador <code>q6/q7=A/B</code>.<br>
+  Causa raiz: <em>propósito sem modelo financeiro + caixa sem governo</em> → alinhado.</p>
+</div>
+
+<div class="diff-block ok-block" style="padding:14px 20px;">
+  <h3>Modelo E — MATCH ✓</h3>
+  <p>PDF V1: <em>"A rotina de primeira venda ainda não foi instalada"</em> → alinhado.<br>
+  <em>"O canal não está testado — as vendas que existem vieram da rede pessoal, não do mercado"</em> → alinhado.<br>
+  Discriminador <code>q11=A</code> refletido: "ainda não saiu do papel da forma que você esperava" → alinhado.</p>
+</div>
+
+<div class="diff-block ok-block" style="padding:14px 20px;">
+  <h3>Modelo F — MATCH ✓</h3>
+  <p>PDF V1: <em>"Quase 100% dos clientes chegam por indicação — e indicação não escala"</em> → alinhado.<br>
+  <em>"Você não tem processo de vendas definido — cada fechamento é um improviso"</em> → alinhado.<br>
+  Discriminador <code>q16=A</code> refletido na narrativa de dependência de indicação → alinhado.</p>
+</div>
+
+<div class="diff-block ok-block" style="padding:14px 20px;">
+  <h3>Modelo G — V1 e V3 — MATCH ✓</h3>
+  <p>PDF V1: <em>"Sua capacidade operacional está no limite — mais demanda gera mais caos"</em> → alinhado.<br>
+  <em>"Não há processos documentados: o que funciona hoje não se repete amanhã"</em> → alinhado (V1 já usa linguagem de processo).<br>
+  PDF V3: Mateus 7:24 ("construiu a casa sobre a rocha") → alinhado com foco estrutural.<br>
+  <strong>Apenas V2 tem discrepância (detalhada acima).</strong></p>
+</div>
+
+<div class="diff-block ok-block" style="padding:14px 20px;">
+  <h3>Modelo H — MATCH ✓</h3>
+  <p>PDF V1: <em>"O negócio para quando você para"</em> → alinhado.<br>
+  PDF V1: Êxodo 18:17-18 → alinhado (exclusivo de H conforme análise).<br>
+  PDF V3: <em>"quando o dono para, o negócio para"</em> / <em>"Você é insubstituível — e isso, no negócio, é fraqueza, não força"</em> → alinhados.<br>
+  Discriminador <code>q18=D/E</code> refletido: "Você trabalha mais de 60h por semana" → alinhado.</p>
+</div>
+
+<p style="margin-top:40px; font-size:9pt; color:#888; border-top: 1px solid #ddd; padding-top:10px;">
+  Comparativo gerado a partir do PDF <em>Mensagens de Diagnóstico v2.0 — Abril 2026</em> × documento de engenharia reversa (Motor v2.5).
+  Ações identificadas: 2 correções de mensagem (D v1, G v2) + 1 análise pendente (Modelo I).
+</p>
+
+</body>
+</html>
