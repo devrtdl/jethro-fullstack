@@ -34,7 +34,7 @@ function passagem1(q) {
 
   // ---- MODELO G — Operação no Limite ----
   // Fatura acima de R$5k + operação colapsa ao crescer
-  if (gte(q.q11, 'C') && q.q17 === 'C') return 'G';
+  if (gte(q.q11, 'C') && q.q17 === 'C' && q.q13 !== 'C') return 'G';
 
   // ---- MODELO D — Fatura Mas Sangra ----
   // Fatura + está regredindo
