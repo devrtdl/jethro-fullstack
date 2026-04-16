@@ -10,6 +10,9 @@ const adminHeaders = {
   'x-admin-api-key': 'dev-admin-key',
 };
 
+// Cenário Modelo C: propósito forte (Q6=A, Q7=A) + cobra frequentemente abaixo (qPrec=C)
+// + canal único Instagram (q15=B) → F dispara mas exceção ativa (precificacaoSevera + propositoForte)
+// → motor pula F e captura C.
 const validDiagnosticAnswers = [
   { questionId: 'question_nome_completo', value: 'Daniel Lopes' },
   { questionId: 'question_area_atuacao', value: 'Consultoria de negocios' },
@@ -22,11 +25,11 @@ const validDiagnosticAnswers = [
     },
   },
   { questionId: 'question_email', value: 'daniel@example.com' },
-  { questionId: 'question_fase_negocio', value: 'crescimento' },
-  { questionId: 'question_conexao_dons', value: 'parcial' },
-  { questionId: 'question_proposito_negocio', value: 'claro' },
-  { questionId: 'question_estrutura_negocio', value: 'desenvolvimento' },
-  { questionId: 'question_organizacao_financeira', value: 'basica' },
+  { questionId: 'question_fase_negocio', value: 'C' },            // Em crescimento (1-3 anos)
+  { questionId: 'question_conexao_dons', value: 'A' },            // Sim, totalmente
+  { questionId: 'question_proposito_negocio', value: 'A' },       // Sim, muito claro
+  { questionId: 'question_estrutura_negocio', value: 'B' },       // Em desenvolvimento
+  { questionId: 'question_organizacao_financeira', value: 'B' },  // Básica
   { questionId: 'question_formalizacao', value: 'formalizada' },
   {
     questionId: 'question_faturamento_mensal',
@@ -36,7 +39,8 @@ const validDiagnosticAnswers = [
       pais: 'BR',
     },
   },
-  { questionId: 'question_lucro_crescimento', value: 'estavel' },
+  { questionId: 'question_precificacao', value: 'C' },            // Frequentemente cobra abaixo — aciona exceção de F → C
+  { questionId: 'question_lucro_crescimento', value: 'B' },       // Estável, sem crescimento
   {
     questionId: 'question_objetivo_futuro',
     value: 'Quero estruturar melhor o negocio, aumentar receita e ganhar previsibilidade comercial.',
@@ -45,8 +49,9 @@ const validDiagnosticAnswers = [
     questionId: 'question_desafios',
     value: 'Preciso vender com consistencia, organizar processos internos e melhorar meu financeiro.',
   },
-  { questionId: 'question_capacidade_operacional', value: 'equipe_2_5' },
-  { questionId: 'question_horas_semana', value: 42 },
+  { questionId: 'question_canal_aquisicao', value: 'B' },         // Instagram (canal único → F seria acionado, mas exceção aplica)
+  { questionId: 'question_capacidade_operacional', value: 'B' },  // Precisaria reorganizar algumas partes
+  { questionId: 'question_horas_semana', value: 'C' },            // 20-40h
 ];
 
 test('returns the published public form with 17 documented questions and dynamic runtime metadata', async () => {

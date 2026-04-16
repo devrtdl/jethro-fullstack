@@ -551,73 +551,67 @@ function mapRevenueToMotorBand(faixa: string | undefined) {
 }
 
 function classifyDiagnostic(answersBySlug: Record<string, JsonValue>): ClassifiedDiagnostic {
-  // Todas as questoes Q5-Q9, Q12, Q15-Q18 usam codigos de letra unica (A/B/C/D)
-  // conforme domain-seed.ts — nenhum mapeamento necessario
-  const q5 = String(answersBySlug.fase_negocio ?? '');
-  const q6 = String(answersBySlug.conexao_dons ?? '');
-  const q7 = String(answersBySlug.proposito_negocio ?? '');
-  const q8 = String(answersBySlug.estrutura_negocio ?? '');
-  const q9 = String(answersBySlug.organizacao_financeira ?? '');
+  // Motor v2.6 — cadeia de prioridade: E → G → D → H → A → F → C → B → Fallback
+  //
+  // Mapeamento motor script → slugs do backend:
+  //   Motor Q12 (precificação)    → qPrec  (precificacao)
+  //   Motor Q13 (lucro/tendência) → q12    (lucro_crescimento)
+  //   Motor Q16 (canal, escala A/B/C) → q15 (canal_aquisicao, escala com opções específicas)
+  //     q15='F' (Uso vários canais) = motor Q16=C (diversificado)
+  //     q15≠'F' e q15≠'E'         = motor Q16 in [A,B] (canal único ou poucos)
+  //   Motor Q17 (cap. operacional) → q16   (capacidade_operacional)
+  //   Motor Q18 (horas/semana)     → q17   (horas_semana)
+  const q5  = String(answersBySlug.fase_negocio ?? '');
+  const q6  = String(answersBySlug.conexao_dons ?? '');
+  const q7  = String(answersBySlug.proposito_negocio ?? '');
+  const q8  = String(answersBySlug.estrutura_negocio ?? '');
+  const q9  = String(answersBySlug.organizacao_financeira ?? '');
   const revenue = asObjectRecord(answersBySlug.faturamento_mensal) as RevenueAnswer | undefined;
   const q11 = mapRevenueToMotorBand(revenue?.faixa);
-  const q12 = String(answersBySlug.lucro_crescimento ?? '');
-  const qPrec = String(answersBySlug.precificacao ?? '');
-  const q15 = String(answersBySlug.canal_aquisicao ?? '');
-  const q16 = String(answersBySlug.capacidade_operacional ?? '');
-  const q17 = String(answersBySlug.horas_semana ?? '');
+  const q12 = String(answersBySlug.lucro_crescimento ?? '');  // motor Q13: A=crescendo B=estável C=regredindo
+  const qPrec = String(answersBySlug.precificacao ?? '');     // motor Q12: A=justo B=às vezes abaixo C=frequentemente abaixo
+  const q15 = String(answersBySlug.canal_aquisicao ?? '');    // motor Q16: 'F'=vários canais; outros=canal único/poucos
+  const q16 = String(answersBySlug.capacidade_operacional ?? ''); // motor Q17: C=entra em colapso
+  const q17 = String(answersBySlug.horas_semana ?? '');       // motor Q18: D=40-60h E=60h+
 
-  // Motor v2.5 — ajustado via engenharia reversa dos textos dos modelos
-  // Regra geral: cada modelo tem uma âncora textual exclusiva; Q9 e Q16 são
-  // os principais árbitros de sobreposição entre modelos vizinhos.
-
-  // 1. MODELO E — pre-receita / ainda nao validou no mercado
-  //    Âncora: Q11=A (zero receita) ou fase inicial com receita mínima
+  // 1. MODELO E — pré-receita
   if (q11 === 'A') return { code: 'E' };
-  if (q5 <= 'B' && q11 === 'B') return { code: 'E' };
+  if (q5 <= 'B' && q11 === 'B' && !['E', 'F'].includes(q15)) return { code: 'E' };
 
-  // 2. MODELO G — a operacao nao aguenta crescer
-  //    Âncora: Q16=C (colapso operacional) + receita substancial
+  // 2. MODELO G — operação no limite (colapso ao crescer)
   if (q11 >= 'C' && q16 === 'C') return { code: 'G' };
 
-  // 3. MODELO D — fatura, mas nao sobra
-  //    Âncora: Q12=C + Q9=B — tem noção dos números mas perde margem.
-  //    Q9=C (caos total) pertence ao Modelo A; sem essa guarda D roubaria
-  //    casos com a mesma frase textual ("dinheiro entra, circula e some").
-  if (q11 >= 'B' && q12 === 'C' && q9 !== 'C') return { code: 'D' };
+  // 3. MODELO D — fatura, mas está regredindo
+  //    Motor Q13=C → q12 (lucro_crescimento) = 'C'
+  if (q11 >= 'B' && q12 === 'C') return { code: 'D' };
 
   // 4. MODELO H — gargalo do dono
-  //    Âncora: Q17=D/E (carga horária extrema) + receita + sem colapso operacional.
-  //    Q16=C indica limite de capacidade estrutural → território de G, não de H.
-  if (q11 >= 'B' && ['D', 'E'].includes(q17) && q16 !== 'C') return { code: 'H' };
+  //    G já capturou q16='C' acima, guarda redundante removida
+  if (['D', 'E'].includes(q17) && q11 >= 'B') return { code: 'H' };
 
-  // 5. MODELO A — negocio travado, baguncado e sem visao
-  //    Âncora: Q9=C (caos financeiro) + ausência de propósito/dons (Q6 ou Q7 = C)
-  if (q9 === 'C' && ['B', 'C'].includes(q8) && ['B', 'C'].includes(q12) && (q6 === 'C' || q7 === 'C')) return { code: 'A' };
+  // 5. MODELO A — caos total
+  //    Motor Q12 = qPrec (precificação); Q8=estrutura; Q9=financeiro; Q6/Q7=propósito
+  if (q9 === 'C' && ['B', 'C'].includes(q8) && ['B', 'C'].includes(qPrec) && (q6 === 'C' || q7 === 'C')) return { code: 'A' };
 
-  // 6. MODELO F — vende mas sem motor comercial
-  //    Âncora: Q15=A (100% indicação) + receita + estável/sem crescimento.
-  //    Q9 removido como condição — a RE confirma que o discriminador de F
-  //    é o canal, não a organização financeira.
-  if (q11 >= 'B' && q15 === 'A' && q12 === 'B') return { code: 'F' };
+  // 6. MODELO F — vende sem motor comercial
+  //    Motor Q16 in [A,B] = canal único/poucos = q15 ≠ 'F' (não usa vários canais) e ≠ 'E' (não prospecta ativamente)
+  //    Motor Q12 in [B,C] = cobra abaixo do valor = qPrec in [B,C]
+  //    Exceção motor: Q12=C + propósito forte → precificação é a raiz, C captura
+  if (q11 >= 'B' && q15 !== '' && !['E', 'F'].includes(q15) && ['B', 'C'].includes(qPrec)) {
+    const precificacaoSevera = qPrec === 'C';
+    const propositoForte = ['A', 'B'].includes(q6) && ['A', 'B'].includes(q7);
+    if (!(precificacaoSevera && propositoForte)) return { code: 'F' };
+  }
 
   // 7. MODELO C — entrega bem, cobra mal
-  //    Âncora: propósito alinhado (Q6/Q7=A/B) + financeiro fraco + cobra abaixo do valor.
-  //    qPrec=B/C (às vezes ou frequentemente cobra abaixo) separa C de B quando os
-  //    demais sinais se sobrepõem — resolve o "ponto cego" identificado na RE.
-  if (
-    ['A', 'B'].includes(q6) &&
-    ['A', 'B'].includes(q7) &&
-    ['B', 'C'].includes(q9) &&
-    ['B', 'C'].includes(q12) &&
-    ['B', 'C'].includes(qPrec)
-  ) return { code: 'C' };
+  //    Motor Q12 = qPrec in [B,C]; Q6/Q7=A/B (propósito forte); Q9=B/C (financeiro fraco)
+  if (['A', 'B'].includes(q6) && ['A', 'B'].includes(q7) && ['B', 'C'].includes(q9) && ['B', 'C'].includes(qPrec)) return { code: 'C' };
 
-  // 8. MODELO B — negocio saudavel no plato
-  //    Âncora: estrutura + finanças organizadas + estável + canal diversificado + precificação justa.
-  //    qPrec≠C garante que quem frequentemente cobra abaixo vai para C, não B.
-  if (['A', 'B'].includes(q9) && ['A', 'B'].includes(q8) && q11 >= 'B' && q12 === 'B' && q15 !== 'A' && qPrec !== 'C') return { code: 'B' };
+  // 8. MODELO B — negócio saudável no platô
+  //    Motor Q16=C → q15='F' (vários canais); Q13=B → q12='B' (estável); Q12 in [A,B] → qPrec≠'C'
+  if (['A', 'B'].includes(q9) && ['A', 'B'].includes(q8) && q11 >= 'B' && q12 === 'B' && q15 === 'F' && qPrec !== 'C') return { code: 'B' };
 
-  return { code: 'A' }; // fallback — caos sem demais âncoras definidas
+  return { code: 'A' }; // fallback
 }
 
 function personalizeDiagnosticText(text: string, fullName: string | undefined) {
