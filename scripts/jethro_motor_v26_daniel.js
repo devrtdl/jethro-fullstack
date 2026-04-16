@@ -30,11 +30,18 @@ function passagem1(q) {
   // E1: não fatura
   if (q.q11 === 'A') return 'E';
   // E2: pré-validação (início + pouco faturamento + rede pessoal)
-  if (inSet(q.q5, ['A','B']) && q.q11 === 'B' && inSet(q.q16, ['A','B'])) return 'E';
+  if (inSet(q.q5, ['A', 'B']) && q.q11 === 'B' && inSet(q.q16, ['A', 'B'])) return 'E';
 
   // ---- MODELO G — Operação no Limite ----
   // Fatura acima de R$5k + operação colapsa ao crescer
-  if (gte(q.q11, 'C') && q.q17 === 'C' && q.q13 !== 'C') return 'G';
+  if (gte(q.q11, 'C') && q.q17 === 'C' && q.q13 !== 'C') {
+    let reforcos = 0;
+    if (inSet(q.q18, ['D', 'E'])) reforcos++;
+    if (inSet(q.q8, ['B', 'C'])) reforcos++;
+    if (inSet(q.q9, ['B', 'C'])) reforcos++;
+    if (inSet(q.q5, ['C', 'D'])) reforcos++;
+    if (reforcos >= 2) return 'G';
+  }
 
   // ---- MODELO D — Fatura Mas Sangra ----
   // Fatura + está regredindo
@@ -42,22 +49,22 @@ function passagem1(q) {
 
   // ---- MODELO H — Gargalo do Dono ----
   // Trabalha 40h+ + fatura
-  if (inSet(q.q18, ['D','E']) && gte(q.q11, 'B')) return 'H';
+  if (inSet(q.q18, ['D', 'E']) && gte(q.q11, 'B')) return 'H';
 
   // ---- MODELO A — Caos Total ----
   // Finanças confusas + sem plano + margem ruim + propósito NÃO resolvido
   if (q.q9 === 'C'
-      && inSet(q.q8, ['B','C'])
-      && inSet(q.q12, ['B','C'])
-      && (q.q6 === 'C' || q.q7 === 'C'))
+    && inSet(q.q8, ['B', 'C'])
+    && inSet(q.q12, ['B', 'C'])
+    && (q.q6 === 'C' || q.q7 === 'C'))
     return 'A';
 
   // ---- MODELO F — Sem Motor Comercial ----
   // Canal único + fatura + margem pressionada
   // EXCEÇÃO: quando Q12=C + propósito forte → C é raiz, não F
-  if (gte(q.q11, 'B') && inSet(q.q16, ['A','B']) && inSet(q.q12, ['B','C'])) {
+  if (gte(q.q11, 'B') && inSet(q.q16, ['A', 'B']) && inSet(q.q12, ['B', 'C'])) {
     const precificacaoSevera = q.q12 === 'C';
-    const propositoForte = inSet(q.q6, ['A','B']) && inSet(q.q7, ['A','B']);
+    const propositoForte = inSet(q.q6, ['A', 'B']) && inSet(q.q7, ['A', 'B']);
     if (precificacaoSevera && propositoForte) {
       // Não retorna F → C captura abaixo (precificação é raiz)
     } else {
@@ -68,20 +75,20 @@ function passagem1(q) {
   // ---- MODELO C — Propósito Claro, Caixa Apertado ----
   // Q9 in [B,C] mantido: guarda de desambiguação C vs B.
   // Perfis com Q9='A' (finanças organizadas) são capturados por B abaixo.
-  if (inSet(q.q6, ['A','B'])
-      && inSet(q.q7, ['A','B'])
-      && inSet(q.q9, ['B','C'])
-      && inSet(q.q12, ['B','C']))
+  if (inSet(q.q6, ['A', 'B'])
+    && inSet(q.q7, ['A', 'B'])
+    && inSet(q.q9, ['B', 'C'])
+    && inSet(q.q12, ['B', 'C']))
     return 'C';
 
   // ---- MODELO B — Platô ----
   // Estrutura ok + finanças ok + fatura + canais diversificados + estável
-  if (inSet(q.q9, ['A','B'])
-      && inSet(q.q8, ['A','B'])
-      && gte(q.q11, 'B')
-      && inSet(q.q12, ['A','B'])
-      && q.q16 === 'C'
-      && q.q13 === 'B')
+  if (inSet(q.q9, ['A', 'B'])
+    && inSet(q.q8, ['A', 'B'])
+    && gte(q.q11, 'B')
+    && inSet(q.q12, ['A', 'B'])
+    && q.q16 === 'C'
+    && q.q13 === 'B')
     return 'B';
 
   return null; // nenhum modelo bateu → Passagem 2
@@ -100,7 +107,7 @@ function avaliarE(q) {
   // Âncoras
   let anchors = false;
   if (q.q11 === 'A') anchors = true;
-  if (inSet(q.q5, ['A','B']) && q.q11 === 'B' && inSet(q.q16, ['A','B'])) anchors = true;
+  if (inSet(q.q5, ['A', 'B']) && q.q11 === 'B' && inSet(q.q16, ['A', 'B'])) anchors = true;
   if (!anchors) return null;
 
   // Contradições
@@ -110,10 +117,10 @@ function avaliarE(q) {
 
   // Reforços
   let score = 0;
-  if (inSet(q.q5, ['A','B'])) score++;
-  if (inSet(q.q8, ['B','C'])) score++;
-  if (inSet(q.q9, ['B','C'])) score++;
-  if (inSet(q.q18, ['A','B'])) score++;
+  if (inSet(q.q5, ['A', 'B'])) score++;
+  if (inSet(q.q8, ['B', 'C'])) score++;
+  if (inSet(q.q9, ['B', 'C'])) score++;
+  if (inSet(q.q18, ['A', 'B'])) score++;
 
   return { modelo: 'E', score };
 }
@@ -122,10 +129,10 @@ function avaliarG(q) {
   // Variação G1: âncora forte (Q17=C)
   if (gte(q.q11, 'C') && q.q17 === 'C') {
     let score = 2; // base forte
-    if (inSet(q.q18, ['C','D','E'])) score++;
-    if (inSet(q.q8, ['B','C'])) score++;
-    if (inSet(q.q5, ['C','D'])) score++;
-    if (inSet(q.q13, ['A','B'])) score++;
+    if (inSet(q.q18, ['C', 'D', 'E'])) score++;
+    if (inSet(q.q8, ['B', 'C'])) score++;
+    if (inSet(q.q5, ['C', 'D'])) score++;
+    if (inSet(q.q13, ['A', 'B'])) score++;
     return { modelo: 'G', score };
   }
 
@@ -133,11 +140,11 @@ function avaliarG(q) {
   // FIX v2.6: threshold corrigido para Q11>=D (R$20k+) conforme spec PDF
   if (gte(q.q11, 'D') && q.q17 === 'B') {
     let score = 0;
-    if (inSet(q.q18, ['C','D','E'])) score++;
-    if (inSet(q.q8, ['B','C'])) score++;
-    if (inSet(q.q5, ['C','D'])) score++;
-    if (inSet(q.q13, ['A','B'])) score++;
-    if (inSet(q.q9, ['B','C'])) score++; // FIX v2.6: reforço Q9 adicionado
+    if (inSet(q.q18, ['C', 'D', 'E'])) score++;
+    if (inSet(q.q8, ['B', 'C'])) score++;
+    if (inSet(q.q5, ['C', 'D'])) score++;
+    if (inSet(q.q13, ['A', 'B'])) score++;
+    if (inSet(q.q9, ['B', 'C'])) score++; // FIX v2.6: reforço Q9 adicionado
     if (score >= 3) return { modelo: 'G', score };
   }
 
@@ -155,24 +162,24 @@ function avaliarD(q) {
 
   // Reforços
   let score = 0;
-  if (q.q13 === 'C' && inSet(q.q12, ['B','C'])) score++;
-  if (q.q12 === 'C' && inSet(q.q13, ['B','C'])) score++;
-  if (inSet(q.q9, ['B','C'])) score++;
-  if (inSet(q.q8, ['B','C'])) score++;
-  if (inSet(q.q5, ['C','D'])) score++;
+  if (q.q13 === 'C' && inSet(q.q12, ['B', 'C'])) score++;
+  if (q.q12 === 'C' && inSet(q.q13, ['B', 'C'])) score++;
+  if (inSet(q.q9, ['B', 'C'])) score++;
+  if (inSet(q.q8, ['B', 'C'])) score++;
+  if (inSet(q.q5, ['C', 'D'])) score++;
 
   return { modelo: 'D', score };
 }
 
 function avaliarH(q) {
   // Variação H1: âncora forte (Q18=D/E)
-  if (inSet(q.q18, ['D','E']) && gte(q.q11, 'B')) {
+  if (inSet(q.q18, ['D', 'E']) && gte(q.q11, 'B')) {
     if (q.q17 === 'C' && gte(q.q11, 'C')) return null; // → G
 
     let score = 2; // base forte
     if (q.q17 === 'B') score++;
     if (q.q8 === 'B') score++;
-    if (inSet(q.q5, ['C','D'])) score++;
+    if (inSet(q.q5, ['C', 'D'])) score++;
     if (q.q13 !== 'C') score++;
     return { modelo: 'H', score };
   }
@@ -182,7 +189,7 @@ function avaliarH(q) {
     let score = 0;
     if (q.q17 === 'B') score++;
     if (q.q8 === 'B') score++;
-    if (inSet(q.q5, ['C','D'])) score++;
+    if (inSet(q.q5, ['C', 'D'])) score++;
     if (score >= 3) return { modelo: 'H', score };
   }
 
@@ -192,21 +199,21 @@ function avaliarH(q) {
 function avaliarA(q) {
   // Âncoras: Q9=C + Q8 in [B,C] + Q12 in [B,C] + (Q6=C OU Q7=C)
   if (q.q9 !== 'C') return null;
-  if (!inSet(q.q8, ['B','C'])) return null;
-  if (!inSet(q.q12, ['B','C'])) return null;
+  if (!inSet(q.q8, ['B', 'C'])) return null;
+  if (!inSet(q.q12, ['B', 'C'])) return null;
   if (q.q6 !== 'C' && q.q7 !== 'C') return null;
 
   // Contradições
-  if (inSet(q.q6, ['A','B']) && inSet(q.q7, ['A','B'])) return null; // → C
+  if (inSet(q.q6, ['A', 'B']) && inSet(q.q7, ['A', 'B'])) return null; // → C
   if (q.q11 === 'A') return null; // → E
   if (q.q17 === 'C' && gte(q.q11, 'C')) return null; // → G
-  if (inSet(q.q18, ['D','E']) && gte(q.q11, 'B')) return null; // → H
+  if (inSet(q.q18, ['D', 'E']) && gte(q.q11, 'B')) return null; // → H
 
   // Reforços
   let score = 0;
-  if (inSet(q.q13, ['B','C'])) score++;
-  if (inSet(q.q5, ['B','C'])) score++;
-  if (inSet(q.q18, ['B','C'])) score++;
+  if (inSet(q.q13, ['B', 'C'])) score++;
+  if (inSet(q.q5, ['B', 'C'])) score++;
+  if (inSet(q.q18, ['B', 'C'])) score++;
   if (q.q6 === 'C' && q.q7 === 'C') score++;
 
   return { modelo: 'A', score };
@@ -214,23 +221,23 @@ function avaliarA(q) {
 
 function avaliarF(q) {
   // Âncoras: Q16 in [A,B] + Q11>=B + Q12 in [B,C]
-  if (!inSet(q.q16, ['A','B'])) return null;
+  if (!inSet(q.q16, ['A', 'B'])) return null;
   if (!gte(q.q11, 'B')) return null;
-  if (!inSet(q.q12, ['B','C'])) return null;
+  if (!inSet(q.q12, ['B', 'C'])) return null;
 
   // Contradições
-  if (inSet(q.q5, ['A','B']) && q.q11 === 'B' && inSet(q.q16, ['A','B'])) return null; // → E2
+  if (inSet(q.q5, ['A', 'B']) && q.q11 === 'B' && inSet(q.q16, ['A', 'B'])) return null; // → E2
   if (q.q17 === 'C' && gte(q.q11, 'C')) return null; // → G
-  if (inSet(q.q18, ['D','E'])) return null; // → H
+  if (inSet(q.q18, ['D', 'E'])) return null; // → H
   if (q.q13 === 'C' && q.q12 === 'C') return null; // → D
 
   // Reforços
   let score = 0;
-  if (inSet(q.q6, ['A','B']) && inSet(q.q7, ['A','B'])) score++;
-  if (inSet(q.q8, ['A','B'])) score++;
-  if (inSet(q.q9, ['A','B'])) score++;
-  if (inSet(q.q5, ['C','D'])) score++;
-  if (inSet(q.q18, ['B','C'])) score++;
+  if (inSet(q.q6, ['A', 'B']) && inSet(q.q7, ['A', 'B'])) score++;
+  if (inSet(q.q8, ['A', 'B'])) score++;
+  if (inSet(q.q9, ['A', 'B'])) score++;
+  if (inSet(q.q5, ['C', 'D'])) score++;
+  if (inSet(q.q18, ['B', 'C'])) score++;
   if (q.q13 === 'B') score++;
 
   return { modelo: 'F', score };
@@ -238,22 +245,22 @@ function avaliarF(q) {
 
 function avaliarC(q) {
   // Âncoras: Q6 in [A,B] + Q7 in [A,B] + Q12 in [B,C]
-  if (!inSet(q.q6, ['A','B'])) return null;
-  if (!inSet(q.q7, ['A','B'])) return null;
-  if (!inSet(q.q12, ['B','C'])) return null;
+  if (!inSet(q.q6, ['A', 'B'])) return null;
+  if (!inSet(q.q7, ['A', 'B'])) return null;
+  if (!inSet(q.q12, ['B', 'C'])) return null;
 
   // Contradições
   if (q.q11 === 'A') return null; // → E
   if (q.q17 === 'C' && gte(q.q11, 'C')) return null; // → G
-  if (inSet(q.q18, ['D','E']) && gte(q.q11, 'B')) return null; // → H
+  if (inSet(q.q18, ['D', 'E']) && gte(q.q11, 'B')) return null; // → H
 
   // Reforços
   let score = 0;
-  if (inSet(q.q9, ['B','C'])) score++;
-  if (inSet(q.q8, ['B','C'])) score++;
-  if (inSet(q.q5, ['C','D'])) score++;
-  if (inSet(q.q13, ['B','C'])) score++;
-  if (inSet(q.q18, ['A','B','C'])) score++;
+  if (inSet(q.q9, ['B', 'C'])) score++;
+  if (inSet(q.q8, ['B', 'C'])) score++;
+  if (inSet(q.q5, ['C', 'D'])) score++;
+  if (inSet(q.q13, ['B', 'C'])) score++;
+  if (inSet(q.q18, ['A', 'B', 'C'])) score++;
   if (q.q6 === 'A' && q.q7 === 'A') score++;
 
   return { modelo: 'C', score };
@@ -261,24 +268,24 @@ function avaliarC(q) {
 
 function avaliarB(q) {
   // Âncoras: Q9 in [A,B] + Q8 in [A,B] + Q11>=B + Q16=C + Q13=B
-  if (!inSet(q.q9, ['A','B'])) return null;
-  if (!inSet(q.q8, ['A','B'])) return null;
+  if (!inSet(q.q9, ['A', 'B'])) return null;
+  if (!inSet(q.q8, ['A', 'B'])) return null;
   if (!gte(q.q11, 'B')) return null;
   if (q.q16 !== 'C') return null;
   if (q.q13 !== 'B') return null;
 
   // Contradições
   if (q.q17 === 'C' && gte(q.q11, 'C')) return null; // → G
-  if (inSet(q.q18, ['D','E'])) return null; // → H
+  if (inSet(q.q18, ['D', 'E'])) return null; // → H
 
   // Reforços
   let score = 0;
-  if (inSet(q.q12, ['A','B'])) score++;
-  if (inSet(q.q5, ['C','D'])) score++;
-  if (inSet(q.q6, ['A','B'])) score++;
-  if (inSet(q.q7, ['A','B'])) score++;
-  if (inSet(q.q18, ['B','C'])) score++;
-  if (inSet(q.q17, ['A','B'])) score++;
+  if (inSet(q.q12, ['A', 'B'])) score++;
+  if (inSet(q.q5, ['C', 'D'])) score++;
+  if (inSet(q.q6, ['A', 'B'])) score++;
+  if (inSet(q.q7, ['A', 'B'])) score++;
+  if (inSet(q.q18, ['B', 'C'])) score++;
+  if (inSet(q.q17, ['A', 'B'])) score++;
 
   return { modelo: 'B', score };
 }
@@ -312,7 +319,7 @@ function classificarLead(q) {
   // Ordenar por score decrescente
   avaliacoes.sort((a, b) => b.score - a.score);
 
-  const p2_principal  = avaliacoes[0] || null;
+  const p2_principal = avaliacoes[0] || null;
   const p2_secundario = avaliacoes[1] || null;
 
   // === DECISÃO FINAL ===
@@ -374,22 +381,22 @@ module.exports = { classificarLead, passagem1 };
 if (require.main === module) {
   // Caso CT-001
   const ct001 = {
-    q5:'C', q6:'A', q7:'A', q8:'B', q9:'B',
-    q11:'E', q12:'B', q13:'A', q16:'A', q17:'B', q18:'C'
+    q5: 'C', q6: 'A', q7: 'A', q8: 'B', q9: 'B',
+    q11: 'E', q12: 'B', q13: 'A', q16: 'A', q17: 'B', q18: 'C'
   };
   const r = classificarLead(ct001);
   console.log('CT-001:', JSON.stringify(r, null, 2));
 
   // Gabarito v2.5
   const gabarito = [
-    { nome: "E", q: { q5:'B', q6:'B', q7:'B', q8:'B', q9:'B', q11:'A', q12:'B', q13:'B', q16:'A', q17:'B', q18:'B' }},
-    { nome: "G", q: { q5:'C', q6:'B', q7:'B', q8:'B', q9:'B', q11:'C', q12:'B', q13:'B', q16:'B', q17:'C', q18:'C' }},
-    { nome: "D", q: { q5:'C', q6:'B', q7:'B', q8:'B', q9:'B', q11:'C', q12:'B', q13:'C', q16:'B', q17:'B', q18:'B' }},
-    { nome: "H", q: { q5:'D', q6:'B', q7:'B', q8:'B', q9:'B', q11:'C', q12:'B', q13:'B', q16:'B', q17:'B', q18:'D' }},
-    { nome: "A", q: { q5:'C', q6:'C', q7:'B', q8:'B', q9:'C', q11:'C', q12:'B', q13:'B', q16:'B', q17:'B', q18:'B' }},
-    { nome: "F", q: { q5:'C', q6:'B', q7:'B', q8:'B', q9:'B', q11:'C', q12:'B', q13:'B', q16:'A', q17:'B', q18:'B' }},
-    { nome: "C", q: { q5:'C', q6:'A', q7:'A', q8:'B', q9:'B', q11:'C', q12:'C', q13:'B', q16:'B', q17:'B', q18:'B' }},
-    { nome: "B", q: { q5:'D', q6:'A', q7:'A', q8:'A', q9:'A', q11:'C', q12:'B', q13:'B', q16:'C', q17:'B', q18:'C' }},
+    { nome: "E", q: { q5: 'B', q6: 'B', q7: 'B', q8: 'B', q9: 'B', q11: 'A', q12: 'B', q13: 'B', q16: 'A', q17: 'B', q18: 'B' } },
+    { nome: "G", q: { q5: 'C', q6: 'B', q7: 'B', q8: 'B', q9: 'B', q11: 'C', q12: 'B', q13: 'B', q16: 'B', q17: 'C', q18: 'C' } },
+    { nome: "D", q: { q5: 'C', q6: 'B', q7: 'B', q8: 'B', q9: 'B', q11: 'C', q12: 'B', q13: 'C', q16: 'B', q17: 'B', q18: 'B' } },
+    { nome: "H", q: { q5: 'D', q6: 'B', q7: 'B', q8: 'B', q9: 'B', q11: 'C', q12: 'B', q13: 'B', q16: 'B', q17: 'B', q18: 'D' } },
+    { nome: "A", q: { q5: 'C', q6: 'C', q7: 'B', q8: 'B', q9: 'C', q11: 'C', q12: 'B', q13: 'B', q16: 'B', q17: 'B', q18: 'B' } },
+    { nome: "F", q: { q5: 'C', q6: 'B', q7: 'B', q8: 'B', q9: 'B', q11: 'C', q12: 'B', q13: 'B', q16: 'A', q17: 'B', q18: 'B' } },
+    { nome: "C", q: { q5: 'C', q6: 'A', q7: 'A', q8: 'B', q9: 'B', q11: 'C', q12: 'C', q13: 'B', q16: 'B', q17: 'B', q18: 'B' } },
+    { nome: "B", q: { q5: 'D', q6: 'A', q7: 'A', q8: 'A', q9: 'A', q11: 'C', q12: 'B', q13: 'B', q16: 'C', q17: 'B', q18: 'C' } },
   ];
 
   console.log('\nGabarito v2.5:');
