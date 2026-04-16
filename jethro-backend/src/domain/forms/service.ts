@@ -489,7 +489,7 @@ function buildRespondent(answersBySlug: Record<string, JsonValue>): SubmissionRe
 }
 
 type ClassifiedDiagnostic = {
-  code: 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H';
+  code: 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'X';
 };
 
 type DiagnosticMessageRow = {
@@ -551,7 +551,7 @@ function mapRevenueToMotorBand(faixa: string | undefined) {
 }
 
 function classifyDiagnostic(answersBySlug: Record<string, JsonValue>): ClassifiedDiagnostic {
-  // Motor v2.6 — cadeia de prioridade: E → G → D → H → A → F → C → B → Fallback
+  // Motor v2.7 — cadeia de prioridade: E → G → D → H → A → F → C → B → X → Fallback
   //
   // Mapeamento motor script → slugs do backend:
   //   Motor Q12 (precificação)    → qPrec  (precificacao)
@@ -595,13 +595,26 @@ function classifyDiagnostic(answersBySlug: Record<string, JsonValue>): Classifie
   if (q9 === 'C' && ['B', 'C'].includes(q8) && ['B', 'C'].includes(qPrec) && (q6 === 'C' || q7 === 'C')) return { code: 'A' };
 
   // 6. MODELO F — vende sem motor comercial
-  //    Motor Q16 in [A,B] = canal único/poucos = q15 ≠ 'F' (não usa vários canais) e ≠ 'E' (não prospecta ativamente)
+  //    Motor Q16 in [A,B] = canal único/poucos = q15 ≠ 'F' e ≠ 'E'
   //    Motor Q12 in [B,C] = cobra abaixo do valor = qPrec in [B,C]
-  //    Exceção motor: Q12=C + propósito forte → precificação é a raiz, C captura
+  //    Exceção 1: Q12=C + propósito forte → C é a raiz, não F
+  //    Exceção 2: crescendo sem problema dominante + propósito resolvido → X captura abaixo
   if (q11 >= 'B' && q15 !== '' && !['E', 'F'].includes(q15) && ['B', 'C'].includes(qPrec)) {
-    const precificacaoSevera = qPrec === 'C';
-    const propositoForte = ['A', 'B'].includes(q6) && ['A', 'B'].includes(q7);
-    if (!(precificacaoSevera && propositoForte)) return { code: 'F' };
+    const crescendoSemProblema = (
+      q12 === 'A'
+      && ['A', 'B'].includes(qPrec)
+      && ['A', 'B'].includes(q9)
+      && ['A', 'B'].includes(q8)
+      && ['A', 'B'].includes(q6)
+      && ['A', 'B'].includes(q7)
+    );
+    if (crescendoSemProblema) {
+      // skip F → X captura abaixo
+    } else if (qPrec === 'C' && ['A', 'B'].includes(q6) && ['A', 'B'].includes(q7)) {
+      // skip F → C captura abaixo (precificação severa é a raiz)
+    } else {
+      return { code: 'F' };
+    }
   }
 
   // 7. MODELO C — entrega bem, cobra mal
@@ -611,6 +624,10 @@ function classifyDiagnostic(answersBySlug: Record<string, JsonValue>): Classifie
   // 8. MODELO B — negócio saudável no platô
   //    Motor Q16=C → q15='F' (vários canais); Q13=B → q12='B' (estável); Q12 in [A,B] → qPrec≠'C'
   if (['A', 'B'].includes(q9) && ['A', 'B'].includes(q8) && q11 >= 'B' && q12 === 'B' && q15 === 'F' && qPrec !== 'C') return { code: 'B' };
+
+  // 9. MODELO X — pronto para escalar
+  //    Fatura + cresce + cobra bem/razoável + finanças ok + estrutura ok
+  if (q11 >= 'B' && ['A', 'B'].includes(qPrec) && q12 === 'A' && ['A', 'B'].includes(q9) && ['A', 'B'].includes(q8)) return { code: 'X' };
 
   return { code: 'A' }; // fallback
 }
