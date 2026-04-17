@@ -576,7 +576,7 @@ function classifyDiagnostic(answersBySlug: Record<string, JsonValue>): Classifie
 
   // 1. MODELO E — pré-receita
   if (q11 === 'A') return { code: 'E' };
-  if (q5 <= 'B' && q11 === 'B' && !['E', 'F'].includes(q15)) return { code: 'E' };
+  if (q5 <= 'B' && q11 === 'B' && q15 !== 'C') return { code: 'E' };
 
   // 2. MODELO G — operação no limite (colapso ao crescer)
   //    Motor Q13≠C: se está regredindo, D tem prioridade sobre G
@@ -602,11 +602,11 @@ function classifyDiagnostic(answersBySlug: Record<string, JsonValue>): Classifie
   if (q9 === 'C' && ['B', 'C'].includes(q8) && ['B', 'C'].includes(qPrec) && (q6 === 'C' || q7 === 'C')) return { code: 'A' };
 
   // 6. MODELO F — vende sem motor comercial
-  //    Motor Q16 in [A,B] = canal único/poucos = q15 ≠ 'F' e ≠ 'E'
+  //    Motor Q16 in [A,B] = canal único/poucos = q15 ≠ 'C'
   //    Motor Q12 in [B,C] = cobra abaixo do valor = qPrec in [B,C]
   //    Exceção 1: Q12=C + propósito forte → C é a raiz, não F
   //    Exceção 2: crescendo sem problema dominante + propósito resolvido → X captura abaixo
-  if (q11 >= 'B' && q15 !== '' && !['E', 'F'].includes(q15) && ['B', 'C'].includes(qPrec)) {
+  if (q11 >= 'B' && q15 !== '' && q15 !== 'C' && ['B', 'C'].includes(qPrec)) {
     const crescendoSemProblema = (
       q12 === 'A'
       && ['A', 'B'].includes(qPrec)
@@ -629,8 +629,8 @@ function classifyDiagnostic(answersBySlug: Record<string, JsonValue>): Classifie
   if (['A', 'B'].includes(q6) && ['A', 'B'].includes(q7) && ['B', 'C'].includes(q9) && ['B', 'C'].includes(qPrec)) return { code: 'C' };
 
   // 8. MODELO B — negócio saudável no platô
-  //    Motor Q16=C → q15='F' (vários canais); Q13=B → q12='B' (estável); Q12 in [A,B] → qPrec≠'C'
-  if (['A', 'B'].includes(q9) && ['A', 'B'].includes(q8) && q11 >= 'B' && q12 === 'B' && q15 === 'F' && qPrec !== 'C') return { code: 'B' };
+  //    Q13=B → q12='B' (estável); Q12 in [A,B] → qPrec≠'C'; canal não bloqueia B
+  if (['A', 'B'].includes(q9) && ['A', 'B'].includes(q8) && q11 >= 'B' && q12 === 'B' && qPrec !== 'C') return { code: 'B' };
 
   // 9. MODELO X — pronto para escalar
   //    Fatura + cresce + cobra bem/razoável + finanças ok + estrutura ok

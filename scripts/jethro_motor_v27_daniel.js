@@ -96,7 +96,6 @@ function passagem1(q) {
       && inSet(q.q8, ['A','B'])
       && gte(q.q11, 'B')
       && inSet(q.q12, ['A','B'])
-      && q.q16 === 'C'
       && q.q13 === 'B')
     return 'B';
 
@@ -301,15 +300,13 @@ function avaliarC(q) {
 }
 
 function avaliarB(q) {
-  // Âncoras: Q9 in [A,B] + Q8 in [A,B] + Q11>=B + Q16=C + Q13=B
+  // Âncoras: Q9 in [A,B] + Q8 in [A,B] + Q11>=B + Q13=B
   if (!inSet(q.q9, ['A','B'])) return null;
   if (!inSet(q.q8, ['A','B'])) return null;
   if (!gte(q.q11, 'B')) return null;
-  if (q.q16 !== 'C') return null;
   if (q.q13 !== 'B') return null;
 
   // Contradições
-  if (inSet(q.q16, ['A','B'])) return null; // → F
   if (q.q13 === 'C') return null; // → D
   if (q.q9 === 'C') return null; // → A
   if (q.q17 === 'C' && gte(q.q11, 'C')) return null; // → G

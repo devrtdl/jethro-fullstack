@@ -224,13 +224,11 @@ const diagnosticQuestions: DiagnosticQuestionSeed[] = [
     label: 'Como a maioria dos seus clientes chega até você hoje?',
     questionType: 'single_select',
     options: [
-      { label: 'Instagram', value: 'B' },
-      { label: 'Indicação', value: 'A' },
-      { label: 'Tráfego pago', value: 'C' },
-      { label: 'LinkedIn', value: 'D' },
-      { label: 'Eu vou atrás ativamente', value: 'E' },
-      { label: 'Uso vários canais', value: 'F' },
-      { label: 'Outro', value: 'G' },
+      { label: 'Rede social orgânica', value: 'A' },
+      { label: 'Indicação', value: 'B' },
+      { label: 'Rede social com tráfego pago', value: 'A' },
+      { label: 'Google Ads', value: 'A' },
+      { label: 'Uso vários canais', value: 'C' },
     ],
   },
   {
