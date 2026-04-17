@@ -580,7 +580,14 @@ function classifyDiagnostic(answersBySlug: Record<string, JsonValue>): Classifie
 
   // 2. MODELO G — operação no limite (colapso ao crescer)
   //    Motor Q13≠C: se está regredindo, D tem prioridade sobre G
-  if (q11 >= 'C' && q16 === 'C' && q12 !== 'C') return { code: 'G' };
+  if (q11 >= 'C' && q16 === 'C' && q12 !== 'C') {
+    let rg = 0;
+    if (['D', 'E'].includes(q17)) rg++;  // dono esticado (horas 40h+)
+    if (['B', 'C'].includes(q8)) rg++;   // estrutura fraca
+    if (['B', 'C'].includes(q9)) rg++;   // finanças sem controle
+    if (['C', 'D'].includes(q5)) rg++;   // não é início
+    if (rg >= 2) return { code: 'G' };
+  }
 
   // 3. MODELO D — fatura, mas está regredindo
   //    Motor Q13=C → q12 (lucro_crescimento) = 'C'

@@ -1114,9 +1114,9 @@ const diagnosticMessages: DiagnosticMessageSeed[] = [
       '→ O que funciona não está documentado — se você parar, o conhecimento para\n' +
       '→ Há alavancas de multiplicação que você ainda não ativou',
     rootCause: 'negócio pronto para escalar — falta mapa de multiplicação + blindagem operacional.',
-    palavraIntro: 'Deus não te deu um talento para enterrar. Ele espera fruto — e fruto que permanece.',
+    palavraIntro: 'O que Deus gerou por meio de você não foi para parar no que já funciona. Foi para dar fruto que permaneça.',
     scriptureVerse: 'João 15:16',
-    scriptureText: '"Eu vos escolhi a vós e vos designei para que vades e deis fruto, e o vosso fruto permaneça."',
+    scriptureText: '"Eu os escolhi para irem e darem fruto, fruto que permaneça."',
     block2Title: 'O que acontece com quem está pronto mas não age:',
     block2Body:
       'O maior risco de quem está bem não é quebrar. É estagnar.\n\n' +
@@ -1124,8 +1124,8 @@ const diagnosticMessages: DiagnosticMessageSeed[] = [
       '⚠ A operação que depende de você tem prazo de validade — e o corpo cobra\n' +
       '⚠ O talento que não multiplica começa a pesar — porque você sabe que poderia ir mais longe\n' +
       '⚠ E um dia o "está bom" vira "era bom" — porque o mercado mudou e você não\n\n' +
-      '"Devias ter entregado o meu dinheiro aos banqueiros, e eu, quando viesse, receberia o que é meu com juros." — Mateus 25:27\n' +
-      'Talento enterrado não honra quem o deu. Estar pronto e não agir é a versão moderna dessa parábola.\n\n' +
+      '"Você devia ao menos ter colocado o meu dinheiro no banco; assim, quando eu voltasse, o receberia com juros."— Mateus 25:27\n' +
+      'Estar pronto e não multiplicar é só uma forma mais sofisticada de enterrar o talento.\n\n' +
       'Você vai continuar "pronto"... ou vai começar a multiplicar?',
     ctaLabel: 'QUERO MEU PLANO DE AÇÃO',
   },
@@ -1135,15 +1135,15 @@ const diagnosticMessages: DiagnosticMessageSeed[] = [
     block1Title: 'O Que Te Trouxe Até Aqui Não Te Leva ao Topo',
     block1Body:
       'Você fez o que a maioria não faz: construiu um negócio que funciona. Que cresce. Que paga as contas e ainda dá fruto.\n\n' +
-      'Mas há uma lei nos negócios que ninguém avisa: o que funciona hoje tem prazo de validade. O método que te trouxe até R$20k não é o mesmo que te leva a R$100k. E você já sente isso.\n\n' +
+      'Mas há uma lei nos negócios que ninguém avisa: o que funciona hoje tem prazo de validade. O método que te trouxe até aqui não é o mesmo que te leva para o próximo patamar. E você já sente isso.\n\n' +
       'O Jethro não identificou um problema no seu negócio. Identificou uma oportunidade dominante.\n\n' +
-      '[NOME], o seu diagnóstico revela algo raro: você não precisa de conserto. Precisa de escada.\n' +
+      '[NOME], o seu diagnóstico revela algo raro: você não precisa de conserto. Precisa de estrutura de escala.\n' +
       'O Jethro mapeou com precisão:\n' +
       '→ Você tem base — mas a base foi construída para o tamanho atual, não para o próximo\n' +
       '→ Você tem clientes — mas não tem sistema de escala previsível\n' +
       '→ Você tem resultado — mas o resultado depende da sua presença, não de um sistema',
     rootCause: 'sistema construído para o tamanho atual — precisa de arquitetura para o próximo nível.',
-    palavraIntro: 'Multiplicação é princípio bíblico — não opcional. Deus não disse "preserva". Disse "multiplica".',
+    palavraIntro: 'O próximo nível exige mais do que manutenção. Exige multiplicação.',
     scriptureVerse: 'Gênesis 1:28',
     scriptureText: '"Sede fecundos, multiplicai-vos, enchei a terra e sujeitai-a."',
     block2Title: 'O custo invisível de estar pronto e não escalar:',
@@ -1153,7 +1153,7 @@ const diagnosticMessages: DiagnosticMessageSeed[] = [
       '⚠ O mercado que hoje te respeita amanhã te esquece — porque alguém escalou antes\n' +
       '⚠ A equipe que hoje é fiel amanhã busca crescimento em outro lugar — se não encontrar em você\n' +
       '⚠ E o chamado que Deus depositou fica menor do que poderia ser — não por incapacidade, mas por omissão\n\n' +
-      '"Porque a quem muito foi dado, muito lhe será exigido; e a quem muito se confiou, muito mais se pedirá." — Lucas 12:48\n' +
+      '"A quem muito foi dado, muito lhe será exigido;" — Lucas 12:48\n' +
       'Você recebeu muito. A pergunta não é se pode. É se vai.\n\n' +
       'Você vai administrar o que tem... ou vai multiplicar o que recebeu?',
     ctaLabel: 'QUERO MEU PLANO DE AÇÃO',
@@ -1172,7 +1172,7 @@ const diagnosticMessages: DiagnosticMessageSeed[] = [
       '→ Crescimento que existe mas não tem sistema de replicação — cada novo cliente é esforço novo\n' +
       '→ Uma visão de futuro que está clara no coração mas não está traduzida em metas e prazos',
     rootCause: 'negócio que funciona por competência pessoal — precisa funcionar por sistema para multiplicar.',
-    palavraIntro: 'Jetro viu que Moisés fazia tudo certo — mas sozinho. O conselho não foi "pare". Foi "estruture para multiplicar".',
+    palavraIntro: 'O que hoje funciona pela sua força precisa começar a funcionar por estrutura. Multiplicação sustentável exige repartir peso, formar gente e construir sistema.',
     scriptureVerse: 'Êxodo 18:21',
     scriptureText: '"Além disso, procura dentre todo o povo homens capazes... e põe-nos sobre eles por chefes de mil, chefes de cem, chefes de cinquenta e chefes de dez."',
     block2Title: 'O que está em jogo quando você adia a multiplicação:',
@@ -1183,7 +1183,7 @@ const diagnosticMessages: DiagnosticMessageSeed[] = [
       '⚠ O mercado que reconhece você como bom — mas não como referência\n' +
       '⚠ E o legado que Deus planejou para você ficando no rascunho em vez de virar realidade\n\n' +
       '"Eu vos escolhi e vos designei para que vades e deis fruto, e o vosso fruto permaneça." — João 15:16\n' +
-      'Fruto que permanece não é fruto que depende de você — é fruto que o sistema sustenta.\n\n' +
+      'Fruto que permanece não pode depender só de você. Precisa de estrutura para continuar crescendo.\n\n' +
       'Você vai continuar dando fruto sozinho... ou vai construir o pomar?',
     ctaLabel: 'QUERO MEU PLANO DE AÇÃO',
   },
