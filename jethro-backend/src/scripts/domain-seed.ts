@@ -354,6 +354,16 @@ const diagnosticModels: DiagnosticModelSeed[] = [
     pillars: ['P6', 'P2', 'P4'],
     triggerRules: ["Q9 in ['A','B'] and Q8 in ['A','B'] and Q11 >= 'B' and Q12 = 'B' and Q15 <> 'A'"],
   },
+  {
+    code: 'X',
+    name: 'Modelo X',
+    title: 'Pronto para Escalar — Negócio Funcional em Ascensão',
+    summary: 'Negócio que funciona, cresce e tem base sólida — precisa de sistema de multiplicação para ir ao próximo nível.',
+    priorityOrder: 9,
+    rootCause: 'Negócio pronto para escalar — falta mapa de multiplicação + blindagem operacional.',
+    pillars: ['P4', 'P6', 'P7'],
+    triggerRules: ["Q11 >= 'B' and Q12 in ['A','B'] and Q13 = 'A' and Q9 in ['A','B'] and Q8 in ['A','B']"],
+  },
 ];
 
 const diagnosticMessages: DiagnosticMessageSeed[] = [
@@ -1089,6 +1099,95 @@ const diagnosticMessages: DiagnosticMessageSeed[] = [
     ctaLabel: 'ESTOU PRONTO PARA MUDAR ISSO',
   },
 
+  // ─── MODELO X — Pronto para Escalar — Negócio Funcional em Ascensão ──────────
+  {
+    modelCode: 'X',
+    variant: 'v1',
+    block1Title: 'Pronto para o Próximo Nível',
+    block1Body:
+      'Tem um momento — geralmente quando o dia foi bom, não quando foi ruim — em que você olha para o que construiu e sente algo que não é insatisfação. É inquietação.\n\n' +
+      'A pergunta que fica: "Como eu levo isso para o próximo nível sem perder o que construí?"\n\n' +
+      'O Jethro identificou a resposta.\n\n' +
+      '[NOME], você tem o coração certo e o negócio certo. Falta o sistema que multiplica.\n' +
+      'O Jethro identificou algo específico no seu negócio:\n' +
+      '→ Você cresceu, mas a estrutura ainda depende de você\n' +
+      '→ O que funciona não está documentado — se você parar, o conhecimento para\n' +
+      '→ Há alavancas de multiplicação que você ainda não ativou',
+    rootCause: 'negócio pronto para escalar — falta mapa de multiplicação + blindagem operacional.',
+    palavraIntro: 'Deus não te deu um talento para enterrar. Ele espera fruto — e fruto que permanece.',
+    scriptureVerse: 'João 15:16',
+    scriptureText: '"Eu vos escolhi a vós e vos designei para que vades e deis fruto, e o vosso fruto permaneça."',
+    block2Title: 'O que acontece com quem está pronto mas não age:',
+    block2Body:
+      'O maior risco de quem está bem não é quebrar. É estagnar.\n\n' +
+      '⚠ O mercado não espera — concorrentes menos qualificados vão ocupar o espaço que você não escalou\n' +
+      '⚠ A operação que depende de você tem prazo de validade — e o corpo cobra\n' +
+      '⚠ O talento que não multiplica começa a pesar — porque você sabe que poderia ir mais longe\n' +
+      '⚠ E um dia o "está bom" vira "era bom" — porque o mercado mudou e você não\n\n' +
+      '"Devias ter entregado o meu dinheiro aos banqueiros, e eu, quando viesse, receberia o que é meu com juros." — Mateus 25:27\n' +
+      'Talento enterrado não honra quem o deu. Estar pronto e não agir é a versão moderna dessa parábola.\n\n' +
+      'Você vai continuar "pronto"... ou vai começar a multiplicar?',
+    ctaLabel: 'QUERO MEU PLANO DE AÇÃO',
+  },
+  {
+    modelCode: 'X',
+    variant: 'v2',
+    block1Title: 'O Que Te Trouxe Até Aqui Não Te Leva ao Topo',
+    block1Body:
+      'Você fez o que a maioria não faz: construiu um negócio que funciona. Que cresce. Que paga as contas e ainda dá fruto.\n\n' +
+      'Mas há uma lei nos negócios que ninguém avisa: o que funciona hoje tem prazo de validade. O método que te trouxe até R$20k não é o mesmo que te leva a R$100k. E você já sente isso.\n\n' +
+      'O Jethro não identificou um problema no seu negócio. Identificou uma oportunidade dominante.\n\n' +
+      '[NOME], o seu diagnóstico revela algo raro: você não precisa de conserto. Precisa de escada.\n' +
+      'O Jethro mapeou com precisão:\n' +
+      '→ Você tem base — mas a base foi construída para o tamanho atual, não para o próximo\n' +
+      '→ Você tem clientes — mas não tem sistema de escala previsível\n' +
+      '→ Você tem resultado — mas o resultado depende da sua presença, não de um sistema',
+    rootCause: 'sistema construído para o tamanho atual — precisa de arquitetura para o próximo nível.',
+    palavraIntro: 'Multiplicação é princípio bíblico — não opcional. Deus não disse "preserva". Disse "multiplica".',
+    scriptureVerse: 'Gênesis 1:28',
+    scriptureText: '"Sede fecundos, multiplicai-vos, enchei a terra e sujeitai-a."',
+    block2Title: 'O custo invisível de estar pronto e não escalar:',
+    block2Body:
+      'Você não perde de uma vez. Perde devagar:\n\n' +
+      '⚠ A energia que hoje é entusiasmo vira rotina — e rotina sem visão vira desgaste\n' +
+      '⚠ O mercado que hoje te respeita amanhã te esquece — porque alguém escalou antes\n' +
+      '⚠ A equipe que hoje é fiel amanhã busca crescimento em outro lugar — se não encontrar em você\n' +
+      '⚠ E o chamado que Deus depositou fica menor do que poderia ser — não por incapacidade, mas por omissão\n\n' +
+      '"Porque a quem muito foi dado, muito lhe será exigido; e a quem muito se confiou, muito mais se pedirá." — Lucas 12:48\n' +
+      'Você recebeu muito. A pergunta não é se pode. É se vai.\n\n' +
+      'Você vai administrar o que tem... ou vai multiplicar o que recebeu?',
+    ctaLabel: 'QUERO MEU PLANO DE AÇÃO',
+  },
+  {
+    modelCode: 'X',
+    variant: 'v3',
+    block1Title: 'Base Sólida, Hora de Multiplicar',
+    block1Body:
+      'Há um momento na vida de um empreendedor em que o problema não é mais sobrevivência. É multiplicação.\n\n' +
+      'Você passou da fase da crise. O negócio funciona, cresce, tem direção. Mas você sabe — lá no fundo — que está operando abaixo do potencial. Não por incompetência. Por falta de mapa.\n\n' +
+      'O Jethro não encontrou feridas no seu negócio. Encontrou portas que você ainda não abriu.\n\n' +
+      '[NOME], o que Deus colocou nas suas mãos já deu fruto. Agora precisa dar fruto que permanece.\n' +
+      'O Jethro identificou com precisão:\n' +
+      '→ Processos que funcionam na sua cabeça mas não estão no papel — o negócio depende da sua memória\n' +
+      '→ Crescimento que existe mas não tem sistema de replicação — cada novo cliente é esforço novo\n' +
+      '→ Uma visão de futuro que está clara no coração mas não está traduzida em metas e prazos',
+    rootCause: 'negócio que funciona por competência pessoal — precisa funcionar por sistema para multiplicar.',
+    palavraIntro: 'Jetro viu que Moisés fazia tudo certo — mas sozinho. O conselho não foi "pare". Foi "estruture para multiplicar".',
+    scriptureVerse: 'Êxodo 18:21',
+    scriptureText: '"Além disso, procura dentre todo o povo homens capazes... e põe-nos sobre eles por chefes de mil, chefes de cem, chefes de cinquenta e chefes de dez."',
+    block2Title: 'O que está em jogo quando você adia a multiplicação:',
+    block2Body:
+      'Quem está pronto e não multiplica paga um preço que não aparece no caixa:\n\n' +
+      '⚠ O peso de saber que poderia ir mais longe — e escolher não ir\n' +
+      '⚠ A equipe que cresce menos porque você não criou o espaço\n' +
+      '⚠ O mercado que reconhece você como bom — mas não como referência\n' +
+      '⚠ E o legado que Deus planejou para você ficando no rascunho em vez de virar realidade\n\n' +
+      '"Eu vos escolhi e vos designei para que vades e deis fruto, e o vosso fruto permaneça." — João 15:16\n' +
+      'Fruto que permanece não é fruto que depende de você — é fruto que o sistema sustenta.\n\n' +
+      'Você vai continuar dando fruto sozinho... ou vai construir o pomar?',
+    ctaLabel: 'QUERO MEU PLANO DE AÇÃO',
+  },
+
 ];
 
 const diagnosticMessageRootCauses: Record<string, string> = {
@@ -1100,6 +1199,7 @@ const diagnosticMessageRootCauses: Record<string, string> = {
   F: 'ausência de motor comercial — aquisição + funil + follow-up + recorrência.',
   G: 'ausência de sistema operacional — processo + padrão + capacidade estruturada.',
   H: 'ausência de governo pessoal — agenda, prioridade, delegação e ritmo semanal.',
+  X: 'falta de mapa de multiplicação + blindagem operacional para escalar sem depender do dono.',
 };
 
 const rogerioQuotes: RogerioQuoteSeed[] = [
