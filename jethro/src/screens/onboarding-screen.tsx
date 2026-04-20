@@ -118,8 +118,8 @@ export function OnboardingScreen() {
         const qs = (data as unknown as { questions: Question[] }).questions ?? (data as unknown as Question[]);
         setQuestions(qs);
         setSteps(groupIntoSteps(qs));
-      } catch {
-        setError('Não foi possível carregar as perguntas. Tenta novamente.');
+      } catch (e) {
+        setError(e instanceof Error ? e.message : 'Não foi possível carregar as perguntas.');
       } finally {
         setLoading(false);
       }

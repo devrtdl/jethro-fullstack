@@ -39,14 +39,17 @@ async function parseResponse(response: Response) {
 }
 
 function getErrorMessage(payload: unknown, fallbackMessage: string) {
-  if (payload && typeof payload === 'object' && 'message' in payload) {
-    const message = payload.message;
-
-    if (typeof message === 'string' && message.trim()) {
-      return message;
+  if (payload && typeof payload === 'object') {
+    // Backend format: { error: { message: "..." } }
+    const error = (payload as Record<string, unknown>).error;
+    if (error && typeof error === 'object') {
+      const msg = (error as Record<string, unknown>).message;
+      if (typeof msg === 'string' && msg.trim()) return msg;
     }
+    // Fallback: top-level message field
+    const message = (payload as Record<string, unknown>).message;
+    if (typeof message === 'string' && message.trim()) return message;
   }
-
   return fallbackMessage;
 }
 
