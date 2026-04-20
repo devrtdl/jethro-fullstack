@@ -41,8 +41,9 @@ export function PaywallScreen() {
           [{ text: 'OK' }]
         );
       }
-    } catch {
-      Alert.alert('Erro', 'Não foi possível verificar o estado. Tenta novamente.');
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      Alert.alert('Erro ao verificar', msg, [{ text: 'OK' }]);
     } finally {
       setVerifying(false);
     }
@@ -58,8 +59,9 @@ export function PaywallScreen() {
       });
       // After browser closes, auto-check
       await checkAndProceed();
-    } catch {
-      Alert.alert('Erro', 'Não foi possível abrir o checkout. Tenta novamente.');
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      Alert.alert('Erro no checkout', msg, [{ text: 'OK' }]);
     } finally {
       setLoading(false);
     }
@@ -69,12 +71,13 @@ export function PaywallScreen() {
     setLoading(true);
     try {
       await subscriptionService.activateSandbox();
-      router.replace('/onboarding');
-    } catch {
-      Alert.alert('Erro', 'Activação sandbox falhou.');
+    } catch (e) {
+      // Log but don't block — sandbox is a dev bypass
+      console.warn('[sandbox] activateSandbox failed:', e instanceof Error ? e.message : String(e));
     } finally {
       setLoading(false);
     }
+    router.replace('/onboarding');
   }, [router]);
 
   return (
