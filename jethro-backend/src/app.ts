@@ -8,6 +8,8 @@ import { isAppError } from './lib/errors.js';
 import { registerAuthBridgeRoutes } from './routes/auth-bridge.js';
 import { registerFormRoutes } from './routes/forms.js';
 import { registerHealthRoutes } from './routes/health.js';
+import { registerMentorRoutes } from './routes/mentor.js';
+import { registerOnboardingRoutes } from './routes/onboarding.js';
 import { registerRatingRoutes } from './routes/ratings.js';
 
 export function createApp() {
@@ -21,7 +23,7 @@ export function createApp() {
 
     reply.header('Access-Control-Allow-Origin', allowOrigin);
     reply.header('Access-Control-Allow-Methods', 'GET,POST,PATCH,DELETE,OPTIONS');
-    reply.header('Access-Control-Allow-Headers', 'Content-Type, x-admin-api-key');
+    reply.header('Access-Control-Allow-Headers', 'Content-Type, x-admin-api-key, Authorization');
   });
 
   app.options('/*', async (_request, reply) => {
@@ -32,6 +34,8 @@ export function createApp() {
   app.register(registerHealthRoutes);
   app.register(registerFormRoutes);
   app.register(registerRatingRoutes);
+  app.register(registerMentorRoutes);
+  app.register(registerOnboardingRoutes);
   app.addHook('onClose', async () => {
     await closeDbPool();
   });

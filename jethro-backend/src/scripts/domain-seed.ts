@@ -271,6 +271,351 @@ const diagnosticQuestions: DiagnosticQuestionSeed[] = [
   },
 ];
 
+// ─── PERGUNTAS DO ONBOARDING (order_index 100+) ───────────────────────────────
+// Armazenadas em diagnostic_questions com prefixo onb_ e metadata.form='onboarding'
+// showIf gates são avaliados pelo frontend; backend ignora respostas de perguntas ocultas
+
+const onboardingQuestions: DiagnosticQuestionSeed[] = [
+  // FASE 1 — Abertura e Contexto (universal)
+  {
+    code: 'onb_o1_contexto',
+    orderIndex: 100,
+    label: 'Conta-me sobre o teu negócio. O que é, há quanto tempo existe e por que escolheste este ramo?',
+    questionType: 'textarea',
+    validation: { minLength: 30, maxLength: 1000 },
+    metadata: { form: 'onboarding', phase: 1, fields: ['area_negocio', 'tempo_negocio'] },
+  },
+  {
+    code: 'onb_o2_equipa',
+    orderIndex: 101,
+    label: 'Quem trabalha contigo hoje? Tens loja física, Instagram activo, site?',
+    questionType: 'textarea',
+    validation: { minLength: 10, maxLength: 800 },
+    metadata: { form: 'onboarding', phase: 1, fields: ['equipa', 'ativos_fisicos', 'audiencia_digital'] },
+  },
+  {
+    code: 'onb_o3_meta',
+    orderIndex: 102,
+    label: 'Se daqui a 6 meses o teu negócio estivesse exactamente onde precisas — qual seria o número mais importante? O que teria mudado?',
+    questionType: 'textarea',
+    validation: { minLength: 20, maxLength: 600 },
+    metadata: { form: 'onboarding', phase: 1, fields: ['meta_6_meses'] },
+  },
+  // FASE 3 — Perguntas Núcleo Universais
+  {
+    code: 'onb_o4_financeiro',
+    orderIndex: 103,
+    label: 'O teu negócio tem separação de receita e despesas? Quanto sobra por mês, em média?',
+    questionType: 'textarea',
+    validation: { minLength: 10, maxLength: 600 },
+    metadata: { form: 'onboarding', phase: 3, fields: ['o_que_sobra', 'modelo_recebimento'] },
+  },
+  {
+    code: 'onb_o5_pf_pj',
+    orderIndex: 104,
+    label: 'As finanças da tua empresa estão separadas das tuas finanças pessoais? Tens pró-labore fixo definido?',
+    questionType: 'textarea',
+    validation: { minLength: 5, maxLength: 400 },
+    metadata: { form: 'onboarding', phase: 3, fields: ['separacao_pf_pj', 'pro_labore'] },
+  },
+  {
+    code: 'onb_o6_custos',
+    orderIndex: 105,
+    label: 'Quais são os teus 3 maiores custos fixos mensais? Sabes quanto é cada um?',
+    questionType: 'textarea',
+    validation: { minLength: 5, maxLength: 500 },
+    metadata: { form: 'onboarding', phase: 3, fields: ['custo_fixo_mensal', 'margem_estimada_pct'] },
+  },
+  {
+    code: 'onb_o6a_dre',
+    orderIndex: 106,
+    label: 'Tens um DRE mensal — mesmo que simples? Como acompanhas o resultado financeiro?',
+    questionType: 'single_select',
+    options: [
+      { label: 'Sim, tenho DRE activo', value: 'A' },
+      { label: 'Às vezes / incompleto', value: 'B' },
+      { label: 'Não, nunca tive', value: 'C' },
+    ],
+    metadata: { form: 'onboarding', phase: 3, fields: ['sem_dre_flag'] },
+  },
+  {
+    code: 'onb_o7_canal',
+    orderIndex: 107,
+    label: 'Como os teus clientes chegam até ti hoje? Qual é o principal canal?',
+    questionType: 'textarea',
+    validation: { minLength: 5, maxLength: 400 },
+    metadata: { form: 'onboarding', phase: 3, fields: ['canal_principal'] },
+  },
+  {
+    code: 'onb_o7a_clientes',
+    orderIndex: 108,
+    label: 'Quantos clientes activos tens hoje? Desses, quantos são recorrentes (compram mais de uma vez por ano)?',
+    questionType: 'text',
+    metadata: { form: 'onboarding', phase: 3, fields: ['clientes_ativos_total', 'clientes_recorrentes'] },
+  },
+  {
+    code: 'onb_o7b_ticket',
+    orderIndex: 109,
+    label: 'Qual é o teu ticket médio actual? O valor que um cliente típico paga numa compra ou contrato.',
+    questionType: 'text',
+    metadata: { form: 'onboarding', phase: 3, fields: ['ticket_medio'] },
+  },
+  {
+    code: 'onb_o8_conversao',
+    orderIndex: 110,
+    label: 'De cada 10 pessoas que demonstram interesse, quantas se tornam clientes? Como é o teu processo de venda?',
+    questionType: 'textarea',
+    validation: { minLength: 5, maxLength: 500 },
+    metadata: { form: 'onboarding', phase: 3, fields: ['conversao_de_10'] },
+  },
+  {
+    code: 'onb_o8a_objeccao',
+    orderIndex: 111,
+    label: 'Qual é a principal objecção que ouves antes de perder uma venda?',
+    questionType: 'textarea',
+    validation: { minLength: 5, maxLength: 400 },
+    metadata: { form: 'onboarding', phase: 3, fields: ['objeccao_principal'] },
+  },
+  {
+    code: 'onb_o8b_sazonalidade',
+    orderIndex: 112,
+    label: 'O teu negócio tem sazonalidade? Em que meses vendes mais e em que meses vendes menos?',
+    questionType: 'textarea',
+    validation: { minLength: 5, maxLength: 300 },
+    metadata: { form: 'onboarding', phase: 3, fields: ['sazonalidade_meses_fortes', 'sazonalidade_meses_fracos'] },
+  },
+  {
+    code: 'onb_o9_problema',
+    orderIndex: 113,
+    label: 'Qual é o maior problema que o teu negócio enfrenta neste momento — na tua opinião?',
+    questionType: 'textarea',
+    validation: { minLength: 20, maxLength: 600 },
+    metadata: { form: 'onboarding', phase: 3, fields: ['maior_problema_percebido'] },
+  },
+  {
+    code: 'onb_o10_tentou',
+    orderIndex: 114,
+    label: 'O que já tentaste fazer para resolver esse problema? O que funcionou e o que não funcionou?',
+    questionType: 'textarea',
+    validation: { minLength: 10, maxLength: 600 },
+    metadata: { form: 'onboarding', phase: 3, fields: ['ja_tentou'] },
+  },
+  {
+    code: 'onb_o11_impacto',
+    orderIndex: 115,
+    label: 'Se o teu negócio estiver exactamente onde precisa estar daqui a 6 meses — o que é diferente na tua vida pessoal?',
+    questionType: 'textarea',
+    validation: { minLength: 10, maxLength: 500 },
+    metadata: { form: 'onboarding', phase: 3, fields: ['impacto_pessoal'] },
+  },
+  // FASE 3 — OB Condicionais
+  {
+    code: 'onb_ob09_equipe',
+    orderIndex: 116,
+    label: 'Tens equipa hoje? Se sim, qual o maior desafio com ela?',
+    questionType: 'single_select',
+    options: [
+      { label: 'Não tenho equipa, faço tudo sozinho', value: 'A' },
+      { label: 'Tenho equipa e funciona bem', value: 'B' },
+      { label: 'Tenho equipa mas não consigo reter', value: 'C' },
+      { label: 'Tenho equipa mas não sei liderar/delegar', value: 'D' },
+    ],
+    metadata: { form: 'onboarding', phase: 3, conditional: true, fields: ['equipe_desafio'] },
+  },
+  {
+    code: 'onb_ob10_concentracao',
+    orderIndex: 117,
+    label: 'Que percentagem do teu faturamento vem dos teus 2 maiores clientes?',
+    questionType: 'single_select',
+    options: [
+      { label: 'Menos de 30%', value: 'A' },
+      { label: 'Entre 30% e 60%', value: 'B' },
+      { label: 'Mais de 60%', value: 'C' },
+    ],
+    metadata: {
+      form: 'onboarding', phase: 3, conditional: true, fields: ['concentracao_receita'],
+      showIf: { diagnosticRevenueMin: 'B', excludeModels: ['E'] },
+    },
+  },
+  {
+    code: 'onb_ob11_subpreco',
+    orderIndex: 118,
+    label: 'Por que achas que o teu preço está abaixo do que deveria?',
+    questionType: 'single_select',
+    options: [
+      { label: 'Medo de perder cliente', value: 'A' },
+      { label: 'O mercado aqui não aceita preço mais alto', value: 'B' },
+      { label: 'Não sei calcular o preço certo', value: 'C' },
+      { label: 'Os clientes não enxergam o meu valor', value: 'D' },
+    ],
+    metadata: {
+      form: 'onboarding', phase: 3, conditional: true, fields: ['razao_subpreco'],
+      showIf: { diagnosticAnswerSlug: 'precificacao', diagnosticAnswerValues: ['B', 'C'] },
+    },
+  },
+  {
+    code: 'onb_ob12_socio',
+    orderIndex: 119,
+    label: 'Tens sócios no negócio?',
+    questionType: 'single_select',
+    options: [
+      { label: 'Não, sou o único dono', value: 'A' },
+      { label: 'Sim, e a parceria funciona bem', value: 'B' },
+      { label: 'Sim, mas temos desalinhamentos frequentes', value: 'C' },
+    ],
+    metadata: { form: 'onboarding', phase: 3, conditional: true, fields: ['tem_socio'] },
+  },
+  {
+    code: 'onb_ob13_inadimplencia',
+    orderIndex: 120,
+    label: 'Tens clientes que atrasam ou não pagam?',
+    questionType: 'single_select',
+    options: [
+      { label: 'Raramente — a maioria paga em dia', value: 'A' },
+      { label: 'Alguns atrasam, mas eventualmente pagam', value: 'B' },
+      { label: 'É um problema constante', value: 'C' },
+    ],
+    metadata: {
+      form: 'onboarding', phase: 3, conditional: true, fields: ['inadimplencia_nivel'],
+      showIf: { diagnosticRevenueMin: 'B', excludeModels: ['E'] },
+    },
+  },
+  {
+    code: 'onb_ob14_plataforma',
+    orderIndex: 121,
+    label: 'De onde vem a maior parte dos teus clientes ou vendas?',
+    questionType: 'single_select',
+    options: [
+      { label: 'Canal próprio (site, loja, lista) — controlo eu', value: 'A' },
+      { label: 'Redes sociais (Instagram, TikTok) — dependo do algoritmo', value: 'B' },
+      { label: 'Marketplace (iFood, Mercado Livre) — dependo da plataforma', value: 'C' },
+      { label: 'Mistura equilibrada de canais', value: 'D' },
+    ],
+    metadata: {
+      form: 'onboarding', phase: 3, conditional: true, fields: ['dependencia_plataforma'],
+      showIf: { diagnosticAnswerSlug: 'canal_aquisicao', excludeAnswerValues: ['B'] },
+    },
+  },
+  // FASE 4 — Adaptativa por modelo
+  {
+    code: 'onb_o12_margem',
+    orderIndex: 122,
+    label: 'Sabes qual produto ou serviço tem maior margem? E qual está no prejuízo?',
+    questionType: 'textarea',
+    validation: { minLength: 5, maxLength: 500 },
+    metadata: {
+      form: 'onboarding', phase: 4, conditional: true,
+      showIf: { diagnosticModel: ['C', 'D'] },
+    },
+  },
+  {
+    code: 'onb_o13_recebimento',
+    orderIndex: 123,
+    label: 'Como funciona o teu recebimento? À vista, parcelado, prazo longo?',
+    questionType: 'textarea',
+    validation: { minLength: 5, maxLength: 400 },
+    metadata: {
+      form: 'onboarding', phase: 4, conditional: true,
+      showIf: { diagnosticModel: ['C', 'D'] },
+    },
+  },
+  {
+    code: 'onb_o14_dividas',
+    orderIndex: 124,
+    label: 'Tens dívidas de curto prazo que consomem caixa mensalmente? Qual o valor total?',
+    questionType: 'text',
+    metadata: {
+      form: 'onboarding', phase: 4, conditional: true,
+      showIf: { diagnosticModel: ['C', 'D'] },
+    },
+  },
+  {
+    code: 'onb_o16_script_venda',
+    orderIndex: 125,
+    label: 'Tens algum script ou processo de venda definido? Ou cada venda é diferente?',
+    questionType: 'textarea',
+    validation: { minLength: 5, maxLength: 400 },
+    metadata: {
+      form: 'onboarding', phase: 4, conditional: true,
+      showIf: { diagnosticModel: ['A', 'B'] },
+    },
+  },
+  {
+    code: 'onb_o18_proposta',
+    orderIndex: 126,
+    label: 'Tens proposta comercial escrita? Ou é tudo verbal e informal?',
+    questionType: 'textarea',
+    validation: { minLength: 5, maxLength: 400 },
+    metadata: {
+      form: 'onboarding', phase: 4, conditional: true,
+      showIf: { diagnosticModel: ['A', 'B'] },
+    },
+  },
+  {
+    code: 'onb_o20_processos',
+    orderIndex: 127,
+    label: 'Quais etapas do processo de entrega dependem exclusivamente de ti?',
+    questionType: 'textarea',
+    validation: { minLength: 5, maxLength: 500 },
+    metadata: {
+      form: 'onboarding', phase: 4, conditional: true,
+      showIf: { diagnosticModel: ['G'] },
+    },
+  },
+  {
+    code: 'onb_o21_ferias',
+    orderIndex: 128,
+    label: 'Se tirasses 2 semanas de férias agora, o que para no teu negócio?',
+    questionType: 'textarea',
+    validation: { minLength: 5, maxLength: 500 },
+    metadata: {
+      form: 'onboarding', phase: 4, conditional: true,
+      showIf: { diagnosticModel: ['G'] },
+    },
+  },
+  {
+    code: 'onb_o22_metas_equipa',
+    orderIndex: 129,
+    label: 'Cada pessoa da tua equipa sabe exactamente qual é a sua meta para esta semana?',
+    questionType: 'textarea',
+    validation: { minLength: 5, maxLength: 400 },
+    metadata: {
+      form: 'onboarding', phase: 4, conditional: true,
+      showIf: { diagnosticModel: ['H'] },
+    },
+  },
+  {
+    code: 'onb_o24_posicionamento',
+    orderIndex: 130,
+    label: 'As pessoas entendem o que fazes e para quem? Consegues explicar em 1 frase?',
+    questionType: 'textarea',
+    validation: { minLength: 5, maxLength: 400 },
+    metadata: {
+      form: 'onboarding', phase: 4, conditional: true,
+      showIf: { diagnosticModel: ['E', 'F'] },
+    },
+  },
+  {
+    code: 'onb_o25_ticket_potencial',
+    orderIndex: 131,
+    label: 'Qual é o teu ticket médio actual? E qual achas que poderia ser com o posicionamento certo?',
+    questionType: 'text',
+    metadata: {
+      form: 'onboarding', phase: 4, conditional: true,
+      showIf: { diagnosticModel: ['E', 'F'] },
+    },
+  },
+  // FASE 6 — Confirmação
+  {
+    code: 'onb_o23_confirmacao',
+    orderIndex: 132,
+    label: 'Para criar o teu plano personalizado, lista as tuas ofertas actuais com preço e margem estimada.',
+    questionType: 'textarea',
+    validation: { minLength: 10, maxLength: 1000 },
+    metadata: { form: 'onboarding', phase: 6, fields: ['ofertas_atuais', 'confirmacao_dados'] },
+  },
+];
+
 const diagnosticModels: DiagnosticModelSeed[] = [
   {
     code: 'E',
@@ -1624,6 +1969,7 @@ export async function seedProductDomain() {
     await client.query('begin');
 
     await seedDiagnosticQuestions(client);
+    await seedOnboardingQuestions(client);
     await seedDiagnosticModels(client);
     await seedDiagnosticMessages(client);
     await seedRogerioQuotes(client);
@@ -1642,6 +1988,39 @@ export async function seedProductDomain() {
 
 async function seedDiagnosticQuestions(client: PoolClient) {
   for (const question of diagnosticQuestions) {
+    await client.query(
+      `insert into diagnostic_questions (
+        code, order_index, label, helper_text, question_type, is_required, is_internal, validation, options, metadata
+      ) values ($1, $2, $3, $4, $5, $6, $7, $8::jsonb, $9::jsonb, $10::jsonb)
+      on conflict (code) do update set
+        order_index = excluded.order_index,
+        label = excluded.label,
+        helper_text = excluded.helper_text,
+        question_type = excluded.question_type,
+        is_required = excluded.is_required,
+        is_internal = excluded.is_internal,
+        validation = excluded.validation,
+        options = excluded.options,
+        metadata = excluded.metadata,
+        updated_at = now()`,
+      [
+        question.code,
+        question.orderIndex,
+        question.label,
+        question.helperText ?? null,
+        question.questionType,
+        question.isRequired ?? true,
+        question.isInternal ?? false,
+        JSON.stringify(question.validation ?? {}),
+        JSON.stringify(question.options ?? []),
+        JSON.stringify(question.metadata ?? {}),
+      ]
+    );
+  }
+}
+
+async function seedOnboardingQuestions(client: PoolClient) {
+  for (const question of onboardingQuestions) {
     await client.query(
       `insert into diagnostic_questions (
         code, order_index, label, helper_text, question_type, is_required, is_internal, validation, options, metadata

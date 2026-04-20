@@ -28,6 +28,9 @@ const envSchema = z.object({
   DATABASE_SSL_REJECT_UNAUTHORIZED: booleanFromEnv.default(false),
   SUPABASE_URL: z.string().url().optional(),
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1).optional(),
+  ANTHROPIC_API_KEY: z.string().min(1).optional(),
+  STRIPE_SECRET_KEY: z.string().min(1).optional(),
+  STRIPE_WEBHOOK_SECRET: z.string().min(1).optional(),
 });
 
 export const env = envSchema.parse(process.env);
