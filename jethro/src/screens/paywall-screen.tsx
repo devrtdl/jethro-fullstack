@@ -13,6 +13,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { JethroColors } from '@/constants/theme';
+import { getAuthHeaders } from '@/src/lib/auth-headers';
 import { subscriptionService } from '@/src/services/subscription/subscription-service';
 
 const features = [
@@ -69,15 +70,36 @@ export function PaywallScreen() {
 
   const handleSandbox = useCallback(async () => {
     setLoading(true);
+
+    // Debug: check auth token first
+    const headers = await getAuthHeaders();
+    const hasToken = 'Authorization' in headers;
+    console.log('[sandbox] hasToken:', hasToken, hasToken ? headers.Authorization?.slice(0, 30) + '...' : 'NONE');
+
+    if (!hasToken) {
+      setLoading(false);
+      Alert.alert('Sem sessão', 'Token de autenticação ausente. Faz logout e login novamente.', [{ text: 'OK' }]);
+      return;
+    }
+
     try {
       await subscriptionService.activateSandbox();
+      console.log('[sandbox] activateSandbox OK');
     } catch (e) {
-      // Log but don't block — sandbox is a dev bypass
-      console.warn('[sandbox] activateSandbox failed:', e instanceof Error ? e.message : String(e));
+      const msg = e instanceof Error ? e.message : String(e);
+      console.warn('[sandbox] activateSandbox failed:', msg);
+      // Continue anyway — this is a dev bypass
     } finally {
       setLoading(false);
     }
-    router.replace('/onboarding');
+
+    console.log('[sandbox] navigating to /onboarding');
+    try {
+      router.replace('/onboarding');
+    } catch (navErr) {
+      const msg = navErr instanceof Error ? navErr.message : String(navErr);
+      Alert.alert('Erro de navegação', msg, [{ text: 'OK' }]);
+    }
   }, [router]);
 
   return (
