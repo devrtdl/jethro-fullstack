@@ -493,7 +493,7 @@ const onboardingQuestions: DiagnosticQuestionSeed[] = [
     ],
     metadata: {
       form: 'onboarding', phase: 3, conditional: true, fields: ['dependencia_plataforma'],
-      showIf: { diagnosticAnswerSlug: 'canal_aquisicao', excludeAnswerValues: ['B'] },
+      // OB-14: condição q16≠indicação — q16 pode não estar disponível no MVP; mostrar por defeito
     },
   },
   // FASE 4 — Adaptativa por modelo
@@ -552,8 +552,19 @@ const onboardingQuestions: DiagnosticQuestionSeed[] = [
     },
   },
   {
-    code: 'onb_o20_processos',
+    code: 'onb_o19_followup',
     orderIndex: 127,
+    label: 'Fazes follow-up após o primeiro contacto com um potencial cliente? Como e em que momento?',
+    questionType: 'textarea',
+    validation: { minLength: 5, maxLength: 400 },
+    metadata: {
+      form: 'onboarding', phase: 4, conditional: true,
+      showIf: { diagnosticModel: ['A', 'B'] },
+    },
+  },
+  {
+    code: 'onb_o20_processos',
+    orderIndex: 128,
     label: 'Quais etapas do processo de entrega dependem exclusivamente de ti?',
     questionType: 'textarea',
     validation: { minLength: 5, maxLength: 500 },
@@ -564,7 +575,7 @@ const onboardingQuestions: DiagnosticQuestionSeed[] = [
   },
   {
     code: 'onb_o21_ferias',
-    orderIndex: 128,
+    orderIndex: 129,
     label: 'Se tirasses 2 semanas de férias agora, o que para no teu negócio?',
     questionType: 'textarea',
     validation: { minLength: 5, maxLength: 500 },
@@ -575,7 +586,7 @@ const onboardingQuestions: DiagnosticQuestionSeed[] = [
   },
   {
     code: 'onb_o22_metas_equipa',
-    orderIndex: 129,
+    orderIndex: 130,
     label: 'Cada pessoa da tua equipa sabe exactamente qual é a sua meta para esta semana?',
     questionType: 'textarea',
     validation: { minLength: 5, maxLength: 400 },
@@ -586,7 +597,7 @@ const onboardingQuestions: DiagnosticQuestionSeed[] = [
   },
   {
     code: 'onb_o24_posicionamento',
-    orderIndex: 130,
+    orderIndex: 131,
     label: 'As pessoas entendem o que fazes e para quem? Consegues explicar em 1 frase?',
     questionType: 'textarea',
     validation: { minLength: 5, maxLength: 400 },
@@ -597,8 +608,9 @@ const onboardingQuestions: DiagnosticQuestionSeed[] = [
   },
   {
     code: 'onb_o25_ticket_potencial',
-    orderIndex: 131,
-    label: 'Qual é o teu ticket médio actual? E qual achas que poderia ser com o posicionamento certo?',
+    orderIndex: 132,
+    // O25 reformulado: ticket actual já capturado em O7B; aqui só o potencial
+    label: 'Com o posicionamento certo, qual seria o preço justo pelo que entregas?',
     questionType: 'text',
     metadata: {
       form: 'onboarding', phase: 4, conditional: true,
@@ -608,7 +620,7 @@ const onboardingQuestions: DiagnosticQuestionSeed[] = [
   // FASE 6 — Confirmação
   {
     code: 'onb_o23_confirmacao',
-    orderIndex: 132,
+    orderIndex: 133,
     label: 'Para criar o teu plano personalizado, lista as tuas ofertas actuais com preço e margem estimada.',
     questionType: 'textarea',
     validation: { minLength: 10, maxLength: 1000 },

@@ -31,6 +31,7 @@ const envSchema = z.object({
   ANTHROPIC_API_KEY: z.string().min(1).optional(),
   STRIPE_SECRET_KEY: z.string().min(1).optional(),
   STRIPE_WEBHOOK_SECRET: z.string().optional().transform((v) => v || undefined),
+  BACKEND_URL: z.string().min(1).default('http://localhost:3000'),
 });
 
 export const env = envSchema.parse(process.env);

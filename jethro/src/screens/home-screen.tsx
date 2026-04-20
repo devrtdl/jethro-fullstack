@@ -1,3 +1,4 @@
+import { useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
@@ -440,6 +441,7 @@ function GrowthChartCard() {
 
 export function HomeScreen() {
   const { session, isReady, errorMessage } = useAuthSession();
+  const homeRouter = useRouter();
   const [resultStep, setResultStep] = useState<'block1' | 'block2' | 'paywall'>('block1');
   const [diagnosticRating, setDiagnosticRating] = useState<number>(0);
   const [isSigningOut, setIsSigningOut] = useState(false);
@@ -545,7 +547,11 @@ export function HomeScreen() {
 
                 <Text style={styles.bodyText}>Gerado em {formatDate(diagnostic.submitResult.diagnostic.generatedAt)}.</Text>
 
-                <Pressable style={styles.primaryButton} onPress={() => setResultStep('paywall')}>
+                <Pressable
+                  style={styles.primaryButton}
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  onPress={() => homeRouter.replace('/paywall' as any)}
+                >
                   <Text style={styles.primaryButtonLabel}>{diagnostic.submitResult.diagnostic.ctaLabel}</Text>
                 </Pressable>
                 <Pressable style={styles.secondaryButton} onPress={() => setResultStep('block1')}>

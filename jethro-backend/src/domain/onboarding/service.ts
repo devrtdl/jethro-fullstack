@@ -36,6 +36,13 @@ export type OnboardingJson = {
   dependencia_plataforma: string | null;
   // Fase 4 adaptativa por modelo
   posicionamento_1_frase: string | null;
+  ticket_posicionamento_potencial: string | null;
+  script_venda: string | null;
+  proposta_comercial: string | null;
+  followup_processo: string | null;
+  processos_dependentes_dono: string | null;
+  ferias_impacto: string | null;
+  metas_equipa: string | null;
   dividas_curto_prazo: number | null;
   ofertas_atuais: string | null;
   equipa_comercial_count: number | null;
@@ -106,6 +113,13 @@ export function buildOnboardingJson(
     dependencia_plataforma,
     // Fase 4 adaptativa
     posicionamento_1_frase: str(answers['o24_posicionamento']),
+    ticket_posicionamento_potencial: str(answers['o25_ticket_posicionamento_potencial']),
+    script_venda: str(answers['o16_script_venda']),
+    proposta_comercial: str(answers['o18_proposta_comercial']),
+    followup_processo: str(answers['o19_followup_processo']),
+    processos_dependentes_dono: str(answers['o20_processos_dependentes_dono']),
+    ferias_impacto: str(answers['o21_ferias_impacto']),
+    metas_equipa: str(answers['o22_metas_equipa']),
     dividas_curto_prazo: num(answers['o14_dividas_curto_prazo']),
     ofertas_atuais: str(answers['o23_ofertas_atuais']),
     equipa_comercial_count: num(answers['o22_equipa_comercial_count']),

@@ -1,5 +1,3 @@
-import { HomeScreen } from '@/src/screens/home-screen';
+import { InicioScreen } from '@/src/screens/inicio-screen';
 
-export default function IndexRoute() {
-  return <HomeScreen />;
-}
+export default InicioScreen;

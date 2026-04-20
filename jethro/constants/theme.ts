@@ -1,40 +1,45 @@
-/**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
- */
 import { Platform } from 'react-native';
 
-const tintColorLight = '#0a7ea4';
-const tintColorDark = '#fff';
+export const JethroColors = {
+  navy: '#1B2A4A',
+  navyDeep: '#0F1E35',
+  navySurface: '#243358',
+  gold: '#C8A951',
+  goldSoft: '#DFC278',
+  goldMuted: 'rgba(200, 169, 81, 0.20)',
+  creme: '#F5F3EE',
+  cremeMuted: '#E8E5DE',
+  white: '#FFFFFF',
+  muted: '#8A9BB0',
+  success: '#4CAF7D',
+  danger: '#E05C5C',
+  overlay: 'rgba(27, 42, 74, 0.85)',
+};
 
 export const Colors = {
   light: {
-    text: '#11181C',
-    background: '#fff',
-    tint: tintColorLight,
-    icon: '#687076',
-    tabIconDefault: '#687076',
-    tabIconSelected: tintColorLight,
+    text: JethroColors.navy,
+    background: JethroColors.creme,
+    tint: JethroColors.gold,
+    icon: JethroColors.muted,
+    tabIconDefault: JethroColors.muted,
+    tabIconSelected: JethroColors.gold,
   },
   dark: {
-    text: '#ECEDEE',
-    background: '#151718',
-    tint: tintColorDark,
-    icon: '#9BA1A6',
-    tabIconDefault: '#9BA1A6',
-    tabIconSelected: tintColorDark,
+    text: JethroColors.creme,
+    background: JethroColors.navy,
+    tint: JethroColors.gold,
+    icon: JethroColors.muted,
+    tabIconDefault: JethroColors.muted,
+    tabIconSelected: JethroColors.gold,
   },
 };
 
 export const Fonts = Platform.select({
   ios: {
-    /** iOS `UIFontDescriptorSystemDesignDefault` */
     sans: 'system-ui',
-    /** iOS `UIFontDescriptorSystemDesignSerif` */
     serif: 'ui-serif',
-    /** iOS `UIFontDescriptorSystemDesignRounded` */
     rounded: 'ui-rounded',
-    /** iOS `UIFontDescriptorSystemDesignMonospaced` */
     mono: 'ui-monospace',
   },
   default: {

@@ -12,18 +12,91 @@ const onboardingSubmitSchema = z.object({
 });
 
 export async function registerOnboardingRoutes(app: FastifyInstance) {
-  // Retorna todas as perguntas do onboarding (para o frontend renderizar o formulário)
-  app.get('/onboarding/questions', async () => {
+  // Retorna as perguntas do onboarding filtradas pelo contexto diagnóstico do utilizador
+  app.get('/onboarding/questions', { preHandler: userAuthPreHandler }, async (request) => {
+    const userId = request.userId!;
     const pool = getDbPool();
-    const rows = await pool
-      .query(
+
+    // Carrega diagnóstico mais recente do utilizador para filtrar perguntas condicionais
+    const diagRow = await pool
+      .query<{
+        modelo_diagnostico: string;
+        q11_faturamento: string | null;
+        answers_by_code: Record<string, string>;
+      }>(
+        `SELECT modelo_diagnostico, q11_faturamento, answers_by_code
+         FROM diagnostico_respostas WHERE user_id = $1
+         ORDER BY created_at DESC LIMIT 1`,
+        [userId]
+      )
+      .then((r) => r.rows[0] ?? null);
+
+    const diagnosticModel = diagRow?.modelo_diagnostico ?? null;
+    const revenueLevel = diagRow?.q11_faturamento ?? null;
+    const diagAnswers = diagRow?.answers_by_code ?? {};
+
+    // Mapeamento: A < B < C < D < E (revenue bands)
+    const revenueBands = ['A', 'B', 'C', 'D', 'E'];
+    function revenueAtLeast(min: string): boolean {
+      if (!revenueLevel) return false;
+      return revenueBands.indexOf(revenueLevel) >= revenueBands.indexOf(min);
+    }
+
+    const allRows = await pool
+      .query<{
+        code: string;
+        order_index: number;
+        label: string;
+        helper_text: string | null;
+        question_type: string;
+        is_required: boolean;
+        options: unknown;
+        metadata: Record<string, unknown>;
+      }>(
         `SELECT code, order_index, label, helper_text, question_type, is_required, options, metadata
          FROM diagnostic_questions
          WHERE metadata->>'form' = 'onboarding'
          ORDER BY order_index ASC`
       )
       .then((r) => r.rows);
-    return successResponse(rows);
+
+    const filtered = allRows.filter((q) => {
+      const m = q.metadata;
+
+      // Não condicional → sempre exibir
+      if (!m.conditional) return true;
+
+      const showIf = m.showIf as Record<string, unknown> | undefined;
+      if (!showIf) return true;
+
+      // Filtro por modelo diagnóstico
+      if (Array.isArray(showIf.diagnosticModel)) {
+        if (!diagnosticModel) return false;
+        if (!(showIf.diagnosticModel as string[]).includes(diagnosticModel)) return false;
+      }
+
+      // Filtro por faturamento mínimo (ex: OB-10, OB-13)
+      if (typeof showIf.diagnosticRevenueMin === 'string') {
+        if (!revenueAtLeast(showIf.diagnosticRevenueMin as string)) return false;
+      }
+
+      // Filtro por resposta diagnóstica (ex: OB-11 → q_precificacao)
+      if (typeof showIf.diagnosticAnswerSlug === 'string') {
+        const slug = showIf.diagnosticAnswerSlug as string;
+        const allowed = showIf.diagnosticAnswerValues as string[] | undefined;
+        const answer = diagAnswers[slug] ?? null;
+        if (allowed && !allowed.includes(answer ?? '')) return false;
+      }
+
+      // Excluir modelos específicos
+      if (Array.isArray(showIf.excludeModels) && diagnosticModel) {
+        if ((showIf.excludeModels as string[]).includes(diagnosticModel)) return false;
+      }
+
+      return true;
+    });
+
+    return successResponse(filtered);
   });
 
 

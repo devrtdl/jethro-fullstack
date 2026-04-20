@@ -11,6 +11,9 @@ import { registerHealthRoutes } from './routes/health.js';
 import { registerMentorRoutes } from './routes/mentor.js';
 import { registerOnboardingRoutes } from './routes/onboarding.js';
 import { registerRatingRoutes } from './routes/ratings.js';
+import { registerUserRoutes } from './routes/user.js';
+import { registerPlanoRoutes } from './routes/plano.js';
+import { registerSubscriptionRoutes } from './routes/subscription.js';
 
 export function createApp() {
   const app = Fastify({
@@ -36,6 +39,9 @@ export function createApp() {
   app.register(registerRatingRoutes);
   app.register(registerMentorRoutes);
   app.register(registerOnboardingRoutes);
+  app.register(registerUserRoutes);
+  app.register(registerPlanoRoutes);
+  app.register(registerSubscriptionRoutes);
   app.addHook('onClose', async () => {
     await closeDbPool();
   });

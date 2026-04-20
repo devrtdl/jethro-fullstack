@@ -4,6 +4,7 @@ import { router } from 'expo-router';
 import { Image } from 'expo-image';
 
 import { useAuthSession } from '@/src/hooks/use-auth-session';
+import { subscriptionService, type FlowStatus } from '@/src/services/subscription/subscription-service';
 
 const SPLASH_DURATION = 1800;
 
@@ -14,11 +15,22 @@ const palette = {
   goldTrack: 'rgba(212, 175, 55, 0.15)',
 };
 
+function resolveRoute(status: FlowStatus): string {
+  if (!status.hasDiagnostic) return '/diagnostico';
+  if (!status.hasSubscription) return '/paywall';
+  if (!status.hasOnboarding) return '/onboarding';
+  if (!status.hasPlan) return '/onboarding-result';
+  return '/(tabs)';
+}
+
 export function LaunchScreen() {
   const { session, isReady } = useAuthSession();
   const [isAnimationDone, setIsAnimationDone] = useState(false);
+  const [flowStatus, setFlowStatus] = useState<FlowStatus | null>(null);
+  const [flowChecked, setFlowChecked] = useState(false);
   const progress = useRef(new Animated.Value(0)).current;
 
+  // Start animation
   useEffect(() => {
     Animated.timing(progress, {
       toValue: 1,
@@ -33,16 +45,39 @@ export function LaunchScreen() {
     return () => clearTimeout(timeoutId);
   }, [progress]);
 
+  // Fetch flow status as soon as session is available
   useEffect(() => {
-    if (!isReady || !isAnimationDone) return;
+    if (!isReady) return;
+    if (!session?.user?.email) {
+      setFlowChecked(true);
+      return;
+    }
 
-    if (session?.user?.email) {
+    subscriptionService
+      .getFlowStatus()
+      .then((status) => setFlowStatus(status))
+      .catch(() => setFlowStatus(null))
+      .finally(() => setFlowChecked(true));
+  }, [isReady, session?.user?.email]);
+
+  // Navigate when both animation and flow check are done
+  useEffect(() => {
+    if (!isReady || !isAnimationDone || !flowChecked) return;
+
+    if (!session?.user?.email) {
+      router.replace('/auth/welcome');
+      return;
+    }
+
+    // If flow check failed (network error), fall back to tabs
+    if (!flowStatus) {
       router.replace('/(tabs)');
       return;
     }
 
-    router.replace('/auth/welcome');
-  }, [isAnimationDone, isReady, session?.user?.email]);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    router.replace(resolveRoute(flowStatus) as any);
+  }, [isAnimationDone, isReady, flowChecked, session?.user?.email, flowStatus]);
 
   const barWidth = progress.interpolate({
     inputRange: [0, 1],
@@ -51,13 +86,11 @@ export function LaunchScreen() {
 
   return (
     <View style={styles.container}>
-
       <Image
         source={require('@/assets/logo.png')}
         style={styles.logo}
         contentFit="contain"
       />
-
       <View style={styles.progressTrack}>
         <Animated.View style={[styles.progressBar, { width: barWidth }]} />
       </View>
@@ -73,15 +106,6 @@ const styles = StyleSheet.create({
     backgroundColor: palette.background,
     paddingHorizontal: 48,
     gap: 64,
-  },
-  glowTop: {
-    position: 'absolute',
-    top: '20%',
-    alignSelf: 'center',
-    width: 320,
-    height: 320,
-    borderRadius: 999,
-    backgroundColor: palette.goldGlow,
   },
   logo: {
     width: 160,
