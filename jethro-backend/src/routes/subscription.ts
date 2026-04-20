@@ -174,7 +174,12 @@ export async function registerSubscriptionRoutes(app: FastifyInstance) {
    */
   app.post('/subscription/activate-sandbox', { preHandler: userAuthPreHandler }, async (request) => {
     const userId = request.userId!;
-    await activateSubscription(userId, `sandbox_${Date.now()}`);
+    try {
+      await activateSubscription(userId, `sandbox_${Date.now()}`);
+    } catch (err) {
+      const detail = err instanceof Error ? err.message : String(err);
+      throw new AppError(`Falha ao ativar sandbox: ${detail}`, 500, 'SANDBOX_FAILED');
+    }
     return successResponse({ activated: true });
   });
 

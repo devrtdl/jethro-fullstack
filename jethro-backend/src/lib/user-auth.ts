@@ -53,7 +53,21 @@ export async function userAuthPreHandler(request: FastifyRequest) {
   }
 
   if (!userRow) {
-    throw new AppError('Utilizador nao encontrado.', 404, 'USER_NOT_FOUND');
+    // Auto-create user on first authenticated request
+    const newUser = await pool
+      .query<{ id: string }>(
+        `INSERT INTO users (email, auth_id, auth_provider, status)
+         VALUES ($1, $2, 'email', 'active')
+         ON CONFLICT (email) DO UPDATE SET auth_id = $2, status = 'active'
+         RETURNING id`,
+        [authUser.email ?? `${authUser.id}@unknown`, authUser.id]
+      )
+      .then((r) => r.rows[0] ?? null);
+
+    if (!newUser) {
+      throw new AppError('Nao foi possivel criar o utilizador.', 500, 'USER_CREATE_FAILED');
+    }
+    userRow = newUser;
   }
 
   request.userId = userRow.id;
