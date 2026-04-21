@@ -20,18 +20,18 @@ export async function registerOnboardingRoutes(app: FastifyInstance) {
     // Carrega diagnóstico mais recente do utilizador para filtrar perguntas condicionais
     const diagRow = await pool
       .query<{
-        modelo_diagnostico: string;
+        modelo_identificado: string;
         q11_faturamento: string | null;
         answers_by_code: Record<string, string>;
       }>(
-        `SELECT modelo_diagnostico, q11_faturamento, answers_by_code
+        `SELECT modelo_identificado, q11_faturamento, answers_by_code
          FROM diagnostico_respostas WHERE user_id = $1
          ORDER BY created_at DESC LIMIT 1`,
         [userId]
       )
       .then((r) => r.rows[0] ?? null);
 
-    const diagnosticModel = diagRow?.modelo_diagnostico ?? null;
+    const diagnosticModel = diagRow?.modelo_identificado ?? null;
     const revenueLevel = diagRow?.q11_faturamento ?? null;
     const diagAnswers = diagRow?.answers_by_code ?? {};
 
@@ -129,14 +129,14 @@ export async function registerOnboardingRoutes(app: FastifyInstance) {
 
       // Carrega modelo do diagnóstico mais recente
       const diagRow = await pool
-        .query<{ modelo_diagnostico: string }>(
-          `SELECT modelo_diagnostico FROM diagnostico_respostas
+        .query<{ modelo_identificado: string }>(
+          `SELECT modelo_identificado FROM diagnostico_respostas
            WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1`,
           [userId]
         )
         .then((r) => r.rows[0] ?? null);
 
-      const diagnosticModel = diagRow?.modelo_diagnostico ?? 'A';
+      const diagnosticModel = diagRow?.modelo_identificado ?? 'A';
 
       const jsonCompleto = buildOnboardingJson(
         answers as Record<string, string | number | boolean | null>,

@@ -27,7 +27,7 @@ export const subscriptionService = {
     const headers = await getAuthHeaders();
     const response = await apiClient.post<ApiResponse<{ url: string; sessionId: string }>>(
       '/subscription/create-checkout',
-      undefined,
+      {},
       { headers }
     );
     return response.data;
@@ -43,6 +43,6 @@ export const subscriptionService = {
 
   async activateSandbox(): Promise<void> {
     const headers = await getAuthHeaders();
-    await apiClient.post('/subscription/activate-sandbox', undefined, { headers });
+    await apiClient.post('/subscription/activate-sandbox', {}, { headers });
   },
 };

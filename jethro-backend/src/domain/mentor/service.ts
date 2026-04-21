@@ -25,7 +25,7 @@ export async function createMentorChat(
   const contextRow = await pool
     .query<{ modelo: string; json_completo: Record<string, unknown> | null; semana_numero: number | null }>(
       `SELECT
-         COALESCE(os.modelo_confirmado, dr.modelo_diagnostico) AS modelo,
+         COALESCE(os.modelo_confirmado, dr.modelo_identificado) AS modelo,
          os.json_completo,
          s.numero AS semana_numero
        FROM users u
@@ -35,7 +35,7 @@ export async function createMentorChat(
          ORDER BY created_at DESC LIMIT 1
        ) os ON os.user_id = u.id
        LEFT JOIN (
-         SELECT modelo_diagnostico, user_id
+         SELECT modelo_identificado, user_id
          FROM diagnostico_respostas WHERE user_id = $1
          ORDER BY created_at DESC LIMIT 1
        ) dr ON dr.user_id = u.id

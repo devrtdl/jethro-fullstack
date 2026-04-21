@@ -81,8 +81,8 @@ export async function registerUserRoutes(app: FastifyInstance) {
         .then((r) => r.rows[0] ?? null),
 
       pool
-        .query<{ modelo_diagnostico: string }>(
-          `SELECT modelo_diagnostico FROM diagnostico_respostas
+        .query<{ modelo_identificado: string }>(
+          `SELECT modelo_identificado FROM diagnostico_respostas
            WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1`,
           [userId]
         )
@@ -90,7 +90,7 @@ export async function registerUserRoutes(app: FastifyInstance) {
     ]);
 
     const modelo =
-      onboardingRow?.modelo_confirmado ?? diagnosticoRow?.modelo_diagnostico ?? null;
+      onboardingRow?.modelo_confirmado ?? diagnosticoRow?.modelo_identificado ?? null;
     const json = onboardingRow?.json_completo ?? null;
 
     // Devocional da semana actual (ou semana 1 se sem plano)
@@ -173,13 +173,13 @@ export async function registerUserRoutes(app: FastifyInstance) {
     const row = await pool
       .query<{
         id: string;
-        modelo_diagnostico: string;
+        modelo_identificado: string;
         q11_faturamento: string | null;
         score: number | null;
         created_at: string;
         payload_raw: unknown;
       }>(
-        `SELECT dr.id, dr.modelo_diagnostico, dr.q11_faturamento, dr.score, dr.created_at,
+        `SELECT dr.id, dr.modelo_identificado, dr.q11_faturamento, dr.score, dr.created_at,
                 dr.payload_raw
          FROM diagnostico_respostas dr
          WHERE dr.user_id = $1
@@ -207,13 +207,13 @@ export async function registerUserRoutes(app: FastifyInstance) {
                 scripture_verse, scripture_text
          FROM diagnostic_messages
          WHERE model_code = $1 AND variant = 'v1'`,
-        [row.modelo_diagnostico]
+        [row.modelo_identificado]
       )
       .then((r) => r.rows[0] ?? null);
 
     return successResponse({
       id: row.id,
-      modelo: row.modelo_diagnostico,
+      modelo: row.modelo_identificado,
       faturamento: row.q11_faturamento,
       score: row.score,
       createdAt: row.created_at,
