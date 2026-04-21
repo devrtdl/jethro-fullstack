@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Jethro Mentor PBN — Roadmap v2.0</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+  :root {
+    --navy:    #0B1F3B;
+    --navy2:   #0d2340;
+    --navy3:   #112a4a;
+    --gold:    #C8A951;
+    --gold2:   #D4AF37;
+    --creme:   #F5F3EE;
+    --muted:   #8A9BB0;
+    --green:   #22c55e;
+    --orange:  #f97316;
+    --red:     #ef4444;
+    --blue:    #3b82f6;
+    --purple:  #a855f7;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--navy);
+    color: var(--creme);
+    font-size: 11px;
+    line-height: 1.5;
+  }
+
+  /* ───── PAGE BREAKS ───── */
+  .page {
+    width: 210mm;
+    min-height: 297mm;
+    margin: 0 auto;
+    padding: 24mm 18mm;
+    position: relative;
+    page-break-after: always;
+  }
+  @media print {
+    body { background: var(--navy); }
+    .page { page-break-after: always; margin:0; padding: 20mm 16mm; }
+    @page { size: A4; margin: 0; background: var(--navy); }
+  }
+
+  /* ───── COVER ───── */
+  .cover-eyebrow {
+    font-size: 9px; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 80px;
+  }
+  .cover-title {
+    font-size: 64px; font-weight: 900; color: var(--gold);
+    line-height: 1.0; margin-bottom: 24px;
+  }
+  .cover-sub {
+    font-size: 13px; color: var(--muted); margin-bottom: 8px;
+  }
+  .version-badge {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: rgba(200,169,81,0.12); border: 1px solid rgba(200,169,81,0.3);
+    border-radius: 6px; padding: 6px 14px;
+    font-size: 10px; font-weight: 700; color: var(--gold);
+    letter-spacing: 1px; margin-top: 12px;
+  }
+  .cover-blocks {
+    position: absolute; bottom: 24mm; left: 18mm; right: 18mm;
+  }
+  .cover-blocks-label {
+    font-size: 8px; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 10px;
+  }
+  .block-tags { display: flex; gap: 8px; flex-wrap: wrap; }
+  .btag {
+    padding: 5px 12px; border-radius: 4px; font-size: 10px;
+    font-weight: 700; letter-spacing: 0.5px;
+  }
+  .btag-b1 { background: #1e40af; }
+  .btag-b2 { background: #7e22ce; }
+  .btag-b3 { background: #b45309; }
+  .btag-b4 { background: #166534; }
+  .btag-b5 { background: #0e7490; }
+  .btag-b6 { background: #be185d; }
+  .cover-footer {
+    position: absolute; bottom: 14mm; left: 18mm; right: 18mm;
+    font-size: 8px; color: var(--muted);
+    border-top: 1px solid rgba(255,255,255,0.06); padding-top: 8px;
+    display: flex; justify-content: space-between;
+  }
+
+  /* ───── SECTION HEADER ───── */
+  .section-header {
+    border-left: 3px solid var(--gold); padding-left: 12px;
+    margin-bottom: 20px;
+  }
+  .section-eyebrow {
+    font-size: 8px; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--gold); margin-bottom: 4px;
+  }
+  .section-title {
+    font-size: 22px; font-weight: 900; color: var(--creme);
+  }
+  .section-sub {
+    font-size: 10px; color: var(--muted); margin-top: 2px;
+  }
+
+  /* ───── FLOW DIAGRAM ───── */
+  .flow-row {
+    display: flex; gap: 0; margin-bottom: 20px;
+    border: 1px solid rgba(255,255,255,0.06); border-radius: 12px;
+    overflow: hidden;
+  }
+  .flow-step {
+    flex: 1; padding: 14px 12px; border-right: 1px solid rgba(255,255,255,0.06);
+    position: relative;
+  }
+  .flow-step:last-child { border-right: none; }
+  .flow-step-num {
+    font-size: 28px; font-weight: 900; line-height: 1; margin-bottom: 6px;
+  }
+  .flow-step-title { font-size: 11px; font-weight: 800; margin-bottom: 3px; }
+  .flow-step-ver { font-size: 9px; color: var(--muted); margin-bottom: 8px; }
+  .flow-step-items { list-style: none; }
+  .flow-step-items li { font-size: 9px; color: var(--muted); padding: 1px 0; }
+  .flow-step-items li::before { content: "· "; color: var(--gold); }
+  .flow-output {
+    margin-top: 8px; padding-top: 8px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    font-size: 8px; font-weight: 700; color: var(--gold); letter-spacing: 0.5px;
+  }
+  .step-b1 { background: rgba(30,64,175,0.15); }
+  .step-b2 { background: rgba(126,34,206,0.15); }
+  .step-b3 { background: rgba(180,83,9,0.15); }
+  .step-b4 { background: rgba(22,101,52,0.15); }
+  .step-b5 { background: rgba(14,116,144,0.15); }
+
+  .api-row {
+    display: flex; gap: 10px; margin-bottom: 20px;
+  }
+  .api-card {
+    flex: 1; background: rgba(200,169,81,0.06); border: 1px solid rgba(200,169,81,0.2);
+    border-radius: 8px; padding: 12px;
+  }
+  .api-badge {
+    font-size: 9px; font-weight: 800; color: var(--gold); letter-spacing: 1px;
+    text-transform: uppercase; margin-bottom: 4px;
+  }
+  .api-title { font-size: 11px; font-weight: 700; color: var(--creme); margin-bottom: 3px; }
+  .api-desc { font-size: 9px; color: var(--muted); }
+
+  /* ───── BLOCKS GRID ───── */
+  .blocks-phases {
+    display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 8px;
+  }
+  .phase-label {
+    font-size: 8px; font-weight: 800; letter-spacing: 1.5px;
+    text-transform: uppercase; color: var(--muted);
+    padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.08);
+    margin-bottom: 8px; text-align: center;
+  }
+  .block-card {
+    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 8px; padding: 10px; margin-bottom: 8px;
+  }
+  .block-card-header {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    margin-bottom: 6px;
+  }
+  .block-id { font-size: 8px; font-weight: 800; color: var(--muted); }
+  .block-ver { font-size: 8px; font-weight: 700; color: var(--gold); }
+  .block-title { font-size: 10px; font-weight: 800; color: var(--creme); margin-bottom: 5px; }
+  .block-items { list-style: none; }
+  .block-items li { font-size: 8.5px; color: var(--muted); padding: 1.5px 0; }
+  .block-items li::before { content: "· "; color: rgba(255,255,255,0.2); }
+  .status-pill {
+    display: inline-block; font-size: 7.5px; font-weight: 800;
+    letter-spacing: 0.8px; text-transform: uppercase;
+    padding: 2px 7px; border-radius: 3px;
+  }
+  .s-ok      { background: rgba(34,197,94,0.15);  color: #86efac; border: 1px solid rgba(34,197,94,0.3); }
+  .s-pend    { background: rgba(249,115,22,0.15); color: #fdba74; border: 1px solid rgba(249,115,22,0.3); }
+  .s-open    { background: rgba(239,68,68,0.15);  color: #fca5a5; border: 1px solid rgba(239,68,68,0.3); }
+  .s-new     { background: rgba(59,130,246,0.15); color: #93c5fd; border: 1px solid rgba(59,130,246,0.3); }
+  .s-partial { background: rgba(168,85,247,0.15); color: #d8b4fe; border: 1px solid rgba(168,85,247,0.3); }
+
+  /* ───── FEATURE TABLE ───── */
+  .feat-table { width: 100%; border-collapse: collapse; }
+  .feat-table th {
+    font-size: 8px; font-weight: 800; letter-spacing: 1.5px;
+    text-transform: uppercase; color: var(--gold);
+    padding: 6px 8px; border-bottom: 1px solid rgba(200,169,81,0.2);
+    text-align: left;
+  }
+  .feat-table td {
+    font-size: 9px; padding: 5px 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    vertical-align: middle;
+  }
+  .feat-table tr:hover td { background: rgba(255,255,255,0.02); }
+  .blk-tag {
+    display: inline-block; font-size: 7px; font-weight: 800;
+    padding: 2px 6px; border-radius: 3px; letter-spacing: 0.5px;
+  }
+  .feat-new td { background: rgba(59,130,246,0.04); }
+
+  /* ───── SUMMARY BAR ───── */
+  .summary-bar {
+    display: flex; gap: 0; border-radius: 8px; overflow: hidden;
+    margin-top: 16px; border: 1px solid rgba(255,255,255,0.06);
+  }
+  .summary-seg {
+    flex: 1; padding: 10px 6px; text-align: center;
+  }
+  .summary-seg-num { font-size: 20px; font-weight: 900; }
+  .summary-seg-label { font-size: 8px; font-weight: 700; letter-spacing: 0.5px; color: var(--muted); }
+  .seg-ok   { background: rgba(34,197,94,0.08); }
+  .seg-new  { background: rgba(59,130,246,0.08); }
+  .seg-part { background: rgba(168,85,247,0.08); }
+  .seg-pend { background: rgba(249,115,22,0.08); }
+  .seg-open { background: rgba(239,68,68,0.08); }
+
+  /* ───── DEPENDENCY ───── */
+  .dep-col { display: flex; flex-direction: column; gap: 3px; }
+  .dep-item {
+    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 5px; padding: 5px 8px; font-size: 8.5px; color: var(--muted);
+  }
+  .dep-item.dep-ok  { border-left: 2px solid var(--green); }
+  .dep-item.dep-new { border-left: 2px solid #3b82f6; }
+  .dep-item.dep-pend{ border-left: 2px solid var(--orange); }
+  .dep-item.dep-open{ border-left: 2px solid var(--red); }
+
+  .issue-card {
+    background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 8px; padding: 12px; margin-bottom: 8px;
+  }
+  .issue-badge {
+    display: inline-block; font-size: 8px; font-weight: 800;
+    padding: 2px 8px; border-radius: 3px; margin-bottom: 6px;
+    letter-spacing: 0.5px;
+  }
+  .ib-crit { background: rgba(239,68,68,0.2); color: #fca5a5; border: 1px solid rgba(239,68,68,0.3); }
+  .ib-high { background: rgba(249,115,22,0.2); color: #fdba74; border: 1px solid rgba(249,115,22,0.3); }
+  .ib-med  { background: rgba(234,179,8,0.2);  color: #fde047; border: 1px solid rgba(234,179,8,0.3); }
+  .ib-low  { background: rgba(100,116,139,0.2);color: #94a3b8; border: 1px solid rgba(100,116,139,0.3); }
+  .ib-done { background: rgba(34,197,94,0.2);  color: #86efac; border: 1px solid rgba(34,197,94,0.3); }
+  .issue-title { font-size: 10px; font-weight: 700; color: var(--creme); margin-bottom: 4px; }
+  .issue-desc  { font-size: 9px; color: var(--muted); }
+
+  .next-item {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 10px 12px; margin-bottom: 6px;
+    background: rgba(200,169,81,0.04); border: 1px solid rgba(200,169,81,0.12);
+    border-radius: 8px;
+  }
+  .next-num {
+    width: 20px; height: 20px; border-radius: 50%;
+    background: var(--gold); color: var(--navy);
+    font-size: 10px; font-weight: 900; display: flex; align-items: center;
+    justify-content: center; flex-shrink: 0;
+  }
+  .next-text { font-size: 10px; color: var(--creme); font-weight: 600; }
+  .next-sub  { font-size: 9px; color: var(--muted); margin-top: 2px; }
+
+  .page-footer {
+    position: absolute; bottom: 14mm; left: 18mm; right: 18mm;
+    font-size: 8px; color: var(--muted);
+    border-top: 1px solid rgba(255,255,255,0.06); padding-top: 8px;
+    display: flex; justify-content: space-between;
+  }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .col-header {
+    font-size: 8px; font-weight: 800; letter-spacing: 1.5px;
+    text-transform: uppercase; color: var(--muted);
+    padding-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.07);
+    margin-bottom: 8px;
+  }
+
+  .infra-card {
+    background: rgba(59,130,246,0.06); border: 1px solid rgba(59,130,246,0.2);
+    border-radius: 8px; padding: 10px; margin-bottom: 6px;
+  }
+  .infra-title { font-size: 10px; font-weight: 700; color: #93c5fd; margin-bottom: 4px; }
+  .infra-items { list-style: none; }
+  .infra-items li { font-size: 8.5px; color: var(--muted); padding: 1.5px 0; }
+  .infra-items li::before { content: "✓ "; color: #86efac; }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════ PAGE 1 — CAPA ══════════════════════ -->
+<div class="page">
+  <div class="cover-eyebrow">ROGÉRIO TEIXEIRA · JETHRO MENTOR PBN</div>
+
+  <div class="cover-title">ROAD&shy;MAP<br>DE DESEN&shy;VOL&shy;VIMENTO</div>
+
+  <div class="cover-sub">Blocos · Dependências · Features · Status de Implementação</div>
+  <div class="version-badge">v2.0 · Abril 2026 · Uso Interno</div>
+
+  <div style="margin-top:32px;">
+    <table style="border-collapse:collapse; width:340px;">
+      <tr>
+        <td style="padding:6px 16px 6px 0; font-size:9px; color:var(--muted); font-weight:700;">Motor</td>
+        <td style="padding:6px 0; font-size:10px; color:var(--creme); font-weight:800;">v2.8 + Modelo X</td>
+      </tr>
+      <tr>
+        <td style="padding:6px 16px 6px 0; font-size:9px; color:var(--muted); font-weight:700;">Alma</td>
+        <td style="padding:6px 0; font-size:10px; color:var(--creme); font-weight:800;">v5.14 (long-context)</td>
+      </tr>
+      <tr>
+        <td style="padding:6px 16px 6px 0; font-size:9px; color:var(--muted); font-weight:700;">Onboarding</td>
+        <td style="padding:6px 0; font-size:10px; color:var(--creme); font-weight:800;">v1.3 implementado (v1.4 pendente)</td>
+      </tr>
+      <tr>
+        <td style="padding:6px 16px 6px 0; font-size:9px; color:var(--muted); font-weight:700;">Camada 3</td>
+        <td style="padding:6px 0; font-size:10px; color:var(--creme); font-weight:800;">v1.10 (v1.11 pendente)</td>
+      </tr>
+      <tr>
+        <td style="padding:6px 16px 6px 0; font-size:9px; color:var(--muted); font-weight:700;">App RN</td>
+        <td style="padding:6px 0; font-size:10px; color:var(--creme); font-weight:800;">Expo Router v3 + Supabase Auth</td>
+      </tr>
+      <tr>
+        <td style="padding:6px 16px 6px 0; font-size:9px; color:var(--muted); font-weight:700;">Backend</td>
+        <td style="padding:6px 0; font-size:10px; color:var(--creme); font-weight:800;">Fastify + PostgreSQL (Render)</td>
+      </tr>
+      <tr>
+        <td style="padding:6px 16px 6px 0; font-size:9px; color:var(--muted); font-weight:700;">DoubleCheck</td>
+        <td style="padding:6px 0; font-size:10px; color:var(--creme); font-weight:800;">v10</td>
+      </tr>
+    </table>
+  </div>
+
+  <div style="margin-top:32px; background:rgba(200,169,81,0.06); border:1px solid rgba(200,169,81,0.2); border-radius:10px; padding:14px 16px;">
+    <div style="font-size:9px; font-weight:800; color:var(--gold); letter-spacing:1px; text-transform:uppercase; margin-bottom:10px;">Novo em v2.0 — Fluxo completo implementado</div>
+    <div style="font-size:11px; color:var(--creme); font-weight:600; font-family:monospace;">
+      Launch → Auth → Diagnóstico (Q1–Q17) → Resultados<br>
+      → Paywall (Stripe sandbox) → Onboarding (O1–O25)<br>
+      → Onboarding Result + Gerar Plano → /(tabs)
+    </div>
+    <div style="margin-top:8px; font-size:9px; color:var(--muted);">Routing inteligente via GET /user/flow-status · Auto-create user · Migrations 018+019</div>
+  </div>
+
+  <div class="cover-blocks">
+    <div class="cover-blocks-label">Blocos do Projeto</div>
+    <div class="block-tags">
+      <span class="btag btag-b1">B1 Motor</span>
+      <span class="btag btag-b2">B2 Alma/RAG</span>
+      <span class="btag btag-b3">B3 Onboarding</span>
+      <span class="btag btag-b4">B4 Plano</span>
+      <span class="btag btag-b5">B5 App</span>
+      <span class="btag btag-b6">B6 QA</span>
+    </div>
+  </div>
+
+  <div class="cover-footer">
+    <span>Motor v2.8 · Alma v5.14 · Onboarding v1.3 · Camada 3 v1.10 · App RN · Backend Fastify/PG</span>
+    <span>CONFIDENCIAL — EQUIPA TÉCNICA</span>
+  </div>
+</div>
+
+<!-- ══════════════════════ PAGE 2 — FLUXO ARQUITETURAL ══════════════════════ -->
+<div class="page">
+  <div class="section-header">
+    <div class="section-eyebrow">Visão Geral</div>
+    <div class="section-title">FLUXO ARQUITETURAL</div>
+    <div class="section-sub">Do formulário ao plano de 24 semanas · v2.0 implementado</div>
+  </div>
+
+  <div class="flow-row">
+    <div class="flow-step step-b1">
+      <div class="flow-step-num" style="color:#93c5fd;">01</div>
+      <div class="flow-step-title">Formulário</div>
+      <div class="flow-step-ver">YAYforms + App RN</div>
+      <ul class="flow-step-items">
+        <li>Q1–Q17 (17 perguntas)</li>
+        <li>Q18 derivado pelo motor</li>
+        <li>Payload estruturado</li>
+        <li>DiagnosticoScreen (RN)</li>
+      </ul>
+      <div class="flow-output">OUTPUT → Payload Q1–Q17 + Q18</div>
+    </div>
+    <div class="flow-step step-b2">
+      <div class="flow-step-num" style="color:#d8b4fe;">02</div>
+      <div class="flow-step-title">Motor v2.8</div>
+      <div class="flow-step-ver">Classificação</div>
+      <ul class="flow-step-items">
+        <li>2 passagens: Estrito + Âncoras</li>
+        <li>9 Modelos A–I + Fallback</li>
+        <li><strong style="color:#93c5fd;">+ Modelo X (Pronto p/ Escalar)</strong></li>
+        <li>Mensagens V1/V2/V3</li>
+      </ul>
+      <div class="flow-output">OUTPUT → modelo_dominante + sinais_secundários[]</div>
+    </div>
+    <div class="flow-step step-b3">
+      <div class="flow-step-num" style="color:#fdba74;">03</div>
+      <div class="flow-step-title">Paywall + Onboarding</div>
+      <div class="flow-step-ver">v1.3 + Stripe sandbox</div>
+      <ul class="flow-step-items">
+        <li>PaywallScreen (Stripe sandbox)</li>
+        <li>O1–O25 + OB condicionais</li>
+        <li>JSON ~38 campos</li>
+        <li>OnboardingScreen (RN)</li>
+      </ul>
+      <div class="flow-output">OUTPUT → JSON completo (~38 campos)</div>
+    </div>
+    <div class="flow-step step-b4">
+      <div class="flow-step-num" style="color:#86efac;">04</div>
+      <div class="flow-step-title">Camada 3 v1.10</div>
+      <div class="flow-step-ver">Seleção + Calibração</div>
+      <ul class="flow-step-items">
+        <li>R01–R33 regras composição</li>
+        <li>Claude Sonnet 4 + Alma</li>
+        <li>24 semanas geradas</li>
+        <li>POST /plano/generate</li>
+      </ul>
+      <div class="flow-output">OUTPUT → Doc 1 (Diag.) + Doc 2 (24 Sem.)</div>
+    </div>
+    <div class="flow-step step-b5">
+      <div class="flow-step-num" style="color:#67e8f9;">05</div>
+      <div class="flow-step-title">App 24 Semanas</div>
+      <div class="flow-step-ver">Tabs · Gate · Mentor</div>
+      <ul class="flow-step-items">
+        <li>Tab Início + KPIs + Gate</li>
+        <li>Tab Mentor (chat IA)</li>
+        <li>Tab Biblioteca (14 guias)</li>
+        <li>Tab Perfil + Subscrição</li>
+      </ul>
+      <div class="flow-output">OUTPUT → LTV sustentado · Churn reduzido</div>
+    </div>
+  </div>
+
+  <div style="margin-bottom:16px;">
+    <div class="col-header">3 Pontos de Inserção da API Claude</div>
+    <div class="api-row">
+      <div class="api-card">
+        <div class="api-badge">API #1 · Pré-diagnóstico</div>
+        <div class="api-title">Lead Warming</div>
+        <div class="api-desc">Conversa pré-diagnóstico e qualificação do lead antes do formulário</div>
+        <div style="margin-top:6px;"><span class="status-pill s-pend">Pendente</span></div>
+      </div>
+      <div class="api-card">
+        <div class="api-badge">API #2 · Pós-diagnóstico</div>
+        <div class="api-title">Objection Handling</div>
+        <div class="api-desc">Tratamento de objeções personalizado por modelo A–I + X</div>
+        <div style="margin-top:6px;"><span class="status-pill s-pend">Pendente</span></div>
+      </div>
+      <div class="api-card" style="border-color:rgba(34,197,94,0.3); background:rgba(34,197,94,0.06);">
+        <div class="api-badge" style="color:#86efac;">API #3 · Geração do Plano</div>
+        <div class="api-title">POST /plano/generate</div>
+        <div class="api-desc">claude-sonnet-4 · max_tokens 8000 · Alma v5.14 long-context · JSON 24 semanas</div>
+        <div style="margin-top:6px;"><span class="status-pill s-ok">Implementado</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-bottom:0;">
+    <div class="col-header">Infraestrutura (novo em v2.0)</div>
+    <div class="three-col">
+      <div class="infra-card">
+        <div class="infra-title">Auth + Routing</div>
+        <ul class="infra-items">
+          <li>Supabase Auth + SecureStore</li>
+          <li>GET /user/flow-status</li>
+          <li>Auto-create user (upsert)</li>
+          <li>Migrations 018 + 019</li>
+        </ul>
+      </div>
+      <div class="infra-card">
+        <div class="infra-title">Pagamentos</div>
+        <ul class="infra-items">
+          <li>Stripe Checkout (sandbox)</li>
+          <li>POST /subscription/create-checkout</li>
+          <li>POST /subscription/activate-sandbox</li>
+          <li>GET /subscription/status</li>
+        </ul>
+      </div>
+      <div class="infra-card">
+        <div class="infra-title">Deploy</div>
+        <ul class="infra-items">
+          <li>Backend: Render (auto-deploy)</li>
+          <li>DB: Supabase PostgreSQL</li>
+          <li>App: Expo (iOS + Android)</li>
+          <li>BACKEND_URL configurado</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <span>Jethro Mentor PBN — Roadmap de Desenvolvimento v2.0 | Rogério Teixeira | Confidencial</span>
+    <span>2 / 5</span>
+  </div>
+</div>
+
+<!-- ══════════════════════ PAGE 3 — ROADMAP POR BLOCOS ══════════════════════ -->
+<div class="page">
+  <div class="section-header">
+    <div class="section-eyebrow">Roadmap</div>
+    <div class="section-title">ROADMAP POR BLOCOS</div>
+    <div class="section-sub">Sequência · Dependências · Status de implementação real</div>
+  </div>
+
+  <div class="blocks-phases">
+    <!-- COL 1 — FASE 1 CORE ENGINE -->
+    <div>
+      <div class="phase-label">Fase 1 — Core Engine</div>
+
+      <div class="block-card">
+        <div class="block-card-header">
+          <span class="block-id">B1.1 · v1.0</span>
+          <span class="status-pill s-ok">OK</span>
+        </div>
+        <div class="block-title">Formulário YAYforms</div>
+        <ul class="block-items">
+          <li>Q1–Q17 implementadas</li>
+          <li>Q18 derivado</li>
+          <li>Payload estruturado</li>
+          <li>DiagnosticoScreen (RN) ✓</li>
+        </ul>
+      </div>
+
+      <div class="block-card">
+        <div class="block-card-header">
+          <span class="block-id">B1.2 · v2.8</span>
+          <span class="status-pill s-new">Novo</span>
+        </div>
+        <div class="block-title">Motor Classificação</div>
+        <ul class="block-items">
+          <li>9 Modelos A–I + Fallback</li>
+          <li>+ Modelo X (Pronto p/ Escalar)</li>
+          <li>2 passagens (Estrito + Âncoras)</li>
+          <li>Canal diversificado removido</li>
+          <li>Q16: 5 opções (A/B/C)</li>
+        </ul>
+      </div>
+
+      <div class="block-card">
+        <div class="block-card-header">
+          <span class="block-id">B1.3 · v1.1</span>
+          <span class="status-pill s-ok">OK</span>
+        </div>
+        <div class="block-title">Mensagens Diagnóstico</div>
+        <ul class="block-items">
+          <li>9+1 modelos × 3 variantes</li>
+          <li>Blocos Realidade + Precipício</li>
+          <li>Seed V1/V2/V3 corrigido</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- COL 2 — FASE 2 CONTEÚDO -->
+    <div>
+      <div class="phase-label">Fase 2 — Conteúdo</div>
+
+      <div class="block-card">
+        <div class="block-card-header">
+          <span class="block-id">B2.1 · v5.14</span>
+          <span class="status-pill s-ok">OK</span>
+        </div>
+        <div class="block-title">Alma do Rogério</div>
+        <ul class="block-items">
+          <li>92 ações definitivas</li>
+          <li>7 Pilares PBN</li>
+          <li>59 metáforas + versículos</li>
+          <li>Long-context (Opção A)</li>
+        </ul>
+      </div>
+
+      <div class="block-card">
+        <div class="block-card-header">
+          <span class="block-id">B2.2 · v1.9</span>
+          <span class="status-pill s-partial">Parcial</span>
+        </div>
+        <div class="block-title">RAG Spec</div>
+        <ul class="block-items">
+          <li>G01–G14 dados estáticos (Biblioteca)</li>
+          <li>Planos reais como exemplos — ❌</li>
+          <li>Prioridade por camadas — ❌</li>
+        </ul>
+      </div>
+
+      <div class="block-card">
+        <div class="block-card-header">
+          <span class="block-id">B3.1 · v1.3</span>
+          <span class="status-pill s-ok">OK</span>
+        </div>
+        <div class="block-title">Onboarding v1.3</div>
+        <ul class="block-items">
+          <li>O1–O25 em 6 fases</li>
+          <li>JSON ~38 campos</li>
+          <li>OnboardingScreen (RN)</li>
+          <li>GET /onboarding/questions (auth)</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- COL 3 — FASE 3 ENTREGA -->
+    <div>
+      <div class="phase-label">Fase 3 — Entrega</div>
+
+      <div class="block-card">
+        <div class="block-card-header">
+          <span class="block-id">B3.2 · v1.4</span>
+          <span class="status-pill s-pend">Pendente</span>
+        </div>
+        <div class="block-title">Onboarding v1.4</div>
+        <ul class="block-items">
+          <li>OB-01–OB-08 condicionais</li>
+          <li>JSON 38 → 40 campos</li>
+          <li>proposito_claro_flag — ❌</li>
+          <li>canal_fragil_flag — ❌</li>
+        </ul>
+      </div>
+
+      <div class="block-card">
+        <div class="block-card-header">
+          <span class="block-id">B4.1 · v1.10</span>
+          <span class="status-pill s-partial">Parcial</span>
+        </div>
+        <div class="block-title">Camada 3 v1.10</div>
+        <ul class="block-items">
+          <li>R01–R33 regras (parcial)</li>
+          <li>Plano 24 semanas gerado</li>
+          <li>Tabela distribuição seeded</li>
+          <li>System Prompt v1.0 (parcial)</li>
+        </ul>
+      </div>
+
+      <div class="block-card">
+        <div class="block-card-header">
+          <span class="block-id">B4.2 · v1.11</span>
+          <span class="status-pill s-pend">Pendente</span>
+        </div>
+        <div class="block-title">Camada 3 v1.11</div>
+        <ul class="block-items">
+          <li>R34–R43 (sinais sec.) — ❌</li>
+          <li>Plano 2 camadas S1–S24 — ❌</li>
+          <li>System Prompt v1.1 — ❌</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- COL 4 — FASE 4 PRODUTO -->
+    <div>
+      <div class="phase-label">Fase 4 — Produto</div>
+
+      <div class="block-card" style="border-color:rgba(59,130,246,0.25);">
+        <div class="block-card-header">
+          <span class="block-id">B4.3 · v2.0</span>
+          <span class="status-pill s-ok">OK</span>
+        </div>
+        <div class="block-title">Template 30 Dias</div>
+        <ul class="block-items">
+          <li>JSON parcial (12 campos)</li>
+          <li>Semanas 1–4 expandidas</li>
+          <li>Produto de entrada</li>
+        </ul>
+      </div>
+
+      <div class="block-card" style="border-color:rgba(59,130,246,0.25);">
+        <div class="block-card-header">
+          <span class="block-id">B5.1 · v1.0</span>
+          <span class="status-pill s-ok">OK</span>
+        </div>
+        <div class="block-title">Gate + App Tabs</div>
+        <ul class="block-items">
+          <li>Gate semanal (5 dias / 120h)</li>
+          <li>Check-in cumpriu/não cumpriu</li>
+          <li>4 tabs: Início·Mentor·Biblio·Perfil</li>
+          <li>Devocional + KPIs + Plano</li>
+        </ul>
+      </div>
+
+      <div class="block-card" style="border-color:rgba(59,130,246,0.3); background:rgba(59,130,246,0.04);">
+        <div class="block-card-header">
+          <span class="block-id">B5.2 · NOVO</span>
+          <span class="status-pill s-new">Novo v2</span>
+        </div>
+        <div class="block-title">Paywall + Subscription</div>
+        <ul class="block-items">
+          <li>PaywallScreen R$147/mês</li>
+          <li>Stripe Checkout sandbox</li>
+          <li>GET /user/flow-status</li>
+          <li>POST /subscription/*</li>
+        </ul>
+      </div>
+
+      <div class="block-card">
+        <div class="block-card-header">
+          <span class="block-id">B5.3 · —</span>
+          <span class="status-pill s-pend">Pendente</span>
+        </div>
+        <div class="block-title">API #1 Lead Warming</div>
+        <ul class="block-items">
+          <li>Conversa pré-diagnóstico</li>
+          <li>Qualificação do lead</li>
+          <li>Integração YAYforms</li>
+        </ul>
+      </div>
+
+      <div class="block-card">
+        <div class="block-card-header">
+          <span class="block-id">B6.1 · v10</span>
+          <span class="status-pill s-open">Em Aberto</span>
+        </div>
+        <div class="block-title">DoubleCheck QA</div>
+        <ul class="block-items">
+          <li>G-34 ações v5.14 sem gate</li>
+          <li>Dead code Q18=D</li>
+          <li>Modelo I — ações PRE</li>
+          <li>QA Roteiro v1.1</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex; gap:16px; margin-top:4px; font-size:8.5px; color:var(--muted);">
+    <span><span class="status-pill s-ok" style="font-size:7px;">OK</span> spec completa e implementada</span>
+    <span><span class="status-pill s-new" style="font-size:7px;">Novo</span> adicionado em v2.0</span>
+    <span><span class="status-pill s-partial" style="font-size:7px;">Parcial</span> implementado parcialmente</span>
+    <span><span class="status-pill s-pend" style="font-size:7px;">Pendente</span> descrito, aguarda impl.</span>
+    <span><span class="status-pill s-open" style="font-size:7px;">Aberto</span> issues no DoubleCheck</span>
+  </div>
+
+  <div class="page-footer">
+    <span>Jethro Mentor PBN — Roadmap de Desenvolvimento v2.0 | Rogério Teixeira | Confidencial</span>
+    <span>3 / 5</span>
+  </div>
+</div>
+
+<!-- ══════════════════════ PAGE 4 — FEATURE TABLE ══════════════════════ -->
+<div class="page">
+  <div class="section-header">
+    <div class="section-eyebrow">Features</div>
+    <div class="section-title">FEATURES POR BLOCO</div>
+    <div class="section-sub">Especificação · Versão · Status real de implementação</div>
+  </div>
+
+  <table class="feat-table">
+    <thead>
+      <tr>
+        <th style="width:36px;">BLK</th>
+        <th>Feature</th>
+        <th style="width:60px;">Versão</th>
+        <th style="width:68px;">Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- B1 -->
+      <tr><td><span class="blk-tag" style="background:#1e40af;">B1</span></td><td>Formulário YAYforms Q1–Q17 + DiagnosticoScreen (RN)</td><td>v2.4/v2.8</td><td><span class="status-pill s-ok">OK</span></td></tr>
+      <tr><td></td><td>Derivação Q18 a partir de Q5+Q17</td><td>v2.8 JS</td><td><span class="status-pill s-ok">OK</span></td></tr>
+      <tr><td></td><td>9 Modelos A–I + Fallback (2 passagens)</td><td>v2.8</td><td><span class="status-pill s-ok">OK</span></td></tr>
+      <tr class="feat-new"><td></td><td>Modelo X — "Pronto para Escalar" (novo modelo 10)</td><td>v2.8</td><td><span class="status-pill s-new">Novo v2</span></td></tr>
+      <tr class="feat-new"><td></td><td>Motor v2.8 — remove requisito canal diversificado; Q16 5 opções</td><td>v2.8</td><td><span class="status-pill s-new">Novo v2</span></td></tr>
+      <tr><td></td><td>Mensagens diagnóstico V1/V2/V3 (sorteio) — seed corrigido</td><td>v1.1</td><td><span class="status-pill s-ok">OK</span></td></tr>
+      <tr><td></td><td>Resolução dead code Q18=D</td><td>—</td><td><span class="status-pill s-open">Aberto</span></td></tr>
+      <!-- B2 -->
+      <tr><td><span class="blk-tag" style="background:#7e22ce;">B2</span></td><td>Alma v5.14 — 92 ações definitivas (long-context Opção A)</td><td>v5.14</td><td><span class="status-pill s-ok">OK</span></td></tr>
+      <tr><td></td><td>59 metáforas + versículos bíblicos</td><td>v5.14</td><td><span class="status-pill s-ok">OK</span></td></tr>
+      <tr><td></td><td>G01–G14 guias — dados estáticos na tab Biblioteca</td><td>v1.9</td><td><span class="status-pill s-partial">Parcial</span></td></tr>
+      <tr><td></td><td>Planos reais como exemplos (4 cases) no RAG</td><td>v1.9</td><td><span class="status-pill s-pend">Pendente</span></td></tr>
+      <tr><td></td><td>Prioridade de indexação por camadas</td><td>v1.9</td><td><span class="status-pill s-pend">Pendente</span></td></tr>
+      <!-- B3 -->
+      <tr><td><span class="blk-tag" style="background:#b45309;">B3</span></td><td>O1–O25 em 6 fases (JSON ~38 campos)</td><td>v1.3</td><td><span class="status-pill s-ok">OK</span></td></tr>
+      <tr class="feat-new"><td></td><td>OnboardingScreen React Native — form step-by-step</td><td>v1.3</td><td><span class="status-pill s-new">Novo v2</span></td></tr>
+      <tr><td></td><td>OB condicionais (servidor) — filtro server-side</td><td>v1.3</td><td><span class="status-pill s-ok">OK</span></td></tr>
+      <tr><td></td><td>GET /onboarding/questions (autenticado + filtro servidor)</td><td>v1.3</td><td><span class="status-pill s-ok">OK</span></td></tr>
+      <tr><td></td><td>O19 follow-up comercial F4 A/B · O25 reformulado</td><td>v1.3</td><td><span class="status-pill s-ok">OK</span></td></tr>
+      <tr><td></td><td>JSON 40 campos completo (proposito_claro + canal_fragil)</td><td>v1.4</td><td><span class="status-pill s-pend">Pendente</span></td></tr>
+      <!-- B4 -->
+      <tr><td><span class="blk-tag" style="background:#166534;">B4</span></td><td>POST /plano/generate — Claude + Alma + JSON → 24 semanas</td><td>v1.0</td><td><span class="status-pill s-ok">OK</span></td></tr>
+      <tr><td></td><td>Persistência: planos_acao + semanas + tarefas + gates</td><td>v1.0</td><td><span class="status-pill s-ok">OK</span></td></tr>
+      <tr><td></td><td>Tabela Distribuição Modelos A–H (acoes_library seeded)</td><td>v2.0</td><td><span class="status-pill s-ok">OK</span></td></tr>
+      <tr class="feat-new"><td></td><td>OnboardingResultScreen + Gerar Plano (React Native)</td><td>—</td><td><span class="status-pill s-new">Novo v2</span></td></tr>
+      <tr><td></td><td>Camada 3 R01–R33 regras de composição</td><td>v1.10</td><td><span class="status-pill s-partial">Parcial</span></td></tr>
+      <tr><td></td><td>System Prompt v1.1 (referência 40 campos)</td><td>v1.1</td><td><span class="status-pill s-partial">Parcial</span></td></tr>
+      <tr><td></td><td>R34–R43 (sinais secundários) + Plano 2 camadas S1–S24</td><td>v1.11</td><td><span class="status-pill s-pend">Pendente</span></td></tr>
+      <tr><td></td><td>Template Plano 30 Dias (produto de entrada)</td><td>v2.0</td><td><span class="status-pill s-ok">OK</span></td></tr>
+      <!-- B5 -->
+      <tr><td><span class="blk-tag" style="background:#0e7490;">B5</span></td><td>Tab Início: devocional + KPIs + plano semana + gate</td><td>v1.0</td><td><span class="status-pill s-ok">OK</span></td></tr>
+      <tr><td></td><td>Tab Mentor: chat IA → POST /mentor/chat</td><td>v1.0</td><td><span class="status-pill s-ok">OK</span></td></tr>
+      <tr><td></td><td>Tab Biblioteca: 14 guias × 7 pilares (accordion)</td><td>v1.0</td><td><span class="status-pill s-ok">OK</span></td></tr>
+      <tr><td></td><td>Tab Perfil: dados user, subscription, progresso, sign out</td><td>v1.0</td><td><span class="status-pill s-ok">OK</span></td></tr>
+      <tr><td></td><td>Gate de Avanço — progress bar + 5 dots + check-in modal</td><td>v1.0</td><td><span class="status-pill s-ok">OK</span></td></tr>
+      <tr><td></td><td>POST /gate/advance · POST /check-in semanal · GET /home</td><td>v1.0</td><td><span class="status-pill s-ok">OK</span></td></tr>
+      <tr class="feat-new"><td></td><td>PaywallScreen — R$147/mês + Stripe Checkout sandbox</td><td>—</td><td><span class="status-pill s-new">Novo v2</span></td></tr>
+      <tr class="feat-new"><td></td><td>GET /user/flow-status — routing inteligente no LaunchScreen</td><td>—</td><td><span class="status-pill s-new">Novo v2</span></td></tr>
+      <tr class="feat-new"><td></td><td>POST /subscription/create-checkout + activate-sandbox</td><td>—</td><td><span class="status-pill s-new">Novo v2</span></td></tr>
+      <tr class="feat-new"><td></td><td>GET /subscription/status + checkout-success (HTML)</td><td>—</td><td><span class="status-pill s-new">Novo v2</span></td></tr>
+      <tr class="feat-new"><td></td><td>Migrations 018 (mentor_messages) + 019 (users.auth_id)</td><td>—</td><td><span class="status-pill s-new">Novo v2</span></td></tr>
+      <tr class="feat-new"><td></td><td>Auto-create user no userAuthPreHandler (upsert)</td><td>—</td><td><span class="status-pill s-new">Novo v2</span></td></tr>
+      <tr><td></td><td>API #1 Lead Warming · API #2 Objection Handling</td><td>—</td><td><span class="status-pill s-pend">Pendente</span></td></tr>
+      <!-- B6 -->
+      <tr><td><span class="blk-tag" style="background:#be185d;">B6</span></td><td>DoubleCheck coerência cruzada v10</td><td>v10</td><td><span class="status-pill s-ok">OK</span></td></tr>
+      <tr><td></td><td>Validação 30 leads simulados (98%)</td><td>—</td><td><span class="status-pill s-ok">OK</span></td></tr>
+      <tr><td></td><td>G-34: COM-43–46, FIN-28, LID-22–23 sem gate Camada 3</td><td>v10</td><td><span class="status-pill s-open">Aberto</span></td></tr>
+      <tr><td></td><td>Modelo I — 12 ações PRE sem ativação</td><td>v10</td><td><span class="status-pill s-open">Aberto</span></td></tr>
+      <tr><td></td><td>QA Roteiro v1.1 — exemplo Fallback errado</td><td>v1.1</td><td><span class="status-pill s-open">Aberto</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="summary-bar">
+    <div class="summary-seg seg-ok">
+      <div class="summary-seg-num" style="color:#86efac;">24</div>
+      <div class="summary-seg-label">Implementado</div>
+    </div>
+    <div class="summary-seg seg-new">
+      <div class="summary-seg-num" style="color:#93c5fd;">11</div>
+      <div class="summary-seg-label">Novo em v2.0</div>
+    </div>
+    <div class="summary-seg seg-part">
+      <div class="summary-seg-num" style="color:#d8b4fe;">4</div>
+      <div class="summary-seg-label">Parcial</div>
+    </div>
+    <div class="summary-seg seg-pend">
+      <div class="summary-seg-num" style="color:#fdba74;">8</div>
+      <div class="summary-seg-label">Pendente</div>
+    </div>
+    <div class="summary-seg seg-open">
+      <div class="summary-seg-num" style="color:#fca5a5;">4</div>
+      <div class="summary-seg-label">Em Aberto</div>
+    </div>
+    <div class="summary-seg" style="background:rgba(255,255,255,0.03);">
+      <div class="summary-seg-num" style="color:var(--gold);">51</div>
+      <div class="summary-seg-label">Total</div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <span>Jethro Mentor PBN — Roadmap de Desenvolvimento v2.0 | Rogério Teixeira | Confidencial</span>
+    <span>4 / 5</span>
+  </div>
+</div>
+
+<!-- ══════════════════════ PAGE 5 — DEPENDÊNCIAS & PRÓXIMOS PASSOS ══════════════════════ -->
+<div class="page">
+  <div class="section-header">
+    <div class="section-eyebrow">Dependências & Pendências</div>
+    <div class="section-title">CADEIA CRÍTICA & PRÓXIMOS PASSOS</div>
+    <div class="section-sub">O que bloqueia o quê · Ações imediatas para v2.1</div>
+  </div>
+
+  <div class="two-col" style="margin-bottom:16px;">
+    <!-- Cadeia -->
+    <div>
+      <div class="col-header">Cadeia de Dependências</div>
+      <div class="dep-col">
+        <div class="dep-item dep-ok"><strong>B1.1</strong> Formulário YAYforms ✓</div>
+        <div style="padding-left:12px;" class="dep-col">
+          <div class="dep-item dep-ok"><strong>B1.2</strong> Motor v2.8 + Modelo X ✓</div>
+          <div style="padding-left:12px;" class="dep-col">
+            <div class="dep-item dep-ok"><strong>B1.3</strong> Mensagens Diagnóstico ✓</div>
+            <div style="padding-left:12px;" class="dep-col">
+              <div class="dep-item dep-ok"><strong>B3.1</strong> Onboarding v1.3 ✓</div>
+              <div style="padding-left:12px;" class="dep-col">
+                <div class="dep-item dep-pend"><strong>B3.2</strong> Onboarding v1.4 — pendente</div>
+                <div style="padding-left:12px;" class="dep-col">
+                  <div class="dep-item dep-pend"><strong>B4.2</strong> Camada 3 v1.11 — pendente</div>
+                </div>
+              </div>
+              <div class="dep-item dep-ok"><strong>B4.1</strong> Camada 3 v1.10 ✓ (parcial)</div>
+              <div style="padding-left:12px;" class="dep-col">
+                <div class="dep-item dep-ok"><strong>B4.3</strong> Template 30 Dias ✓</div>
+                <div class="dep-item dep-ok"><strong>B5.1</strong> Gate Semanal + Tabs ✓</div>
+                <div class="dep-item dep-new"><strong>B5.2</strong> Paywall + Subscription ✓ novo</div>
+                <div class="dep-item dep-open"><strong>B6.1</strong> DoubleCheck QA — aberto</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="dep-item dep-ok"><strong>B2.1</strong> Alma v5.14 ✓</div>
+        <div style="padding-left:12px;" class="dep-col">
+          <div class="dep-item dep-ok"><strong>B2.2</strong> RAG Spec (parcial)</div>
+          <div style="padding-left:12px;" class="dep-col">
+            <div class="dep-item dep-ok"><strong>B4.1</strong> Camada 3 v1.10 ✓</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pendências abertas -->
+    <div>
+      <div class="col-header">Pendências Abertas (DoubleCheck v10)</div>
+
+      <div class="issue-card">
+        <span class="issue-badge ib-crit">G-34 · Crítico</span>
+        <div class="issue-title">Ações v5.14 sem gate na Camada 3</div>
+        <div class="issue-desc">COM-43–46, FIN-28, LID-22–23 não têm regra de ativação na Camada 3 v1.10</div>
+      </div>
+
+      <div class="issue-card">
+        <span class="issue-badge ib-high">G-22 · Alto</span>
+        <div class="issue-title">Modelo I — ações PRE sem ativação</div>
+        <div class="issue-desc">12 ações PRE-xx + 5 candidatas do Modelo I sem gate na Camada 3</div>
+      </div>
+
+      <div class="issue-card">
+        <span class="issue-badge ib-med">QA · Médio</span>
+        <div class="issue-title">Exemplo Fallback errado no Roteiro QA</div>
+        <div class="issue-desc">Perfil documentado retorna F, não Fallback A. Substituir por perfil genuíno de fallback</div>
+      </div>
+
+      <div class="issue-card">
+        <span class="issue-badge ib-low">DC · Baixo</span>
+        <div class="issue-title">Dead code Q18=D no Motor</div>
+        <div class="issue-desc">Nenhuma regra de derivação produz Q18=D. Documentar ou remover do trigger I</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-header">Próximos Passos — v2.1</div>
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+    <div class="next-item">
+      <div class="next-num">1</div>
+      <div>
+        <div class="next-text">Resolver paywall end-to-end</div>
+        <div class="next-sub">STRIPE_SECRET_KEY no Render · Testar fluxo completo sandbox → onboarding → plano</div>
+      </div>
+    </div>
+    <div class="next-item">
+      <div class="next-num">2</div>
+      <div>
+        <div class="next-text">Fechar Onboarding v1.4</div>
+        <div class="next-sub">OB-01–OB-08 condicionais · proposito_claro_flag · canal_fragil_flag (2 campos em falta)</div>
+      </div>
+    </div>
+    <div class="next-item">
+      <div class="next-num">3</div>
+      <div>
+        <div class="next-text">Camada 3 v1.11</div>
+        <div class="next-sub">R34–R43 sinais secundários · Plano 2 camadas S1–S8 + S9–S24 · System Prompt v1.1</div>
+      </div>
+    </div>
+    <div class="next-item">
+      <div class="next-num">4</div>
+      <div>
+        <div class="next-text">Resolver G-34 (crítico)</div>
+        <div class="next-sub">COM-43–46, FIN-28, LID-22–23 precisam de regra de ativação na Camada 3</div>
+      </div>
+    </div>
+    <div class="next-item">
+      <div class="next-num">5</div>
+      <div>
+        <div class="next-text">API #2 Objection Handling</div>
+        <div class="next-sub">Personalização pós-diagnóstico por modelo A–I + X antes de entrar no onboarding</div>
+      </div>
+    </div>
+    <div class="next-item">
+      <div class="next-num">6</div>
+      <div>
+        <div class="next-text">RAG real (G01–G14 + planos)</div>
+        <div class="next-sub">Substituir dados estáticos da Biblioteca por RAG indexado com 4 planos reais</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <span>Jethro Mentor PBN — Roadmap de Desenvolvimento v2.0 | Rogério Teixeira | Confidencial</span>
+    <span>5 / 5</span>
+  </div>
+</div>
+
+</body>
+</html>

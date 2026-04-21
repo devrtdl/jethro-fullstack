@@ -505,6 +505,7 @@ const onboardingQuestions: DiagnosticQuestionSeed[] = [
     validation: { minLength: 5, maxLength: 500 },
     metadata: {
       form: 'onboarding', phase: 4, conditional: true,
+      fields: ['o12_mix_margem'],
       showIf: { diagnosticModel: ['C', 'D'] },
     },
   },
@@ -516,6 +517,7 @@ const onboardingQuestions: DiagnosticQuestionSeed[] = [
     validation: { minLength: 5, maxLength: 400 },
     metadata: {
       form: 'onboarding', phase: 4, conditional: true,
+      fields: ['o13_recebimento_cd'],
       showIf: { diagnosticModel: ['C', 'D'] },
     },
   },
@@ -1998,13 +2000,22 @@ export async function seedProductDomain() {
   }
 }
 
-async function seedDiagnosticQuestions(client: PoolClient) {
-  for (const question of diagnosticQuestions) {
-    await client.query(
-      `insert into diagnostic_questions (
+async function upsertQuestion(
+  client: PoolClient,
+  question: DiagnosticQuestionSeed
+) {
+  // Remove qualquer linha com o mesmo order_index mas código diferente antes do upsert,
+  // para evitar violação da unique constraint order_index quando o seed é re-executado
+  // após mudanças de índice entre versões.
+  await client.query(
+    `DELETE FROM diagnostic_questions WHERE order_index = $1 AND code != $2`,
+    [question.orderIndex, question.code]
+  );
+  await client.query(
+    `INSERT INTO diagnostic_questions (
         code, order_index, label, helper_text, question_type, is_required, is_internal, validation, options, metadata
-      ) values ($1, $2, $3, $4, $5, $6, $7, $8::jsonb, $9::jsonb, $10::jsonb)
-      on conflict (code) do update set
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8::jsonb, $9::jsonb, $10::jsonb)
+      ON CONFLICT (code) DO UPDATE SET
         order_index = excluded.order_index,
         label = excluded.label,
         helper_text = excluded.helper_text,
@@ -2015,52 +2026,30 @@ async function seedDiagnosticQuestions(client: PoolClient) {
         options = excluded.options,
         metadata = excluded.metadata,
         updated_at = now()`,
-      [
-        question.code,
-        question.orderIndex,
-        question.label,
-        question.helperText ?? null,
-        question.questionType,
-        question.isRequired ?? true,
-        question.isInternal ?? false,
-        JSON.stringify(question.validation ?? {}),
-        JSON.stringify(question.options ?? []),
-        JSON.stringify(question.metadata ?? {}),
-      ]
-    );
+    [
+      question.code,
+      question.orderIndex,
+      question.label,
+      question.helperText ?? null,
+      question.questionType,
+      question.isRequired ?? true,
+      question.isInternal ?? false,
+      JSON.stringify(question.validation ?? {}),
+      JSON.stringify(question.options ?? []),
+      JSON.stringify(question.metadata ?? {}),
+    ]
+  );
+}
+
+async function seedDiagnosticQuestions(client: PoolClient) {
+  for (const question of diagnosticQuestions) {
+    await upsertQuestion(client, question);
   }
 }
 
 async function seedOnboardingQuestions(client: PoolClient) {
   for (const question of onboardingQuestions) {
-    await client.query(
-      `insert into diagnostic_questions (
-        code, order_index, label, helper_text, question_type, is_required, is_internal, validation, options, metadata
-      ) values ($1, $2, $3, $4, $5, $6, $7, $8::jsonb, $9::jsonb, $10::jsonb)
-      on conflict (code) do update set
-        order_index = excluded.order_index,
-        label = excluded.label,
-        helper_text = excluded.helper_text,
-        question_type = excluded.question_type,
-        is_required = excluded.is_required,
-        is_internal = excluded.is_internal,
-        validation = excluded.validation,
-        options = excluded.options,
-        metadata = excluded.metadata,
-        updated_at = now()`,
-      [
-        question.code,
-        question.orderIndex,
-        question.label,
-        question.helperText ?? null,
-        question.questionType,
-        question.isRequired ?? true,
-        question.isInternal ?? false,
-        JSON.stringify(question.validation ?? {}),
-        JSON.stringify(question.options ?? []),
-        JSON.stringify(question.metadata ?? {}),
-      ]
-    );
+    await upsertQuestion(client, question);
   }
 }
 

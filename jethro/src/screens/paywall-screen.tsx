@@ -85,20 +85,13 @@ export function PaywallScreen() {
     try {
       await subscriptionService.activateSandbox();
       console.log('[sandbox] activateSandbox OK');
+      router.replace('/onboarding');
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       console.warn('[sandbox] activateSandbox failed:', msg);
-      // Continue anyway — this is a dev bypass
+      Alert.alert('Erro no sandbox', msg, [{ text: 'OK' }]);
     } finally {
       setLoading(false);
-    }
-
-    console.log('[sandbox] navigating to /onboarding');
-    try {
-      router.replace('/onboarding');
-    } catch (navErr) {
-      const msg = navErr instanceof Error ? navErr.message : String(navErr);
-      Alert.alert('Erro de navegação', msg, [{ text: 'OK' }]);
     }
   }, [router]);
 
