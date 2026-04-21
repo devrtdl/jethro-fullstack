@@ -22,7 +22,7 @@ type Question = {
   helper_text: string | null;
   question_type: string;
   is_required: boolean;
-  options: Array<{ id: string; value: string; label: string }>;
+  options: Array<{ value: string; label: string }>;
   metadata: Record<string, unknown>;
 };
 
@@ -61,7 +61,7 @@ function QuestionBlock({
         <View style={styles.optionsWrap}>
           {options.map((opt) => (
             <Pressable
-              key={opt.id}
+              key={opt.value}
               style={[styles.optionPill, value === opt.value && styles.optionPillActive]}
               onPress={() => onChange(opt.value)}
             >

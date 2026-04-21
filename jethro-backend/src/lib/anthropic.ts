@@ -1,6 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 
 import { env } from '../config/env.js';
+import { AppError } from './errors.js';
 
 let client: Anthropic | undefined;
 
@@ -10,7 +11,7 @@ export function hasAnthropicConfig() {
 
 export function getAnthropicClient(): Anthropic {
   if (!env.ANTHROPIC_API_KEY) {
-    throw new Error('ANTHROPIC_API_KEY nao configurada.');
+    throw new AppError('ANTHROPIC_API_KEY nao configurada.', 503, 'ANTHROPIC_UNCONFIGURED');
   }
   if (!client) {
     client = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY });

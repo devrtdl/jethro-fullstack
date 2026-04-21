@@ -204,7 +204,8 @@ export async function generatePlano(userId: string): Promise<{ planoId: string }
     await client.query('COMMIT');
   } catch (error) {
     await client.query('ROLLBACK');
-    throw error;
+    const detail = error instanceof Error ? error.message : String(error);
+    throw new AppError(`Erro ao persistir plano: ${detail}`, 500, 'PLAN_PERSIST_ERROR');
   } finally {
     client.release();
   }
