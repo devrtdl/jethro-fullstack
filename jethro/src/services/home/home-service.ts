@@ -73,6 +73,31 @@ type PlanoGenerateResponse = {
   data: { planoId: string };
 };
 
+export type PlanoSemanaCompleta = {
+  numero: number;
+  nome: string | null;
+  objetivo: string;
+  por_que_importa: string | null;
+  versiculo: string | null;
+  fase: string;
+  gate_status: 'locked' | 'available' | 'completed' | 'overdue';
+  indicador_conclusao: string | null;
+  resultado_esperado: string | null;
+  tarefas: { descricao: string; prioridade: string; completada: boolean }[];
+};
+
+export type PlanoCompleto = {
+  planoId: string;
+  modelo: string;
+  totalSemanas: number;
+  semanas: PlanoSemanaCompleta[];
+};
+
+type PlanoCompletoResponse = {
+  success: boolean;
+  data: PlanoCompleto | null;
+};
+
 export const homeService = {
   async getHomeData(): Promise<HomeData> {
     const headers = await getAuthHeaders();
@@ -109,6 +134,12 @@ export const homeService = {
       success: boolean;
       data: { skipped: boolean; reason?: string; checkInsCount?: number; gateDesbloqueado?: boolean };
     }>('/check-in', { cumpriu, nota }, { headers });
+    return response.data;
+  },
+
+  async getPlanoCompleto(): Promise<PlanoCompleto | null> {
+    const headers = await getAuthHeaders();
+    const response = await apiClient.get<PlanoCompletoResponse>('/plano', { headers });
     return response.data;
   },
 

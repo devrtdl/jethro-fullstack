@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -13,7 +13,10 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { JethroColors } from '@/constants/theme';
+import { appStorage } from '@/src/lib/app-storage';
 import { onboardingService } from '@/src/services/onboarding/onboarding-service';
+
+const DRAFT_KEY = 'onboarding_draft';
 
 type Question = {
   code: string;
@@ -110,14 +113,26 @@ export function OnboardingScreen() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const draftLoaded = useRef(false);
 
+  // Carrega perguntas e restaura draft guardado
   useEffect(() => {
     void (async () => {
       try {
-        const data = await onboardingService.getQuestions();
+        const [data, draftRaw] = await Promise.all([
+          onboardingService.getQuestions(),
+          appStorage.getItem(DRAFT_KEY),
+        ]);
         const qs = (data as unknown as { questions: Question[] }).questions ?? (data as unknown as Question[]);
         setQuestions(qs);
         setSteps(groupIntoSteps(qs));
+
+        if (draftRaw) {
+          const draft = JSON.parse(draftRaw) as { answers: Answers; stepIndex: number };
+          setAnswers(draft.answers ?? {});
+          setStepIndex(draft.stepIndex ?? 0);
+        }
+        draftLoaded.current = true;
       } catch (e) {
         setError(e instanceof Error ? e.message : 'Não foi possível carregar as perguntas.');
       } finally {
@@ -125,6 +140,12 @@ export function OnboardingScreen() {
       }
     })();
   }, []);
+
+  // Guarda draft sempre que respostas ou passo mudam
+  useEffect(() => {
+    if (!draftLoaded.current) return;
+    void appStorage.setItem(DRAFT_KEY, JSON.stringify({ answers, stepIndex }));
+  }, [answers, stepIndex]);
 
   const setAnswer = useCallback((code: string, value: string) => {
     setAnswers((prev) => ({ ...prev, [code]: value }));
@@ -154,6 +175,7 @@ export function OnboardingScreen() {
     setSubmitting(true);
     try {
       await onboardingService.submit(answers);
+      await appStorage.setItem(DRAFT_KEY, ''); // limpa draft
       router.replace('/onboarding-result');
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : 'Erro ao submeter. Tenta novamente.';
