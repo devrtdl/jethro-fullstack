@@ -66,8 +66,10 @@ export async function registerOnboardingRoutes(app: FastifyInstance) {
       // Não condicional → sempre exibir
       if (!m.conditional) return true;
 
+      // Perguntas com showIfAnswer são filtradas no frontend (dependem de respostas do onboarding)
+      // O backend só aplica filtros baseados em dados do diagnóstico
       const showIf = m.showIf as Record<string, unknown> | undefined;
-      if (!showIf) return true;
+      if (!showIf) return true; // condicional mas sem showIf diagnóstico → frontend gere
 
       // Filtro por modelo diagnóstico
       if (Array.isArray(showIf.diagnosticModel)) {
@@ -75,7 +77,7 @@ export async function registerOnboardingRoutes(app: FastifyInstance) {
         if (!(showIf.diagnosticModel as string[]).includes(diagnosticModel)) return false;
       }
 
-      // Filtro por faturamento mínimo (ex: OB-10, OB-13)
+      // Filtro por faturamento mínimo
       if (typeof showIf.diagnosticRevenueMin === 'string') {
         if (!revenueAtLeast(showIf.diagnosticRevenueMin as string)) return false;
       }

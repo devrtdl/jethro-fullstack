@@ -18,6 +18,13 @@ import { onboardingService } from '@/src/services/onboarding/onboarding-service'
 
 const DRAFT_KEY = 'onboarding_draft';
 
+type ShowIfAnswer = {
+  code: string;
+  op: 'eq' | 'neq' | 'in' | 'gt';
+  value?: string | number;
+  values?: string[];
+};
+
 type Question = {
   code: string;
   order_index: number;
@@ -31,17 +38,45 @@ type Question = {
 
 type Answers = Record<string, string>;
 
-// Simple step grouping: 5 questions per step
-function groupIntoSteps(questions: Question[]): Question[][] {
-  const steps: Question[][] = [];
-  const perStep = 4;
-  for (let i = 0; i < questions.length; i += perStep) {
-    steps.push(questions.slice(i, i + perStep));
+// Avalia se uma pergunta deve ser visível com base nas respostas actuais do onboarding
+function isVisible(q: Question, answers: Answers): boolean {
+  const showIfAnswer = q.metadata?.showIfAnswer as ShowIfAnswer | undefined;
+  if (!showIfAnswer) return true;
+  const current = answers[showIfAnswer.code] ?? '';
+  if (!current) return false;
+  switch (showIfAnswer.op) {
+    case 'eq':  return current === String(showIfAnswer.value ?? '');
+    case 'neq': return current !== String(showIfAnswer.value ?? '');
+    case 'in':  return (showIfAnswer.values ?? []).includes(current);
+    case 'gt':  return Number(current) > Number(showIfAnswer.value ?? 0);
+    default:    return true;
   }
-  return steps;
 }
 
-function QuestionBlock({
+// Agrupa perguntas por fase (metadata.phase)
+function groupByPhase(questions: Question[]): Question[][] {
+  const order = ['1', '3a', '3b', '3c', 'ob', '4', '6'];
+  const map = new Map<string, Question[]>();
+  for (const q of questions) {
+    const phase = String(q.metadata?.phase ?? 'other');
+    if (!map.has(phase)) map.set(phase, []);
+    map.get(phase)!.push(q);
+  }
+  const result: Question[][] = [];
+  for (const key of order) {
+    const group = map.get(key);
+    if (group && group.length > 0) result.push(group);
+  }
+  // Adiciona fases não mapeadas
+  for (const [key, group] of map.entries()) {
+    if (!order.includes(key) && group.length > 0) result.push(group);
+  }
+  return result;
+}
+
+// ─── Componente de pergunta individual ───────────────────────────────────────
+
+function RangeWithOptional({
   question,
   value,
   onChange,
@@ -50,6 +85,107 @@ function QuestionBlock({
   value: string;
   onChange: (v: string) => void;
 }) {
+  // value format: "A" or "A|7500"
+  const [rangeCode, optVal] = value.split('|');
+  const optionalText = optVal ?? '';
+
+  function selectRange(code: string) {
+    // Mantém valor opcional se já existia
+    onChange(optionalText ? `${code}|${optionalText}` : code);
+  }
+
+  function setOptional(text: string) {
+    const code = rangeCode ?? '';
+    onChange(text ? `${code}|${text}` : code);
+  }
+
+  return (
+    <View style={styles.rangeWrap}>
+      {question.options.map((opt) => (
+        <Pressable
+          key={opt.value}
+          style={[styles.optionPill, rangeCode === opt.value && styles.optionPillActive]}
+          onPress={() => selectRange(opt.value)}
+        >
+          <Text style={[styles.optionLabel, rangeCode === opt.value && styles.optionLabelActive]}>
+            {opt.label}
+          </Text>
+        </Pressable>
+      ))}
+      {rangeCode && rangeCode !== 'G' && (
+        <View style={styles.optionalInputWrap}>
+          <Text style={styles.optionalLabel}>Valor exacto (opcional):</Text>
+          <TextInput
+            style={styles.optionalInput}
+            value={optionalText}
+            onChangeText={setOptional}
+            placeholder="Ex: 8500"
+            placeholderTextColor={JethroColors.muted}
+            keyboardType="number-pad"
+          />
+        </View>
+      )}
+    </View>
+  );
+}
+
+function MultiSelect({
+  question,
+  value,
+  onChange,
+}: {
+  question: Question;
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  // value format: "A,B,C"
+  const selected = value ? value.split(',').filter(Boolean) : [];
+
+  function toggle(code: string) {
+    const next = selected.includes(code)
+      ? selected.filter((c) => c !== code)
+      : [...selected, code];
+    onChange(next.join(','));
+  }
+
+  return (
+    <View style={styles.optionsWrap}>
+      {question.options.map((opt) => {
+        const active = selected.includes(opt.value);
+        return (
+          <Pressable
+            key={opt.value}
+            style={[styles.optionPill, active && styles.optionPillActive]}
+            onPress={() => toggle(opt.value)}
+          >
+            <View style={styles.multiRow}>
+              <View style={[styles.checkbox, active && styles.checkboxActive]}>
+                {active && <Text style={styles.checkmark}>✓</Text>}
+              </View>
+              <Text style={[styles.optionLabel, active && styles.optionLabelActive]}>
+                {opt.label}
+              </Text>
+            </View>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+
+function QuestionBlock({
+  question,
+  value,
+  onChange,
+  answers,
+}: {
+  question: Question;
+  value: string;
+  onChange: (v: string) => void;
+  answers: Answers;
+}) {
+  if (!isVisible(question, answers)) return null;
+
   const { question_type, label, helper_text, options, is_required } = question;
 
   return (
@@ -76,6 +212,14 @@ function QuestionBlock({
         </View>
       )}
 
+      {question_type === 'range_with_optional' && (
+        <RangeWithOptional question={question} value={value} onChange={onChange} />
+      )}
+
+      {question_type === 'multi_select' && (
+        <MultiSelect question={question} value={value} onChange={onChange} />
+      )}
+
       {(question_type === 'text' || question_type === 'email' || question_type === 'number') && (
         <TextInput
           style={styles.input}
@@ -83,8 +227,12 @@ function QuestionBlock({
           onChangeText={onChange}
           placeholder="Escreve aqui..."
           placeholderTextColor={JethroColors.muted}
-          keyboardType={question_type === 'number' ? 'number-pad' : question_type === 'email' ? 'email-address' : 'default'}
-          autoCapitalize={question_type === 'email' ? 'none' : 'words'}
+          keyboardType={
+            question_type === 'number' ? 'number-pad'
+            : question_type === 'email' ? 'email-address'
+            : 'default'
+          }
+          autoCapitalize={question_type === 'email' ? 'none' : 'sentences'}
         />
       )}
 
@@ -104,6 +252,8 @@ function QuestionBlock({
   );
 }
 
+// ─── Ecrã principal ───────────────────────────────────────────────────────────
+
 export function OnboardingScreen() {
   const router = useRouter();
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -115,7 +265,6 @@ export function OnboardingScreen() {
   const [error, setError] = useState<string | null>(null);
   const draftLoaded = useRef(false);
 
-  // Carrega perguntas e restaura draft guardado
   useEffect(() => {
     void (async () => {
       try {
@@ -125,9 +274,9 @@ export function OnboardingScreen() {
         ]);
         const qs = (data as unknown as { questions: Question[] }).questions ?? (data as unknown as Question[]);
         setQuestions(qs);
-        setSteps(groupIntoSteps(qs));
+        setSteps(groupByPhase(qs));
 
-        if (draftRaw) {
+        if (draftRaw && draftRaw.length > 2) {
           const draft = JSON.parse(draftRaw) as { answers: Answers; stepIndex: number };
           setAnswers(draft.answers ?? {});
           setStepIndex(draft.stepIndex ?? 0);
@@ -155,9 +304,15 @@ export function OnboardingScreen() {
   const totalSteps = steps.length;
   const isLast = stepIndex === totalSteps - 1;
 
+  // Perguntas visíveis no passo actual (filtra condicionais baseadas em respostas)
+  const visibleQuestions = currentStepQuestions.filter((q) => isVisible(q, answers));
+
   function validateStep(): boolean {
-    for (const q of currentStepQuestions) {
-      if (q.is_required && !answers[q.code]?.trim()) {
+    for (const q of visibleQuestions) {
+      if (!q.is_required) continue;
+      const val = answers[q.code] ?? '';
+      const rangeCode = val.split('|')[0] ?? '';
+      if (!rangeCode.trim()) {
         Alert.alert('Resposta necessária', `"${q.label}" é obrigatória.`);
         return false;
       }
@@ -175,7 +330,7 @@ export function OnboardingScreen() {
     setSubmitting(true);
     try {
       await onboardingService.submit(answers);
-      await appStorage.setItem(DRAFT_KEY, ''); // limpa draft
+      await appStorage.setItem(DRAFT_KEY, '');
       router.replace('/onboarding-result');
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : 'Erro ao submeter. Tenta novamente.';
@@ -216,6 +371,13 @@ export function OnboardingScreen() {
     );
   }
 
+  const phaseLabels: Record<string, string> = {
+    '1': 'Contexto', '3a': 'Financeiro', '3b': 'Comercial',
+    '3c': 'Diagnóstico', 'ob': 'Contexto expandido', '4': 'Aprofundamento', '6': 'Fechamento',
+  };
+  const currentPhase = String(currentStepQuestions[0]?.metadata?.phase ?? '');
+  const phaseLabel = phaseLabels[currentPhase] ?? '';
+
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <ScrollView
@@ -243,7 +405,7 @@ export function OnboardingScreen() {
           ))}
         </View>
         <Text style={styles.progressLabel}>
-          Parte {stepIndex + 1} de {totalSteps}
+          {phaseLabel ? `${phaseLabel} · ` : ''}Parte {stepIndex + 1} de {totalSteps}
         </Text>
 
         {/* Questions */}
@@ -254,6 +416,7 @@ export function OnboardingScreen() {
               question={q}
               value={answers[q.code] ?? ''}
               onChange={(v) => setAnswer(q.code, v)}
+              answers={answers}
             />
           ))}
         </View>
@@ -303,7 +466,7 @@ const styles = StyleSheet.create({
   progressSeg: { flex: 1, height: 4, borderRadius: 2, backgroundColor: JethroColors.navyDeep },
   progressSegActive: { backgroundColor: JethroColors.gold },
   progressLabel: { fontSize: 12, color: JethroColors.muted, marginBottom: 20 },
-  questionsWrap: { gap: 20, marginBottom: 24 },
+  questionsWrap: { gap: 24, marginBottom: 24 },
   qBlock: { gap: 10 },
   qLabel: { fontSize: 16, fontWeight: '600', color: JethroColors.creme, lineHeight: 23 },
   qRequired: { color: JethroColors.gold },
@@ -317,11 +480,33 @@ const styles = StyleSheet.create({
   optionPillActive: { borderColor: JethroColors.gold, backgroundColor: JethroColors.goldMuted },
   optionLabel: { fontSize: 15, color: JethroColors.cremeMuted, fontWeight: '500' },
   optionLabelActive: { color: JethroColors.creme, fontWeight: '700' },
+  // Range with optional
+  rangeWrap: { gap: 10 },
+  optionalInputWrap: {
+    flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 4,
+    backgroundColor: JethroColors.navySurface, borderRadius: 12, padding: 12,
+    borderWidth: 1, borderColor: JethroColors.gold,
+  },
+  optionalLabel: { fontSize: 13, color: JethroColors.gold, flex: 1 },
+  optionalInput: {
+    fontSize: 15, color: JethroColors.creme, fontWeight: '700',
+    minWidth: 80, textAlign: 'right',
+  },
+  // Multi-select
+  multiRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  checkbox: {
+    width: 22, height: 22, borderRadius: 6, borderWidth: 2,
+    borderColor: JethroColors.muted, justifyContent: 'center', alignItems: 'center',
+  },
+  checkboxActive: { borderColor: JethroColors.gold, backgroundColor: JethroColors.gold },
+  checkmark: { fontSize: 13, color: JethroColors.navy, fontWeight: '800' },
+  // Text inputs
   input: {
     backgroundColor: JethroColors.navySurface, borderWidth: 1, borderColor: JethroColors.navyDeep,
     borderRadius: 12, paddingHorizontal: 14, paddingVertical: 13, fontSize: 15, color: JethroColors.creme,
   },
   textarea: { minHeight: 100, textAlignVertical: 'top' },
+  // Navigation
   navRow: { flexDirection: 'row', gap: 12 },
   backBtn: {
     flex: 1, borderWidth: 1, borderColor: JethroColors.navySurface, borderRadius: 12,
