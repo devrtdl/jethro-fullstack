@@ -5,6 +5,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -28,6 +29,13 @@ const INITIAL_MESSAGE: MentorMessage = {
   content:
     'Olá! Sou o Jethro, o teu mentor PBN.\n\nEstou aqui para te ajudar a construir um negócio com propósito, estrutura e fé. O que está no coração hoje?',
 };
+
+const SUGESTOES = [
+  'O que é o Método PBN?',
+  'Como funciona o diagnóstico?',
+  'O que é o Gate de Avanço?',
+  'Qual material técnico é mais urgente para mim?',
+];
 
 function MessageBubble({ message }: { message: MentorMessage }) {
   const isUser = message.role === 'user';
@@ -54,6 +62,28 @@ export function MentorScreen() {
   const [loading, setLoading] = useState(false);
   const [sessionId] = useState(generateSessionId);
   const listRef = useRef<FlatList>(null);
+
+  const sendSugestao = useCallback(
+    async (text: string) => {
+      if (loading) return;
+      const userMsg: MentorMessage = { role: 'user', content: text };
+      setMessages((prev) => [...prev, userMsg]);
+      setLoading(true);
+      try {
+        const { reply } = await mentorService.chat(sessionId, text);
+        setMessages((prev) => [...prev, { role: 'assistant', content: reply }]);
+      } catch {
+        setMessages((prev) => [
+          ...prev,
+          { role: 'assistant', content: 'Tive dificuldade em responder agora. Tenta novamente em instantes.' },
+        ]);
+      } finally {
+        setLoading(false);
+        setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 100);
+      }
+    },
+    [loading, sessionId]
+  );
 
   const sendMessage = useCallback(async () => {
     const text = input.trim();
@@ -109,16 +139,38 @@ export function MentorScreen() {
           onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: false })}
           showsVerticalScrollIndicator={false}
           ListFooterComponent={
-            loading ? (
-              <View style={styles.typingRow}>
-                <View style={styles.avatarCircle}>
-                  <Text style={styles.avatarText}>J</Text>
+            <>
+              {loading && (
+                <View style={styles.typingRow}>
+                  <View style={styles.avatarCircle}>
+                    <Text style={styles.avatarText}>J</Text>
+                  </View>
+                  <View style={styles.typingBubble}>
+                    <ActivityIndicator size="small" color={JethroColors.gold} />
+                  </View>
                 </View>
-                <View style={styles.typingBubble}>
-                  <ActivityIndicator size="small" color={JethroColors.gold} />
+              )}
+              {messages.length === 1 && !loading && (
+                <View style={styles.sugestoesContainer}>
+                  <Text style={styles.sugestoesLabel}>Toca numa pergunta para começar</Text>
+                  <ScrollView
+                    horizontal={false}
+                    showsVerticalScrollIndicator={false}
+                    contentContainerStyle={styles.sugestoesList}
+                  >
+                    {SUGESTOES.map((s) => (
+                      <Pressable
+                        key={s}
+                        style={({ pressed }) => [styles.sugestaoChip, pressed && { opacity: 0.7 }]}
+                        onPress={() => sendSugestao(s)}
+                      >
+                        <Text style={styles.sugestaoText}>{s}</Text>
+                      </Pressable>
+                    ))}
+                  </ScrollView>
                 </View>
-              </View>
-            ) : null
+              )}
+            </>
           }
         />
 
@@ -294,5 +346,33 @@ const styles = StyleSheet.create({
     color: JethroColors.navy,
     fontWeight: '700',
     lineHeight: 24,
+  },
+  sugestoesContainer: {
+    marginTop: 16,
+    paddingHorizontal: 4,
+  },
+  sugestoesLabel: {
+    fontSize: 12,
+    color: JethroColors.muted,
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  sugestoesList: {
+    gap: 8,
+    alignItems: 'flex-end',
+    paddingRight: 4,
+  },
+  sugestaoChip: {
+    backgroundColor: JethroColors.gold,
+    borderRadius: 20,
+    paddingHorizontal: 18,
+    paddingVertical: 10,
+    maxWidth: '85%',
+  },
+  sugestaoText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: JethroColors.navy,
+    lineHeight: 20,
   },
 });

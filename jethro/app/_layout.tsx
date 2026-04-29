@@ -19,6 +19,7 @@ export default function RootLayout() {
         <Stack.Screen name="paywall" options={{ headerShown: false }} />
         <Stack.Screen name="onboarding" options={{ headerShown: false }} />
         <Stack.Screen name="onboarding-result" options={{ headerShown: false }} />
+        <Stack.Screen name="faq" options={{ headerShown: false }} />
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>

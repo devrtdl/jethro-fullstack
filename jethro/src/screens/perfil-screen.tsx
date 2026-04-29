@@ -135,6 +135,17 @@ export function PerfilScreen() {
           <RowItem icon="◈" label="Onboarding" value="Completo" />
         </View>
 
+        {/* FAQ */}
+        <Text style={styles.sectionTitle}>Ajuda</Text>
+        <Pressable
+          style={({ pressed }) => [styles.card, styles.faqRow, pressed && { opacity: 0.75 }]}
+          onPress={() => router.push('/faq' as never)}
+        >
+          <Text style={styles.faqIcon}>?</Text>
+          <Text style={styles.faqLabel}>Perguntas Frequentes</Text>
+          <Text style={styles.faqChevron}>›</Text>
+        </Pressable>
+
         {/* Novo diagnóstico */}
         <Text style={styles.sectionTitle}>Diagnóstico</Text>
         <View style={styles.card}>
@@ -347,6 +358,36 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '600',
     color: JethroColors.danger,
+  },
+  faqRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 14,
+    gap: 12,
+  },
+  faqIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: JethroColors.gold,
+    textAlign: 'center',
+    textAlignVertical: 'center',
+    lineHeight: 32,
+    fontSize: 16,
+    fontWeight: '700',
+    color: JethroColors.navy,
+    overflow: 'hidden',
+  },
+  faqLabel: {
+    flex: 1,
+    fontSize: 15,
+    fontWeight: '600',
+    color: JethroColors.creme,
+  },
+  faqChevron: {
+    fontSize: 22,
+    color: JethroColors.muted,
+    fontWeight: '300',
   },
   diagInfo: {
     fontSize: 13,
