@@ -226,8 +226,8 @@ const diagnosticQuestions: DiagnosticQuestionSeed[] = [
     options: [
       { label: 'Rede social orgânica', value: 'A' },
       { label: 'Indicação', value: 'B' },
-      { label: 'Rede social com tráfego pago', value: 'A' },
-      { label: 'Google Ads', value: 'A' },
+      { label: 'Rede social com tráfego pago', value: 'D' },
+      { label: 'Google Ads', value: 'E' },
       { label: 'Uso vários canais', value: 'C' },
     ],
   },

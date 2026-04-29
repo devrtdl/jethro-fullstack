@@ -557,8 +557,8 @@ function classifyDiagnostic(answersBySlug: Record<string, JsonValue>): Classifie
   //   Motor Q12 (precificação)    → qPrec  (precificacao)
   //   Motor Q13 (lucro/tendência) → q12    (lucro_crescimento)
   //   Motor Q16 (canal, escala A/B/C) → q15 (canal_aquisicao, escala com opções específicas)
-  //     q15='F' (Uso vários canais) = motor Q16=C (diversificado)
-  //     q15≠'F' e q15≠'E'         = motor Q16 in [A,B] (canal único ou poucos)
+  //     q15='C' (Uso vários canais) = motor Q16=C (diversificado)
+  //     q15∈{A,B,D,E}              = motor Q16 in [A,B] (canal único ou poucos)
   //   Motor Q17 (cap. operacional) → q16   (capacidade_operacional)
   //   Motor Q18 (horas/semana)     → q17   (horas_semana)
   const q5  = String(answersBySlug.fase_negocio ?? '');
@@ -570,7 +570,7 @@ function classifyDiagnostic(answersBySlug: Record<string, JsonValue>): Classifie
   const q11 = mapRevenueToMotorBand(revenue?.faixa);
   const q12 = String(answersBySlug.lucro_crescimento ?? '');  // motor Q13: A=crescendo B=estável C=regredindo
   const qPrec = String(answersBySlug.precificacao ?? '');     // motor Q12: A=justo B=às vezes abaixo C=frequentemente abaixo
-  const q15 = String(answersBySlug.canal_aquisicao ?? '');    // motor Q16: 'F'=vários canais; outros=canal único/poucos
+  const q15 = String(answersBySlug.canal_aquisicao ?? '');    // motor Q16: 'C'=vários canais; A/B/D/E=canal único/poucos
   const q16 = String(answersBySlug.capacidade_operacional ?? ''); // motor Q17: C=entra em colapso
   const q17 = String(answersBySlug.horas_semana ?? '');       // motor Q18: D=40-60h E=60h+
 
