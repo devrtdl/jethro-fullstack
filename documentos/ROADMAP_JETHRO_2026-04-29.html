@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Jethro — Roadmap v2.0 · Estado de Implementação · Abril 2026</title>
+  <style>
+    :root {
+      --bg: #0b1220;
+      --panel: #132238;
+      --panel-soft: #1b2d47;
+      --text: #f7f4ea;
+      --muted: #b9c3d3;
+      --gold: #e8cc73;
+      --line: #2d3f5c;
+      --green: #7dd3a8;
+      --orange: #f5a97f;
+      --red: #f2b2a5;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      font-size: 11.5px;
+      line-height: 1.6;
+      padding: 32px 40px;
+    }
+
+    header {
+      border-bottom: 2px solid var(--gold);
+      padding-bottom: 14px;
+      margin-bottom: 28px;
+    }
+    header h1 { font-size: 21px; color: var(--gold); font-weight: 700; }
+    header p { color: var(--muted); font-size: 10.5px; margin-top: 5px; }
+
+    .flow-box {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-left: 3px solid var(--gold);
+      border-radius: 6px;
+      padding: 14px 18px;
+      margin-bottom: 28px;
+      font-family: monospace;
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.8;
+    }
+    .flow-box strong { color: var(--gold); }
+
+    .block {
+      margin-bottom: 30px;
+    }
+    .block-header {
+      background: var(--panel-soft);
+      border-left: 4px solid var(--gold);
+      padding: 8px 14px;
+      margin-bottom: 10px;
+      border-radius: 0 6px 6px 0;
+    }
+    .block-header h2 {
+      font-size: 13px;
+      color: var(--gold);
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 6px;
+    }
+    th {
+      background: var(--panel);
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 7px 10px;
+      text-align: left;
+      border-bottom: 1px solid var(--line);
+    }
+    td {
+      padding: 7px 10px;
+      border-bottom: 1px solid var(--line);
+      font-size: 11px;
+      vertical-align: top;
+    }
+    tr:last-child td { border-bottom: none; }
+    td:first-child { width: 68%; }
+    td:last-child { width: 32%; white-space: nowrap; }
+
+    .ok    { color: var(--green);  font-weight: 600; }
+    .novo  { color: var(--green);  font-weight: 700; }
+    .parcial { color: var(--orange); font-weight: 600; }
+    .nao   { color: var(--red);    font-weight: 600; }
+
+    .summary {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+    }
+    .summary-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px 20px;
+      min-width: 110px;
+      text-align: center;
+    }
+    .summary-card .num {
+      font-size: 28px;
+      font-weight: 800;
+      line-height: 1.1;
+    }
+    .summary-card .lbl {
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 3px;
+    }
+    .num-ok      { color: var(--green); }
+    .num-parcial { color: var(--orange); }
+    .num-nao     { color: var(--red); }
+    .num-total   { color: var(--gold); }
+
+    .priorities {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+    }
+    .priorities h3 {
+      color: var(--gold);
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .priorities ol {
+      padding-left: 18px;
+    }
+    .priorities li {
+      color: var(--muted);
+      font-size: 11px;
+      margin-bottom: 7px;
+      line-height: 1.5;
+    }
+    .priorities li strong { color: var(--text); }
+
+    footer {
+      border-top: 1px solid var(--line);
+      padding-top: 12px;
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 10px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    @media print {
+      body { background: #fff; color: #111; padding: 20px 28px; }
+      :root {
+        --bg: #fff; --panel: #f5f5f5; --panel-soft: #ececec;
+        --text: #111; --muted: #555; --gold: #b8860b; --line: #ddd;
+        --green: #1a7a4a; --orange: #c06000; --red: #c0392b;
+      }
+      .summary-card { border: 1px solid #ddd; }
+      .flow-box { border-left: 3px solid #b8860b; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Jethro Mentor PBN — Roadmap v2.0</h1>
+  <p>Estado de Implementação · Auditoria de código: 2026-04-29 · Daniel Lopes / Rogério Teixeira · Confidencial</p>
+</header>
+
+<!-- FLUXO -->
+<div class="flow-box">
+  <strong>Fluxo completo implementado:</strong><br>
+  Launch → Auth → Diagnóstico (Q1–Q17) → Resultados → Paywall (Stripe sandbox)<br>
+  → Onboarding v2.0 (52 perguntas, ~35 visíveis) → Onboarding Result + Gerar Plano → /(tabs)
+</div>
+
+<!-- CONTAGEM -->
+<div class="summary">
+  <div class="summary-card">
+    <div class="num num-ok">43</div>
+    <div class="lbl">Implementado</div>
+  </div>
+  <div class="summary-card">
+    <div class="num num-parcial">8</div>
+    <div class="lbl">Parcial / Aberto</div>
+  </div>
+  <div class="summary-card">
+    <div class="num num-nao">8</div>
+    <div class="lbl">Não implementado</div>
+  </div>
+  <div class="summary-card">
+    <div class="num num-total">59</div>
+    <div class="lbl">Total features</div>
+  </div>
+</div>
+
+<!-- B1 -->
+<div class="block">
+  <div class="block-header"><h2>B1 — Motor de Diagnóstico</h2></div>
+  <table>
+    <tr><th>Feature</th><th>Status</th></tr>
+    <tr><td>Formulário diagnóstico Q1–Q17 + Q18 derivado</td><td class="ok">✅ OK — motor v2.8, Modelo X</td></tr>
+    <tr><td>9 Modelos A–H + Fallback + Modelo X ("Pronto para Escalar")</td><td class="ok">✅ OK</td></tr>
+    <tr><td>Mensagens V1/V2/V3 (sorteio por modelo)</td><td class="ok">✅ OK</td></tr>
+    <tr><td>q15_canal_aquisicao: valores únicos (A=orgânico, B=indicação, C=vários, D=tráfego pago, E=Google Ads)</td><td class="ok">✅ OK</td></tr>
+    <tr><td>Dead code Q18=D no motor — nenhuma regra produz este valor</td><td class="parcial">⚠️ Aberto</td></tr>
+  </table>
+</div>
+
+<!-- B2 -->
+<div class="block">
+  <div class="block-header"><h2>B2 — Alma / RAG</h2></div>
+  <table>
+    <tr><th>Feature</th><th>Status</th></tr>
+    <tr><td>Alma v5.14 (92 ações, 59 metáforas) — long-context com prompt caching</td><td class="ok">✅ OK</td></tr>
+    <tr><td>G01–G14 no contexto do Mentor IA (Camada 3 injetada no system prompt)</td><td class="ok">✅ OK</td></tr>
+    <tr><td>Planos reais como exemplos RAG (4 cases)</td><td class="nao">❌ Não implementado</td></tr>
+    <tr><td>Prioridade de indexação por camadas</td><td class="nao">❌ Não implementado</td></tr>
+  </table>
+</div>
+
+<!-- B3 -->
+<div class="block">
+  <div class="block-header"><h2>B3 — Onboarding</h2></div>
+  <table>
+    <tr><th>Feature</th><th>Status</th></tr>
+    <tr><td>Onboarding v2.0 — todas as perguntas clicáveis (single_select, range_with_optional, multi_select)</td><td class="novo">✅ NOVO</td></tr>
+    <tr><td>52 perguntas no DB · 31–38 visíveis por utilizador · 6 fases</td><td class="novo">✅ NOVO</td></tr>
+    <tr><td>showIfAnswer — condicionais client-side com isVisible()</td><td class="novo">✅ NOVO</td></tr>
+    <tr><td>RangeWithOptional + MultiSelect components (React Native)</td><td class="novo">✅ NOVO</td></tr>
+    <tr><td>Condicionais server-side (OB-09–OB-14 por modelo)</td><td class="ok">✅ OK</td></tr>
+    <tr><td>O19 follow-up comercial F4 A/B</td><td class="ok">✅ OK</td></tr>
+    <tr><td>buildOnboardingJson() v2.0 — 75+ campos + aliases legados</td><td class="ok">✅ OK (era parcial)</td></tr>
+    <tr><td>sem_dre_flag · risco_concentracao · risco_plataforma · precisa_primeiro_contrato</td><td class="novo">✅ NOVO</td></tr>
+    <tr><td>CANAL_MOTOR_MAP + midpoints FAT / CUSTO / TICKET</td><td class="novo">✅ NOVO</td></tr>
+    <tr><td>Migrations 004 (idempotente) + 020 (novos question_types)</td><td class="novo">✅ NOVO</td></tr>
+    <tr><td>proposito_claro_flag</td><td class="nao">❌ Não implementado</td></tr>
+    <tr><td>canal_fragil_flag</td><td class="nao">❌ Não implementado</td></tr>
+  </table>
+</div>
+
+<!-- B4 -->
+<div class="block">
+  <div class="block-header"><h2>B4 — Geração de Plano</h2></div>
+  <table>
+    <tr><th>Feature</th><th>Status</th></tr>
+    <tr><td>POST /plano/generate — Claude + Alma + onboarding JSON → 24 semanas</td><td class="ok">✅ OK</td></tr>
+    <tr><td>Persistência: planos_acao + semanas + tarefas_semana + gates_semanais</td><td class="ok">✅ OK</td></tr>
+    <tr><td>Tabela Distribuição Modelos A–H (acoes_library seeded)</td><td class="ok">✅ OK</td></tr>
+    <tr><td>Camada 3 R01–R33 regras</td><td class="parcial">⚠️ Parcial</td></tr>
+    <tr><td>R34–R43 — sinais secundários</td><td class="nao">❌ Não implementado</td></tr>
+    <tr><td>Plano em 2 camadas: S1–S8 + S9–S24</td><td class="nao">❌ Não implementado</td></tr>
+    <tr><td>System Prompt v1.1 (referência 75+ campos onboarding)</td><td class="parcial">⚠️ Parcial</td></tr>
+    <tr><td>Template 30 Dias (produto de entrada)</td><td class="nao">❌ Não implementado</td></tr>
+  </table>
+</div>
+
+<!-- B5 -->
+<div class="block">
+  <div class="block-header"><h2>B5 — App (React Native)</h2></div>
+  <table>
+    <tr><th>Feature</th><th>Status</th></tr>
+    <tr><td>Tab Início: devocional + KPIs + plano semana + gate</td><td class="ok">✅ OK</td></tr>
+    <tr><td>Tab Mentor: chat com Jethro → POST /mentor/chat</td><td class="ok">✅ OK</td></tr>
+    <tr><td>Tab Biblioteca: 14 guias × 7 pilares (accordion, dados estáticos)</td><td class="ok">✅ OK</td></tr>
+    <tr><td>Tab Perfil: conta, subscription, progresso, diagnóstico, sign out</td><td class="ok">✅ OK</td></tr>
+    <tr><td>GET /home · GET /diagnostic/latest · GET /user/flow-status</td><td class="ok">✅ OK</td></tr>
+    <tr><td>Gate de Avanço — progress bar + 5 dots + check-in modal</td><td class="ok">✅ OK</td></tr>
+    <tr><td>POST /gate/advance · POST /check-in semanal</td><td class="ok">✅ OK</td></tr>
+    <tr><td>Paywall Stripe sandbox — checkout + mock activation + webhook</td><td class="ok">✅ OK</td></tr>
+    <tr><td>GET /subscription/status · POST /subscription/create-checkout</td><td class="ok">✅ OK</td></tr>
+    <tr><td>FAQ Fixo — tela /faq dedicada (21 perguntas, 3 blocos accordion)</td><td class="novo">✅ NOVO</td></tr>
+    <tr><td>Row "Perguntas Frequentes" no Perfil → navega para /faq</td><td class="novo">✅ NOVO</td></tr>
+    <tr><td>Mentor Tier 1 — FAQ sem chamar Claude (match por keywords ≥ 0.5)</td><td class="novo">✅ NOVO</td></tr>
+    <tr><td>Mentor Tier 2 — system prompt enriquecido (modelo, semana, fase, gate, FAQ por modelo, G01–G14)</td><td class="novo">✅ NOVO</td></tr>
+    <tr><td>Mentor chips de sugestão (4 perguntas, desaparecem após 1ª interação)</td><td class="novo">✅ NOVO</td></tr>
+    <tr><td>faq-data.ts — FAQ Global 16 Q&As + por Modelo 45 Q&As + Camada 4</td><td class="novo">✅ NOVO</td></tr>
+    <tr><td>API #1 Lead Warming (pré-diagnóstico)</td><td class="nao">❌ Não implementado</td></tr>
+    <tr><td>API #2 Objection Handling (pós-diagnóstico por modelo)</td><td class="nao">❌ Não implementado</td></tr>
+    <tr><td>Cálculo de horas reais (tracking 120h)</td><td class="parcial">⚠️ COUNT(check_ins) × 24h</td></tr>
+  </table>
+</div>
+
+<!-- B6 -->
+<div class="block">
+  <div class="block-header"><h2>B6 — QA e Validação</h2></div>
+  <table>
+    <tr><th>Feature</th><th>Status</th></tr>
+    <tr><td>DoubleCheck coerência cruzada v10</td><td class="ok">✅ OK — documentado</td></tr>
+    <tr><td>Validação 30 leads simulados (98% de acerto)</td><td class="ok">✅ OK</td></tr>
+    <tr><td>G-34: COM-43–46, FIN-28, LID-22–23 — ações referenciadas na Alma mas não seedadas em acoes_library</td><td class="parcial">⚠️ Aberto</td></tr>
+    <tr><td>Modelo I — 12 ações PRE sem activação (prefixo PRE- inexistente no código)</td><td class="parcial">⚠️ Aberto</td></tr>
+    <tr><td>Exemplo Fallback errado no Roteiro QA</td><td class="parcial">⚠️ Aberto</td></tr>
+  </table>
+</div>
+
+<!-- PRIORIDADES -->
+<div class="priorities">
+  <h3>Próximas Prioridades — v2.1</h3>
+  <ol>
+    <li><strong>proposito_claro_flag + canal_fragil_flag</strong> — últimos flags em falta do Onboarding v2.0 (service.ts + domain-seed.ts)</li>
+    <li><strong>System Prompt v1.1</strong> — referenciar os 75+ campos do buildOnboardingJson() v2.0 no prompt de geração de plano</li>
+    <li><strong>Camada 3 v1.11</strong> — R34–R43 sinais secundários + Plano 2 camadas S1–S8 + S9–S24</li>
+    <li><strong>G-34 crítico</strong> — seed COM-43–46, FIN-28, LID-22–23 em acoes_library + regras de ativação Camada 3</li>
+    <li><strong>API #2 Objection Handling</strong> — personalização pós-diagnóstico por modelo A–H+X</li>
+    <li><strong>RAG real</strong> — 4 planos reais como exemplos + indexação por camadas</li>
+    <li><strong>Stripe produção</strong> — STRIPE_SECRET_KEY no Render env vars + webhook verificado</li>
+  </ol>
+</div>
+
+<footer>
+  <span>Jethro Mentor PBN · Roadmap v2.0 · Documento confidencial · © 2026 Rogério Teixeira</span>
+  <span>Gerado em 2026-04-29</span>
+</footer>
+
+</body>
+</html>
