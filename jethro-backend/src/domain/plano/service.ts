@@ -201,7 +201,14 @@ export async function generatePlano(userId: string): Promise<{ planoId: string }
   }
 
   const { modelo_confirmado: diagnosticModel, json_completo: onboardingJson } = onboardingRow;
-  const alma = loadAlmaContent();
+
+  let alma: string;
+  try {
+    alma = loadAlmaContent();
+  } catch (err) {
+    const detail = err instanceof Error ? err.message : String(err);
+    throw new AppError(`Conteúdo ALMA não encontrado: ${detail}`, 500, 'ALMA_LOAD_ERROR');
+  }
 
   // Chamada Claude com Alma cacheada
   const systemBlocks: Anthropic.Messages.TextBlockParam[] = [
@@ -215,12 +222,18 @@ export async function generatePlano(userId: string): Promise<{ planoId: string }
 
   const prompt = buildPlanPrompt(diagnosticModel, onboardingJson as Record<string, unknown>);
 
-  const response = await getAnthropicClient().messages.create({
-    model: MODEL,
-    max_tokens: MAX_TOKENS,
-    system: systemBlocks,
-    messages: [{ role: 'user', content: prompt }],
-  });
+  let response: Anthropic.Messages.Message;
+  try {
+    response = await getAnthropicClient().messages.create({
+      model: MODEL,
+      max_tokens: MAX_TOKENS,
+      system: systemBlocks,
+      messages: [{ role: 'user', content: prompt }],
+    });
+  } catch (err) {
+    const detail = err instanceof Error ? err.message : String(err);
+    throw new AppError(`Erro na chamada ao modelo de IA: ${detail}`, 502, 'AI_CALL_ERROR');
+  }
 
   const rawText = response.content[0]?.type === 'text' ? response.content[0].text : '';
 
