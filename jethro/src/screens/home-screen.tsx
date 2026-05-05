@@ -223,13 +223,11 @@ function QuestionInput({
   getRevenueOptions: (question: FormQuestion) => QuestionOption[];
   selectedCountryIso: string;
 }) {
-  const questionCode = `q${question.order + 1}`;
   const options = question.type === 'money_range' ? getRevenueOptions(question) : question.options;
 
   return (
     <View style={styles.questionBlock}>
       <Text style={styles.questionLabel}>
-        <Text style={styles.questionNumber}>{questionCode} </Text>
         {question.label}
       </Text>
       {question.helperText ? <Text style={styles.questionHelper}>{question.helperText}</Text> : null}
@@ -1069,10 +1067,6 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     fontWeight: '600',
     textAlign: 'center',
-  },
-  questionNumber: {
-    color: palette.gold,
-    fontWeight: '700',
   },
   questionHelper: {
     color: palette.muted,
