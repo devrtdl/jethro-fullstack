@@ -57,13 +57,14 @@ async function request<T>(path: string, options: RequestOptions = {}) {
   const controller = new AbortController();
   const timeoutMs = options.timeoutMs ?? env.apiTimeoutMs;
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  const hasBody = options.body !== undefined;
 
   try {
     const response = await fetch(buildUrl(path, options.query), {
       ...options,
       headers: {
         Accept: 'application/json',
-        'Content-Type': 'application/json',
+        ...(hasBody ? { 'Content-Type': 'application/json' } : {}),
         ...options.headers,
       },
       signal: controller.signal,

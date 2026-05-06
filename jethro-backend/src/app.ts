@@ -70,6 +70,17 @@ export function createApp() {
       );
     }
 
+    const statusError = error as { statusCode?: unknown; message?: unknown };
+    if (typeof statusError.statusCode === 'number' && statusError.statusCode >= 400 && statusError.statusCode < 500) {
+      return reply.code(statusError.statusCode).send(
+        errorResponse({
+          code: 'BAD_REQUEST',
+          message: typeof statusError.message === 'string' ? statusError.message : 'Requisicao invalida.',
+          retryable: false,
+        })
+      );
+    }
+
     return reply.code(500).send(
       errorResponse({
         code: 'INTERNAL_SERVER_ERROR',
