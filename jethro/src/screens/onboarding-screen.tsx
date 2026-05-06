@@ -173,6 +173,83 @@ function MultiSelect({
   );
 }
 
+type TeamSlot = { nome: string; funcao: string };
+
+function TeamSlots({
+  question,
+  value,
+  onChange,
+}: {
+  question: Question;
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  const maxSlots = (question.metadata?.maxSlots as number) ?? 5;
+
+  let slots: TeamSlot[] = [];
+  try {
+    if (value) slots = JSON.parse(value) as TeamSlot[];
+  } catch {}
+  if (slots.length === 0) slots = [{ nome: '', funcao: '' }];
+
+  function update(index: number, field: 'nome' | 'funcao', val: string) {
+    const next = slots.map((s, i) => (i === index ? { ...s, [field]: val } : s));
+    onChange(JSON.stringify(next));
+  }
+
+  function addSlot() {
+    if (slots.length >= maxSlots) return;
+    onChange(JSON.stringify([...slots, { nome: '', funcao: '' }]));
+  }
+
+  function removeSlot(index: number) {
+    const next = slots.filter((_, i) => i !== index);
+    onChange(next.length > 0 ? JSON.stringify(next) : '');
+  }
+
+  return (
+    <View style={styles.slotsWrap}>
+      {slots.map((slot, i) => (
+        <View key={i} style={styles.slotCard}>
+          <View style={styles.slotHeader}>
+            <TextInput
+              style={styles.slotNomeInput}
+              value={slot.nome}
+              onChangeText={(v) => update(i, 'nome', v)}
+              placeholder="Nome (opcional)"
+              placeholderTextColor={JethroColors.muted}
+              autoCapitalize="words"
+            />
+            {slots.length > 1 && (
+              <Pressable style={styles.slotRemoveBtn} onPress={() => removeSlot(i)}>
+                <Text style={styles.slotRemoveText}>×</Text>
+              </Pressable>
+            )}
+          </View>
+          <View style={styles.funcaoWrap}>
+            {question.options.map((opt) => (
+              <Pressable
+                key={opt.value}
+                style={[styles.funcaoChip, slot.funcao === opt.value && styles.funcaoChipActive]}
+                onPress={() => update(i, 'funcao', slot.funcao === opt.value ? '' : opt.value)}
+              >
+                <Text style={[styles.funcaoChipLabel, slot.funcao === opt.value && styles.funcaoChipLabelActive]}>
+                  {opt.label}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+        </View>
+      ))}
+      {slots.length < maxSlots && (
+        <Pressable style={styles.addSlotBtn} onPress={addSlot}>
+          <Text style={styles.addSlotText}>+ Adicionar pessoa</Text>
+        </Pressable>
+      )}
+    </View>
+  );
+}
+
 function QuestionBlock({
   question,
   value,
@@ -218,6 +295,10 @@ function QuestionBlock({
 
       {question_type === 'multi_select' && (
         <MultiSelect question={question} value={value} onChange={onChange} />
+      )}
+
+      {question_type === 'team_slots' && (
+        <TeamSlots question={question} value={value} onChange={onChange} />
       )}
 
       {(question_type === 'text' || question_type === 'email' || question_type === 'number') && (
@@ -506,6 +587,36 @@ const styles = StyleSheet.create({
     borderRadius: 12, paddingHorizontal: 14, paddingVertical: 13, fontSize: 15, color: JethroColors.creme,
   },
   textarea: { minHeight: 100, textAlignVertical: 'top' },
+  // Team slots
+  slotsWrap:       { gap: 10 },
+  slotCard:        {
+    backgroundColor: JethroColors.navyDeep, borderRadius: 12, padding: 12, gap: 10,
+    borderWidth: 1, borderColor: JethroColors.navySurface,
+  },
+  slotHeader:      { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  slotNomeInput:   {
+    flex: 1, height: 40, backgroundColor: JethroColors.navySurface,
+    borderRadius: 8, paddingHorizontal: 12, fontSize: 14, color: JethroColors.creme,
+    borderWidth: 1, borderColor: JethroColors.navyDeep,
+  },
+  slotRemoveBtn:   {
+    width: 32, height: 32, borderRadius: 16,
+    backgroundColor: JethroColors.navySurface, alignItems: 'center', justifyContent: 'center',
+  },
+  slotRemoveText:  { fontSize: 18, color: JethroColors.muted, fontWeight: '700', lineHeight: 22 },
+  funcaoWrap:      { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
+  funcaoChip:      {
+    paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8,
+    borderWidth: 1, borderColor: JethroColors.navySurface, backgroundColor: JethroColors.navySurface,
+  },
+  funcaoChipActive:      { borderColor: JethroColors.gold, backgroundColor: JethroColors.goldMuted },
+  funcaoChipLabel:       { fontSize: 12, color: JethroColors.cremeMuted, fontWeight: '500' },
+  funcaoChipLabelActive: { color: JethroColors.creme, fontWeight: '700' },
+  addSlotBtn:      {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+    padding: 12, borderRadius: 12, borderWidth: 1, borderColor: JethroColors.navySurface,
+  },
+  addSlotText:     { fontSize: 14, color: JethroColors.gold, fontWeight: '600' },
   // Navigation
   navRow: { flexDirection: 'row', gap: 12 },
   backBtn: {

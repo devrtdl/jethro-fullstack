@@ -12,7 +12,7 @@ type DiagnosticQuestionSeed = {
   orderIndex: number;
   label: string;
   helperText?: string;
-  questionType: 'text' | 'textarea' | 'email' | 'phone' | 'single_select' | 'money_range' | 'number' | 'range_with_optional' | 'multi_select';
+  questionType: 'text' | 'textarea' | 'email' | 'phone' | 'single_select' | 'money_range' | 'number' | 'range_with_optional' | 'multi_select' | 'team_slots';
   isRequired?: boolean;
   isInternal?: boolean;
   validation?: Record<string, unknown>;
@@ -328,8 +328,29 @@ const onboardingQuestions: DiagnosticQuestionSeed[] = [
     },
   },
   {
-    code: 'onb_o2c_ativo_fisico',
+    code: 'onb_o2b_equipa_detalhada',
     orderIndex: 103,
+    label: 'Quem são as pessoas-chave da tua equipa?',
+    helperText: 'Até 5 pessoas — escreve o nome (opcional) e selecciona a função.',
+    questionType: 'team_slots',
+    options: [
+      { label: 'Vendas', value: 'vendas' },
+      { label: 'Financeiro', value: 'financeiro' },
+      { label: 'Operação', value: 'operacao' },
+      { label: 'Atendimento', value: 'atendimento' },
+      { label: 'Admin', value: 'admin' },
+      { label: 'Outro', value: 'outro' },
+    ],
+    metadata: {
+      form: 'onboarding', phase: '1', fields: ['equipa_detalhada'],
+      conditional: true,
+      showIfAnswer: { code: 'onb_o2_equipa_total', op: 'neq', value: '1' },
+      maxSlots: 5,
+    },
+  },
+  {
+    code: 'onb_o2c_ativo_fisico',
+    orderIndex: 104,
     label: 'Tens espaço físico para atender clientes?',
     questionType: 'single_select',
     isRequired: true,
@@ -343,7 +364,7 @@ const onboardingQuestions: DiagnosticQuestionSeed[] = [
   },
   {
     code: 'onb_o3_meta',
-    orderIndex: 104,
+    orderIndex: 105,
     label: 'Qual faturamento mensal queres alcançar nos próximos 6 meses?',
     questionType: 'single_select',
     isRequired: true,
@@ -359,7 +380,7 @@ const onboardingQuestions: DiagnosticQuestionSeed[] = [
   },
   {
     code: 'onb_o3a_problema',
-    orderIndex: 105,
+    orderIndex: 106,
     label: 'Para isso, o que precisa mudar primeiro na tua opinião?',
     questionType: 'single_select',
     isRequired: true,

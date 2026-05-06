@@ -54,7 +54,17 @@ type OnboardingRow = { id: string; modelo_confirmado: string; json_completo: Rec
 
 function buildStudentContext(diagnosticModel: string, j: Record<string, unknown>): string {
   const segmento     = j['area_negocio']            ?? 'Não informado';
-  const equipa       = j['equipa']                  ?? 'Não informado';
+  const equipaTotal  = j['equipa']                  ?? 'Não informado';
+  const equipaDet    = j['equipa_detalhada'];
+  const equipaPessoas = Array.isArray(equipaDet) && equipaDet.length > 0
+    ? (equipaDet as Array<{ nome?: string; funcao?: string }>)
+        .map((p) => p.nome ? `${p.nome} (${p.funcao})` : p.funcao ?? '')
+        .filter(Boolean)
+        .join(', ')
+    : null;
+  const equipa = equipaPessoas
+    ? `${String(equipaTotal)} pessoas — ${equipaPessoas}`
+    : String(equipaTotal);
   const tempoNeg     = j['tempo_negocio']           ?? 'Não informado';
   const meta         = j['meta_6_meses']            ?? 'Não informado';
   const problema     = j['maior_problema_percebido'] ?? '';

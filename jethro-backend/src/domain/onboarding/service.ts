@@ -8,6 +8,7 @@ export type OnboardingJson = {
   // EQUIPE E ATIVOS
   equipa_total: number | null;
   equipa_comercial_count: number | null;
+  equipa_detalhada: Array<{ nome: string; funcao: string }> | null;
   ativo_fisico: string | null;
   audiencia_digital_status: string | null;
   audiencia_tamanho: string | null;
@@ -172,6 +173,22 @@ export function buildOnboardingJson(
   const equipa_comercial_raw = str(answers['onb_o2a_equipa_comercial']);
   const equipa_comercial_num = equipa_comercial_raw ? (num(equipa_comercial_raw) ?? 0) : 0;
 
+  const equipa_detalhada_raw = str(answers['onb_o2b_equipa_detalhada']);
+  let equipa_detalhada: Array<{ nome: string; funcao: string }> | null = null;
+  if (equipa_detalhada_raw) {
+    try {
+      const parsed = JSON.parse(equipa_detalhada_raw) as unknown;
+      if (Array.isArray(parsed)) {
+        equipa_detalhada = (parsed as Array<{ nome?: string; funcao?: string }>)
+          .filter((p) => p.funcao)
+          .map((p) => ({ nome: p.nome ?? '', funcao: p.funcao! }));
+        if (equipa_detalhada.length === 0) equipa_detalhada = null;
+      }
+    } catch {
+      equipa_detalhada = null;
+    }
+  }
+
   const sem_dre_raw = str(answers['onb_o6a_dre']);
   // C=só contador, D=nenhum controle → sem_dre_flag=true
   const sem_dre_flag = sem_dre_raw === 'C' || sem_dre_raw === 'D';
@@ -275,6 +292,7 @@ export function buildOnboardingJson(
     // EQUIPE E ATIVOS
     equipa_total: equipa_total_num,
     equipa_comercial_count: equipa_comercial_num,
+    equipa_detalhada,
     ativo_fisico: str(answers['onb_o2c_ativo_fisico']),
     audiencia_digital_status: str(answers['onb_o7c_audiencia']),
     audiencia_tamanho: str(answers['onb_o7d_seguidores']),
