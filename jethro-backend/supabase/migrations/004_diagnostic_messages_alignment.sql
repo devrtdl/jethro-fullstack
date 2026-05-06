@@ -3,7 +3,7 @@ alter table diagnostic_questions
 
 alter table diagnostic_questions
   add constraint diagnostic_questions_question_type_check
-  check (question_type in ('text', 'textarea', 'email', 'phone', 'single_select', 'money_range', 'number', 'range_with_optional', 'multi_select'));
+  check (question_type in ('text', 'textarea', 'email', 'phone', 'single_select', 'money_range', 'number', 'range_with_optional', 'multi_select', 'team_slots'));
 
 alter table diagnostic_messages
   add column if not exists root_cause text;

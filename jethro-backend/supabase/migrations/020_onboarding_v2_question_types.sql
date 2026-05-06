@@ -5,7 +5,7 @@ SET question_type = 'text'
 WHERE question_type NOT IN (
   'text', 'textarea', 'email', 'phone',
   'single_select', 'money_range', 'number',
-  'range_with_optional', 'multi_select'
+  'range_with_optional', 'multi_select', 'team_slots'
 );
 
 -- Onboarding v2.0: alarga check constraint para incluir novos tipos de pergunta
@@ -17,5 +17,5 @@ ALTER TABLE diagnostic_questions
   CHECK (question_type IN (
     'text', 'textarea', 'email', 'phone',
     'single_select', 'money_range', 'number',
-    'range_with_optional', 'multi_select'
+    'range_with_optional', 'multi_select', 'team_slots'
   ));
