@@ -76,7 +76,11 @@ function buildStudentContext(diagnosticModel: string, j: Record<string, unknown>
   const custoFixo    = j['custo_fixo_mensal']       ? `Custo fixo mensal: R$${j['custo_fixo_mensal']}` : '';
   const margem       = j['margem_estimada_pct']     ? `Margem estimada: ${j['margem_estimada_pct']}%` : '';
   const faturamento  = [ticket, clientes, custoFixo, margem].filter(Boolean).join(' | ') || 'Não informado';
-  const canal        = j['canal_principal']         ?? '';
+  const canal_motor_labels: Record<string, string> = {
+    A: 'Redes sociais / digital', B: 'Indicação pessoal', C: 'Vários canais',
+  };
+  const canal_raw    = String(j['canal_principal'] ?? '');
+  const canal        = canal_motor_labels[canal_raw] ?? canal_raw;
   const objeccao     = j['objeccao_principal']      ?? '';
   const observacoes  = [canal && `Canal principal: ${canal}`, objeccao && `Objecção principal: ${objeccao}`]
     .filter(Boolean).join(' | ') || 'Não informado';
@@ -242,8 +246,10 @@ export async function initiateGeneratePlano(
 
   const existing = await pool
     .query<{ id: string; status: string }>(
-      `SELECT id, status FROM planos_acao WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1`,
-      [userId]
+      `SELECT id, status FROM planos_acao
+       WHERE user_id = $1 AND onboarding_id = $2
+       ORDER BY created_at DESC LIMIT 1`,
+      [userId, onboardingRow.id]
     )
     .then((r) => r.rows[0] ?? null);
 
@@ -274,10 +280,24 @@ export async function getPlanoStatus(
   userId: string
 ): Promise<{ status: 'not_started' | 'generating' | 'ready' | 'error'; planoId?: string; error?: string }> {
   const pool = getDbPool();
+
+  const onboardingRow = await pool
+    .query<{ id: string }>(
+      `SELECT id FROM onboarding_sessions
+       WHERE user_id = $1 AND status = 'completed'
+       ORDER BY created_at DESC LIMIT 1`,
+      [userId]
+    )
+    .then((r) => r.rows[0] ?? null);
+
+  if (!onboardingRow) return { status: 'not_started' };
+
   const row = await pool
     .query<{ id: string; status: string; error_message: string | null }>(
-      `SELECT id, status, error_message FROM planos_acao WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1`,
-      [userId]
+      `SELECT id, status, error_message FROM planos_acao
+       WHERE user_id = $1 AND onboarding_id = $2
+       ORDER BY created_at DESC LIMIT 1`,
+      [userId, onboardingRow.id]
     )
     .then((r) => r.rows[0] ?? null);
 

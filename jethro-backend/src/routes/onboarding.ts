@@ -129,72 +129,55 @@ export async function registerOnboardingRoutes(app: FastifyInstance) {
         );
       }
 
-      // Carrega modelo do diagnóstico mais recente
+      // Carrega modelo e respostas do diagnóstico mais recente
       const diagRow = await pool
-        .query<{ modelo_identificado: string }>(
-          `SELECT modelo_identificado FROM diagnostico_respostas
+        .query<{ id: string; modelo_identificado: string; answers_by_code: Record<string, string> }>(
+          `SELECT id, modelo_identificado, answers_by_code FROM diagnostico_respostas
            WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1`,
           [userId]
         )
         .then((r) => r.rows[0] ?? null);
 
-      const diagnosticModel = diagRow?.modelo_identificado ?? 'A';
+      if (!diagRow) {
+        throw new AppError('Diagnostico necessario para completar o onboarding.', 400, 'DIAGNOSTIC_REQUIRED');
+      }
+
+      const diagnosticModel = diagRow.modelo_identificado;
+      const diagAnswers = diagRow?.answers_by_code ?? {};
 
       const jsonCompleto = buildOnboardingJson(
         answers as Record<string, string | number | boolean | null>,
         diagnosticModel
       );
 
-      // Persiste na onboarding_session mais recente ou cria nova
-      const sessionRow = await pool
+      // Enriquece com campos que só existem no diagnóstico
+      const faseLabelMap: Record<string, string> = {
+        A: 'Ideia (pré-início)', B: 'Início (0-1 ano)',
+        C: 'Em crescimento (1-3 anos)', D: 'Consolidado (3+ anos)',
+      };
+      jsonCompleto.area_negocio = (diagAnswers['q2_area_atuacao'] as string | undefined) ?? null;
+      jsonCompleto.tempo_negocio = diagAnswers['q5_fase_negocio']
+        ? (faseLabelMap[diagAnswers['q5_fase_negocio']] ?? diagAnswers['q5_fase_negocio'])
+        : null;
+
+      const newSession = await pool
         .query<{ id: string }>(
-          `SELECT id FROM onboarding_sessions WHERE user_id = $1
-           ORDER BY created_at DESC LIMIT 1`,
-          [userId]
-        )
-        .then((r) => r.rows[0] ?? null);
-
-      let sessionId: string;
-
-      if (sessionRow) {
-        await pool.query(
-          `UPDATE onboarding_sessions SET
-             json_completo = $1,
-             modelo_confirmado = $2,
-             sem_dre_flag = $3,
-             sem_empresa_flag = $4,
-             equipa_comercial_count = $5,
-             status = 'completed'
-           WHERE id = $6`,
+          `INSERT INTO onboarding_sessions
+             (user_id, diagnostico_id, modelo_confirmado, json_completo, sem_dre_flag, sem_empresa_flag, equipa_comercial_count, status)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, 'completed')
+           RETURNING id`,
           [
-            jsonCompleto,
+            userId,
+            diagRow.id,
             diagnosticModel,
+            jsonCompleto,
             jsonCompleto.sem_dre_flag,
             false,
             jsonCompleto.equipa_comercial_count ?? 0,
-            sessionRow.id,
           ]
-        );
-        sessionId = sessionRow.id;
-      } else {
-        const newSession = await pool
-          .query<{ id: string }>(
-            `INSERT INTO onboarding_sessions
-               (user_id, modelo_confirmado, json_completo, sem_dre_flag, sem_empresa_flag, equipa_comercial_count, status)
-             VALUES ($1, $2, $3, $4, $5, $6, 'completed')
-             RETURNING id`,
-            [
-              userId,
-              diagnosticModel,
-              jsonCompleto,
-              jsonCompleto.sem_dre_flag,
-              false,
-              jsonCompleto.equipa_comercial_count ?? 0,
-            ]
-          )
-          .then((r) => r.rows[0]!);
-        sessionId = newSession.id;
-      }
+        )
+        .then((r) => r.rows[0]!);
+      const sessionId = newSession.id;
 
       return successResponse({ sessionId, modeloConfirmado: diagnosticModel, json: jsonCompleto });
     }

@@ -21,10 +21,22 @@ export async function registerUserRoutes(app: FastifyInstance) {
         [userId]
       ),
       pool.query(
-        `SELECT id FROM onboarding_sessions WHERE user_id = $1 AND status = 'completed' LIMIT 1`,
+        `SELECT id FROM onboarding_sessions WHERE user_id = $1 AND status = 'completed'
+         ORDER BY created_at DESC LIMIT 1`,
         [userId]
       ),
-      pool.query(`SELECT id FROM planos_acao WHERE user_id = $1 AND status = 'ready' LIMIT 1`, [userId]),
+      pool.query(
+        `SELECT pa.id
+         FROM planos_acao pa
+         JOIN (
+           SELECT id FROM onboarding_sessions
+           WHERE user_id = $1 AND status = 'completed'
+           ORDER BY created_at DESC LIMIT 1
+         ) os ON os.id = pa.onboarding_id
+         WHERE pa.user_id = $1 AND pa.status = 'ready'
+         LIMIT 1`,
+        [userId]
+      ),
     ]);
 
     return successResponse({
@@ -73,9 +85,14 @@ export async function registerUserRoutes(app: FastifyInstance) {
           `SELECT pa.id AS plano_id, s.id AS semana_id, s.numero AS semana_numero,
                   s.fase, s.pilar, s.objetivo, gs.gate_status, gs.avancou_em
            FROM planos_acao pa
+           JOIN (
+             SELECT id FROM onboarding_sessions
+             WHERE user_id = $1 AND status = 'completed'
+             ORDER BY created_at DESC LIMIT 1
+           ) os ON os.id = pa.onboarding_id
            JOIN semanas s ON s.plano_id = pa.id
            JOIN gates_semanais gs ON gs.semana_id = s.id AND gs.user_id = pa.user_id
-           WHERE pa.user_id = $1 AND gs.gate_status IN ('available', 'completed')
+           WHERE pa.user_id = $1 AND pa.status = 'ready' AND gs.gate_status IN ('available', 'completed')
            ORDER BY s.numero ASC LIMIT 1`,
           [userId]
         )
@@ -241,9 +258,14 @@ export async function registerUserRoutes(app: FastifyInstance) {
         .query<{ semana_id: string; semana_numero: number }>(
           `SELECT s.id AS semana_id, s.numero AS semana_numero
            FROM planos_acao pa
+           JOIN (
+             SELECT id FROM onboarding_sessions
+             WHERE user_id = $1 AND status = 'completed'
+             ORDER BY created_at DESC LIMIT 1
+           ) os ON os.id = pa.onboarding_id
            JOIN semanas s ON s.plano_id = pa.id
            JOIN gates_semanais gs ON gs.semana_id = s.id AND gs.user_id = pa.user_id
-           WHERE pa.user_id = $1 AND gs.gate_status = 'available'
+           WHERE pa.user_id = $1 AND pa.status = 'ready' AND gs.gate_status = 'available'
            ORDER BY s.numero ASC LIMIT 1`,
           [userId]
         )
@@ -315,9 +337,14 @@ export async function registerUserRoutes(app: FastifyInstance) {
         .query<{ semana_id: string; plano_id: string; semana_numero: number }>(
           `SELECT s.id AS semana_id, s.plano_id, s.numero AS semana_numero
            FROM planos_acao pa
+           JOIN (
+             SELECT id FROM onboarding_sessions
+             WHERE user_id = $1 AND status = 'completed'
+             ORDER BY created_at DESC LIMIT 1
+           ) os ON os.id = pa.onboarding_id
            JOIN semanas s ON s.plano_id = pa.id
            JOIN gates_semanais gs ON gs.semana_id = s.id AND gs.user_id = pa.user_id
-           WHERE pa.user_id = $1 AND gs.gate_status = 'available'
+           WHERE pa.user_id = $1 AND pa.status = 'ready' AND gs.gate_status = 'available'
            ORDER BY s.numero ASC LIMIT 1`,
           [userId]
         )

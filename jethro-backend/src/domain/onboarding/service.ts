@@ -249,6 +249,22 @@ export function buildOnboardingJson(
     A: 'Sim, valor fixo', B: 'Tiro o que sobra', C: 'Não tiro',
   };
 
+  const objeccao_labels: Record<string, string> = {
+    A: 'Está caro', B: 'Vou pensar (e some)', C: 'Já tem alguém que faz',
+    D: 'Não entendeu o que ofereço', E: 'Não chega gente', F: 'Outro',
+  };
+  const ja_tentou_labels: Record<string, string> = {
+    A: 'Contratou marketing/tráfego', B: 'Fez curso ou mentoria',
+    C: 'Tentou reorganizar sozinho', D: 'Contratou funcionário',
+    E: 'Nunca tentou', F: 'Outro',
+  };
+
+  const objeccao_raw = str(answers['onb_o8a_objeccao']);
+  const ja_tentou_raw = str(answers['onb_o10_tentou']);
+  const ja_tentou_label = ja_tentou_raw
+    ? ja_tentou_raw.split(',').map((c) => ja_tentou_labels[c.trim()] ?? c).filter(Boolean).join(', ')
+    : null;
+
   const meta_raw = str(answers['onb_o3_meta']);
   const problema_raw = str(answers['onb_o3a_problema']);
   const impacto_raw = str(answers['onb_o11_impacto']);
@@ -300,7 +316,7 @@ export function buildOnboardingJson(
     meta_6_meses: meta_raw ? (meta_labels[meta_raw] ?? meta_raw) : null,
     maior_problema_percebido: problema_raw ? (problema_labels[problema_raw] ?? problema_raw) : null,
     impacto_pessoal: impacto_raw ? (impacto_labels[impacto_raw] ?? impacto_raw) : null,
-    ja_tentou: str(answers['onb_o10_tentou']),
+    ja_tentou: ja_tentou_label,
     nota_adicional: str(answers['onb_o23c_nota']),
     // FINANCEIRO
     faturamento_medio_3m: faturamento,
@@ -319,7 +335,7 @@ export function buildOnboardingJson(
     clientes_ativos_total: clientes_ativos,
     clientes_recorrentes: clientes_rec,
     conversao_de_10: conversao,
-    objeccao_principal: str(answers['onb_o8a_objeccao']),
+    objeccao_principal: objeccao_raw ? (objeccao_labels[objeccao_raw] ?? objeccao_raw) : null,
     sazonalidade_flag: str(answers['onb_o8b_sazonalidade']),
     sazonalidade_meses_fortes: null,
     sazonalidade_meses_fracos: null,

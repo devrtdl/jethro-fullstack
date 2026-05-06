@@ -10,7 +10,7 @@ export async function registerPlanoRoutes(app: FastifyInstance) {
   /**
    * POST /plano/generate
    * Gera o plano de 24 semanas com Claude + Alma + onboarding JSON.
-   * Idempotente: se já existe plano, devolve o existente.
+   * Idempotente para a rodada atual: se já existe plano para o último onboarding, devolve o existente.
    */
   app.post('/plano/generate', { preHandler: userAuthPreHandler }, async (request) => {
     const userId = request.userId!;
@@ -38,7 +38,15 @@ export async function registerPlanoRoutes(app: FastifyInstance) {
 
     const planoRow = await pool
       .query<{ id: string; modelo: string }>(
-        `SELECT id, modelo FROM planos_acao WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1`,
+        `SELECT pa.id, pa.modelo
+         FROM planos_acao pa
+         JOIN (
+           SELECT id FROM onboarding_sessions
+           WHERE user_id = $1 AND status = 'completed'
+           ORDER BY created_at DESC LIMIT 1
+         ) os ON os.id = pa.onboarding_id
+         WHERE pa.user_id = $1 AND pa.status = 'ready'
+         ORDER BY pa.created_at DESC LIMIT 1`,
         [userId]
       )
       .then((r) => r.rows[0] ?? null);

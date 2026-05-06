@@ -72,7 +72,7 @@ export async function createMentorChat(
        FROM users u
        LEFT JOIN (
          SELECT modelo_confirmado, json_completo, user_id
-         FROM onboarding_sessions WHERE user_id = $1
+         FROM onboarding_sessions WHERE user_id = $1 AND status = 'completed'
          ORDER BY created_at DESC LIMIT 1
        ) os ON os.user_id = u.id
        LEFT JOIN (
@@ -83,9 +83,14 @@ export async function createMentorChat(
        LEFT JOIN (
          SELECT pa.user_id, s.numero, gs.gate_status, s.id as semana_id
          FROM planos_acao pa
+         JOIN (
+           SELECT id FROM onboarding_sessions
+           WHERE user_id = $1 AND status = 'completed'
+           ORDER BY created_at DESC LIMIT 1
+         ) os ON os.id = pa.onboarding_id
          JOIN semanas s ON s.plano_id = pa.id
          JOIN gates_semanais gs ON gs.semana_id = s.id
-         WHERE pa.user_id = $1 AND gs.gate_status = 'available'
+         WHERE pa.user_id = $1 AND pa.status = 'ready' AND gs.gate_status = 'available'
          ORDER BY s.numero ASC LIMIT 1
        ) s ON s.user_id = u.id
        LEFT JOIN gates_semanais gs ON gs.semana_id = s.semana_id
