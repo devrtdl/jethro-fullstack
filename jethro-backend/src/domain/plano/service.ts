@@ -6,7 +6,7 @@ import { loadAlmaContent } from '../../lib/alma-loader.js';
 import { AppError } from '../../lib/errors.js';
 
 const MODEL = 'claude-sonnet-4-6';
-const MAX_TOKENS = 16000;
+const MAX_TOKENS = 32000;
 const ALMA_VERSION = 'v5.14';
 
 const FASES: Record<number, string> = {
@@ -292,7 +292,7 @@ export async function generatePlano(userId: string): Promise<{ planoId: string }
         await client.query(
           `INSERT INTO tarefas_semana (semana_id, descricao, prioridade, acao_codigo)
            VALUES ($1, $2, $3, $4)`,
-          [semanaId, tarefa.descricao, tarefa.prioridade, tarefa.acao_codigo ?? null]
+          [semanaId, tarefa.descricao, tarefa.prioridade, null]
         );
       }
 
