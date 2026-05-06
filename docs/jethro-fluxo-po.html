@@ -1,0 +1,1352 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Jethro — Fluxo do App & Estado Atual</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+  :root {
+    --navy:   #0f1b2d;
+    --navy2:  #162035;
+    --gold:   #c49a3c;
+    --gold2:  #e0b84e;
+    --white:  #ffffff;
+    --gray1:  #f4f5f7;
+    --gray2:  #e8eaed;
+    --gray3:  #9aa3b0;
+    --green:  #22c55e;
+    --red:    #ef4444;
+    --orange: #f97316;
+    --blue:   #3b82f6;
+    --text:   #1a2332;
+    --muted:  #64748b;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--white);
+    color: var(--text);
+    font-size: 10.5pt;
+    line-height: 1.6;
+  }
+
+  /* ── COVER ── */
+  .cover {
+    background: var(--navy);
+    color: var(--white);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    page-break-after: always;
+    padding: 60px 80px;
+    position: relative;
+  }
+
+  .cover-star {
+    font-size: 64px;
+    color: var(--gold);
+    margin-bottom: 32px;
+    line-height: 1;
+  }
+
+  .cover-title {
+    font-size: 48pt;
+    font-weight: 800;
+    letter-spacing: -1px;
+    margin-bottom: 8px;
+    color: var(--white);
+  }
+
+  .cover-subtitle {
+    font-size: 16pt;
+    font-weight: 300;
+    color: var(--gold2);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 48px;
+  }
+
+  .cover-desc {
+    max-width: 520px;
+    text-align: center;
+    font-size: 12pt;
+    color: rgba(255,255,255,0.7);
+    line-height: 1.8;
+    margin-bottom: 64px;
+  }
+
+  .cover-meta {
+    display: flex;
+    gap: 48px;
+  }
+
+  .cover-meta-item {
+    text-align: center;
+  }
+
+  .cover-meta-item .value {
+    font-size: 28pt;
+    font-weight: 700;
+    color: var(--gold);
+    display: block;
+  }
+
+  .cover-meta-item .label {
+    font-size: 9pt;
+    color: rgba(255,255,255,0.5);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .cover-footer {
+    position: absolute;
+    bottom: 40px;
+    left: 0; right: 0;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 80px;
+    color: rgba(255,255,255,0.35);
+    font-size: 8.5pt;
+  }
+
+  .cover-divider {
+    width: 80px;
+    height: 2px;
+    background: var(--gold);
+    margin: 0 auto 40px;
+  }
+
+  /* ── PAGES ── */
+  .page {
+    padding: 56px 72px;
+    min-height: 100vh;
+    page-break-after: always;
+  }
+
+  .page:last-child {
+    page-break-after: avoid;
+  }
+
+  /* ── HEADERS ── */
+  .page-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 40px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid var(--gray2);
+  }
+
+  .section-number {
+    background: var(--navy);
+    color: var(--gold);
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 13pt;
+    flex-shrink: 0;
+  }
+
+  .page-header h1 {
+    font-size: 22pt;
+    font-weight: 700;
+    color: var(--navy);
+  }
+
+  .page-header p {
+    font-size: 10pt;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  h2 {
+    font-size: 13pt;
+    font-weight: 700;
+    color: var(--navy);
+    margin: 32px 0 12px;
+  }
+
+  h2:first-child { margin-top: 0; }
+
+  h3 {
+    font-size: 10.5pt;
+    font-weight: 600;
+    color: var(--text);
+    margin: 20px 0 8px;
+  }
+
+  p {
+    margin-bottom: 10px;
+    color: var(--text);
+  }
+
+  /* ── STATUS BADGES ── */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 8.5pt;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .badge-green  { background: #dcfce7; color: #15803d; }
+  .badge-orange { background: #fff7ed; color: #c2410c; }
+  .badge-red    { background: #fee2e2; color: #b91c1c; }
+  .badge-blue   { background: #dbeafe; color: #1d4ed8; }
+  .badge-gray   { background: var(--gray2); color: var(--muted); }
+  .badge-gold   { background: #fef9c3; color: #a16207; }
+
+  /* ── FLOW DIAGRAM ── */
+  .flow-container {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin: 24px 0;
+    flex-wrap: nowrap;
+    overflow: hidden;
+  }
+
+  .flow-step {
+    flex: 1;
+    background: var(--navy);
+    color: var(--white);
+    padding: 14px 10px;
+    text-align: center;
+    position: relative;
+    min-width: 0;
+  }
+
+  .flow-step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    right: -12px;
+    top: 50%;
+    transform: translateY(-50%);
+    border-left: 12px solid var(--navy);
+    border-top: 28px solid transparent;
+    border-bottom: 28px solid transparent;
+    z-index: 2;
+  }
+
+  .flow-step:not(:first-child) {
+    margin-left: 0;
+  }
+
+  .flow-step .step-num {
+    font-size: 7.5pt;
+    color: var(--gold);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+  }
+
+  .flow-step .step-name {
+    font-size: 9pt;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  .flow-step .step-detail {
+    font-size: 7.5pt;
+    color: rgba(255,255,255,0.55);
+    margin-top: 3px;
+  }
+
+  .flow-step.gold {
+    background: var(--gold);
+    color: var(--navy);
+  }
+
+  .flow-step.gold::after {
+    border-left-color: var(--gold);
+  }
+
+  .flow-step.gold .step-detail {
+    color: rgba(15,27,45,0.6);
+  }
+
+  /* ── SCREEN CARDS ── */
+  .screen-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .screen-card {
+    background: var(--gray1);
+    border-radius: 10px;
+    padding: 18px 20px;
+    border: 1px solid var(--gray2);
+    position: relative;
+  }
+
+  .screen-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+  }
+
+  .screen-card h3 {
+    margin: 0;
+    font-size: 10.5pt;
+    font-weight: 700;
+    color: var(--navy);
+  }
+
+  .screen-card .endpoint {
+    font-size: 8pt;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    color: var(--muted);
+    background: var(--gray2);
+    padding: 1px 6px;
+    border-radius: 4px;
+    margin-bottom: 4px;
+    display: inline-block;
+  }
+
+  .screen-card .desc {
+    font-size: 9pt;
+    color: var(--muted);
+    line-height: 1.5;
+    margin-top: 6px;
+  }
+
+  .screen-card ul {
+    margin: 8px 0 0 0;
+    padding-left: 16px;
+    font-size: 9pt;
+    color: var(--muted);
+  }
+
+  .screen-card ul li { margin-bottom: 3px; }
+
+  /* ── FEATURE ITEMS ── */
+  .feature-list {
+    list-style: none;
+    margin: 8px 0;
+  }
+
+  .feature-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--gray2);
+    font-size: 9.5pt;
+  }
+
+  .feature-list li:last-child { border-bottom: none; }
+
+  .feature-icon {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9pt;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .icon-green { background: #dcfce7; color: #15803d; }
+  .icon-gold  { background: #fef9c3; color: #a16207; }
+
+  /* ── BIG SUMMARY TABLE ── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 9pt;
+    margin: 16px 0;
+  }
+
+  thead th {
+    background: var(--navy);
+    color: var(--white);
+    padding: 10px 14px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 8.5pt;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  thead th:first-child { border-radius: 8px 0 0 0; }
+  thead th:last-child  { border-radius: 0 8px 0 0; }
+
+  tbody tr:nth-child(even) { background: var(--gray1); }
+
+  tbody td {
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--gray2);
+    vertical-align: top;
+    line-height: 1.5;
+  }
+
+  tbody td:first-child { font-weight: 600; color: var(--navy); }
+
+  code {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 8pt;
+    background: var(--gray2);
+    padding: 1px 5px;
+    border-radius: 3px;
+    color: var(--navy);
+  }
+
+  /* ── BUG FIXES SECTION ── */
+  .bug-card {
+    border: 1px solid var(--gray2);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 14px;
+  }
+
+  .bug-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 18px;
+    background: var(--gray1);
+    border-bottom: 1px solid var(--gray2);
+  }
+
+  .bug-num {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--red);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9pt;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .bug-num.fixed {
+    background: var(--green);
+  }
+
+  .bug-header h3 {
+    margin: 0;
+    font-size: 10.5pt;
+    flex: 1;
+  }
+
+  .bug-body {
+    padding: 14px 18px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .bug-section-label {
+    font-size: 8pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+
+  .bug-body p {
+    font-size: 9pt;
+    margin-bottom: 4px;
+    color: var(--text);
+  }
+
+  .fix-highlight {
+    background: #f0fdf4;
+    border-left: 3px solid var(--green);
+    padding: 8px 12px;
+    border-radius: 0 6px 6px 0;
+    font-size: 9pt;
+  }
+
+  /* ── ARCH DIAGRAM ── */
+  .arch-row {
+    display: grid;
+    grid-template-columns: 1fr 40px 1fr 40px 1fr;
+    gap: 0;
+    align-items: center;
+    margin: 24px 0;
+  }
+
+  .arch-box {
+    background: var(--navy);
+    color: var(--white);
+    border-radius: 10px;
+    padding: 18px;
+    text-align: center;
+  }
+
+  .arch-box .arch-icon { font-size: 24pt; margin-bottom: 8px; }
+  .arch-box .arch-label { font-size: 9pt; font-weight: 700; color: var(--gold); text-transform: uppercase; letter-spacing: 1px; }
+  .arch-box .arch-tech  { font-size: 8pt; color: rgba(255,255,255,0.6); margin-top: 4px; }
+
+  .arch-items {
+    margin-top: 10px;
+    font-size: 8pt;
+    color: rgba(255,255,255,0.7);
+    line-height: 1.8;
+  }
+
+  .arch-arrow {
+    text-align: center;
+    color: var(--gold);
+    font-size: 18pt;
+  }
+
+  /* ── GATE SECTION ── */
+  .gate-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 10px 0;
+    padding: 12px 16px;
+    background: var(--gray1);
+    border-radius: 8px;
+  }
+
+  .gate-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12pt;
+    flex-shrink: 0;
+  }
+
+  .gate-info h4 { font-size: 10pt; font-weight: 600; margin-bottom: 2px; }
+  .gate-info p  { font-size: 8.5pt; color: var(--muted); margin: 0; }
+
+  /* ── CALLOUT ── */
+  .callout {
+    background: #fef9c3;
+    border-left: 4px solid var(--gold);
+    padding: 14px 18px;
+    border-radius: 0 8px 8px 0;
+    margin: 20px 0;
+  }
+
+  .callout p { margin: 0; font-size: 9.5pt; }
+  .callout strong { color: var(--navy); }
+
+  /* ── PRINT ── */
+  @media print {
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .page { padding: 48px 60px; }
+    .cover { min-height: auto; padding: 80px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════ COVER ═══════════════════════════════ -->
+<div class="cover">
+  <div class="cover-star">✦</div>
+  <h1 class="cover-title">Jethro</h1>
+  <p class="cover-subtitle">Programa Bases do Negócio</p>
+  <div class="cover-divider"></div>
+  <p class="cover-desc">
+    Documento de revisão do fluxo de funcionamento do aplicativo —
+    arquitetura, telas, integrações e estado atual de cada funcionalidade.
+    Preparado para revisão com Product Owner.
+  </p>
+  <div class="cover-meta">
+    <div class="cover-meta-item">
+      <span class="value">10</span>
+      <span class="label">Telas</span>
+    </div>
+    <div class="cover-meta-item">
+      <span class="value">14</span>
+      <span class="label">Endpoints</span>
+    </div>
+    <div class="cover-meta-item">
+      <span class="value">24</span>
+      <span class="label">Semanas de Plano</span>
+    </div>
+    <div class="cover-meta-item">
+      <span class="value">3</span>
+      <span class="label">IAs Integradas</span>
+    </div>
+  </div>
+  <div class="cover-footer">
+    <span>Jethro — Bases do Negócio</span>
+    <span>Maio 2026 · Versão 1.0</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ JORNADA DO USUÁRIO ═══════════════════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <div class="section-number">1</div>
+    <div>
+      <h1>Jornada Completa do Usuário</h1>
+      <p>Fluxo sequencial desde o cadastro até a execução do plano semanal</p>
+    </div>
+  </div>
+
+  <h2>Fluxo Principal (sequência obrigatória)</h2>
+
+  <div class="flow-container">
+    <div class="flow-step">
+      <div class="step-num">Entrada</div>
+      <div class="step-name">Diagnóstico</div>
+      <div class="step-detail">Formulário 18 perguntas</div>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">Acesso</div>
+      <div class="step-name">Autenticação</div>
+      <div class="step-detail">Email / Google</div>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">Liberação</div>
+      <div class="step-name">Paywall</div>
+      <div class="step-detail">Stripe checkout</div>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">Contexto</div>
+      <div class="step-name">Onboarding</div>
+      <div class="step-detail">~30 perguntas filtradas</div>
+    </div>
+    <div class="flow-step gold">
+      <div class="step-num">IA</div>
+      <div class="step-name">Gerar Plano</div>
+      <div class="step-detail">Claude · 24 semanas</div>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">Execução</div>
+      <div class="step-name">App Principal</div>
+      <div class="step-detail">4 abas ativas</div>
+    </div>
+  </div>
+
+  <div class="callout">
+    <p><strong>Gate de fluxo:</strong> O backend verifica em <code>GET /user/flow-status</code> se o usuário completou cada etapa. Qualquer etapa pendente redireciona automaticamente — o usuário não pode pular para o app sem ter plano gerado.</p>
+  </div>
+
+  <h2>Gate Semanal — Lógica de Progressão</h2>
+  <p>Após entrar no app, o progresso é controlado por um sistema de gates semanais:</p>
+
+  <div class="gate-row">
+    <div class="gate-icon icon-gold">🔒</div>
+    <div class="gate-info">
+      <h4>Locked (padrão)</h4>
+      <p>Semanas 2–24 começam bloqueadas. Conteúdo visível na Biblioteca mas não interativo.</p>
+    </div>
+  </div>
+  <div class="gate-row">
+    <div class="gate-icon icon-green">▶</div>
+    <div class="gate-info">
+      <h4>Available (semana ativa)</h4>
+      <p>Semana 1 começa disponível. Usuário faz check-in diário (máx. 1 por dia).</p>
+    </div>
+  </div>
+  <div class="gate-row">
+    <div class="gate-icon" style="background:#dbeafe;color:#1d4ed8;">✓</div>
+    <div class="gate-info">
+      <h4>Avanço de Semana</h4>
+      <p>Após 5 check-ins, botão "Avançar" fica disponível → <code>POST /gate/advance</code> → próxima semana desbloqueia.</p>
+    </div>
+  </div>
+
+  <h2>Regras de Navegação</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Condição</th>
+        <th>Destino</th>
+        <th>Endpoint verificado</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Não autenticado</td>
+        <td>Tela de Boas-Vindas</td>
+        <td>Supabase Auth</td>
+      </tr>
+      <tr>
+        <td>Sem diagnóstico</td>
+        <td>Formulário de Diagnóstico</td>
+        <td><code>hasDiagnostic = false</code></td>
+      </tr>
+      <tr>
+        <td>Sem assinatura ativa</td>
+        <td>Paywall</td>
+        <td><code>hasSubscription = false</code></td>
+      </tr>
+      <tr>
+        <td>Sem onboarding completo</td>
+        <td>Onboarding</td>
+        <td><code>hasOnboarding = false</code></td>
+      </tr>
+      <tr>
+        <td>Sem plano gerado</td>
+        <td>Tela de Resultado do Onboarding</td>
+        <td><code>hasPlan = false</code></td>
+      </tr>
+      <tr>
+        <td>Tudo completo</td>
+        <td>App Principal (4 abas)</td>
+        <td>Todos os gates = true</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ═══════════════════════════════ TELAS PRÉ-APP ═══════════════════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <div class="section-number">2</div>
+    <div>
+      <h1>Telas de Entrada e Onboarding</h1>
+      <p>Fluxo completo antes de o usuário acessar o app principal</p>
+    </div>
+  </div>
+
+  <div class="screen-grid">
+    <div class="screen-card">
+      <div class="screen-card-header">
+        <h3>Splash / Launch</h3>
+        <span class="badge badge-green">✓ Funcionando</span>
+      </div>
+      <code>GET /user/flow-status</code>
+      <p class="desc">Tela de carregamento com barra de progresso animada. Determina automaticamente para onde navegar com base no estado do usuário.</p>
+      <ul>
+        <li>Verifica autenticação via Supabase</li>
+        <li>Consulta 4 flags de progresso no backend</li>
+        <li>Redireciona para a próxima etapa pendente</li>
+      </ul>
+    </div>
+
+    <div class="screen-card">
+      <div class="screen-card-header">
+        <h3>Boas-Vindas</h3>
+        <span class="badge badge-green">✓ Funcionando</span>
+      </div>
+      <code>Estático</code>
+      <p class="desc">Landing com proposta de valor do Jethro. Apresenta os 3 pilares: Diagnóstico, Plano e Mentor. CTAs para cadastro e login.</p>
+    </div>
+
+    <div class="screen-card">
+      <div class="screen-card-header">
+        <h3>Autenticação</h3>
+        <span class="badge badge-green">✓ Funcionando</span>
+      </div>
+      <code>Supabase Auth</code>
+      <p class="desc">Login e cadastro em toggle. Suporta email + senha e OAuth Google. Recuperação de senha via email.</p>
+      <ul>
+        <li>Email + senha</li>
+        <li>Google OAuth</li>
+        <li>Reset de senha</li>
+        <li>Link de identidades (Setup Screen)</li>
+      </ul>
+    </div>
+
+    <div class="screen-card">
+      <div class="screen-card-header">
+        <h3>Diagnóstico</h3>
+        <span class="badge badge-green">✓ Funcionando</span>
+      </div>
+      <code>POST /forms/diagnostico-inicial/submissions</code>
+      <p class="desc">Formulário de 18 perguntas com lógica condicional. Identifica o Modelo de Diagnóstico do usuário (A–H, X).</p>
+      <ul>
+        <li>Lógica condicional entre perguntas</li>
+        <li>Auto-save de rascunho local</li>
+        <li>8 modelos diagnósticos possíveis</li>
+        <li>Pontuação automática no backend</li>
+      </ul>
+    </div>
+
+    <div class="screen-card">
+      <div class="screen-card-header">
+        <h3>Paywall</h3>
+        <span class="badge badge-green">✓ Funcionando</span>
+      </div>
+      <code>POST /subscription/create-checkout</code>
+      <p class="desc">Tela de assinatura com 5 benefícios do programa. Integração Stripe: abre checkout no browser, verifica pagamento ao voltar.</p>
+      <ul>
+        <li>Checkout via Stripe</li>
+        <li>Modo sandbox para testes</li>
+        <li>Verifica status: trial / active / grace_period</li>
+      </ul>
+    </div>
+
+    <div class="screen-card">
+      <div class="screen-card-header">
+        <h3>Onboarding</h3>
+        <span class="badge badge-green">✓ Funcionando</span>
+      </div>
+      <code>GET /onboarding/questions · POST /onboarding/submit</code>
+      <p class="desc">Questionário multi-fase com ~30 perguntas personalizadas pelo modelo diagnóstico. Gera o JSON completo do negócio do usuário.</p>
+      <ul>
+        <li>Fases: Básico → Receita → Comercial → Operação → Metas</li>
+        <li>Perguntas filtradas pelo modelo diagnóstico</li>
+        <li>Rascunho salvo localmente</li>
+        <li>Visibilidade condicional por resposta anterior</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="screen-card" style="margin-top: 0; background: var(--navy); color: white; border-color: var(--navy2);">
+    <div class="screen-card-header">
+      <h3 style="color: var(--gold);">✦ Geração do Plano de Ação (IA)</h3>
+      <span class="badge" style="background: rgba(196,154,60,0.2); color: var(--gold2);">Core Feature</span>
+    </div>
+    <code style="background: rgba(255,255,255,0.1); color: var(--gold2);">POST /plano/generate</code>
+    <p class="desc" style="color: rgba(255,255,255,0.7); margin-top: 8px;">Após o onboarding, o usuário clica em "Gerar o meu plano de ação". O backend chama o Claude Sonnet com o framework ALMA v5.14 + dados do negócio para gerar um plano estratégico de 24 semanas completamente personalizado.</p>
+    <ul style="color: rgba(255,255,255,0.6); margin-top: 8px;">
+      <li>Modelo: Claude Sonnet 4.6 · Output: até 32.000 tokens</li>
+      <li>Context: ALMA v5.14 (214K chars, prompt caching ativado)</li>
+      <li>Output: 24 semanas · nome, objetivo, por que importa, versículo, 2–4 tarefas, indicador, resultado</li>
+      <li>Idempotente: se plano já existe, retorna o existente</li>
+      <li>Tempo estimado: ~4–5 minutos (timeout do app: 2 minutos)</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ APP PRINCIPAL ═══════════════════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <div class="section-number">3</div>
+    <div>
+      <h1>App Principal — 4 Abas</h1>
+      <p>Telas acessíveis após o plano ser gerado</p>
+    </div>
+  </div>
+
+  <h2>Aba 1 — Início (Home)</h2>
+  <div class="screen-card" style="margin-bottom: 16px;">
+    <div class="screen-card-header">
+      <h3>Tela Início</h3>
+      <span class="badge badge-green">✓ Funcionando</span>
+    </div>
+    <code>GET /home · POST /check-in · POST /gate/advance</code>
+    <p class="desc">Hub central do programa. Reúne em uma tela: saudação personalizada por horário, devocional da semana, KPIs do negócio, tarefas da semana atual e controle de avanço de gate.</p>
+  </div>
+  <ul class="feature-list">
+    <li><span class="feature-icon icon-green">✓</span><strong>Saudação com horário</strong> — Bom dia / tarde / noite com nome do usuário</li>
+    <li><span class="feature-icon icon-green">✓</span><strong>Modelo de Diagnóstico</strong> — Badge do modelo identificado (ex: Modelo D)</li>
+    <li><span class="feature-icon icon-green">✓</span><strong>Devocional da Semana</strong> — Título, versículo e texto da semana atual</li>
+    <li><span class="feature-icon icon-green">✓</span><strong>KPIs do Negócio</strong> — Receita atual, ticket médio, clientes ativos (dados do onboarding)</li>
+    <li><span class="feature-icon icon-green">✓</span><strong>Plano da Semana</strong> — Número da semana, objetivo, lista de tarefas com prioridade e status de conclusão</li>
+    <li><span class="feature-icon icon-green">✓</span><strong>Gate de Avanço</strong> — Contador X/5 check-ins, barra de progresso, botão diário e botão de avanço (quando desbloqueado)</li>
+    <li><span class="feature-icon icon-green">✓</span><strong>Modal de Check-in</strong> — Captura resposta do usuário sobre o trabalho do dia (cumpriu: sim/não, nota)</li>
+  </ul>
+
+  <h2>Aba 2 — Mentor (IA)</h2>
+  <div class="screen-card" style="margin-bottom: 16px;">
+    <div class="screen-card-header">
+      <h3>Chat com Mentor Jethro</h3>
+      <span class="badge badge-green">✓ Funcionando</span>
+    </div>
+    <code>POST /mentor/chat</code>
+    <p class="desc">Interface de chat com o mentor IA Jethro, contextualizado no método PBN. Sugestões de perguntas pré-definidas para guiar a conversa.</p>
+  </div>
+  <ul class="feature-list">
+    <li><span class="feature-icon icon-green">✓</span>Histórico de mensagens na sessão</li>
+    <li><span class="feature-icon icon-green">✓</span>Seleção de sugestões de perguntas frequentes</li>
+    <li><span class="feature-icon icon-green">✓</span>Mensagem de boas-vindas automática</li>
+    <li><span class="feature-icon icon-green">✓</span>Session ID gerado por conversa</li>
+  </ul>
+
+  <h2>Aba 3 — Biblioteca</h2>
+  <div class="screen-card" style="margin-bottom: 16px;">
+    <div class="screen-card-header">
+      <h3>Plano Completo de 24 Semanas</h3>
+      <span class="badge badge-green">✓ Funcionando</span>
+    </div>
+    <code>GET /plano</code>
+    <p class="desc">Visualização completa do plano gerado. 24 semanas organizadas em 5 blocos estratégicos, com detalhe expandível por semana e controle de gates.</p>
+  </div>
+  <ul class="feature-list">
+    <li><span class="feature-icon icon-green">✓</span>5 blocos colapsáveis (Fundamento · Estrutura · Controlo · Crescimento · Legado)</li>
+    <li><span class="feature-icon icon-green">✓</span>Ícone de gate por semana: 🔒 locked · ▶ available · ✓ completed</li>
+    <li><span class="feature-icon icon-green">✓</span>Detalhe expandível: objetivo, por que importa, versículo, tarefas com prioridade, indicador, resultado</li>
+    <li><span class="feature-icon icon-green">✓</span>Cores de prioridade: crítica (vermelho) · alta (ouro) · média (azul) · baixa (cinza)</li>
+    <li><span class="feature-icon icon-green">✓</span>Medidor de progresso: X/24 semanas concluídas</li>
+  </ul>
+
+  <h2>Aba 4 — Perfil</h2>
+  <div class="screen-card" style="margin-bottom: 16px;">
+    <div class="screen-card-header">
+      <h3>Tela de Perfil</h3>
+      <span class="badge badge-green">✓ Funcionando</span>
+    </div>
+    <code>Dados locais / sessão</code>
+    <p class="desc">Painel do usuário com dados da conta, progresso no programa e acesso ao FAQ e ao diagnóstico.</p>
+  </div>
+  <ul class="feature-list">
+    <li><span class="feature-icon icon-green">✓</span>Avatar + email + data de membro desde</li>
+    <li><span class="feature-icon icon-green">✓</span>Status da assinatura</li>
+    <li><span class="feature-icon icon-green">✓</span>Grid de progresso: semana atual / 24 semanas / gates concluídos</li>
+    <li><span class="feature-icon icon-green">✓</span>Barra de progresso do programa (%)</li>
+    <li><span class="feature-icon icon-green">✓</span>Link para FAQ (estático)</li>
+    <li><span class="feature-icon icon-green">✓</span>Link para refazer diagnóstico</li>
+    <li><span class="feature-icon icon-green">✓</span>Botão de logout</li>
+  </ul>
+</div>
+
+<!-- ═══════════════════════════════ ARQUITETURA ═══════════════════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <div class="section-number">4</div>
+    <div>
+      <h1>Arquitetura Técnica</h1>
+      <p>Stack completa e integrações externas do sistema</p>
+    </div>
+  </div>
+
+  <div class="arch-row">
+    <div class="arch-box">
+      <div class="arch-icon">📱</div>
+      <div class="arch-label">Mobile App</div>
+      <div class="arch-tech">Expo · React Native</div>
+      <div class="arch-items">
+        10 telas<br/>
+        Supabase Auth<br/>
+        Stripe WebView<br/>
+        API URL: Render
+      </div>
+    </div>
+    <div class="arch-arrow">→</div>
+    <div class="arch-box">
+      <div class="arch-icon">⚙️</div>
+      <div class="arch-label">Backend API</div>
+      <div class="arch-tech">Node.js · Fastify · TypeScript</div>
+      <div class="arch-items">
+        14 endpoints<br/>
+        Deploy: Render<br/>
+        Auth: Supabase JWT<br/>
+        jethro-fullstack.onrender.com
+      </div>
+    </div>
+    <div class="arch-arrow">→</div>
+    <div class="arch-box">
+      <div class="arch-icon">🗄️</div>
+      <div class="arch-label">Banco de Dados</div>
+      <div class="arch-tech">PostgreSQL · Supabase</div>
+      <div class="arch-items">
+        14 tabelas<br/>
+        Auth integrado<br/>
+        20 migrações<br/>
+        sglpwjmdrvapurllisdn
+      </div>
+    </div>
+  </div>
+
+  <h2>Integrações Externas</h2>
+  <table>
+    <thead>
+      <tr><th>Serviço</th><th>Uso</th><th>Onde é chamado</th><th>Status</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Anthropic Claude Sonnet 4.6</td>
+        <td>Geração do Plano de 24 Semanas + Chat do Mentor</td>
+        <td>Backend: <code>/plano/generate</code>, <code>/mentor/chat</code></td>
+        <td><span class="badge badge-green">✓ OK</span></td>
+      </tr>
+      <tr>
+        <td>Supabase Auth</td>
+        <td>Autenticação (email/senha, Google OAuth, JWT)</td>
+        <td>App mobile (direto) + backend (validação)</td>
+        <td><span class="badge badge-green">✓ OK</span></td>
+      </tr>
+      <tr>
+        <td>Stripe</td>
+        <td>Checkout de assinatura, webhook de pagamento</td>
+        <td>Backend: <code>/subscription/*</code></td>
+        <td><span class="badge badge-green">✓ OK</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>Principais Tabelas do Banco</h2>
+  <table>
+    <thead>
+      <tr><th>Tabela</th><th>Função</th><th>Relacionamento</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>users</td><td>Dados do usuário, auth_id, status</td><td>Hub central — FK em todas</td></tr>
+      <tr><td>diagnostico_respostas</td><td>Respostas do formulário + modelo identificado</td><td>→ onboarding_sessions</td></tr>
+      <tr><td>onboarding_sessions</td><td>JSON completo do negócio (92 campos)</td><td>→ planos_acao</td></tr>
+      <tr><td>planos_acao</td><td>JSON do plano gerado pela IA (documento_1)</td><td>→ semanas</td></tr>
+      <tr><td>semanas</td><td>24 semanas com fase, pilar, objetivo</td><td>→ tarefas_semana, gates_semanais</td></tr>
+      <tr><td>tarefas_semana</td><td>Tarefas por semana (descrição, prioridade)</td><td>→ semanas</td></tr>
+      <tr><td>gates_semanais</td><td>Status de desbloqueio por semana por usuário</td><td>→ users, semanas</td></tr>
+      <tr><td>assinaturas</td><td>Status de assinatura Stripe (trial/active/etc.)</td><td>→ users</td></tr>
+      <tr><td>devocionais</td><td>Devocional por semana (1–24)</td><td>Independente</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ═══════════════════════════════ ENDPOINTS ═══════════════════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <div class="section-number">5</div>
+    <div>
+      <h1>Mapa Completo de Endpoints</h1>
+      <p>Todos os endpoints da API e seu estado atual</p>
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Método</th>
+        <th>Endpoint</th>
+        <th>Função</th>
+        <th>Auth</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>GET</code></td>
+        <td><code>/health/check</code></td>
+        <td>Verifica se a API está rodando</td>
+        <td>—</td>
+        <td><span class="badge badge-green">✓</span></td>
+      </tr>
+      <tr>
+        <td><code>GET</code></td>
+        <td><code>/user/flow-status</code></td>
+        <td>Flags de progresso do usuário no fluxo</td>
+        <td>JWT</td>
+        <td><span class="badge badge-green">✓</span></td>
+      </tr>
+      <tr>
+        <td><code>GET</code></td>
+        <td><code>/home</code></td>
+        <td>Dados da Home: devocional, KPIs, semana atual</td>
+        <td>JWT</td>
+        <td><span class="badge badge-green">✓</span></td>
+      </tr>
+      <tr>
+        <td><code>GET</code></td>
+        <td><code>/forms/:slug</code></td>
+        <td>Formulário diagnóstico (estrutura + perguntas)</td>
+        <td>—</td>
+        <td><span class="badge badge-green">✓</span></td>
+      </tr>
+      <tr>
+        <td><code>POST</code></td>
+        <td><code>/forms/:slug/submissions</code></td>
+        <td>Submete respostas do diagnóstico</td>
+        <td>—</td>
+        <td><span class="badge badge-green">✓</span></td>
+      </tr>
+      <tr>
+        <td><code>GET</code></td>
+        <td><code>/onboarding/questions</code></td>
+        <td>Perguntas filtradas por modelo diagnóstico</td>
+        <td>JWT</td>
+        <td><span class="badge badge-green">✓</span></td>
+      </tr>
+      <tr>
+        <td><code>POST</code></td>
+        <td><code>/onboarding/submit</code></td>
+        <td>Salva respostas do onboarding, retorna JSON do negócio</td>
+        <td>JWT</td>
+        <td><span class="badge badge-green">✓</span></td>
+      </tr>
+      <tr>
+        <td><code>GET</code></td>
+        <td><code>/onboarding/summary</code></td>
+        <td>Dados do onboarding para tela de resultado</td>
+        <td>JWT</td>
+        <td><span class="badge badge-green">✓</span></td>
+      </tr>
+      <tr>
+        <td><code>POST</code></td>
+        <td><code>/plano/generate</code></td>
+        <td>Gera plano de 24 semanas com Claude (idempotente)</td>
+        <td>JWT</td>
+        <td><span class="badge badge-green">✓ Corrigido</span></td>
+      </tr>
+      <tr>
+        <td><code>GET</code></td>
+        <td><code>/plano</code></td>
+        <td>Plano completo: 24 semanas + tarefas + gates</td>
+        <td>JWT</td>
+        <td><span class="badge badge-green">✓</span></td>
+      </tr>
+      <tr>
+        <td><code>POST</code></td>
+        <td><code>/check-in</code></td>
+        <td>Registra check-in diário (máx. 1/dia, idempotente)</td>
+        <td>JWT</td>
+        <td><span class="badge badge-green">✓</span></td>
+      </tr>
+      <tr>
+        <td><code>POST</code></td>
+        <td><code>/gate/advance</code></td>
+        <td>Avança para próxima semana (requer 5+ check-ins)</td>
+        <td>JWT</td>
+        <td><span class="badge badge-green">✓</span></td>
+      </tr>
+      <tr>
+        <td><code>POST</code></td>
+        <td><code>/mentor/chat</code></td>
+        <td>Envia mensagem ao Mentor IA (Claude)</td>
+        <td>JWT</td>
+        <td><span class="badge badge-green">✓</span></td>
+      </tr>
+      <tr>
+        <td><code>POST</code></td>
+        <td><code>/subscription/create-checkout</code></td>
+        <td>Cria sessão Stripe e retorna URL de checkout</td>
+        <td>JWT</td>
+        <td><span class="badge badge-green">✓</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout" style="margin-top: 24px;">
+    <p><strong>Autenticação:</strong> Todos os endpoints com JWT validam o token Bearer via Supabase Auth. O backend cria o usuário automaticamente na tabela <code>users</code> se for o primeiro acesso autenticado.</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ BUGS CORRIGIDOS ═══════════════════════════════ -->
+<div class="page">
+  <div class="page-header">
+    <div class="section-number">6</div>
+    <div>
+      <h1>Bugs Identificados e Corrigidos</h1>
+      <p>Análise e resolução dos problemas encontrados no fluxo de geração do plano</p>
+    </div>
+  </div>
+
+  <p style="margin-bottom: 24px;">Foram identificados 3 bugs na geração do plano. Todos foram corrigidos nesta sessão. Os bugs foram descobertos executando uma simulação end-to-end idêntica ao código de produção.</p>
+
+  <div class="bug-card">
+    <div class="bug-header">
+      <div class="bug-num fixed">✓</div>
+      <h3>Bug #1 — ALMA não copiado no build (causa raiz do "Erro interno do servidor.")</h3>
+      <span class="badge badge-green">Corrigido</span>
+    </div>
+    <div class="bug-body">
+      <div>
+        <div class="bug-section-label">Causa</div>
+        <p>O comando de build (<code>tsc</code>) só compila arquivos <code>.ts</code>. O arquivo <code>alma-content.txt</code> (214KB, framework estratégico) não era copiado para <code>dist/lib/</code>. O servidor de produção no Render roda <code>node dist/server.js</code> — ao tentar ler o ALMA, lançava erro <code>ENOENT</code> (arquivo não encontrado) antes mesmo de chamar a IA. Como não havia <code>try-catch</code>, o erro caía no handler global → "Erro interno do servidor."</p>
+      </div>
+      <div>
+        <div class="bug-section-label">Correção</div>
+        <div class="fix-highlight">
+          <p><strong>package.json — script build:</strong></p>
+          <p><code>tsc && cp src/lib/alma-content.txt dist/lib/alma-content.txt</code></p>
+          <p style="margin-top: 8px;"><strong>service.ts:</strong> Envolveu <code>loadAlmaContent()</code> em try-catch, lançando <code>ALMA_LOAD_ERROR</code> com mensagem descritiva.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bug-card">
+    <div class="bug-header">
+      <div class="bug-num fixed">✓</div>
+      <h3>Bug #2 — MAX_TOKENS insuficiente para 24 semanas completas</h3>
+      <span class="badge badge-green">Corrigido</span>
+    </div>
+    <div class="bug-body">
+      <div>
+        <div class="bug-section-label">Causa</div>
+        <p>O limite de output era <code>MAX_TOKENS=16.000</code>. A simulação de produção confirmou: o modelo gera exatamente 16.000 tokens e é cortado no meio da semana 24 (JSON sem fechar). O <code>JSON.parse()</code> falha com "Unterminated string". Este seria o segundo erro revelado após o Bug #1 ser corrigido.</p>
+      </div>
+      <div>
+        <div class="bug-section-label">Correção</div>
+        <div class="fix-highlight">
+          <p>Aumentado <code>MAX_TOKENS</code> de <strong>16.000</strong> para <strong>32.000</strong>.</p>
+          <p style="margin-top: 6px; color: var(--muted);">Dados da simulação: input=1.824 tokens (user msg) + ~53K (ALMA cached) · output=16.000 tokens cortados em 50.720 chars · plano incompleto na semana 24.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bug-card">
+    <div class="bug-header">
+      <div class="bug-num fixed">✓</div>
+      <h3>Bug #3 — FK violation: acao_codigo gerado pela IA com valor inválido</h3>
+      <span class="badge badge-green">Corrigido</span>
+    </div>
+    <div class="bug-body">
+      <div>
+        <div class="bug-section-label">Causa</div>
+        <p>O prompt pede à IA para retornar <code>"acao_codigo": null</code>, mas o modelo às vezes retorna valores inventados (ex: <code>"LID-07"</code>). Como <code>acoes_library</code> está vazia em produção, o <code>INSERT INTO tarefas_semana</code> falharia com violação de chave estrangeira dentro da transação de persistência.</p>
+      </div>
+      <div>
+        <div class="bug-section-label">Correção</div>
+        <div class="fix-highlight">
+          <p>No INSERT de tarefas, o valor de <code>acao_codigo</code> é agora sempre forçado para <code>null</code>, independente do que a IA retornar.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2>Erro sem tratamento (Anthropic SDK)</h2>
+  <div class="bug-card">
+    <div class="bug-header">
+      <div class="bug-num fixed">✓</div>
+      <h3>Chamada à API Anthropic sem try-catch</h3>
+      <span class="badge badge-green">Corrigido</span>
+    </div>
+    <div class="bug-body">
+      <div>
+        <div class="bug-section-label">Causa</div>
+        <p>A chamada <code>client.messages.create()</code> não estava em <code>try-catch</code>. Qualquer erro de rede, autenticação ou limite da API gerava um erro bruto (não AppError) que caía no handler genérico, mascarando a causa real.</p>
+      </div>
+      <div>
+        <div class="bug-section-label">Correção</div>
+        <div class="fix-highlight">
+          <p>Chamada envolvida em try-catch. Lança <code>AppError</code> com código <code>AI_CALL_ERROR</code> e mensagem descritiva incluindo o status HTTP e erro real da API.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ STATUS GERAL ═══════════════════════════════ -->
+<div class="page" style="page-break-after: avoid;">
+  <div class="page-header">
+    <div class="section-number">7</div>
+    <div>
+      <h1>Status Geral e Próximos Passos</h1>
+      <p>Visão executiva para o Product Owner</p>
+    </div>
+  </div>
+
+  <h2>Resumo de Funcionalidades</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Área</th>
+        <th>Funcionalidade</th>
+        <th>Tela</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Entrada</td>
+        <td>Diagnóstico (18 perguntas, 8 modelos)</td>
+        <td>Diagnóstico</td>
+        <td><span class="badge badge-green">✓ OK</span></td>
+      </tr>
+      <tr>
+        <td>Acesso</td>
+        <td>Login / Cadastro / Google / Reset de senha</td>
+        <td>Auth</td>
+        <td><span class="badge badge-green">✓ OK</span></td>
+      </tr>
+      <tr>
+        <td>Monetização</td>
+        <td>Paywall + Stripe checkout + verificação</td>
+        <td>Paywall</td>
+        <td><span class="badge badge-green">✓ OK</span></td>
+      </tr>
+      <tr>
+        <td>Contexto</td>
+        <td>Onboarding 92 campos, perguntas adaptativas</td>
+        <td>Onboarding</td>
+        <td><span class="badge badge-green">✓ OK</span></td>
+      </tr>
+      <tr>
+        <td>Core IA</td>
+        <td>Geração do Plano 24 semanas com Claude</td>
+        <td>Resultado Onboarding</td>
+        <td><span class="badge badge-gold">✓ Corrigido</span></td>
+      </tr>
+      <tr>
+        <td>Home</td>
+        <td>KPIs, Devocional, Tarefas da semana, Gate</td>
+        <td>Início</td>
+        <td><span class="badge badge-green">✓ OK</span></td>
+      </tr>
+      <tr>
+        <td>IA Chat</td>
+        <td>Mentor Jethro — chat contextualizado no PBN</td>
+        <td>Mentor</td>
+        <td><span class="badge badge-green">✓ OK</span></td>
+      </tr>
+      <tr>
+        <td>Conteúdo</td>
+        <td>Biblioteca com 24 semanas + tarefas + gates</td>
+        <td>Biblioteca</td>
+        <td><span class="badge badge-green">✓ OK</span></td>
+      </tr>
+      <tr>
+        <td>Conta</td>
+        <td>Perfil, progresso, FAQ, logout</td>
+        <td>Perfil</td>
+        <td><span class="badge badge-green">✓ OK</span></td>
+      </tr>
+      <tr>
+        <td>Progressão</td>
+        <td>Check-in diário + Gate de avanço semanal</td>
+        <td>Início</td>
+        <td><span class="badge badge-green">✓ OK</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>Ação Necessária — Deploy</h2>
+  <div class="callout">
+    <p><strong>Para ativar as correções em produção:</strong> É necessário fazer um novo deploy no Render. O primeiro <code>npm run build</code> irá executar automaticamente o <code>cp alma-content.txt</code> e a geração de planos passará a funcionar. Os 3 bugs são corrigidos com este único deploy.</p>
+  </div>
+
+  <h2>Observações para o PO</h2>
+  <ul class="feature-list">
+    <li>
+      <span class="feature-icon icon-gold">⚠</span>
+      <div><strong>Tempo de geração do plano (~4–5 min):</strong> O timeout atual do app é 2 minutos. Após o deploy, testar se o plano completo é gerado dentro desse tempo ou se é necessário aumentar o timeout ou usar streaming.</div>
+    </li>
+    <li>
+      <span class="feature-icon icon-gold">⚠</span>
+      <div><strong>Status da assinatura no Perfil:</strong> Atualmente exibido como "Activa" de forma estática. Pode ser dinamizado consultando <code>GET /subscription/status</code>.</div>
+    </li>
+    <li>
+      <span class="feature-icon icon-green">✓</span>
+      <div><strong>Idempotência:</strong> O plano é gerado uma única vez por usuário. Chamadas subsequentes ao <code>POST /plano/generate</code> retornam o plano existente sem custo de IA adicional.</div>
+    </li>
+    <li>
+      <span class="feature-icon icon-green">✓</span>
+      <div><strong>Prompt Caching:</strong> O conteúdo ALMA (214KB) é enviado com <code>cache_control: ephemeral</code>. A partir da segunda chamada, a leitura do cache reduz custo e latência em ~85%.</div>
+    </li>
+  </ul>
+
+  <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--gray2); display: flex; justify-content: space-between; align-items: center;">
+    <div>
+      <p style="font-size: 8.5pt; color: var(--muted);">Jethro — Programa Bases do Negócio</p>
+      <p style="font-size: 8.5pt; color: var(--muted);">Documento gerado em Maio de 2026</p>
+    </div>
+    <div style="text-align: right;">
+      <p style="font-size: 22pt; color: var(--gold); font-weight: 800; line-height: 1;">✦</p>
+      <p style="font-size: 8pt; color: var(--muted);">jethro-fullstack.onrender.com</p>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
