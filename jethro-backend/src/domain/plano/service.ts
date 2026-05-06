@@ -80,6 +80,21 @@ type InitialPlanGerado = {
 };
 
 type OnboardingRow = { id: string; modelo_confirmado: string; json_completo: Record<string, unknown> };
+type TarefaPrioridade = 'baixa' | 'media' | 'alta' | 'critica';
+
+function normalizePrioridade(value: unknown): TarefaPrioridade {
+  const normalized = String(value ?? 'media')
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .trim()
+    .toLowerCase();
+
+  if (normalized === 'baixa' || normalized === 'baixo') return 'baixa';
+  if (normalized === 'media' || normalized === 'medio') return 'media';
+  if (normalized === 'alta' || normalized === 'alto') return 'alta';
+  if (normalized === 'critica' || normalized === 'critico' || normalized === 'urgente') return 'critica';
+  return 'media';
+}
 
 async function recordAiUsage(
   userId: string,
@@ -502,7 +517,7 @@ export async function generateSemanaCompleta(semanaId: string): Promise<void> {
       await client.query(
         `INSERT INTO tarefas_semana (semana_id, descricao, prioridade, acao_codigo, recurso_biblioteca)
          VALUES ($1, $2, $3, $4, $5)`,
-        [semanaId, tarefa.descricao, tarefa.prioridade, null, tarefa.recurso_biblioteca ?? null]
+        [semanaId, tarefa.descricao, normalizePrioridade(tarefa.prioridade), null, tarefa.recurso_biblioteca ?? null]
       );
     }
 
@@ -612,7 +627,7 @@ async function runGeneratePlanoBackground(
       await client.query(
         `INSERT INTO tarefas_semana (semana_id, descricao, prioridade, acao_codigo, recurso_biblioteca)
          VALUES ($1, $2, $3, $4, $5)`,
-        [semana1Id, tarefa.descricao, tarefa.prioridade, null, tarefa.recurso_biblioteca ?? null]
+        [semana1Id, tarefa.descricao, normalizePrioridade(tarefa.prioridade), null, tarefa.recurso_biblioteca ?? null]
       );
     }
 
