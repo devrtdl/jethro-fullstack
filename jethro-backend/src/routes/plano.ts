@@ -3,7 +3,8 @@ import type { FastifyInstance } from 'fastify';
 import { successResponse } from '../lib/api-response.js';
 import { getDbPool } from '../lib/db.js';
 import { userAuthPreHandler } from '../lib/user-auth.js';
-import { generatePlano } from '../domain/plano/service.js';
+import { initiateGeneratePlano, getPlanoStatus } from '../domain/plano/service.js';
+
 
 export async function registerPlanoRoutes(app: FastifyInstance) {
   /**
@@ -13,7 +14,17 @@ export async function registerPlanoRoutes(app: FastifyInstance) {
    */
   app.post('/plano/generate', { preHandler: userAuthPreHandler }, async (request) => {
     const userId = request.userId!;
-    const result = await generatePlano(userId);
+    const result = await initiateGeneratePlano(userId);
+    return successResponse(result);
+  });
+
+  /**
+   * GET /plano/status
+   * Retorna o status de geração do plano: not_started | generating | ready | error
+   */
+  app.get('/plano/status', { preHandler: userAuthPreHandler }, async (request) => {
+    const userId = request.userId!;
+    const result = await getPlanoStatus(userId);
     return successResponse(result);
   });
 
@@ -26,8 +37,8 @@ export async function registerPlanoRoutes(app: FastifyInstance) {
     const pool = getDbPool();
 
     const planoRow = await pool
-      .query<{ id: string; modelo: string; documento_1: Record<string, unknown> }>(
-        `SELECT id, modelo, documento_1 FROM planos_acao WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1`,
+      .query<{ id: string; modelo: string }>(
+        `SELECT id, modelo FROM planos_acao WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1`,
         [userId]
       )
       .then((r) => r.rows[0] ?? null);
@@ -36,14 +47,19 @@ export async function registerPlanoRoutes(app: FastifyInstance) {
       return successResponse(null);
     }
 
-    // Carrega semanas com gate status e tarefas
+    // Carrega semanas com gate status, tarefas e conteúdo completo
     const semanas = await pool
       .query<{
         semana_id: string;
         numero: number;
         fase: string;
         objetivo: string;
+        nome: string | null;
         versiculo: string | null;
+        por_que_importa: string | null;
+        indicador_conclusao: string | null;
+        resultado_esperado: string | null;
+        conteudo_completo: boolean;
         gate_status: string;
         tarefas: { descricao: string; prioridade: string; completada: boolean }[];
       }>(
@@ -52,7 +68,12 @@ export async function registerPlanoRoutes(app: FastifyInstance) {
            s.numero,
            s.fase,
            s.objetivo,
+           s.nome,
            s.versiculo,
+           s.por_que_importa,
+           s.indicador_conclusao,
+           s.resultado_esperado,
+           s.conteudo_completo,
            gs.gate_status,
            COALESCE(
              json_agg(
@@ -68,37 +89,31 @@ export async function registerPlanoRoutes(app: FastifyInstance) {
          JOIN gates_semanais gs ON gs.semana_id = s.id AND gs.user_id = $1
          LEFT JOIN tarefas_semana t ON t.semana_id = s.id
          WHERE s.plano_id = $2
-         GROUP BY s.id, s.numero, s.fase, s.objetivo, s.versiculo, gs.gate_status
+         GROUP BY s.id, s.numero, s.fase, s.objetivo, s.nome, s.versiculo,
+                  s.por_que_importa, s.indicador_conclusao, s.resultado_esperado,
+                  s.conteudo_completo, gs.gate_status
          ORDER BY s.numero ASC`,
         [userId, planoRow.id]
       )
       .then((r) => r.rows);
 
-    // Enriquece com campos extra do documento_1 (nome, por_que_importa, etc.)
-    const doc1Semanas = (planoRow.documento_1 as { semanas?: Record<string, unknown>[] })?.semanas ?? [];
-    const doc1ByNumero = new Map(doc1Semanas.map((s) => [s['numero'] as number, s]));
-
-    const semanasEnriquecidas = semanas.map((s) => {
-      const extra = doc1ByNumero.get(s.numero) ?? {};
-      return {
-        numero: s.numero,
-        nome: extra['nome'] ?? null,
-        objetivo: s.objetivo,
-        por_que_importa: extra['por_que_importa'] ?? null,
-        versiculo: s.versiculo,
-        fase: s.fase,
-        gate_status: s.gate_status,
-        indicador_conclusao: extra['indicador_conclusao'] ?? null,
-        resultado_esperado: extra['resultado_esperado'] ?? null,
-        tarefas: s.tarefas,
-      };
-    });
-
     return successResponse({
       planoId: planoRow.id,
       modelo: planoRow.modelo,
-      totalSemanas: semanasEnriquecidas.length,
-      semanas: semanasEnriquecidas,
+      totalSemanas: semanas.length,
+      semanas: semanas.map((s) => ({
+        numero: s.numero,
+        nome: s.nome,
+        objetivo: s.objetivo,
+        por_que_importa: s.por_que_importa,
+        versiculo: s.versiculo,
+        fase: s.fase,
+        gate_status: s.gate_status,
+        indicador_conclusao: s.indicador_conclusao,
+        resultado_esperado: s.resultado_esperado,
+        conteudo_completo: s.conteudo_completo,
+        tarefas: s.tarefas,
+      })),
     });
   });
 }

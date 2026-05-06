@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -30,37 +30,106 @@ const SUMMARY_LABELS: Record<string, string> = {
   meta_90_dias: 'Meta 90 dias',
 };
 
+const STEPS = [
+  { icon: '◈', text: 'A IA analisa o teu diagnóstico e onboarding' },
+  { icon: '◆', text: 'Cria o plano de 24 semanas personalizado' },
+  { icon: '◉', text: 'Prepara o conteúdo completo da semana 1' },
+  { icon: '●', text: 'Activa o gate de avanço e finaliza' },
+];
+
+// Avança um step a cada ~20s durante o polling
+const STEP_INTERVAL_MS = 20_000;
+const POLL_INTERVAL_MS = 3_000;
+const MAX_WAIT_MS = 5 * 60 * 1000; // 5 minutos
+
 export function OnboardingResultScreen() {
   const router = useRouter();
   const [summary, setSummary] = useState<OnboardingSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
+  const [activeStep, setActiveStep] = useState(0);
 
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const stepRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const startTimeRef = useRef<number>(0);
+
+  const stopPolling = useCallback(() => {
+    if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
+    if (stepRef.current) { clearInterval(stepRef.current); stepRef.current = null; }
+  }, []);
+
+  const startPolling = useCallback(() => {
+    startTimeRef.current = Date.now();
+    setActiveStep(0);
+
+    // Avança os steps visualmente ao longo do tempo
+    stepRef.current = setInterval(() => {
+      setActiveStep((prev) => Math.min(prev + 1, STEPS.length - 1));
+    }, STEP_INTERVAL_MS);
+
+    pollRef.current = setInterval(async () => {
+      if (Date.now() - startTimeRef.current > MAX_WAIT_MS) {
+        stopPolling();
+        setGenerating(false);
+        Alert.alert('Tempo esgotado', 'A geração está a demorar mais que o esperado. Tenta novamente.');
+        return;
+      }
+
+      try {
+        const status = await homeService.getPlanoStatus();
+        if (status.status === 'ready') {
+          stopPolling();
+          router.replace('/(tabs)');
+        } else if (status.status === 'error') {
+          stopPolling();
+          setGenerating(false);
+          Alert.alert('Erro', status.error ?? 'Erro ao gerar plano. Tenta novamente.');
+        }
+      } catch {
+        // Erro de rede durante polling — continua tentando
+      }
+    }, POLL_INTERVAL_MS);
+  }, [router, stopPolling]);
+
+  // Ao montar: verifica se já há uma geração em andamento
   useEffect(() => {
     void (async () => {
       try {
-        const data = await onboardingService.getSummary();
-        setSummary(data as OnboardingSummary);
-      } catch {
-        // Not critical — proceed even without summary
+        const [data, status] = await Promise.all([
+          onboardingService.getSummary().catch(() => null),
+          homeService.getPlanoStatus().catch(() => null),
+        ]);
+        if (data) setSummary(data as OnboardingSummary);
+        if (status?.status === 'ready') {
+          router.replace('/(tabs)');
+          return;
+        }
+        if (status?.status === 'generating') {
+          setGenerating(true);
+          startPolling();
+        }
       } finally {
         setLoading(false);
       }
     })();
-  }, []);
+    return stopPolling;
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleGeneratePlan = useCallback(async () => {
     setGenerating(true);
     try {
-      await homeService.generatePlano();
-      router.replace('/(tabs)');
+      const result = await homeService.generatePlano();
+      if (result.status === 'ready') {
+        router.replace('/(tabs)');
+        return;
+      }
+      startPolling();
     } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : 'Erro ao gerar plano. Tenta novamente.';
-      Alert.alert('Erro', msg);
-    } finally {
       setGenerating(false);
+      const msg = e instanceof Error ? e.message : 'Erro ao iniciar geração. Tenta novamente.';
+      Alert.alert('Erro', msg);
     }
-  }, [router]);
+  }, [router, startPolling]);
 
   const visibleFields = summary
     ? Object.entries(SUMMARY_LABELS)
@@ -93,7 +162,7 @@ export function OnboardingResultScreen() {
         </View>
 
         {/* Summary */}
-        {visibleFields.length > 0 && (
+        {visibleFields.length > 0 && !generating && (
           <View style={styles.summaryCard}>
             <Text style={styles.summaryTitle}>O que o Jethro sabe de ti</Text>
             {visibleFields.map((f) => (
@@ -105,21 +174,28 @@ export function OnboardingResultScreen() {
           </View>
         )}
 
-        {/* What happens next */}
+        {/* Steps */}
         <View style={styles.stepsCard}>
           <Text style={styles.stepsTitle}>O que acontece a seguir</Text>
-          {[
-            { icon: '◈', text: 'A IA analisa o teu diagnóstico e onboarding' },
-            { icon: '◆', text: 'Cria um plano de 24 semanas personalizado' },
-            { icon: '◉', text: 'Estrutura as tarefas semana a semana' },
-            { icon: '●', text: 'Activa o gate de avanço da semana 1' },
-          ].map((s) => (
-            <View key={s.text} style={styles.stepRow}>
-              <Text style={styles.stepIcon}>{s.icon}</Text>
-              <Text style={styles.stepText}>{s.text}</Text>
-            </View>
-          ))}
-          <Text style={styles.timeNote}>⏱ Demora ~30 segundos</Text>
+          {STEPS.map((s, i) => {
+            const isDone = generating && i < activeStep;
+            const isActive = generating && i === activeStep;
+            return (
+              <View key={s.text} style={styles.stepRow}>
+                <Text style={[styles.stepIcon, (isDone || isActive) && styles.stepIconActive]}>
+                  {isDone ? '✓' : isActive ? '⟳' : s.icon}
+                </Text>
+                <Text style={[styles.stepText, isDone && styles.stepTextDone, isActive && styles.stepTextActive]}>
+                  {s.text}
+                </Text>
+              </View>
+            );
+          })}
+          {generating ? (
+            <Text style={styles.timeNote}>⏱ A processar… normalmente menos de 1 minuto</Text>
+          ) : (
+            <Text style={styles.timeNote}>⏱ Normalmente menos de 1 minuto</Text>
+          )}
         </View>
 
         {/* CTA */}
@@ -130,8 +206,8 @@ export function OnboardingResultScreen() {
         >
           {generating ? (
             <>
-              <ActivityIndicator color={JethroColors.navy} />
-              <Text style={styles.ctaBtnText}>A gerar o teu plano...</Text>
+              <ActivityIndicator color={JethroColors.navy} size="small" />
+              <Text style={styles.ctaBtnText}>A gerar o teu plano…</Text>
             </>
           ) : (
             <Text style={styles.ctaBtnText}>✦ Gerar o meu plano de ação</Text>
@@ -179,8 +255,11 @@ const styles = StyleSheet.create({
     letterSpacing: 1, textTransform: 'uppercase',
   },
   stepRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  stepIcon: { fontSize: 16, color: JethroColors.gold, width: 20, textAlign: 'center' },
+  stepIcon: { fontSize: 16, color: JethroColors.muted, width: 20, textAlign: 'center' },
+  stepIconActive: { color: JethroColors.gold },
   stepText: { fontSize: 14, color: JethroColors.cremeMuted, flex: 1, lineHeight: 20 },
+  stepTextActive: { color: JethroColors.creme, fontWeight: '600' },
+  stepTextDone: { color: JethroColors.gold },
   timeNote: { fontSize: 12, color: JethroColors.muted, marginTop: 4 },
   ctaBtn: {
     backgroundColor: JethroColors.gold, borderRadius: 14, paddingVertical: 17,

@@ -6,7 +6,8 @@ import { loadAlmaContent } from '../../lib/alma-loader.js';
 import { AppError } from '../../lib/errors.js';
 
 const MODEL = 'claude-sonnet-4-6';
-const MAX_TOKENS = 32000;
+const MAX_TOKENS_INITIAL = 8000;
+const MAX_TOKENS_SEMANA = 4000;
 const ALMA_VERSION = 'v5.14';
 
 const FASES: Record<number, string> = {
@@ -24,7 +25,13 @@ const PILARES_POR_SEMANA: Record<number, string> = {
   19: 'P5', 20: 'P6', 21: 'P7', 22: 'P1', 23: 'P2', 24: 'P7',
 };
 
-type SemanaGerada = {
+type SemanaOutline = {
+  numero: number;
+  nome: string;
+  objetivo: string;
+};
+
+type SemanaCompleta = {
   numero: number;
   nome: string;
   objetivo: string;
@@ -33,22 +40,19 @@ type SemanaGerada = {
   tarefas: Array<{
     descricao: string;
     prioridade: 'baixa' | 'media' | 'alta' | 'critica';
-    acao_codigo: string | null;
   }>;
   indicador_conclusao: string;
   resultado_esperado: string;
 };
 
-type PlanoGerado = {
-  semanas: SemanaGerada[];
+type InitialPlanGerado = {
+  semana_1: SemanaCompleta;
+  semanas_restantes: SemanaOutline[];
 };
 
-function buildPlanPrompt(
-  diagnosticModel: string,
-  onboardingJson: Record<string, unknown>
-): string {
-  const j = onboardingJson;
+type OnboardingRow = { id: string; modelo_confirmado: string; json_completo: Record<string, unknown> };
 
+function buildStudentContext(diagnosticModel: string, j: Record<string, unknown>): string {
   const segmento     = j['area_negocio']            ?? 'Não informado';
   const equipa       = j['equipa']                  ?? 'Não informado';
   const tempoNeg     = j['tempo_negocio']           ?? 'Não informado';
@@ -67,10 +71,7 @@ function buildPlanPrompt(
   const observacoes  = [canal && `Canal principal: ${canal}`, objeccao && `Objecção principal: ${objeccao}`]
     .filter(Boolean).join(' | ') || 'Não informado';
 
-  return `TAREFA:
-Criar um Plano de Ação Estratégico de 24 semanas para um aluno de mentoria empresarial, com base no diagnóstico realizado, nas informações do negócio, nos problemas declarados e no contexto real do aluno.
-
-DADOS DO ALUNO:
+  return `DADOS DO ALUNO:
 Segmento: ${segmento}
 Faturamento actual: ${faturamento}
 Tamanho da equipa: ${equipa}
@@ -78,7 +79,19 @@ Momento do negócio: ${tempoNeg}
 Principais dores: ${dores}
 Objetivos: ${meta}
 Modelo de diagnóstico: ${diagnosticModel}
-Observações relevantes: ${observacoes}
+Observações relevantes: ${observacoes}`;
+}
+
+function buildInitialPlanPrompt(
+  diagnosticModel: string,
+  onboardingJson: Record<string, unknown>
+): string {
+  const ctx = buildStudentContext(diagnosticModel, onboardingJson);
+
+  return `TAREFA:
+Criar um Plano de Ação Estratégico de 24 semanas para um aluno de mentoria empresarial, com base no diagnóstico realizado, nas informações do negócio, nos problemas declarados e no contexto real do aluno.
+
+${ctx}
 
 OBJETIVO DO PLANO:
 O plano não deve ser motivacional, genérico ou teórico. Ele deve funcionar como um mapa prático de transformação do negócio e da liderança do aluno, conduzindo-o de desorganização, inconsistência ou estagnação para clareza, estrutura, execução, crescimento e governo.
@@ -94,28 +107,6 @@ Considere obrigatoriamente os seguintes elementos para personalizar o plano:
 - Objectivos desejados pelo aluno
 - Grau de maturidade do negócio
 - Capacidade real de execução do aluno
-
-ESTRUTURA OBRIGATÓRIA:
-Gere exactamente 24 semanas. Cada semana deve conter:
-1. Nome da semana
-2. Objectivo estratégico da semana — 1 frase clara, específica e directa
-3. Por que esta semana importa — 1 parágrafo explicando a lógica estratégica daquela etapa
-4. Versículo bíblico — deve reforçar a direcção estratégica, não ser genérico ou forçado
-5. Tarefas práticas — entre 2 e 4 tarefas concretas, aplicáveis e mensuráveis; nada genérico como "melhorar liderança" ou "crescer nas vendas"
-6. Prioridade de cada tarefa — use apenas: baixa / media / alta / critica
-7. Indicador de conclusão — como saber, de forma prática, se a semana foi cumprida
-8. Resultado esperado — 1 frase mostrando o ganho concreto gerado ao final
-
-REGRAS DE QUALIDADE:
-- O plano deve parecer feito sob medida para este aluno, não um modelo pronto reciclado
-- Não use linguagem vaga, abstracta ou excessivamente espiritualizada
-- O tom deve ser estratégico, claro, firme e aplicável
-- As tarefas devem respeitar a realidade e o tamanho actual do negócio
-- Se o negócio for pequeno, não proponha estrutura de empresa grande
-- Se houver baixa maturidade de gestão, comece pelo essencial antes de avançar
-- O plano deve corrigir causas-raiz, não apenas sintomas
-- Não repetir tarefas com palavras diferentes em semanas diferentes
-- Pense como um mentor estratégico experiente, não como um gerador de listas
 
 LÓGICA DA JORNADA DAS 24 SEMANAS:
 
@@ -138,45 +129,96 @@ REGRAS DE PROGRESSÃO:
 - O plano deve mostrar progressão lógica entre semanas — uma semana prepara a próxima
 - Antes de escalar, estruture. Antes de estruturar, clarifique. Antes de delegar, organize. Antes de crescer, controle
 
-CAMADA EXTRA DE FIDELIDADE AO MÉTODO:
-Ao construir o plano, trabalhe com estes eixos distribuídos ao longo das 24 semanas:
-- Clareza de direcção
-- Alinhamento entre talento, chamado e negócio
-- Validação e ajuste do modelo
-- Estruturação do negócio sobre bases sólidas
-- Clareza financeira
-- Multiplicação com ordem
-- Conexão com princípios bíblicos aplicados ao mundo empresarial
-
-TRAVA DE QUALIDADE:
-Se alguma semana estiver genérica, superficial, repetitiva, desconectada do diagnóstico ou sem lógica de progressão, reescreva antes de entregar.
-Não entregue um plano "bonito". Entregue um plano utilizável.
+REGRAS DE QUALIDADE:
+- O plano deve parecer feito sob medida para este aluno, não um modelo pronto reciclado
+- Não use linguagem vaga, abstracta ou excessivamente espiritualizada
+- O tom deve ser estratégico, claro, firme e aplicável
+- As tarefas devem respeitar a realidade e o tamanho actual do negócio
+- O plano deve corrigir causas-raiz, não apenas sintomas
 
 FORMATO DE SAÍDA (JSON puro, sem markdown, sem texto antes ou depois):
+- Semana 1: conteúdo COMPLETO (todos os campos abaixo)
+- Semanas 2 a 24: apenas { numero, nome, objetivo }
+
 {
-  "semanas": [
-    {
-      "numero": 1,
-      "nome": "Nome da semana",
-      "objetivo": "1 frase estratégica e específica",
-      "por_que_importa": "Parágrafo explicando a lógica estratégica desta etapa",
-      "versiculo": "Livro X:Y — texto do versículo",
-      "tarefas": [
-        { "descricao": "Tarefa concreta e mensurável", "prioridade": "alta", "acao_codigo": null }
-      ],
-      "indicador_conclusao": "Como saber praticamente se a semana foi cumprida",
-      "resultado_esperado": "Ganho concreto gerado ao final da execução"
-    }
+  "semana_1": {
+    "numero": 1,
+    "nome": "Nome da semana",
+    "objetivo": "1 frase estratégica e específica",
+    "por_que_importa": "Parágrafo explicando a lógica estratégica desta etapa",
+    "versiculo": "Livro X:Y — texto do versículo",
+    "tarefas": [
+      { "descricao": "Tarefa concreta e mensurável", "prioridade": "alta" }
+    ],
+    "indicador_conclusao": "Como saber praticamente se a semana foi cumprida",
+    "resultado_esperado": "Ganho concreto gerado ao final da execução"
+  },
+  "semanas_restantes": [
+    { "numero": 2, "nome": "Nome da semana 2", "objetivo": "Objectivo da semana 2" },
+    { "numero": 3, "nome": "Nome da semana 3", "objetivo": "Objectivo da semana 3" },
+    ...
+    { "numero": 24, "nome": "Nome da semana 24", "objetivo": "Objectivo da semana 24" }
   ]
 }`;
 }
 
-export async function generatePlano(userId: string): Promise<{ planoId: string }> {
+function buildSemanaFullPrompt(
+  semanaNumero: number,
+  semanaNome: string,
+  semanaObjetivo: string,
+  diagnosticModel: string,
+  onboardingJson: Record<string, unknown>,
+  todasSemanas: SemanaOutline[]
+): string {
+  const ctx = buildStudentContext(diagnosticModel, onboardingJson);
+
+  const outlineText = todasSemanas
+    .map((s) => `Semana ${s.numero}: "${s.nome}" — ${s.objetivo}`)
+    .join('\n');
+
+  return `TAREFA:
+Expandir a Semana ${semanaNumero} do Plano de Ação Estratégico de 24 semanas do aluno abaixo.
+
+${ctx}
+
+VISÃO GERAL DO PLANO (24 semanas):
+${outlineText}
+
+SEMANA A EXPANDIR: Semana ${semanaNumero} — "${semanaNome}"
+Objectivo: ${semanaObjetivo}
+
+Gera o conteúdo completo desta semana, mantendo coerência com o contexto do aluno e com as semanas anteriores e seguintes do plano.
+
+REGRAS:
+- Tarefas concretas, aplicáveis e mensuráveis (2 a 4 tarefas)
+- Prioridades: baixa / media / alta / critica
+- Versículo bíblico que reforce a direcção estratégica desta etapa
+- Indicador de conclusão prático e verificável
+- Resultado esperado em 1 frase com ganho concreto
+
+FORMATO DE SAÍDA (JSON puro, sem markdown, sem texto antes ou depois):
+{
+  "numero": ${semanaNumero},
+  "nome": "nome da semana",
+  "objetivo": "objectivo da semana",
+  "por_que_importa": "Parágrafo explicando a lógica estratégica desta etapa",
+  "versiculo": "Livro X:Y — texto do versículo",
+  "tarefas": [
+    { "descricao": "Tarefa concreta e mensurável", "prioridade": "alta" }
+  ],
+  "indicador_conclusao": "Como saber praticamente se a semana foi cumprida",
+  "resultado_esperado": "Ganho concreto gerado ao final da execução"
+}`;
+}
+
+// ── Inicia a geração (retorna imediatamente) ──────────────────────────────
+export async function initiateGeneratePlano(
+  userId: string
+): Promise<{ status: 'generating' | 'ready'; planoId: string }> {
   const pool = getDbPool();
 
-  // Verifica onboarding completo
   const onboardingRow = await pool
-    .query<{ id: string; modelo_confirmado: string; json_completo: Record<string, unknown> }>(
+    .query<OnboardingRow>(
       `SELECT id, modelo_confirmado, json_completo
        FROM onboarding_sessions WHERE user_id = $1 AND status = 'completed'
        ORDER BY created_at DESC LIMIT 1`,
@@ -188,17 +230,196 @@ export async function generatePlano(userId: string): Promise<{ planoId: string }
     throw new AppError('Onboarding não concluído.', 400, 'ONBOARDING_REQUIRED');
   }
 
-  // Verifica se já tem plano activo
-  const planoExistente = await pool
-    .query<{ id: string }>(
-      `SELECT id FROM planos_acao WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1`,
+  const existing = await pool
+    .query<{ id: string; status: string }>(
+      `SELECT id, status FROM planos_acao WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1`,
       [userId]
     )
     .then((r) => r.rows[0] ?? null);
 
-  if (planoExistente) {
-    return { planoId: planoExistente.id };
+  if (existing?.status === 'ready') return { status: 'ready', planoId: existing.id };
+  if (existing?.status === 'generating') return { status: 'generating', planoId: existing.id };
+
+  if (existing?.status === 'error') {
+    await pool.query('DELETE FROM planos_acao WHERE id = $1', [existing.id]);
   }
+
+  const planoResult = await pool
+    .query<{ id: string }>(
+      `INSERT INTO planos_acao
+         (user_id, onboarding_id, modelo, versao_alma, documento_1, documento_2, status)
+       VALUES ($1, $2, $3, $4, '{}'::jsonb, '{}'::jsonb, 'generating')
+       RETURNING id`,
+      [userId, onboardingRow.id, onboardingRow.modelo_confirmado, ALMA_VERSION]
+    )
+    .then((r) => r.rows[0]!);
+
+  void runGeneratePlanoBackground(userId, planoResult.id, onboardingRow);
+
+  return { status: 'generating', planoId: planoResult.id };
+}
+
+// ── Retorna o status atual do plano ──────────────────────────────────────
+export async function getPlanoStatus(
+  userId: string
+): Promise<{ status: 'not_started' | 'generating' | 'ready' | 'error'; planoId?: string; error?: string }> {
+  const pool = getDbPool();
+  const row = await pool
+    .query<{ id: string; status: string; error_message: string | null }>(
+      `SELECT id, status, error_message FROM planos_acao WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1`,
+      [userId]
+    )
+    .then((r) => r.rows[0] ?? null);
+
+  if (!row) return { status: 'not_started' };
+
+  return {
+    status: row.status as 'generating' | 'ready' | 'error',
+    planoId: row.status === 'ready' ? row.id : undefined,
+    error: row.error_message ?? undefined,
+  };
+}
+
+// ── Expande uma semana específica com conteúdo completo ───────────────────
+export async function generateSemanaCompleta(semanaId: string): Promise<void> {
+  const pool = getDbPool();
+
+  const semanaRow = await pool
+    .query<{ numero: number; plano_id: string; nome: string | null; objetivo: string }>(
+      `SELECT numero, plano_id, nome, objetivo FROM semanas WHERE id = $1`,
+      [semanaId]
+    )
+    .then((r) => r.rows[0] ?? null);
+
+  if (!semanaRow) return;
+
+  const planoRow = await pool
+    .query<{ modelo: string; onboarding_id: string }>(
+      `SELECT modelo, onboarding_id FROM planos_acao WHERE id = $1`,
+      [semanaRow.plano_id]
+    )
+    .then((r) => r.rows[0] ?? null);
+
+  if (!planoRow) return;
+
+  const onbRow = await pool
+    .query<{ json_completo: Record<string, unknown> }>(
+      `SELECT json_completo FROM onboarding_sessions WHERE id = $1`,
+      [planoRow.onboarding_id]
+    )
+    .then((r) => r.rows[0] ?? null);
+
+  if (!onbRow) return;
+
+  const todasSemanas = await pool
+    .query<{ numero: number; nome: string | null; objetivo: string }>(
+      `SELECT numero, nome, objetivo FROM semanas WHERE plano_id = $1 ORDER BY numero ASC`,
+      [semanaRow.plano_id]
+    )
+    .then((r) => r.rows);
+
+  let alma: string;
+  try {
+    alma = loadAlmaContent();
+  } catch (err) {
+    console.error(`[generateSemanaCompleta] ALMA load error for semana ${semanaId}:`, err);
+    return;
+  }
+
+  const systemBlocks: Anthropic.Messages.TextBlockParam[] = [
+    { type: 'text', text: alma },
+    { type: 'text', text: 'Você é o Jethro, mentor do Programa Bases do Negócio (PBN). Gere conteúdo estratégico, prático e espiritual para empresários cristãos.' },
+  ];
+  (systemBlocks[0] as unknown as { cache_control: { type: string } }).cache_control = { type: 'ephemeral' };
+
+  const outlines: SemanaOutline[] = todasSemanas.map((s) => ({
+    numero: s.numero,
+    nome: s.nome ?? '',
+    objetivo: s.objetivo,
+  }));
+
+  const prompt = buildSemanaFullPrompt(
+    semanaRow.numero,
+    semanaRow.nome ?? '',
+    semanaRow.objetivo,
+    planoRow.modelo,
+    onbRow.json_completo,
+    outlines
+  );
+
+  let response: Anthropic.Messages.Message;
+  try {
+    response = await getAnthropicClient().messages.create({
+      model: MODEL,
+      max_tokens: MAX_TOKENS_SEMANA,
+      system: systemBlocks,
+      messages: [{ role: 'user', content: prompt }],
+    });
+  } catch (err) {
+    console.error(`[generateSemanaCompleta] AI call error for semana ${semanaId}:`, err);
+    return;
+  }
+
+  const rawText = response.content[0]?.type === 'text' ? response.content[0].text : '';
+
+  let semanaGerada: SemanaCompleta;
+  try {
+    const cleaned = rawText.replace(/^```json\s*/i, '').replace(/```\s*$/i, '').trim();
+    semanaGerada = JSON.parse(cleaned) as SemanaCompleta;
+  } catch {
+    console.error(`[generateSemanaCompleta] JSON parse error for semana ${semanaId}:`, rawText.slice(0, 300));
+    return;
+  }
+
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+
+    await client.query(
+      `UPDATE semanas
+       SET por_que_importa = $1, versiculo = $2, indicador_conclusao = $3, resultado_esperado = $4, conteudo_completo = true
+       WHERE id = $5`,
+      [
+        semanaGerada.por_que_importa ?? null,
+        semanaGerada.versiculo ?? null,
+        semanaGerada.indicador_conclusao ?? null,
+        semanaGerada.resultado_esperado ?? null,
+        semanaId,
+      ]
+    );
+
+    await client.query(`DELETE FROM tarefas_semana WHERE semana_id = $1`, [semanaId]);
+
+    for (const tarefa of semanaGerada.tarefas ?? []) {
+      await client.query(
+        `INSERT INTO tarefas_semana (semana_id, descricao, prioridade, acao_codigo)
+         VALUES ($1, $2, $3, $4)`,
+        [semanaId, tarefa.descricao, tarefa.prioridade, null]
+      );
+    }
+
+    await client.query('COMMIT');
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error(`[generateSemanaCompleta] DB error for semana ${semanaId}:`, err);
+  } finally {
+    client.release();
+  }
+}
+
+// ── Geração inicial — corre em background ────────────────────────────────
+async function runGeneratePlanoBackground(
+  userId: string,
+  planoId: string,
+  onboardingRow: OnboardingRow
+): Promise<void> {
+  const pool = getDbPool();
+
+  const markError = async (msg: string) => {
+    await pool
+      .query(`UPDATE planos_acao SET status = 'error', error_message = $1 WHERE id = $2`, [msg, planoId])
+      .catch(() => {});
+  };
 
   const { modelo_confirmado: diagnosticModel, json_completo: onboardingJson } = onboardingRow;
 
@@ -206,113 +427,123 @@ export async function generatePlano(userId: string): Promise<{ planoId: string }
   try {
     alma = loadAlmaContent();
   } catch (err) {
-    const detail = err instanceof Error ? err.message : String(err);
-    throw new AppError(`Conteúdo ALMA não encontrado: ${detail}`, 500, 'ALMA_LOAD_ERROR');
+    await markError(`Conteúdo ALMA não encontrado: ${err instanceof Error ? err.message : String(err)}`);
+    return;
   }
 
-  // Chamada Claude com Alma cacheada
   const systemBlocks: Anthropic.Messages.TextBlockParam[] = [
     { type: 'text', text: alma },
     { type: 'text', text: 'Você é o Jethro, mentor do Programa Bases do Negócio (PBN). Gere planos de acção estruturados, práticos e espirituais para empresários cristãos.' },
   ];
+  (systemBlocks[0] as unknown as { cache_control: { type: string } }).cache_control = { type: 'ephemeral' };
 
-  (systemBlocks[0] as unknown as { cache_control: { type: string } }).cache_control = {
-    type: 'ephemeral',
-  };
-
-  const prompt = buildPlanPrompt(diagnosticModel, onboardingJson as Record<string, unknown>);
+  const prompt = buildInitialPlanPrompt(diagnosticModel, onboardingJson as Record<string, unknown>);
 
   let response: Anthropic.Messages.Message;
   try {
     response = await getAnthropicClient().messages.create({
       model: MODEL,
-      max_tokens: MAX_TOKENS,
+      max_tokens: MAX_TOKENS_INITIAL,
       system: systemBlocks,
       messages: [{ role: 'user', content: prompt }],
     });
   } catch (err) {
-    const detail = err instanceof Error ? err.message : String(err);
-    throw new AppError(`Erro na chamada ao modelo de IA: ${detail}`, 502, 'AI_CALL_ERROR');
+    await markError(`Erro na chamada ao modelo de IA: ${err instanceof Error ? err.message : String(err)}`);
+    return;
   }
 
   const rawText = response.content[0]?.type === 'text' ? response.content[0].text : '';
 
-  let planoGerado: PlanoGerado;
+  let planoGerado: InitialPlanGerado;
   try {
-    // Remove possíveis blocos markdown se Claude os incluir
     const cleaned = rawText.replace(/^```json\s*/i, '').replace(/```\s*$/i, '').trim();
-    planoGerado = JSON.parse(cleaned) as PlanoGerado;
+    planoGerado = JSON.parse(cleaned) as InitialPlanGerado;
   } catch {
-    throw new AppError('Erro ao interpretar plano gerado.', 500, 'PLAN_PARSE_ERROR');
+    await markError('Erro ao interpretar resposta da IA (JSON inválido).');
+    return;
   }
 
-  if (!Array.isArray(planoGerado.semanas) || planoGerado.semanas.length !== 24) {
-    throw new AppError('Plano gerado inválido — número de semanas incorreto.', 500, 'PLAN_INVALID');
+  const s1 = planoGerado.semana_1;
+  const restantes = planoGerado.semanas_restantes;
+
+  if (!s1 || typeof s1.objetivo !== 'string') {
+    await markError('Semana 1 ausente ou inválida na resposta da IA.');
+    return;
+  }
+  if (!Array.isArray(restantes) || restantes.length !== 23) {
+    await markError(`Número inválido de semanas restantes: ${restantes?.length ?? 0} (esperado 23)`);
+    return;
   }
 
-  // Persiste o plano numa transação
   const client = await pool.connect();
-  let planoId: string;
-
   try {
     await client.query('BEGIN');
 
-    const planoResult = await client.query<{ id: string }>(
-      `INSERT INTO planos_acao (user_id, onboarding_id, modelo, versao_alma, documento_1, documento_2)
-       VALUES ($1, $2, $3, $4, $5::jsonb, '{}'::jsonb)
-       RETURNING id`,
-      [userId, onboardingRow.id, diagnosticModel, ALMA_VERSION, JSON.stringify(planoGerado)]
+    // Semana 1 — conteúdo completo
+    const s1Result = await client.query<{ id: string }>(
+      `INSERT INTO semanas (plano_id, numero, mes, fase, pilar, versiculo, objetivo, nome, por_que_importa, indicador_conclusao, resultado_esperado, conteudo_completo)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, true) RETURNING id`,
+      [
+        planoId, 1, 1,
+        FASES[1] ?? 'fundamento',
+        PILARES_POR_SEMANA[1] ?? 'P1',
+        s1.versiculo ?? null,
+        s1.objetivo,
+        s1.nome ?? null,
+        s1.por_que_importa ?? null,
+        s1.indicador_conclusao ?? null,
+        s1.resultado_esperado ?? null,
+      ]
+    );
+    const semana1Id = s1Result.rows[0]!.id;
+
+    for (const tarefa of s1.tarefas ?? []) {
+      await client.query(
+        `INSERT INTO tarefas_semana (semana_id, descricao, prioridade, acao_codigo)
+         VALUES ($1, $2, $3, $4)`,
+        [semana1Id, tarefa.descricao, tarefa.prioridade, null]
+      );
+    }
+
+    await client.query(
+      `INSERT INTO gates_semanais (user_id, semana_id, semana_numero, gate_status)
+       VALUES ($1, $2, $3, 'available')
+       ON CONFLICT (user_id, semana_id) DO NOTHING`,
+      [userId, semana1Id, 1]
     );
 
-    planoId = planoResult.rows[0]!.id;
-
-    for (const semana of planoGerado.semanas) {
-      const n = semana.numero;
+    // Semanas 2-24 — apenas esboço
+    for (const outline of restantes) {
+      const n = outline.numero;
       const fase = FASES[n] ?? 'fundamento';
       const pilar = PILARES_POR_SEMANA[n] ?? 'P1';
 
       const semanaResult = await client.query<{ id: string }>(
-        `INSERT INTO semanas (plano_id, numero, mes, fase, pilar, versiculo, objetivo)
-         VALUES ($1, $2, $3, $4, $5, $6, $7)
-         RETURNING id`,
-        [
-          planoId,
-          n,
-          Math.ceil(n / 4),
-          fase,
-          pilar,
-          semana.versiculo ?? null,
-          semana.objetivo,
-        ]
+        `INSERT INTO semanas (plano_id, numero, mes, fase, pilar, objetivo, nome, conteudo_completo)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, false) RETURNING id`,
+        [planoId, n, Math.ceil(n / 4), fase, pilar, outline.objetivo, outline.nome ?? null]
       );
 
       const semanaId = semanaResult.rows[0]!.id;
 
-      for (const tarefa of semana.tarefas) {
-        await client.query(
-          `INSERT INTO tarefas_semana (semana_id, descricao, prioridade, acao_codigo)
-           VALUES ($1, $2, $3, $4)`,
-          [semanaId, tarefa.descricao, tarefa.prioridade, null]
-        );
-      }
-
-      // Gate: semana 1 = available, resto = locked
       await client.query(
         `INSERT INTO gates_semanais (user_id, semana_id, semana_numero, gate_status)
-         VALUES ($1, $2, $3, $4)
+         VALUES ($1, $2, $3, 'locked')
          ON CONFLICT (user_id, semana_id) DO NOTHING`,
-        [userId, semanaId, n, n === 1 ? 'available' : 'locked']
+        [userId, semanaId, n]
       );
     }
+
+    await client.query(
+      `UPDATE planos_acao SET status = 'ready' WHERE id = $1`,
+      [planoId]
+    );
 
     await client.query('COMMIT');
   } catch (error) {
     await client.query('ROLLBACK');
-    const detail = error instanceof Error ? error.message : String(error);
-    throw new AppError(`Erro ao persistir plano: ${detail}`, 500, 'PLAN_PERSIST_ERROR');
+    await markError(`Erro ao persistir plano: ${error instanceof Error ? error.message : String(error)}`);
   } finally {
     client.release();
   }
-
-  return { planoId };
 }

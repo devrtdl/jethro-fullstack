@@ -70,7 +70,18 @@ type DiagnosticoApiResponse = {
 
 type PlanoGenerateResponse = {
   success: boolean;
-  data: { planoId: string };
+  data: { status: 'generating' | 'ready'; planoId: string };
+};
+
+export type PlanoStatus = {
+  status: 'not_started' | 'generating' | 'ready' | 'error';
+  planoId?: string;
+  error?: string;
+};
+
+type PlanoStatusResponse = {
+  success: boolean;
+  data: PlanoStatus;
 };
 
 export type PlanoSemanaCompleta = {
@@ -83,6 +94,7 @@ export type PlanoSemanaCompleta = {
   gate_status: 'locked' | 'available' | 'completed' | 'overdue';
   indicador_conclusao: string | null;
   resultado_esperado: string | null;
+  conteudo_completo: boolean;
   tarefas: { descricao: string; prioridade: string; completada: boolean }[];
 };
 
@@ -113,13 +125,19 @@ export const homeService = {
     return response.data;
   },
 
-  async generatePlano(): Promise<{ planoId: string }> {
+  async generatePlano(): Promise<{ status: 'generating' | 'ready'; planoId: string }> {
     const headers = await getAuthHeaders();
     const response = await apiClient.post<PlanoGenerateResponse>(
       '/plano/generate',
       undefined,
-      { headers, timeoutMs: 120_000 }
+      { headers, timeoutMs: 15_000 }
     );
+    return response.data;
+  },
+
+  async getPlanoStatus(): Promise<PlanoStatus> {
+    const headers = await getAuthHeaders();
+    const response = await apiClient.get<PlanoStatusResponse>('/plano/status', { headers });
     return response.data;
   },
 

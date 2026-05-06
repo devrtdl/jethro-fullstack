@@ -3,6 +3,7 @@ import type { FastifyInstance } from 'fastify';
 import { successResponse } from '../lib/api-response.js';
 import { getDbPool } from '../lib/db.js';
 import { userAuthPreHandler } from '../lib/user-auth.js';
+import { generateSemanaCompleta } from '../domain/plano/service.js';
 
 export async function registerUserRoutes(app: FastifyInstance) {
   /**
@@ -23,7 +24,7 @@ export async function registerUserRoutes(app: FastifyInstance) {
         `SELECT id FROM onboarding_sessions WHERE user_id = $1 AND status = 'completed' LIMIT 1`,
         [userId]
       ),
-      pool.query('SELECT id FROM planos_acao WHERE user_id = $1 LIMIT 1', [userId]),
+      pool.query(`SELECT id FROM planos_acao WHERE user_id = $1 AND status = 'ready' LIMIT 1`, [userId]),
     ]);
 
     return successResponse({
@@ -380,6 +381,13 @@ export async function registerUserRoutes(app: FastifyInstance) {
         throw err;
       } finally {
         client.release();
+      }
+
+      // Dispara geração do conteúdo completo da próxima semana em background
+      if (nextRow) {
+        void generateSemanaCompleta(nextRow.semana_id).catch((err) =>
+          console.error('[gate/advance] generateSemanaCompleta error:', err)
+        );
       }
 
       return successResponse({

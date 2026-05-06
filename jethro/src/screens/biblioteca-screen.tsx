@@ -58,12 +58,14 @@ function prioridadeColor(p: string) {
 function SemanaCard({ semana }: { semana: PlanoSemanaCompleta }) {
   const [expanded, setExpanded] = useState(false);
   const isLocked = semana.gate_status === 'locked';
+  const isGenerating = !isLocked && !semana.conteudo_completo;
+  const canExpand = !isLocked && semana.conteudo_completo;
 
   return (
     <View style={[styles.semanaCard, isLocked && styles.semanaCardLocked]}>
       <Pressable
         style={styles.semanaHeader}
-        onPress={() => !isLocked && setExpanded((v) => !v)}
+        onPress={() => canExpand && setExpanded((v) => !v)}
       >
         <View style={styles.semanaNumWrap}>
           <Text style={[styles.semanaGateIcon, { color: gateColor(semana.gate_status) }]}>
@@ -77,13 +79,20 @@ function SemanaCard({ semana }: { semana: PlanoSemanaCompleta }) {
           </Text>
           <Text style={styles.semanaFase}>{faseLabel(semana.fase)}</Text>
         </View>
-        {!isLocked && (
+        {canExpand && (
           <Text style={[styles.chevron, expanded && styles.chevronOpen]}>›</Text>
         )}
+        {isGenerating && <Text style={styles.generatingBadge}>⟳</Text>}
         {isLocked && <Text style={styles.lockIcon}>⊘</Text>}
       </Pressable>
 
-      {expanded && (
+      {isGenerating && (
+        <View style={styles.generatingRow}>
+          <Text style={styles.generatingText}>A preparar o conteúdo desta semana…</Text>
+        </View>
+      )}
+
+      {expanded && semana.conteudo_completo && (
         <View style={styles.semanaDetail}>
           {/* Objetivo */}
           {semana.nome && (
@@ -305,7 +314,13 @@ const styles = StyleSheet.create({
   textMuted:  { color: JethroColors.muted },
   chevron:    { fontSize: 20, color: JethroColors.muted },
   chevronOpen:{ transform: [{ rotate: '90deg' }] },
-  lockIcon:   { fontSize: 14, color: JethroColors.muted },
+  lockIcon:        { fontSize: 14, color: JethroColors.muted },
+  generatingBadge: { fontSize: 14, color: JethroColors.gold },
+  generatingRow:   {
+    borderTopWidth: 1, borderTopColor: JethroColors.navyDeep,
+    paddingHorizontal: 12, paddingVertical: 10,
+  },
+  generatingText:  { fontSize: 12, color: JethroColors.gold, fontStyle: 'italic' },
 
   semanaDetail: {
     borderTopWidth: 1, borderTopColor: JethroColors.navyDeep,
