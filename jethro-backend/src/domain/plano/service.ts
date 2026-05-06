@@ -5,7 +5,7 @@ import { getAnthropicClient } from '../../lib/anthropic.js';
 import { loadAlmaContent } from '../../lib/alma-loader.js';
 import { AppError } from '../../lib/errors.js';
 
-const MODEL = 'claude-sonnet-4-6';
+const MODEL = 'claude-sonnet-4-20250514';
 const MAX_TOKENS_INITIAL = 8000;
 const MAX_TOKENS_SEMANA = 4000;
 const ALMA_VERSION = 'v5.14';
