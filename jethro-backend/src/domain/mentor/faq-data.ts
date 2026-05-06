@@ -21,7 +21,7 @@ export const FAQ_GLOBAL: FaqItem[] = [
   },
   {
     q: 'O que é o plano de 24 semanas',
-    a: 'É o seu roteiro de transformação empresarial dividido em 4 fases: Fundação (S1–S6), Estrutura (S7–S12), Escala (S13–S18) e Legado (S19–S24). Cada semana tem ações concretas, uma âncora bíblica e um material técnico de referência. Você avança semana a semana com acompanhamento do Jethro.',
+    a: 'É o seu roteiro de transformação empresarial dividido em 5 blocos: Fundamento (S1-S5), Estrutura (S6-S10), Controlo (S11-S15), Crescimento (S16-S20) e Legado (S21-S24). Cada semana tem ações concretas, uma âncora bíblica e um material técnico de referência. Você avança semana a semana com acompanhamento do Jethro.',
   },
   {
     q: 'O que é o Gate de Avanço',
@@ -307,9 +307,10 @@ export const SUGESTOES_CHAT = [
 ];
 
 export function derivarFase(semana: number): string {
-  if (semana <= 6) return 'Fundação';
-  if (semana <= 12) return 'Estrutura';
-  if (semana <= 18) return 'Escala';
+  if (semana <= 5) return 'Fundamento';
+  if (semana <= 10) return 'Estrutura';
+  if (semana <= 15) return 'Controlo';
+  if (semana <= 20) return 'Crescimento';
   return 'Legado';
 }
 

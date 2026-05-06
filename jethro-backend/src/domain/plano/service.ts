@@ -8,15 +8,39 @@ import { AppError } from '../../lib/errors.js';
 const MODEL = 'claude-sonnet-4-6';
 const MAX_TOKENS_INITIAL = 8000;
 const MAX_TOKENS_SEMANA = 4000;
-const ALMA_VERSION = 'v5.14';
+const ALMA_VERSION = 'v5.14-doc5-v2';
+const INPUT_COST_PER_MILLION_USD = 3;
+const OUTPUT_COST_PER_MILLION_USD = 15;
 
 const FASES: Record<number, string> = {
   1: 'fundamento', 2: 'fundamento', 3: 'fundamento', 4: 'fundamento', 5: 'fundamento',
   6: 'estrutura', 7: 'estrutura', 8: 'estrutura', 9: 'estrutura', 10: 'estrutura',
-  11: 'escala', 12: 'escala', 13: 'escala', 14: 'escala', 15: 'escala',
-  16: 'escala', 17: 'escala', 18: 'escala', 19: 'escala', 20: 'escala',
+  11: 'controlo', 12: 'controlo', 13: 'controlo', 14: 'controlo', 15: 'controlo',
+  16: 'crescimento', 17: 'crescimento', 18: 'crescimento', 19: 'crescimento', 20: 'crescimento',
   21: 'legado', 22: 'legado', 23: 'legado', 24: 'legado',
 };
+
+const TAGS_POR_SEMANA: Record<number, string> = {
+  1: 'Fundamento', 2: 'Fundamento', 3: 'Fundamento', 4: 'Fundamento', 5: 'Fundamento',
+  6: 'Estrutura', 7: 'Estrutura', 8: 'Estrutura', 9: 'Estrutura', 10: 'Estrutura',
+  11: 'Controlo', 12: 'Controlo', 13: 'Controlo', 14: 'Controlo', 15: 'Controlo',
+  16: 'Crescimento', 17: 'Crescimento', 18: 'Crescimento', 19: 'Crescimento', 20: 'Crescimento',
+  21: 'Legado', 22: 'Legado', 23: 'Legado', 24: 'Legado',
+};
+
+const BLOCOS_POR_MODELO: Record<string, string[]> = {
+  D: ['Estancar e Diagnosticar', 'Reorganizar Finanças', 'Controlar e Corrigir', 'Reconstruir com Base', 'Sustentabilidade e Governo'],
+  E: ['Definir e Validar', 'Construir a Oferta', 'Primeiros Clientes', 'Escalar com Método', 'Consistência e Governo'],
+  C: ['Diagnóstico de Valor', 'Posicionamento e Preço Justo', 'Controlo e Margem Real', 'Crescimento com Preço Correto', 'Autoridade e Legado'],
+  F: ['Diagnóstico de Canal', 'Estrutura Comercial', 'Diversificação e Controlo', 'Motor de Aquisição', 'Governo e Multiplicação'],
+  G: ['Diagnóstico Operacional', 'Processos e Delegação', 'Controlo e Padrão', 'Escala com Sistema', 'Governo e Autonomia'],
+  H: ['Mapa de Centralização', 'Delegação Estruturada', 'Liderança e Indicadores', 'Crescimento sem Gargalo', 'Governo Pessoal e Legado'],
+  B: ['Diagnóstico do Platô', 'Destravar o Crescimento', 'Novos Canais e Controlo', 'Expansão com Base', 'Consolidação e Legado'],
+  X: ['Inventário de Alavancas', 'Blindagem Operacional', 'Escala Controlada', 'Multiplicação com Sistema', 'Governo e Próximo Nível'],
+  A: ['Clareza e Prioridade', 'Organização Mínima', 'Controlo e Direção', 'Crescimento com Foco', 'Governo e Propósito'],
+};
+
+const BLOCOS_PADRAO = BLOCOS_POR_MODELO.A as [string, string, string, string, string];
 
 const PILARES_POR_SEMANA: Record<number, string> = {
   1: 'P1', 2: 'P1', 3: 'P2', 4: 'P2', 5: 'P3', 6: 'P3',
@@ -27,12 +51,16 @@ const PILARES_POR_SEMANA: Record<number, string> = {
 
 type SemanaOutline = {
   numero: number;
+  bloco?: string;
+  tag?: string;
   nome: string;
   objetivo: string;
 };
 
 type SemanaCompleta = {
   numero: number;
+  bloco?: string;
+  tag?: string;
   nome: string;
   objetivo: string;
   por_que_importa: string;
@@ -40,6 +68,7 @@ type SemanaCompleta = {
   tarefas: Array<{
     descricao: string;
     prioridade: 'baixa' | 'media' | 'alta' | 'critica';
+    recurso_biblioteca?: string | null;
   }>;
   indicador_conclusao: string;
   resultado_esperado: string;
@@ -52,48 +81,112 @@ type InitialPlanGerado = {
 
 type OnboardingRow = { id: string; modelo_confirmado: string; json_completo: Record<string, unknown> };
 
-function buildStudentContext(diagnosticModel: string, j: Record<string, unknown>): string {
-  const segmento     = j['area_negocio']            ?? 'Não informado';
-  const equipaTotal  = j['equipa']                  ?? 'Não informado';
-  const equipaDet    = j['equipa_detalhada'];
-  const equipaPessoas = Array.isArray(equipaDet) && equipaDet.length > 0
-    ? (equipaDet as Array<{ nome?: string; funcao?: string }>)
-        .map((p) => p.nome ? `${p.nome} (${p.funcao})` : p.funcao ?? '')
-        .filter(Boolean)
-        .join(', ')
-    : null;
-  const equipa = equipaPessoas
-    ? `${String(equipaTotal)} pessoas — ${equipaPessoas}`
-    : String(equipaTotal);
-  const tempoNeg     = j['tempo_negocio']           ?? 'Não informado';
-  const meta         = j['meta_6_meses']            ?? 'Não informado';
-  const problema     = j['maior_problema_percebido'] ?? '';
-  const jaTentou     = j['ja_tentou']               ?? '';
-  const impacto      = j['impacto_pessoal']         ?? '';
-  const dores        = [problema, jaTentou, impacto].filter(Boolean).join(' | ') || 'Não informado';
-  const ticket       = j['ticket_medio']            ? `Ticket médio: R$${j['ticket_medio']}` : '';
-  const clientes     = j['clientes_ativos_total']   ? `Clientes activos: ${j['clientes_ativos_total']}` : '';
-  const custoFixo    = j['custo_fixo_mensal']       ? `Custo fixo mensal: R$${j['custo_fixo_mensal']}` : '';
-  const margem       = j['margem_estimada_pct']     ? `Margem estimada: ${j['margem_estimada_pct']}%` : '';
-  const faturamento  = [ticket, clientes, custoFixo, margem].filter(Boolean).join(' | ') || 'Não informado';
-  const canal_motor_labels: Record<string, string> = {
-    A: 'Redes sociais / digital', B: 'Indicação pessoal', C: 'Vários canais',
-  };
-  const canal_raw    = String(j['canal_principal'] ?? '');
-  const canal        = canal_motor_labels[canal_raw] ?? canal_raw;
-  const objeccao     = j['objeccao_principal']      ?? '';
-  const observacoes  = [canal && `Canal principal: ${canal}`, objeccao && `Objecção principal: ${objeccao}`]
-    .filter(Boolean).join(' | ') || 'Não informado';
+async function recordAiUsage(
+  userId: string,
+  planoId: string,
+  promptTipo: 'A' | 'B',
+  semanaNumero: number | null,
+  response: Anthropic.Messages.Message
+): Promise<void> {
+  const usage = response.usage;
+  const inputTokens = usage.input_tokens ?? 0;
+  const outputTokens = usage.output_tokens ?? 0;
+  const cacheReadTokens = usage.cache_read_input_tokens ?? 0;
+  const cacheCreationTokens = usage.cache_creation_input_tokens ?? 0;
+  const custoEstimado =
+    ((inputTokens + cacheCreationTokens) / 1_000_000) * INPUT_COST_PER_MILLION_USD +
+    (outputTokens / 1_000_000) * OUTPUT_COST_PER_MILLION_USD;
 
-  return `DADOS DO ALUNO:
-Segmento: ${segmento}
-Faturamento actual: ${faturamento}
-Tamanho da equipa: ${equipa}
-Momento do negócio: ${tempoNeg}
-Principais dores: ${dores}
-Objetivos: ${meta}
-Modelo de diagnóstico: ${diagnosticModel}
-Observações relevantes: ${observacoes}`;
+  await getDbPool()
+    .query(
+      `INSERT INTO plano_ai_usage
+         (user_id, plano_id, modelo, prompt_tipo, semana_numero, tokens_entrada,
+          tokens_saida, cache_read_input_tokens, cache_creation_input_tokens, custo_estimado_usd)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+      [
+        userId,
+        planoId,
+        MODEL,
+        promptTipo,
+        semanaNumero,
+        inputTokens,
+        outputTokens,
+        cacheReadTokens,
+        cacheCreationTokens,
+        custoEstimado,
+      ]
+    )
+    .catch((err) => {
+      console.error('[recordAiUsage] failed:', err);
+    });
+}
+
+function buildStudentContext(diagnosticModel: string, j: Record<string, unknown>): string {
+  return JSON.stringify(
+    {
+      modelo_diagnostico: diagnosticModel,
+      ...j,
+    },
+    null,
+    2
+  );
+}
+
+function blocoIndexForSemana(numero: number): number {
+  if (numero <= 5) return 0;
+  if (numero <= 10) return 1;
+  if (numero <= 15) return 2;
+  if (numero <= 20) return 3;
+  return 4;
+}
+
+function blocoForSemana(modelo: string, numero: number): string {
+  const blocos = (BLOCOS_POR_MODELO[modelo] ?? BLOCOS_PADRAO) as [string, string, string, string, string];
+  return blocos[blocoIndexForSemana(numero)] ?? BLOCOS_PADRAO[0];
+}
+
+function tagForSemana(numero: number): string {
+  return TAGS_POR_SEMANA[numero] ?? 'Fundamento';
+}
+
+function faseFromTag(tag: string | undefined, numero: number): string {
+  const normalized = String(tag ?? tagForSemana(numero))
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .toLowerCase();
+
+  if (normalized.includes('estrutura')) return 'estrutura';
+  if (normalized.includes('controlo') || normalized.includes('controle')) return 'controlo';
+  if (normalized.includes('crescimento')) return 'crescimento';
+  if (normalized.includes('legado')) return 'legado';
+  if (normalized.includes('escala')) return numero >= 16 && numero <= 20 ? 'crescimento' : 'controlo';
+  return FASES[numero] ?? 'fundamento';
+}
+
+function buildPlanSystemPrompt(): string {
+  return `IDENTIDADE E PAPEL:
+Você é o Jethro, mentor empresarial cristão criado pelo Rogério Teixeira com base no Método PBN (Princípios Bíblicos para Negócios). Você não é um assistente genérico. Você é o Rogério: fala como ele, pensa como ele, prescreve como ele. O tom é de mentor sênior: direto, cuidador, espiritual, sem rodeios e sem motivação vazia. A Palavra de Deus entra como sabedoria prática, nunca como julgamento moral.
+
+REGRAS ABSOLUTAS:
+1. Nunca inventar números. Use sempre o faturamento_medio_3m declarado no onboarding. Nunca recalcule faturamento multiplicando ticket_medio por clientes_ativos_total. Se faturamento_medio_3m = 0, adapte tarefas para registrar investimento e listar interessados.
+2. Nunca use "aluno". Use sempre o nome do empreendedor ou "empreendedor".
+3. Versículos fixos por bloco: Fundamento/S1-S5 = Provérbios 27:23; Estrutura/S6-S10 = Êxodo 18:17-18; Controlo/S11-S15 = Salmo 119:105; Crescimento/S16-S20 = Lucas 16:10; Legado/S21-S24 = Mateus 25:21.
+4. Tags por bloco: S1-S5 = Fundamento; S6-S10 = Estrutura; S11-S15 = Controlo; S16-S20 = Crescimento; S21-S24 = Legado. Nunca use "Escala" para todas.
+5. Regras condicionais obrigatórias: dividas_fornecedores > 0 ou dividas > 0 gera renegociação em S2/S3; inadimplencia = frequente gera cobrança em S2/S3; dependencia_plataforma alta gera risco em S1 e diversificação antes da S10; Q18 modelo D/E + empreendedor solo gera carga horária antes do bloco 4; concentracao_receita alta gera mitigação em S3/S4.
+6. S1 específica por modelo: D = sangramento; E = ponto de partida; C = gap de preço; F = dependência de canal; G = dependência operacional; H = centralização; B = platô; X = alavancas; A = priorização de caos.
+7. Use os nomes de blocos personalizados por modelo informados no prompt do usuário.
+8. Se ticket_medio = 0, não use como base de cálculo. A tarefa deve definir quanto cobrar pelo primeiro pacote.
+9. Referencie materiais da Biblioteca no campo recurso_biblioteca em cada tarefa, usando T01-T12 ou materiais específicos do modelo quando fizer sentido.
+
+TOM:
+Direto, cuidador, espiritual. Use "a gente" nas partes conversacionais. Celebre antes de corrigir. Números primeiro.`;
+}
+
+function buildRemainingWeeksExample(diagnosticModel: string): string {
+  return Array.from({ length: 23 }, (_, index) => {
+    const numero = index + 2;
+    return `    { "numero": ${numero}, "bloco": "${blocoForSemana(diagnosticModel, numero)}", "tag": "${tagForSemana(numero)}", "nome": "Nome da semana ${numero}", "objetivo": "Objetivo da semana ${numero}" }`;
+  }).join(',\n');
 }
 
 function buildInitialPlanPrompt(
@@ -101,83 +194,47 @@ function buildInitialPlanPrompt(
   onboardingJson: Record<string, unknown>
 ): string {
   const ctx = buildStudentContext(diagnosticModel, onboardingJson);
+  const blocos = (BLOCOS_POR_MODELO[diagnosticModel] ?? BLOCOS_PADRAO) as [string, string, string, string, string];
 
   return `TAREFA:
-Criar um Plano de Ação Estratégico de 24 semanas para um aluno de mentoria empresarial, com base no diagnóstico realizado, nas informações do negócio, nos problemas declarados e no contexto real do aluno.
+Gerar a estrutura completa do Plano de Ação de 24 semanas com base no diagnóstico e onboarding do empreendedor. A Semana 1 deve ser gerada completa. As Semanas 2 a 24 devem ser geradas apenas com número, bloco, tag, nome da semana e objetivo estratégico.
 
+CONTEXTO DO EMPREENDEDOR:
 ${ctx}
 
-OBJETIVO DO PLANO:
-O plano não deve ser motivacional, genérico ou teórico. Ele deve funcionar como um mapa prático de transformação do negócio e da liderança do aluno, conduzindo-o de desorganização, inconsistência ou estagnação para clareza, estrutura, execução, crescimento e governo.
-
-CONTEXTO DE ENTRADA:
-Considere obrigatoriamente os seguintes elementos para personalizar o plano:
-- Modelo de diagnóstico do aluno
-- Problemas declarados
-- Momento actual do negócio
-- Faturamento/receita
-- Equipa actual
-- Gargalos operacionais, comerciais, financeiros ou de liderança
-- Objectivos desejados pelo aluno
-- Grau de maturidade do negócio
-- Capacidade real de execução do aluno
-
-LÓGICA DA JORNADA DAS 24 SEMANAS:
-
-BLOCO 1 — DIRECÇÃO E FUNDAMENTO (Semanas 1 a 5)
-Foco: clareza do momento actual, diagnóstico, visão, posicionamento, propósito, prioridades, primeiros ajustes urgentes
-
-BLOCO 2 — ESTRUTURA E ORGANIZAÇÃO (Semanas 6 a 10)
-Foco: organização da operação, processos básicos, rotina mínima de gestão, papéis e responsabilidades, agenda do líder
-
-BLOCO 3 — CONTROLO E CORRECÇÃO (Semanas 11 a 15)
-Foco: clareza financeira, indicadores, análise de números, identificação de desperdícios, correcções comerciais/operacionais, decisão baseada em dados
-
-BLOCO 4 — CRESCIMENTO E MULTIPLICAÇÃO (Semanas 16 a 20)
-Foco: aumento de capacidade, melhoria comercial, produtividade, expansão com base sólida, rentabilidade, experiência do cliente
-
-BLOCO 5 — GOVERNO, CONSOLIDAÇÃO E LEGADO (Semanas 21 a 24)
-Foco: liderança madura, cultura, consistência, autonomia da equipa, visão de longo prazo, sustentabilidade, impacto e legado
-
-REGRAS DE PROGRESSÃO:
-- O plano deve mostrar progressão lógica entre semanas — uma semana prepara a próxima
-- Antes de escalar, estruture. Antes de estruturar, clarifique. Antes de delegar, organize. Antes de crescer, controle
-
-REGRAS DE QUALIDADE:
-- O plano deve parecer feito sob medida para este aluno, não um modelo pronto reciclado
-- Não use linguagem vaga, abstracta ou excessivamente espiritualizada
-- O tom deve ser estratégico, claro, firme e aplicável
-- As tarefas devem respeitar a realidade e o tamanho actual do negócio
-- O plano deve corrigir causas-raiz, não apenas sintomas
+BLOCOS PERSONALIZADOS DO MODELO ${diagnosticModel}:
+1. ${blocos[0]} (S1-S5, tag Fundamento)
+2. ${blocos[1]} (S6-S10, tag Estrutura)
+3. ${blocos[2]} (S11-S15, tag Controlo)
+4. ${blocos[3]} (S16-S20, tag Crescimento)
+5. ${blocos[4]} (S21-S24, tag Legado)
 
 FORMATO DE SAÍDA (JSON puro, sem markdown, sem texto antes ou depois):
-- Semana 1: conteúdo COMPLETO (todos os campos abaixo)
-- Semanas 2 a 24: apenas { numero, nome, objetivo }
-
 {
   "semana_1": {
     "numero": 1,
+    "bloco": "${blocoForSemana(diagnosticModel, 1)}",
+    "tag": "Fundamento",
     "nome": "Nome da semana",
     "objetivo": "1 frase estratégica e específica",
     "por_que_importa": "Parágrafo explicando a lógica estratégica desta etapa",
-    "versiculo": "Livro X:Y — texto do versículo",
+    "versiculo": "Provérbios 27:23 — texto do versículo",
     "tarefas": [
-      { "descricao": "Tarefa concreta e mensurável", "prioridade": "alta" }
+      { "descricao": "Tarefa concreta e mensurável", "prioridade": "alta", "recurso_biblioteca": "T01" }
     ],
     "indicador_conclusao": "Como saber praticamente se a semana foi cumprida",
     "resultado_esperado": "Ganho concreto gerado ao final da execução"
   },
   "semanas_restantes": [
-    { "numero": 2, "nome": "Nome da semana 2", "objetivo": "Objectivo da semana 2" },
-    { "numero": 3, "nome": "Nome da semana 3", "objetivo": "Objectivo da semana 3" },
-    ...
-    { "numero": 24, "nome": "Nome da semana 24", "objetivo": "Objectivo da semana 24" }
+${buildRemainingWeeksExample(diagnosticModel)}
   ]
 }`;
 }
 
 function buildSemanaFullPrompt(
   semanaNumero: number,
+  semanaBloco: string,
+  semanaTag: string,
   semanaNome: string,
   semanaObjetivo: string,
   diagnosticModel: string,
@@ -187,38 +244,50 @@ function buildSemanaFullPrompt(
   const ctx = buildStudentContext(diagnosticModel, onboardingJson);
 
   const outlineText = todasSemanas
-    .map((s) => `Semana ${s.numero}: "${s.nome}" — ${s.objetivo}`)
+    .map((s) => `Semana ${s.numero}: bloco="${s.bloco ?? blocoForSemana(diagnosticModel, s.numero)}"; tag="${s.tag ?? tagForSemana(s.numero)}"; nome="${s.nome}" — ${s.objetivo}`)
     .join('\n');
+  const semana = {
+    numero: semanaNumero,
+    bloco: semanaBloco,
+    tag: semanaTag,
+    nome: semanaNome,
+    objetivo: semanaObjetivo,
+  };
 
   return `TAREFA:
-Expandir a Semana ${semanaNumero} do Plano de Ação Estratégico de 24 semanas do aluno abaixo.
+Gerar o conteúdo completo de UMA semana do Plano de Ação.
 
+CONTEXTO DO EMPREENDEDOR:
 ${ctx}
 
 VISÃO GERAL DO PLANO (24 semanas):
 ${outlineText}
 
-SEMANA A EXPANDIR: Semana ${semanaNumero} — "${semanaNome}"
-Objectivo: ${semanaObjetivo}
+SEMANA A GERAR:
+${JSON.stringify(semana, null, 2)}
 
-Gera o conteúdo completo desta semana, mantendo coerência com o contexto do aluno e com as semanas anteriores e seguintes do plano.
+Gere o conteúdo completo desta semana, mantendo coerência com o contexto do empreendedor e com as semanas anteriores e seguintes do plano.
 
 REGRAS:
-- Tarefas concretas, aplicáveis e mensuráveis (2 a 4 tarefas)
-- Prioridades: baixa / media / alta / critica
-- Versículo bíblico que reforce a direcção estratégica desta etapa
-- Indicador de conclusão prático e verificável
-- Resultado esperado em 1 frase com ganho concreto
+1. Use dados declarados: faturamento_medio_3m, custo_fixo_mensal, ticket_medio, clientes_ativos_total. Se faturamento_medio_3m = 0, adapte para pré-receita.
+2. Use nome do empreendedor, nunca "aluno".
+3. Use o versículo fixo do bloco: Fundamento = Provérbios 27:23; Estrutura = Êxodo 18:17-18; Controlo = Salmo 119:105; Crescimento = Lucas 16:10; Legado = Mateus 25:21.
+4. Respeite dados condicionais: dívidas, inadimplência, plataforma, carga horária e concentração.
+5. Referencie materiais da Biblioteca no campo recurso_biblioteca.
+6. Tarefas concretas, aplicáveis e mensuráveis (2 a 4 tarefas). Prioridades: baixa / media / alta / critica.
+7. Celebre progresso antes de prescrever.
 
 FORMATO DE SAÍDA (JSON puro, sem markdown, sem texto antes ou depois):
 {
   "numero": ${semanaNumero},
+  "bloco": "${semana.bloco}",
+  "tag": "${semana.tag}",
   "nome": "nome da semana",
-  "objetivo": "objectivo da semana",
+  "objetivo": "objetivo da semana",
   "por_que_importa": "Parágrafo explicando a lógica estratégica desta etapa",
-  "versiculo": "Livro X:Y — texto do versículo",
+  "versiculo": "Livro X:Y — texto do versículo fixo do bloco",
   "tarefas": [
-    { "descricao": "Tarefa concreta e mensurável", "prioridade": "alta" }
+    { "descricao": "Tarefa concreta e mensurável", "prioridade": "alta", "recurso_biblioteca": "T01" }
   ],
   "indicador_conclusao": "Como saber praticamente se a semana foi cumprida",
   "resultado_esperado": "Ganho concreto gerado ao final da execução"
@@ -315,8 +384,8 @@ export async function generateSemanaCompleta(semanaId: string): Promise<void> {
   const pool = getDbPool();
 
   const semanaRow = await pool
-    .query<{ numero: number; plano_id: string; nome: string | null; objetivo: string }>(
-      `SELECT numero, plano_id, nome, objetivo FROM semanas WHERE id = $1`,
+    .query<{ numero: number; plano_id: string; bloco: string | null; tag: string | null; nome: string | null; objetivo: string }>(
+      `SELECT numero, plano_id, bloco, tag, nome, objetivo FROM semanas WHERE id = $1`,
       [semanaId]
     )
     .then((r) => r.rows[0] ?? null);
@@ -324,8 +393,8 @@ export async function generateSemanaCompleta(semanaId: string): Promise<void> {
   if (!semanaRow) return;
 
   const planoRow = await pool
-    .query<{ modelo: string; onboarding_id: string }>(
-      `SELECT modelo, onboarding_id FROM planos_acao WHERE id = $1`,
+    .query<{ user_id: string; modelo: string; onboarding_id: string }>(
+      `SELECT user_id, modelo, onboarding_id FROM planos_acao WHERE id = $1`,
       [semanaRow.plano_id]
     )
     .then((r) => r.rows[0] ?? null);
@@ -342,8 +411,8 @@ export async function generateSemanaCompleta(semanaId: string): Promise<void> {
   if (!onbRow) return;
 
   const todasSemanas = await pool
-    .query<{ numero: number; nome: string | null; objetivo: string }>(
-      `SELECT numero, nome, objetivo FROM semanas WHERE plano_id = $1 ORDER BY numero ASC`,
+    .query<{ numero: number; bloco: string | null; tag: string | null; nome: string | null; objetivo: string }>(
+      `SELECT numero, bloco, tag, nome, objetivo FROM semanas WHERE plano_id = $1 ORDER BY numero ASC`,
       [semanaRow.plano_id]
     )
     .then((r) => r.rows);
@@ -358,18 +427,22 @@ export async function generateSemanaCompleta(semanaId: string): Promise<void> {
 
   const systemBlocks: Anthropic.Messages.TextBlockParam[] = [
     { type: 'text', text: alma },
-    { type: 'text', text: 'Você é o Jethro, mentor do Programa Bases do Negócio (PBN). Gere conteúdo estratégico, prático e espiritual para empresários cristãos.' },
+    { type: 'text', text: buildPlanSystemPrompt() },
   ];
   (systemBlocks[0] as unknown as { cache_control: { type: string } }).cache_control = { type: 'ephemeral' };
 
   const outlines: SemanaOutline[] = todasSemanas.map((s) => ({
     numero: s.numero,
+    bloco: s.bloco ?? blocoForSemana(planoRow.modelo, s.numero),
+    tag: s.tag ?? tagForSemana(s.numero),
     nome: s.nome ?? '',
     objetivo: s.objetivo,
   }));
 
   const prompt = buildSemanaFullPrompt(
     semanaRow.numero,
+    semanaRow.bloco ?? blocoForSemana(planoRow.modelo, semanaRow.numero),
+    semanaRow.tag ?? tagForSemana(semanaRow.numero),
     semanaRow.nome ?? '',
     semanaRow.objetivo,
     planoRow.modelo,
@@ -389,6 +462,7 @@ export async function generateSemanaCompleta(semanaId: string): Promise<void> {
     console.error(`[generateSemanaCompleta] AI call error for semana ${semanaId}:`, err);
     return;
   }
+  await recordAiUsage(planoRow.user_id, semanaRow.plano_id, 'B', semanaRow.numero, response);
 
   const rawText = response.content[0]?.type === 'text' ? response.content[0].text : '';
 
@@ -407,9 +481,13 @@ export async function generateSemanaCompleta(semanaId: string): Promise<void> {
 
     await client.query(
       `UPDATE semanas
-       SET por_que_importa = $1, versiculo = $2, indicador_conclusao = $3, resultado_esperado = $4, conteudo_completo = true
-       WHERE id = $5`,
+       SET bloco = $1, tag = $2, fase = $3, por_que_importa = $4, versiculo = $5,
+           indicador_conclusao = $6, resultado_esperado = $7, conteudo_completo = true
+       WHERE id = $8`,
       [
+        semanaGerada.bloco ?? semanaRow.bloco ?? blocoForSemana(planoRow.modelo, semanaRow.numero),
+        semanaGerada.tag ?? semanaRow.tag ?? tagForSemana(semanaRow.numero),
+        faseFromTag(semanaGerada.tag ?? semanaRow.tag ?? undefined, semanaRow.numero),
         semanaGerada.por_que_importa ?? null,
         semanaGerada.versiculo ?? null,
         semanaGerada.indicador_conclusao ?? null,
@@ -422,9 +500,9 @@ export async function generateSemanaCompleta(semanaId: string): Promise<void> {
 
     for (const tarefa of semanaGerada.tarefas ?? []) {
       await client.query(
-        `INSERT INTO tarefas_semana (semana_id, descricao, prioridade, acao_codigo)
-         VALUES ($1, $2, $3, $4)`,
-        [semanaId, tarefa.descricao, tarefa.prioridade, null]
+        `INSERT INTO tarefas_semana (semana_id, descricao, prioridade, acao_codigo, recurso_biblioteca)
+         VALUES ($1, $2, $3, $4, $5)`,
+        [semanaId, tarefa.descricao, tarefa.prioridade, null, tarefa.recurso_biblioteca ?? null]
       );
     }
 
@@ -463,7 +541,7 @@ async function runGeneratePlanoBackground(
 
   const systemBlocks: Anthropic.Messages.TextBlockParam[] = [
     { type: 'text', text: alma },
-    { type: 'text', text: 'Você é o Jethro, mentor do Programa Bases do Negócio (PBN). Gere planos de acção estruturados, práticos e espirituais para empresários cristãos.' },
+    { type: 'text', text: buildPlanSystemPrompt() },
   ];
   (systemBlocks[0] as unknown as { cache_control: { type: string } }).cache_control = { type: 'ephemeral' };
 
@@ -481,6 +559,7 @@ async function runGeneratePlanoBackground(
     await markError(`Erro na chamada ao modelo de IA: ${err instanceof Error ? err.message : String(err)}`);
     return;
   }
+  await recordAiUsage(userId, planoId, 'A', null, response);
 
   const rawText = response.content[0]?.type === 'text' ? response.content[0].text : '';
 
@@ -511,12 +590,14 @@ async function runGeneratePlanoBackground(
 
     // Semana 1 — conteúdo completo
     const s1Result = await client.query<{ id: string }>(
-      `INSERT INTO semanas (plano_id, numero, mes, fase, pilar, versiculo, objetivo, nome, por_que_importa, indicador_conclusao, resultado_esperado, conteudo_completo)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, true) RETURNING id`,
+      `INSERT INTO semanas (plano_id, numero, mes, fase, pilar, bloco, tag, versiculo, objetivo, nome, por_que_importa, indicador_conclusao, resultado_esperado, conteudo_completo)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, true) RETURNING id`,
       [
         planoId, 1, 1,
-        FASES[1] ?? 'fundamento',
+        faseFromTag(s1.tag, 1),
         PILARES_POR_SEMANA[1] ?? 'P1',
+        s1.bloco ?? blocoForSemana(diagnosticModel, 1),
+        s1.tag ?? tagForSemana(1),
         s1.versiculo ?? null,
         s1.objetivo,
         s1.nome ?? null,
@@ -529,9 +610,9 @@ async function runGeneratePlanoBackground(
 
     for (const tarefa of s1.tarefas ?? []) {
       await client.query(
-        `INSERT INTO tarefas_semana (semana_id, descricao, prioridade, acao_codigo)
-         VALUES ($1, $2, $3, $4)`,
-        [semana1Id, tarefa.descricao, tarefa.prioridade, null]
+        `INSERT INTO tarefas_semana (semana_id, descricao, prioridade, acao_codigo, recurso_biblioteca)
+         VALUES ($1, $2, $3, $4, $5)`,
+        [semana1Id, tarefa.descricao, tarefa.prioridade, null, tarefa.recurso_biblioteca ?? null]
       );
     }
 
@@ -545,13 +626,15 @@ async function runGeneratePlanoBackground(
     // Semanas 2-24 — apenas esboço
     for (const outline of restantes) {
       const n = outline.numero;
-      const fase = FASES[n] ?? 'fundamento';
+      const fase = faseFromTag(outline.tag, n);
       const pilar = PILARES_POR_SEMANA[n] ?? 'P1';
+      const bloco = outline.bloco ?? blocoForSemana(diagnosticModel, n);
+      const tag = outline.tag ?? tagForSemana(n);
 
       const semanaResult = await client.query<{ id: string }>(
-        `INSERT INTO semanas (plano_id, numero, mes, fase, pilar, objetivo, nome, conteudo_completo)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, false) RETURNING id`,
-        [planoId, n, Math.ceil(n / 4), fase, pilar, outline.objetivo, outline.nome ?? null]
+        `INSERT INTO semanas (plano_id, numero, mes, fase, pilar, bloco, tag, objetivo, nome, conteudo_completo)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, false) RETURNING id`,
+        [planoId, n, Math.ceil(n / 4), fase, pilar, bloco, tag, outline.objetivo, outline.nome ?? null]
       );
 
       const semanaId = semanaResult.rows[0]!.id;

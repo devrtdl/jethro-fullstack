@@ -11,12 +11,15 @@ export type Tarefa = {
   descricao: string;
   prioridade: 'baixa' | 'media' | 'alta' | 'critica';
   completada: boolean;
+  recurso_biblioteca?: string | null;
 };
 
 export type PlanoSemana = {
   semanaNumero: number;
   fase: string;
   pilar: string;
+  bloco?: string | null;
+  tag?: string | null;
   objetivo: string;
   gateStatus: 'locked' | 'available' | 'completed' | 'overdue';
   horasRegistadas: number;
@@ -91,11 +94,13 @@ export type PlanoSemanaCompleta = {
   por_que_importa: string | null;
   versiculo: string | null;
   fase: string;
+  bloco: string | null;
+  tag: string | null;
   gate_status: 'locked' | 'available' | 'completed' | 'overdue';
   indicador_conclusao: string | null;
   resultado_esperado: string | null;
   conteudo_completo: boolean;
-  tarefas: { descricao: string; prioridade: string; completada: boolean }[];
+  tarefas: { descricao: string; prioridade: string; completada: boolean; recurso_biblioteca?: string | null }[];
 };
 
 export type PlanoCompleto = {

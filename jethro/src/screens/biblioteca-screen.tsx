@@ -19,11 +19,11 @@ type Bloco = {
 };
 
 const BLOCOS_DEF = [
-  { titulo: 'Direcção e Fundamento',        subtitulo: 'Semanas 1–5',   range: [1, 5] },
-  { titulo: 'Estrutura e Organização',       subtitulo: 'Semanas 6–10',  range: [6, 10] },
-  { titulo: 'Controlo e Correcção',          subtitulo: 'Semanas 11–15', range: [11, 15] },
-  { titulo: 'Crescimento e Multiplicação',   subtitulo: 'Semanas 16–20', range: [16, 20] },
-  { titulo: 'Governo, Consolidação e Legado',subtitulo: 'Semanas 21–24', range: [21, 24] },
+  { titulo: 'Fundamento',  subtitulo: 'Semanas 1-5',   range: [1, 5] },
+  { titulo: 'Estrutura',   subtitulo: 'Semanas 6-10',  range: [6, 10] },
+  { titulo: 'Controlo',    subtitulo: 'Semanas 11-15', range: [11, 15] },
+  { titulo: 'Crescimento', subtitulo: 'Semanas 16-20', range: [16, 20] },
+  { titulo: 'Legado',      subtitulo: 'Semanas 21-24', range: [21, 24] },
 ];
 
 function gateIcon(status: string) {
@@ -42,6 +42,8 @@ function faseLabel(fase: string) {
   const map: Record<string, string> = {
     fundamento: 'Fundamento',
     estrutura: 'Estrutura',
+    controlo: 'Controlo',
+    crescimento: 'Crescimento',
     escala: 'Escala',
     legado: 'Legado',
   };
@@ -77,7 +79,9 @@ function SemanaCard({ semana }: { semana: PlanoSemanaCompleta }) {
           <Text style={[styles.semanaNome, isLocked && styles.textMuted]} numberOfLines={2}>
             {semana.nome ?? semana.objetivo}
           </Text>
-          <Text style={styles.semanaFase}>{faseLabel(semana.fase)}</Text>
+          <Text style={styles.semanaFase}>
+            {semana.bloco ? `${semana.bloco} · ${semana.tag ?? faseLabel(semana.fase)}` : faseLabel(semana.fase)}
+          </Text>
         </View>
         {canExpand && (
           <Text style={[styles.chevron, expanded && styles.chevronOpen]}>›</Text>
@@ -125,6 +129,7 @@ function SemanaCard({ semana }: { semana: PlanoSemanaCompleta }) {
                   </Text>
                   <Text style={[styles.tarefaDesc, t.completada && styles.tarefaDone]}>
                     {t.descricao}
+                    {t.recurso_biblioteca ? `\nRecurso: ${t.recurso_biblioteca}` : ''}
                   </Text>
                 </View>
               ))}
@@ -217,7 +222,7 @@ export function BibliotecaScreen() {
   }
 
   const blocos: Bloco[] = BLOCOS_DEF.map((def) => ({
-    titulo: def.titulo,
+    titulo: plano.semanas.find((s) => s.numero >= def.range[0] && s.numero <= def.range[1])?.bloco ?? def.titulo,
     subtitulo: def.subtitulo,
     semanas: plano.semanas.filter((s) => s.numero >= def.range[0] && s.numero <= def.range[1]),
   }));

@@ -35,7 +35,7 @@ const BLOCOS: FaqBlock[] = [
       },
       {
         q: 'O que é o plano de 24 semanas?',
-        a: 'É o seu roteiro de transformação dividido em 4 fases: Fundação, Estrutura, Escala e Legado. Cada semana tem ações concretas construídas a partir do seu diagnóstico, uma âncora bíblica e um material técnico de referência. O plano avança semana a semana — você não pula etapas, porque cada fase constrói sobre a anterior.',
+        a: 'É o seu roteiro de transformação dividido em 5 blocos: Fundamento, Estrutura, Controlo, Crescimento e Legado. Cada semana tem ações concretas construídas a partir do seu diagnóstico, uma âncora bíblica e um material técnico de referência. O plano avança semana a semana — você não pula etapas, porque cada fase constrói sobre a anterior.',
       },
       {
         q: 'O que é o Gate de Avanço?',

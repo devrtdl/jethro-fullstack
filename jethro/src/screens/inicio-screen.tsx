@@ -41,6 +41,8 @@ function faseLabel(fase: string): string {
   const map: Record<string, string> = {
     fundamento: 'Fundamento',
     estrutura: 'Estrutura',
+    controlo: 'Controlo',
+    crescimento: 'Crescimento',
     escala: 'Escala',
     legado: 'Legado',
   };
@@ -373,7 +375,7 @@ export function InicioScreen() {
               <View style={{ flex: 1 }}>
                 <Text style={styles.planoTitle}>{plano.objetivo}</Text>
                 <Text style={styles.planoSub}>
-                  {faseLabel(plano.fase)} · Semana {plano.semanaNumero} de 24
+                  {(plano.bloco ?? plano.tag ?? faseLabel(plano.fase))} · Semana {plano.semanaNumero} de 24
                 </Text>
               </View>
             </View>
@@ -384,6 +386,7 @@ export function InicioScreen() {
                 </Text>
                 <Text style={[styles.planoTarefaText, t.completada && styles.planoTarefaDone]}>
                   {t.descricao}
+                  {t.recurso_biblioteca ? `\nRecurso: ${t.recurso_biblioteca}` : ''}
                 </Text>
               </View>
             ))}

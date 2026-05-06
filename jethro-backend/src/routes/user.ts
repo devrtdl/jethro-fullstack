@@ -78,12 +78,14 @@ export async function registerUserRoutes(app: FastifyInstance) {
           semana_numero: number;
           fase: string;
           pilar: string;
+          bloco: string | null;
+          tag: string | null;
           objetivo: string;
           gate_status: string;
           avancou_em: string | null;
         }>(
           `SELECT pa.id AS plano_id, s.id AS semana_id, s.numero AS semana_numero,
-                  s.fase, s.pilar, s.objetivo, gs.gate_status, gs.avancou_em
+                  s.fase, s.pilar, s.bloco, s.tag, s.objetivo, gs.gate_status, gs.avancou_em
            FROM planos_acao pa
            JOIN (
              SELECT id FROM onboarding_sessions
@@ -123,8 +125,8 @@ export async function registerUserRoutes(app: FastifyInstance) {
     // Tarefas da semana actual
     const tarefas = planoRow
       ? await pool
-          .query<{ descricao: string; prioridade: string; completada: boolean }>(
-            `SELECT descricao, prioridade, completada
+          .query<{ descricao: string; prioridade: string; completada: boolean; recurso_biblioteca: string | null }>(
+            `SELECT descricao, prioridade, completada, recurso_biblioteca
              FROM tarefas_semana WHERE semana_id = $1
              ORDER BY prioridade DESC, created_at ASC`,
             [planoRow.semana_id]
@@ -159,6 +161,8 @@ export async function registerUserRoutes(app: FastifyInstance) {
             semanaNumero: planoRow.semana_numero,
             fase: planoRow.fase,
             pilar: planoRow.pilar,
+            bloco: planoRow.bloco,
+            tag: planoRow.tag,
             objetivo: planoRow.objetivo,
             gateStatus: planoRow.gate_status,
             horasRegistadas,
