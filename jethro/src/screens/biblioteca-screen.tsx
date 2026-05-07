@@ -90,7 +90,7 @@ function SemanaCard({ semana }: { semana: PlanoSemanaCompleta }) {
 
       {isGenerating && (
         <View style={s.generatingRow}>
-          <Text style={s.generatingText}>A preparar o conteúdo desta semana…</Text>
+          <Text style={s.generatingText}>Preparando o conteúdo desta semana…</Text>
         </View>
       )}
 

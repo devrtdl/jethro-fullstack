@@ -496,8 +496,8 @@ const onboardingQuestions: DiagnosticQuestionSeed[] = [
     isRequired: true,
     options: [
       { label: 'Sim, acompanho todo mês', value: 'A' },
-      { label: 'Tenho planilha mas não actualizo', value: 'B' },
-      { label: 'Só o que o contabilista manda', value: 'C' },
+      { label: 'Tenho planilha mas não atualizo', value: 'B' },
+      { label: 'Só o que meu contador envia', value: 'C' },
       { label: 'Não tenho nenhum controle', value: 'D' },
     ],
     metadata: { form: 'onboarding', phase: '3a', fields: ['sem_dre_flag'] },
