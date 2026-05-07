@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'expo-router';
 import {
   ActivityIndicator,
@@ -10,13 +10,17 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { JethroColors } from '@/constants/theme';
 import { homeService, type PlanoCompleto, type PlanoSemanaCompleta } from '@/src/services/home/home-service';
+import { useTheme } from '@/src/theme/ThemeContext';
+import type { ThemeColors } from '@/src/theme/colors';
+import { palette } from '@/src/theme/colors';
+import { FontFamily } from '@/src/theme/typography';
+import { Radius, Spacing } from '@/src/theme/spacing';
 
 type Bloco = {
-  titulo: string;
+  titulo:    string;
   subtitulo: string;
-  semanas: PlanoSemanaCompleta[];
+  semanas:   PlanoSemanaCompleta[];
 };
 
 const BLOCOS_DEF = [
@@ -29,116 +33,95 @@ const BLOCOS_DEF = [
 
 function gateIcon(status: string) {
   if (status === 'completed') return '✓';
-  if (status === 'available')  return '●';
+  if (status === 'available') return '●';
   return '○';
 }
 
-function gateColor(status: string) {
-  if (status === 'completed') return JethroColors.gold;
-  if (status === 'available')  return JethroColors.gold;
-  return JethroColors.muted;
+function gateColor(status: string, accent: string, muted: string) {
+  if (status === 'completed' || status === 'available') return accent;
+  return muted;
 }
 
 function faseLabel(fase: string) {
   const map: Record<string, string> = {
-    fundamento: 'Fundamento',
-    estrutura: 'Estrutura',
-    controlo: 'Controlo',
-    crescimento: 'Crescimento',
-    escala: 'Escala',
-    legado: 'Legado',
+    fundamento: 'Fundamento', estrutura: 'Estrutura', controlo: 'Controlo',
+    crescimento: 'Crescimento', escala: 'Escala', legado: 'Legado',
   };
   return map[fase] ?? fase;
 }
 
 function prioridadeColor(p: string) {
-  if (p === 'critica') return '#E05C5C';
-  if (p === 'alta')    return JethroColors.gold;
+  if (p === 'critica') return palette.liveRed;
+  if (p === 'alta')    return palette.gold500;
   if (p === 'media')   return '#6B9FD4';
-  return JethroColors.muted;
+  return palette.inkMute;
 }
 
 function SemanaCard({ semana }: { semana: PlanoSemanaCompleta }) {
   const router = useRouter();
+  const { colors } = useTheme();
+  const s = useMemo(() => makeSemanaStyles(colors), [colors]);
   const [expanded, setExpanded] = useState(false);
-  const isLocked = semana.gate_status === 'locked';
+  const isLocked     = semana.gate_status === 'locked';
   const isGenerating = !isLocked && !semana.conteudo_completo;
-  const canExpand = !isLocked && semana.conteudo_completo;
+  const canExpand    = !isLocked && semana.conteudo_completo;
 
   return (
-    <View style={[styles.semanaCard, isLocked && styles.semanaCardLocked]}>
-      <Pressable
-        style={styles.semanaHeader}
-        onPress={() => canExpand && setExpanded((v) => !v)}
-      >
-        <View style={styles.semanaNumWrap}>
-          <Text style={[styles.semanaGateIcon, { color: gateColor(semana.gate_status) }]}>
+    <View style={[s.semanaCard, isLocked && s.semanaCardLocked]}>
+      <Pressable style={s.semanaHeader} onPress={() => canExpand && setExpanded((v) => !v)}>
+        <View style={s.semanaNumWrap}>
+          <Text style={[s.semanaGateIcon, { color: gateColor(semana.gate_status, colors.accent, colors.inkMute) }]}>
             {gateIcon(semana.gate_status)}
           </Text>
-          <Text style={[styles.semanaNum, isLocked && styles.textMuted]}>S{semana.numero}</Text>
+          <Text style={[s.semanaNum, isLocked && s.textMuted]}>S{semana.numero}</Text>
         </View>
-        <View style={styles.semanaInfo}>
-          <Text style={[styles.semanaNome, isLocked && styles.textMuted]} numberOfLines={2}>
+        <View style={s.semanaInfo}>
+          <Text style={[s.semanaNome, isLocked && s.textMuted]} numberOfLines={2}>
             {semana.nome ?? semana.objetivo}
           </Text>
-          <Text style={styles.semanaFase}>
+          <Text style={s.semanaFase}>
             {semana.bloco ? `${semana.bloco} · ${semana.tag ?? faseLabel(semana.fase)}` : faseLabel(semana.fase)}
           </Text>
         </View>
-        {canExpand && (
-          <Text style={[styles.chevron, expanded && styles.chevronOpen]}>›</Text>
-        )}
-        {isGenerating && <Text style={styles.generatingBadge}>⟳</Text>}
-        {isLocked && <Text style={styles.lockIcon}>⊘</Text>}
+        {canExpand    && <Text style={[s.chevron, expanded && s.chevronOpen]}>›</Text>}
+        {isGenerating && <Text style={s.generatingBadge}>⟳</Text>}
+        {isLocked     && <Text style={s.lockIcon}>⊘</Text>}
       </Pressable>
 
       {isGenerating && (
-        <View style={styles.generatingRow}>
-          <Text style={styles.generatingText}>A preparar o conteúdo desta semana…</Text>
+        <View style={s.generatingRow}>
+          <Text style={s.generatingText}>A preparar o conteúdo desta semana…</Text>
         </View>
       )}
 
       {expanded && semana.conteudo_completo && (
-        <View style={styles.semanaDetail}>
-          {/* Objetivo */}
-          {semana.nome && (
-            <Text style={styles.detailObjetivo}>{semana.objetivo}</Text>
-          )}
+        <View style={s.semanaDetail}>
+          {semana.nome && <Text style={s.detailObjetivo}>{semana.objetivo}</Text>}
 
-          {/* Por que importa */}
           {semana.por_que_importa && (
-            <View style={styles.detailBlock}>
-              <Text style={styles.detailLabel}>Por que esta semana importa</Text>
-              <Text style={styles.detailText}>{semana.por_que_importa}</Text>
+            <View style={s.detailBlock}>
+              <Text style={s.detailLabel}>Por que esta semana importa</Text>
+              <Text style={s.detailText}>{semana.por_que_importa}</Text>
             </View>
           )}
 
-          {/* Versículo */}
           {semana.versiculo && (
-            <View style={styles.versiculoWrap}>
-              <Text style={styles.versiculoText}>✦ {semana.versiculo}</Text>
+            <View style={s.versiculoWrap}>
+              <Text style={s.versiculoText}>✦ {semana.versiculo}</Text>
             </View>
           )}
 
-          {/* Tarefas */}
           {semana.tarefas.length > 0 && (
-            <View style={styles.detailBlock}>
-              <Text style={styles.detailLabel}>Tarefas</Text>
+            <View style={s.detailBlock}>
+              <Text style={s.detailLabel}>Tarefas</Text>
               {semana.tarefas.map((t, i) => (
-                <View key={i} style={styles.tarefaRow}>
-                  <Text style={[styles.tarefaPrio, { color: prioridadeColor(t.prioridade) }]}>
-                    ◆
-                  </Text>
-                  <View style={styles.tarefaBody}>
-                    <Text style={[styles.tarefaDesc, t.completada && styles.tarefaDone]}>
-                      {t.descricao}
-                    </Text>
+                <View key={i} style={s.tarefaRow}>
+                  <Text style={[s.tarefaPrio, { color: prioridadeColor(t.prioridade) }]}>◆</Text>
+                  <View style={s.tarefaBody}>
+                    <Text style={[s.tarefaDesc, t.completada && s.tarefaDone]}>{t.descricao}</Text>
                     {t.recurso_biblioteca && (
-                      <Pressable
-                        style={styles.recursoChip}
-                        onPress={() => router.push('/(tabs)/biblioteca')}
-                      >
-                        <Text style={styles.recursoChipText}>◈ {t.recurso_biblioteca}</Text>
+                      <Pressable style={s.recursoChip} onPress={() => router.push('/(tabs)/biblioteca')}>
+                        <Text style={s.recursoChipText}>◈ {t.recurso_biblioteca}</Text>
                       </Pressable>
                     )}
                   </View>
@@ -147,19 +130,17 @@ function SemanaCard({ semana }: { semana: PlanoSemanaCompleta }) {
             </View>
           )}
 
-          {/* Indicador */}
           {semana.indicador_conclusao && (
-            <View style={styles.detailBlock}>
-              <Text style={styles.detailLabel}>Indicador de conclusão</Text>
-              <Text style={styles.detailText}>{semana.indicador_conclusao}</Text>
+            <View style={s.detailBlock}>
+              <Text style={s.detailLabel}>Indicador de conclusão</Text>
+              <Text style={s.detailText}>{semana.indicador_conclusao}</Text>
             </View>
           )}
 
-          {/* Resultado esperado */}
           {semana.resultado_esperado && (
-            <View style={styles.resultadoWrap}>
-              <Text style={styles.resultadoLabel}>Resultado esperado</Text>
-              <Text style={styles.resultadoText}>{semana.resultado_esperado}</Text>
+            <View style={s.resultadoWrap}>
+              <Text style={s.resultadoLabel}>Resultado esperado</Text>
+              <Text style={s.resultadoText}>{semana.resultado_esperado}</Text>
             </View>
           )}
         </View>
@@ -168,32 +149,76 @@ function SemanaCard({ semana }: { semana: PlanoSemanaCompleta }) {
   );
 }
 
+function makeSemanaStyles(c: ThemeColors) {
+  return StyleSheet.create({
+    semanaCard:       { backgroundColor: c.surface, borderRadius: Radius.xs, overflow: 'hidden' },
+    semanaCardLocked: { opacity: 0.45 },
+    semanaHeader:     { flexDirection: 'row', alignItems: 'center', padding: 12, gap: 10 },
+    semanaNumWrap:    { alignItems: 'center', width: 28 },
+    semanaGateIcon:   { fontSize: 12, marginBottom: 2 },
+    semanaNum:        { fontFamily: FontFamily.sansBold,    fontSize: 11, color: c.ink },
+    semanaInfo:       { flex: 1 },
+    semanaNome:       { fontFamily: FontFamily.sansMedium,  fontSize: 13, color: c.ink,     lineHeight: 18 },
+    semanaFase:       { fontFamily: FontFamily.sansRegular, fontSize: 11, color: c.inkMute, marginTop: 2 },
+    textMuted:        { color: c.inkMute },
+    chevron:          { fontFamily: FontFamily.sansRegular, fontSize: 20, color: c.inkMute },
+    chevronOpen:      { transform: [{ rotate: '90deg' }] },
+    lockIcon:         { fontSize: 14, color: c.inkMute },
+    generatingBadge:  { fontSize: 14, color: c.accent },
+
+    generatingRow:  { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: c.hairline, paddingHorizontal: 12, paddingVertical: 10 },
+    generatingText: { fontFamily: FontFamily.sansRegular, fontSize: 12, color: c.accent, fontStyle: 'italic' },
+
+    semanaDetail: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: c.hairline, padding: 14, gap: 12, backgroundColor: c.background },
+    detailObjetivo: { fontFamily: FontFamily.sansRegular, fontSize: 13, color: c.inkSoft, fontStyle: 'italic', lineHeight: 20 },
+    detailBlock: { gap: 6 },
+    detailLabel: { fontFamily: FontFamily.sansBold, fontSize: 11, color: c.accent, textTransform: 'uppercase', letterSpacing: 0.5 },
+    detailText:  { fontFamily: FontFamily.sansRegular, fontSize: 13, color: c.inkSoft, lineHeight: 20 },
+
+    versiculoWrap: { backgroundColor: c.accentMuted, borderRadius: Radius.xs, borderLeftWidth: 2, borderLeftColor: c.accent, padding: 10 },
+    versiculoText: { fontFamily: FontFamily.sansRegular, fontSize: 12, color: c.accent, fontStyle: 'italic', lineHeight: 18 },
+
+    tarefaRow:  { flexDirection: 'row', gap: 8, alignItems: 'flex-start' },
+    tarefaPrio: { fontSize: 10, marginTop: 4 },
+    tarefaBody: { flex: 1, gap: 4 },
+    tarefaDesc: { fontFamily: FontFamily.sansRegular, fontSize: 13, color: c.inkSoft, lineHeight: 20 },
+    tarefaDone: { textDecorationLine: 'line-through', color: c.inkMute },
+
+    recursoChip:     { alignSelf: 'flex-start', borderWidth: 1, borderColor: c.accent, borderRadius: Radius.xs, paddingHorizontal: 8, paddingVertical: 3 },
+    recursoChipText: { fontFamily: FontFamily.sansRegular, fontSize: 11, color: c.accent },
+
+    resultadoWrap:  { backgroundColor: c.accentMuted, borderRadius: Radius.xs, padding: 10 },
+    resultadoLabel: { fontFamily: FontFamily.sansBold, fontSize: 11, color: c.accent, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 },
+    resultadoText:  { fontFamily: FontFamily.sansRegular, fontSize: 13, color: c.ink, lineHeight: 20 },
+  });
+}
+
 function BlocoSection({ bloco, index }: { bloco: Bloco; index: number }) {
+  const { colors } = useTheme();
+  const s = useMemo(() => makeBlocoStyles(colors), [colors]);
   const [expanded, setExpanded] = useState(index === 0);
-  const completadas = bloco.semanas.filter((s) => s.gate_status === 'completed').length;
-  const total = bloco.semanas.length;
+  const completadas = bloco.semanas.filter((s2) => s2.gate_status === 'completed').length;
+  const total       = bloco.semanas.length;
 
   return (
-    <View style={styles.blocoSection}>
-      <Pressable style={styles.blocoHeader} onPress={() => setExpanded((v) => !v)}>
-        <View style={styles.blocoLeft}>
-          <View style={styles.blocoNumBadge}>
-            <Text style={styles.blocoNumText}>{index + 1}</Text>
+    <View style={s.blocoSection}>
+      <Pressable style={s.blocoHeader} onPress={() => setExpanded((v) => !v)}>
+        <View style={s.blocoLeft}>
+          <View style={s.blocoNumBadge}>
+            <Text style={s.blocoNumText}>{index + 1}</Text>
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={styles.blocoTitulo}>{bloco.titulo}</Text>
-            <Text style={styles.blocoSub}>
-              {bloco.subtitulo} · {completadas}/{total} semanas
-            </Text>
+            <Text style={s.blocoTitulo}>{bloco.titulo}</Text>
+            <Text style={s.blocoSub}>{bloco.subtitulo} · {completadas}/{total} semanas</Text>
           </View>
         </View>
-        <Text style={[styles.chevron, expanded && styles.chevronOpen]}>›</Text>
+        <Text style={[s.chevron, expanded && s.chevronOpen]}>›</Text>
       </Pressable>
 
       {expanded && (
-        <View style={styles.blocoSemanas}>
-          {bloco.semanas.map((s) => (
-            <SemanaCard key={s.numero} semana={s} />
+        <View style={s.blocoSemanas}>
+          {bloco.semanas.map((sem) => (
+            <SemanaCard key={sem.numero} semana={sem} />
           ))}
         </View>
       )}
@@ -201,8 +226,25 @@ function BlocoSection({ bloco, index }: { bloco: Bloco; index: number }) {
   );
 }
 
+function makeBlocoStyles(c: ThemeColors) {
+  return StyleSheet.create({
+    blocoSection: { backgroundColor: c.surface, borderRadius: Radius.md, borderWidth: StyleSheet.hairlineWidth, borderColor: c.hairline, overflow: 'hidden' },
+    blocoHeader:  { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16 },
+    blocoLeft:    { flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 },
+    blocoNumBadge:{ width: 32, height: 32, borderRadius: 16, backgroundColor: c.accentMuted, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: c.accent },
+    blocoNumText: { fontFamily: FontFamily.sansBold,     fontSize: 13, color: c.accent },
+    blocoTitulo:  { fontFamily: FontFamily.sansSemiBold, fontSize: 14, color: c.ink },
+    blocoSub:     { fontFamily: FontFamily.sansRegular,  fontSize: 11, color: c.inkMute, marginTop: 2 },
+    blocoSemanas: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: c.hairline, paddingHorizontal: 10, paddingVertical: 8, gap: 6, backgroundColor: c.background },
+    chevron:      { fontFamily: FontFamily.sansRegular, fontSize: 20, color: c.inkMute },
+    chevronOpen:  { transform: [{ rotate: '90deg' }] },
+  });
+}
+
 export function BibliotecaScreen() {
-  const [plano, setPlano] = useState<PlanoCompleto | null>(null);
+  const { colors } = useTheme();
+  const s = useMemo(() => makeStyles(colors), [colors]);
+  const [plano,   setPlano]   = useState<PlanoCompleto | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -214,18 +256,18 @@ export function BibliotecaScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView style={[styles.safe, styles.center]} edges={['top']}>
-        <ActivityIndicator size="large" color={JethroColors.gold} />
+      <SafeAreaView style={[s.safe, s.center]} edges={['top']}>
+        <ActivityIndicator size="large" color={colors.accent} />
       </SafeAreaView>
     );
   }
 
   if (!plano) {
     return (
-      <SafeAreaView style={[styles.safe, styles.center]} edges={['top']}>
-        <Text style={styles.emptyIcon}>◈</Text>
-        <Text style={styles.emptyTitle}>Plano ainda não gerado</Text>
-        <Text style={styles.emptyText}>
+      <SafeAreaView style={[s.safe, s.center]} edges={['top']}>
+        <Text style={s.emptyIcon}>◈</Text>
+        <Text style={s.emptyTitle}>Plano ainda não gerado</Text>
+        <Text style={s.emptyText}>
           Completa o onboarding e gera o teu plano de 24 semanas para ver o teu percurso aqui.
         </Text>
       </SafeAreaView>
@@ -233,31 +275,26 @@ export function BibliotecaScreen() {
   }
 
   const blocos: Bloco[] = BLOCOS_DEF.map((def) => ({
-    titulo: plano.semanas.find((s) => s.numero >= def.range[0] && s.numero <= def.range[1])?.bloco ?? def.titulo,
+    titulo:    plano.semanas.find((s2) => s2.numero >= def.range[0] && s2.numero <= def.range[1])?.bloco ?? def.titulo,
     subtitulo: def.subtitulo,
-    semanas: plano.semanas.filter((s) => s.numero >= def.range[0] && s.numero <= def.range[1]),
+    semanas:   plano.semanas.filter((s2) => s2.numero >= def.range[0] && s2.numero <= def.range[1]),
   }));
 
-  const totalCompletas = plano.semanas.filter((s) => s.gate_status === 'completed').length;
+  const totalCompletas = plano.semanas.filter((s2) => s2.gate_status === 'completed').length;
 
   return (
-    <SafeAreaView style={styles.safe} edges={['top']}>
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.headerTitle}>O teu plano</Text>
-          <Text style={styles.headerSub}>
-            {totalCompletas} de {plano.totalSemanas} semanas concluídas
-          </Text>
+    <SafeAreaView style={s.safe} edges={['top']}>
+      <ScrollView style={s.scroll} contentContainerStyle={s.container} showsVerticalScrollIndicator={false}>
+        <View style={s.pageHeader}>
+          <Text style={s.pageTitle}>O teu plano</Text>
+          <Text style={s.pageSub}>{totalCompletas} de {plano.totalSemanas} semanas concluídas</Text>
         </View>
 
-        {/* Progress bar */}
-        <View style={styles.progressTrack}>
-          <View style={[styles.progressBar, { width: `${(totalCompletas / plano.totalSemanas) * 100}%` as `${number}%` }]} />
+        <View style={s.progressTrack}>
+          <View style={[s.progressBar, { width: `${(totalCompletas / plano.totalSemanas) * 100}%` as `${number}%` }]} />
         </View>
 
-        {/* Blocos */}
-        <View style={styles.blocosList}>
+        <View style={s.blocosList}>
           {blocos.map((bloco, i) => (
             <BlocoSection key={bloco.titulo} bloco={bloco} index={i} />
           ))}
@@ -269,109 +306,24 @@ export function BibliotecaScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safe:   { flex: 1, backgroundColor: JethroColors.navy },
-  center: { justifyContent: 'center', alignItems: 'center', paddingHorizontal: 32 },
-  scroll: { flex: 1 },
-  container: { paddingHorizontal: 20, paddingTop: 16 },
+function makeStyles(c: ThemeColors) {
+  return StyleSheet.create({
+    safe:      { flex: 1, backgroundColor: c.background },
+    center:    { justifyContent: 'center', alignItems: 'center', paddingHorizontal: 32 },
+    scroll:    { flex: 1 },
+    container: { paddingHorizontal: Spacing.screenH, paddingTop: 16 },
 
-  header:      { marginBottom: 12 },
-  headerTitle: { fontSize: 24, fontWeight: '800', color: JethroColors.creme },
-  headerSub:   { fontSize: 13, color: JethroColors.muted, marginTop: 4 },
+    pageHeader: { marginBottom: 12 },
+    pageTitle:  { fontFamily: FontFamily.serifMedium, fontSize: 24, color: c.ink },
+    pageSub:    { fontFamily: FontFamily.sansRegular, fontSize: 13, color: c.inkMute, marginTop: 4 },
 
-  progressTrack: {
-    height: 3, backgroundColor: JethroColors.navyDeep,
-    borderRadius: 99, marginBottom: 24, overflow: 'hidden',
-  },
-  progressBar: {
-    height: '100%', backgroundColor: JethroColors.gold, borderRadius: 99,
-  },
+    progressTrack: { height: 3, backgroundColor: c.hairline, borderRadius: 99, marginBottom: 24, overflow: 'hidden' },
+    progressBar:   { height: '100%', backgroundColor: c.accent, borderRadius: 99 },
 
-  blocosList: { gap: 10 },
+    blocosList: { gap: 10 },
 
-  blocoSection: {
-    backgroundColor: JethroColors.navySurface,
-    borderRadius: 14, overflow: 'hidden',
-  },
-  blocoHeader: {
-    flexDirection: 'row', alignItems: 'center',
-    justifyContent: 'space-between', padding: 16,
-  },
-  blocoLeft: { flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 },
-  blocoNumBadge: {
-    width: 32, height: 32, borderRadius: 16,
-    backgroundColor: JethroColors.goldMuted,
-    justifyContent: 'center', alignItems: 'center',
-    borderWidth: 1, borderColor: JethroColors.gold,
-  },
-  blocoNumText: { fontSize: 13, fontWeight: '800', color: JethroColors.gold },
-  blocoTitulo:  { fontSize: 14, fontWeight: '700', color: JethroColors.creme },
-  blocoSub:     { fontSize: 11, color: JethroColors.muted, marginTop: 2 },
-
-  blocoSemanas: {
-    borderTopWidth: 1, borderTopColor: JethroColors.navyDeep,
-    paddingHorizontal: 12, paddingVertical: 8, gap: 6,
-  },
-
-  semanaCard: {
-    backgroundColor: JethroColors.navy, borderRadius: 10,
-    overflow: 'hidden',
-  },
-  semanaCardLocked: { opacity: 0.45 },
-  semanaHeader: {
-    flexDirection: 'row', alignItems: 'center', padding: 12, gap: 10,
-  },
-  semanaNumWrap: { alignItems: 'center', width: 28 },
-  semanaGateIcon: { fontSize: 12, marginBottom: 2 },
-  semanaNum:  { fontSize: 11, fontWeight: '700', color: JethroColors.creme },
-  semanaInfo: { flex: 1 },
-  semanaNome: { fontSize: 13, fontWeight: '600', color: JethroColors.creme, lineHeight: 18 },
-  semanaFase: { fontSize: 11, color: JethroColors.muted, marginTop: 2 },
-  textMuted:  { color: JethroColors.muted },
-  chevron:    { fontSize: 20, color: JethroColors.muted },
-  chevronOpen:{ transform: [{ rotate: '90deg' }] },
-  lockIcon:        { fontSize: 14, color: JethroColors.muted },
-  generatingBadge: { fontSize: 14, color: JethroColors.gold },
-  generatingRow:   {
-    borderTopWidth: 1, borderTopColor: JethroColors.navyDeep,
-    paddingHorizontal: 12, paddingVertical: 10,
-  },
-  generatingText:  { fontSize: 12, color: JethroColors.gold, fontStyle: 'italic' },
-
-  semanaDetail: {
-    borderTopWidth: 1, borderTopColor: JethroColors.navyDeep,
-    padding: 14, gap: 12,
-  },
-  detailObjetivo: { fontSize: 13, color: JethroColors.cremeMuted, fontStyle: 'italic', lineHeight: 20 },
-  detailBlock:    { gap: 6 },
-  detailLabel:    { fontSize: 11, fontWeight: '700', color: JethroColors.gold, textTransform: 'uppercase', letterSpacing: 0.5 },
-  detailText:     { fontSize: 13, color: JethroColors.cremeMuted, lineHeight: 20 },
-
-  versiculoWrap: {
-    backgroundColor: JethroColors.navySurface, borderRadius: 8,
-    borderLeftWidth: 2, borderLeftColor: JethroColors.gold, padding: 10,
-  },
-  versiculoText: { fontSize: 12, color: JethroColors.gold, fontStyle: 'italic', lineHeight: 18 },
-
-  tarefaRow: { flexDirection: 'row', gap: 8, alignItems: 'flex-start' },
-  tarefaPrio: { fontSize: 10, marginTop: 4 },
-  tarefaBody: { flex: 1, gap: 4 },
-  tarefaDesc: { fontSize: 13, color: JethroColors.cremeMuted, lineHeight: 20 },
-  tarefaDone: { textDecorationLine: 'line-through', color: JethroColors.muted },
-  recursoChip: {
-    alignSelf: 'flex-start',
-    borderWidth: 1, borderColor: JethroColors.gold,
-    borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3,
-  },
-  recursoChipText: { fontSize: 11, color: JethroColors.gold },
-
-  resultadoWrap: {
-    backgroundColor: JethroColors.goldMuted, borderRadius: 8, padding: 10,
-  },
-  resultadoLabel: { fontSize: 11, fontWeight: '700', color: JethroColors.gold, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 },
-  resultadoText:  { fontSize: 13, color: JethroColors.creme, lineHeight: 20 },
-
-  emptyIcon:  { fontSize: 48, color: JethroColors.gold, marginBottom: 16 },
-  emptyTitle: { fontSize: 18, fontWeight: '700', color: JethroColors.creme, marginBottom: 10, textAlign: 'center' },
-  emptyText:  { fontSize: 14, color: JethroColors.muted, textAlign: 'center', lineHeight: 22 },
-});
+    emptyIcon:  { fontFamily: FontFamily.sansRegular, fontSize: 48, color: c.accent,   marginBottom: 16, textAlign: 'center' },
+    emptyTitle: { fontFamily: FontFamily.serifMedium, fontSize: 18, color: c.ink,      marginBottom: 10, textAlign: 'center' },
+    emptyText:  { fontFamily: FontFamily.sansRegular, fontSize: 14, color: c.inkMute,  textAlign: 'center', lineHeight: 22 },
+  });
+}

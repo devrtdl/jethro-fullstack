@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Link, router } from 'expo-router';
 import { Image } from 'expo-image';
@@ -6,48 +6,35 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
 import { authService } from '@/src/services/auth/auth-service';
+import { useTheme } from '@/src/theme/ThemeContext';
+import type { ThemeColors } from '@/src/theme/colors';
+import { palette } from '@/src/theme/colors';
+import { FontFamily } from '@/src/theme/typography';
 
 type AuthScreenMode = 'login' | 'register';
 
-const palette = {
-  background: '#0B1F3B',
-  surface: '#112440',
-  surfaceElevated: '#163050',
-  gold: '#D4AF37',
-  goldSoft: 'rgba(212, 175, 55, 0.18)',
-  goldGlow: 'rgba(212, 175, 55, 0.08)',
-  goldBorder: 'rgba(212, 175, 55, 0.25)',
-  cream: '#F8F9FA',
-  muted: '#8A9BB0',
-  mutedDim: 'rgba(138, 155, 176, 0.6)',
-  danger: '#E05C5C',
-  success: '#4CAF7D',
-  inputBorder: 'rgba(212, 175, 55, 0.20)',
-  inputBackground: 'rgba(17, 36, 64, 0.8)',
-};
-
 export function AuthScreen({ mode }: { mode: AuthScreenMode }) {
-  const [fullName, setFullName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [message, setMessage] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
+  const { colors } = useTheme();
+  const s = useMemo(() => makeStyles(colors), [colors]);
+
+  const [fullName,    setFullName]    = useState('');
+  const [email,       setEmail]       = useState('');
+  const [password,    setPassword]    = useState('');
+  const [message,     setMessage]     = useState<string | null>(null);
+  const [error,       setError]       = useState<string | null>(null);
+  const [isSubmitting,setIsSubmitting]= useState(false);
+  const [showPassword,setShowPassword]= useState(false);
   const isRegister = mode === 'register';
 
   async function handlePasswordAction() {
     const normalizedEmail = email.trim().toLowerCase();
-
     if (!normalizedEmail || !password.trim() || (isRegister && !fullName.trim())) {
       setError(isRegister ? 'Preencha nome, e-mail e senha.' : 'Preencha e-mail e senha.');
       return;
     }
-
     setIsSubmitting(true);
     setMessage(null);
     setError(null);
-
     try {
       if (isRegister) {
         const result = await authService.signUpWithPassword(normalizedEmail, password, fullName);
@@ -56,7 +43,6 @@ export function AuthScreen({ mode }: { mode: AuthScreenMode }) {
           router.replace('/(tabs)');
           return;
         }
-
         setMessage('Conta criada. Se o ambiente exigir confirmação de e-mail, valide e depois entre.');
       } else {
         await authService.signInWithPassword(normalizedEmail, password);
@@ -74,7 +60,6 @@ export function AuthScreen({ mode }: { mode: AuthScreenMode }) {
     setIsSubmitting(true);
     setMessage(null);
     setError(null);
-
     try {
       await authService.signInWithOAuth(provider);
       router.replace('/(tabs)');
@@ -86,158 +71,131 @@ export function AuthScreen({ mode }: { mode: AuthScreenMode }) {
   }
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      {/* Background glow */}
-      
-
+    <SafeAreaView style={s.safeArea}>
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={styles.content}
-        showsVerticalScrollIndicator={false}>
-
+        contentContainerStyle={s.content}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Logo + wordmark */}
-        <View style={styles.brandBlock}>
-          <Image
-            source={require('@/assets/logo.png')}
-            style={styles.logo}
-            contentFit="contain"
-          />
-
-          <View style={styles.wordmarkBlock}>
-            <Text style={styles.brandName}>JETHRO</Text>
-            <View style={styles.dividerRow}>
-              <View style={styles.dividerLine} />
-              <Text style={styles.brandTagline}>Mentor do Empreendedor Cristão</Text>
-              <View style={styles.dividerLine} />
+        <View style={s.brandBlock}>
+          <Image source={require('@/assets/logo.png')} style={s.logo} contentFit="contain" />
+          <View style={s.wordmarkBlock}>
+            <Text style={s.brandName}>JETHRO</Text>
+            <View style={s.dividerRow}>
+              <View style={s.dividerLine} />
+              <Text style={s.brandTagline}>Mentor do Empreendedor Cristão</Text>
+              <View style={s.dividerLine} />
             </View>
           </View>
         </View>
 
         {/* Heading */}
-        <View style={styles.headingBlock}>
-          <Text style={styles.heading}>
-            {isRegister ? 'Comece sua jornada' : 'Bem-vindo de volta'}
-          </Text>
-          <Text style={styles.subheading}>
-            {isRegister
-              ? 'Crie sua conta para acessar seu diagnóstico.'
-              : 'Acesse para continuar de onde parou.'}
+        <View style={s.headingBlock}>
+          <Text style={s.heading}>{isRegister ? 'Comece sua jornada' : 'Bem-vindo de volta'}</Text>
+          <Text style={s.subheading}>
+            {isRegister ? 'Crie sua conta para acessar seu diagnóstico.' : 'Acesse para continuar de onde parou.'}
           </Text>
         </View>
 
         {/* Form */}
-        <View style={styles.formBlock}>
+        <View style={s.formBlock}>
           {isRegister ? (
-            <View style={styles.inputWrap}>
-              <Text style={styles.inputLabel}>Nome completo</Text>
+            <View style={s.inputWrap}>
+              <Text style={s.inputLabel}>Nome completo</Text>
               <TextInput
                 autoCapitalize="words"
                 autoComplete="name"
                 placeholder="Seu nome completo"
-                placeholderTextColor={palette.mutedDim}
-                style={styles.input}
+                placeholderTextColor={colors.inkMute}
+                style={s.input}
                 value={fullName}
                 onChangeText={setFullName}
               />
             </View>
           ) : null}
 
-          <View style={styles.inputWrap}>
-            <Text style={styles.inputLabel}>E-mail</Text>
+          <View style={s.inputWrap}>
+            <Text style={s.inputLabel}>E-mail</Text>
             <TextInput
               autoCapitalize="none"
               autoComplete="email"
               keyboardType="email-address"
               placeholder="seu@email.com"
-              placeholderTextColor={palette.mutedDim}
-              style={styles.input}
+              placeholderTextColor={colors.inkMute}
+              style={s.input}
               value={email}
               onChangeText={setEmail}
             />
           </View>
 
-          <View style={styles.inputWrap}>
-            <View style={styles.inputLabelRow}>
-              <Text style={styles.inputLabel}>Senha</Text>
+          <View style={s.inputWrap}>
+            <View style={s.inputLabelRow}>
+              <Text style={s.inputLabel}>Senha</Text>
               {!isRegister ? (
                 <Link href="/auth/forgot-password" asChild>
                   <Pressable>
-                    <Text style={styles.forgotLink}>Esqueci minha senha</Text>
+                    <Text style={s.forgotLink}>Esqueci minha senha</Text>
                   </Pressable>
                 </Link>
               ) : null}
             </View>
-            <View style={styles.inputRow}>
+            <View style={s.inputRow}>
               <TextInput
                 autoCapitalize="none"
                 autoComplete={isRegister ? 'new-password' : 'current-password'}
                 secureTextEntry={!showPassword}
                 placeholder="••••••••"
-                placeholderTextColor={palette.mutedDim}
-                style={[styles.input, styles.inputWithIcon]}
+                placeholderTextColor={colors.inkMute}
+                style={[s.input, s.inputWithIcon]}
                 value={password}
                 onChangeText={setPassword}
               />
-              <Pressable
-                style={styles.eyeButton}
-                onPress={() => setShowPassword(prev => !prev)}
-                hitSlop={8}>
+              <Pressable style={s.eyeButton} onPress={() => setShowPassword(prev => !prev)} hitSlop={8}>
                 <Ionicons
                   name={showPassword ? 'eye-off-outline' : 'eye-outline'}
                   size={22}
-                  color={palette.muted}
+                  color={colors.inkMute}
                 />
               </Pressable>
             </View>
           </View>
 
-          {message ? <Text style={styles.successText}>{message}</Text> : null}
-          {error ? <Text style={styles.errorText}>{error}</Text> : null}
+          {message ? <Text style={s.successText}>{message}</Text> : null}
+          {error   ? <Text style={s.errorText}>{error}</Text>     : null}
 
           <Pressable
-            style={[styles.primaryButton, isSubmitting && styles.primaryButtonDisabled]}
+            style={[s.primaryButton, isSubmitting && s.primaryButtonDisabled]}
             onPress={() => void handlePasswordAction()}
-            disabled={isSubmitting}>
+            disabled={isSubmitting}
+          >
             {isSubmitting ? (
-              <ActivityIndicator color={palette.background} />
+              <ActivityIndicator color={palette.navy800} />
             ) : (
-              <Text style={styles.primaryButtonLabel}>
-                {isRegister ? 'Criar conta' : 'Entrar'}
-              </Text>
+              <Text style={s.primaryButtonLabel}>{isRegister ? 'Criar conta' : 'Entrar'}</Text>
             )}
           </Pressable>
 
-          {/* Divider */}
-          <View style={styles.orRow}>
-            <View style={styles.orLine} />
-            <Text style={styles.orLabel}>ou</Text>
-            <View style={styles.orLine} />
+          <View style={s.orRow}>
+            <View style={s.orLine} />
+            <Text style={s.orLabel}>ou</Text>
+            <View style={s.orLine} />
           </View>
 
-          {/* Google */}
-          <Pressable
-            style={styles.socialButton}
-            onPress={() => void handleSocialAuth('google')}
-            disabled={isSubmitting}>
-            <View style={styles.socialIconShell}>
-              <Text style={styles.socialIconLabel}>G</Text>
+          <Pressable style={s.socialButton} onPress={() => void handleSocialAuth('google')} disabled={isSubmitting}>
+            <View style={s.socialIconShell}>
+              <Text style={s.socialIconLabel}>G</Text>
             </View>
-            <Text style={styles.socialButtonLabel}>
-              {isRegister ? 'Continuar com Google' : 'Entrar com Google'}
-            </Text>
+            <Text style={s.socialButtonLabel}>{isRegister ? 'Continuar com Google' : 'Entrar com Google'}</Text>
           </Pressable>
         </View>
 
         {/* Footer switch */}
-        <View style={styles.footerRow}>
-          <Text style={styles.footerText}>
-            {isRegister ? 'Já tem conta?' : 'Ainda não tem conta?'}
-          </Text>
+        <View style={s.footerRow}>
+          <Text style={s.footerText}>{isRegister ? 'Já tem conta?' : 'Ainda não tem conta?'}</Text>
           <Link href={isRegister ? '/auth/login' : '/auth/register'} asChild>
             <Pressable>
-              <Text style={styles.footerLink}>
-                {isRegister ? 'Entrar' : 'Registrar'}
-              </Text>
+              <Text style={s.footerLink}>{isRegister ? 'Entrar' : 'Registrar'}</Text>
             </Pressable>
           </Link>
         </View>
@@ -246,235 +204,56 @@ export function AuthScreen({ mode }: { mode: AuthScreenMode }) {
   );
 }
 
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: palette.background,
-  },
-  glowTop: {
-    position: 'absolute',
-    top: -40,
-    alignSelf: 'center',
-    width: 340,
-    height: 340,
-    borderRadius: 999,
-    backgroundColor: palette.goldGlow,
-  },
-  glowBottom: {
-    position: 'absolute',
-    bottom: -80,
-    alignSelf: 'center',
-    width: 280,
-    height: 200,
-    borderRadius: 999,
-    backgroundColor: 'rgba(11, 31, 59, 0.5)',
-  },
-  content: {
-    flexGrow: 1,
-    paddingHorizontal: 28,
-    paddingTop: 24,
-    paddingBottom: 32,
-    gap: 28,
-  },
+function makeStyles(c: ThemeColors) {
+  return StyleSheet.create({
+    safeArea: { flex: 1, backgroundColor: c.background },
+    content:  { flexGrow: 1, paddingHorizontal: 28, paddingTop: 24, paddingBottom: 32, gap: 28 },
 
-  // Brand
-  brandBlock: {
-    alignItems: 'center',
-    gap: 14,
-  },
-  logo: {
-    width: 120,
-    height: 120,
-  },
-  wordmarkBlock: {
-    alignItems: 'center',
-    gap: 8,
-  },
-  brandName: {
-    color: palette.cream,
-    fontSize: 34,
-    fontWeight: '800',
-    letterSpacing: 5,
-  },
-  dividerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: palette.gold,
-    maxWidth: 32,
-    opacity: 0.5,
-  },
-  brandTagline: {
-    color: palette.gold,
-    fontSize: 12,
-    fontWeight: '500',
-    letterSpacing: 0.5,
-  },
+    brandBlock:    { alignItems: 'center', gap: 14 },
+    logo:          { width: 120, height: 120 },
+    wordmarkBlock: { alignItems: 'center', gap: 8 },
+    brandName:     { color: c.ink, fontFamily: FontFamily.serifSemiBold, fontSize: 34, letterSpacing: 5 },
+    dividerRow:    { flexDirection: 'row', alignItems: 'center', gap: 10 },
+    dividerLine:   { flex: 1, height: 1, backgroundColor: c.accent, maxWidth: 32, opacity: 0.5 },
+    brandTagline:  { color: c.accent, fontFamily: FontFamily.sansMedium, fontSize: 12, letterSpacing: 0.5 },
 
-  // Heading
-  headingBlock: {
-    alignItems: 'center',
-    gap: 8,
-  },
-  heading: {
-    color: palette.cream,
-    fontSize: 24,
-    fontWeight: '700',
-    letterSpacing: 0.3,
-    textAlign: 'center',
-  },
-  subheading: {
-    color: palette.muted,
-    fontSize: 14,
-    lineHeight: 20,
-    textAlign: 'center',
-    maxWidth: 300,
-  },
+    headingBlock: { alignItems: 'center', gap: 8 },
+    heading:      { color: c.ink, fontFamily: FontFamily.serifSemiBold, fontSize: 24, letterSpacing: 0.3, textAlign: 'center' },
+    subheading:   { color: c.inkMute, fontFamily: FontFamily.sansRegular, fontSize: 14, lineHeight: 20, textAlign: 'center', maxWidth: 300 },
 
-  // Form
-  formBlock: {
-    gap: 14,
-  },
-  inputWrap: {
-    gap: 6,
-  },
-  inputLabelRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginLeft: 4,
-    marginRight: 4,
-  },
-  inputLabel: {
-    color: palette.muted,
-    fontSize: 12,
-    fontWeight: '600',
-    letterSpacing: 0.8,
-    textTransform: 'uppercase',
-  },
-  forgotLink: {
-    color: palette.gold,
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  inputRow: {
-    position: 'relative',
-    justifyContent: 'center',
-  },
-  input: {
-    minHeight: 54,
-    borderRadius: 14,
-    backgroundColor: palette.inputBackground,
-    borderWidth: 1,
-    borderColor: palette.inputBorder,
-    paddingHorizontal: 18,
-    paddingVertical: 12,
-    color: palette.cream,
-    fontSize: 15,
-  },
-  inputWithIcon: {
-    paddingRight: 52,
-  },
-  eyeButton: {
-    position: 'absolute',
-    right: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  primaryButton: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 14,
-    backgroundColor: palette.gold,
-    minHeight: 54,
-    paddingHorizontal: 18,
-    marginTop: 4,
-  },
-  primaryButtonDisabled: {
-    opacity: 0.7,
-  },
-  primaryButtonLabel: {
-    color: palette.background,
-    fontSize: 17,
-    fontWeight: '800',
-    letterSpacing: 0.3,
-  },
-  orRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  orLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: 'rgba(138, 155, 176, 0.25)',
-  },
-  orLabel: {
-    color: palette.muted,
-    fontSize: 13,
-    fontWeight: '500',
-  },
-  socialButton: {
-    minHeight: 54,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: 'rgba(212, 175, 55, 0.20)',
-    backgroundColor: palette.surface,
-    paddingHorizontal: 18,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 12,
-  },
-  socialIconShell: {
-    width: 28,
-    height: 28,
-    borderRadius: 999,
-    backgroundColor: 'rgba(212, 175, 55, 0.15)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  socialIconLabel: {
-    color: palette.gold,
-    fontSize: 14,
-    fontWeight: '800',
-  },
-  socialButtonLabel: {
-    color: palette.cream,
-    fontSize: 15,
-    fontWeight: '600',
-  },
-  successText: {
-    color: palette.success,
-    fontSize: 13,
-    lineHeight: 20,
-    textAlign: 'center',
-  },
-  errorText: {
-    color: palette.danger,
-    fontSize: 13,
-    lineHeight: 20,
-    textAlign: 'center',
-  },
+    formBlock:     { gap: 14 },
+    inputWrap:     { gap: 6 },
+    inputLabelRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginLeft: 4, marginRight: 4 },
+    inputLabel:    { color: c.inkMute, fontFamily: FontFamily.sansBold, fontSize: 12, letterSpacing: 0.8, textTransform: 'uppercase' },
+    forgotLink:    { color: c.accent, fontFamily: FontFamily.sansSemiBold, fontSize: 12 },
+    inputRow:      { position: 'relative', justifyContent: 'center' },
+    input: {
+      minHeight: 54, borderRadius: 14, backgroundColor: c.surface,
+      borderWidth: 1, borderColor: c.accentMuted,
+      paddingHorizontal: 18, paddingVertical: 12,
+      color: c.ink, fontFamily: FontFamily.sansRegular, fontSize: 15,
+    },
+    inputWithIcon: { paddingRight: 52 },
+    eyeButton:     { position: 'absolute', right: 16, alignItems: 'center', justifyContent: 'center' },
 
-  // Footer
-  footerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-  },
-  footerText: {
-    color: palette.muted,
-    fontSize: 14,
-  },
-  footerLink: {
-    color: palette.gold,
-    fontSize: 14,
-    fontWeight: '700',
-  },
-});
+    primaryButton:         { alignItems: 'center', justifyContent: 'center', borderRadius: 14, backgroundColor: c.accent, minHeight: 54, paddingHorizontal: 18, marginTop: 4 },
+    primaryButtonDisabled: { opacity: 0.7 },
+    primaryButtonLabel:    { color: palette.navy800, fontFamily: FontFamily.sansBold, fontSize: 17, letterSpacing: 0.3 },
+
+    orRow:   { flexDirection: 'row', alignItems: 'center', gap: 12 },
+    orLine:  { flex: 1, height: 1, backgroundColor: c.hairline },
+    orLabel: { color: c.inkMute, fontFamily: FontFamily.sansMedium, fontSize: 13 },
+
+    socialButton:      { minHeight: 54, borderRadius: 14, borderWidth: 1, borderColor: c.accentMuted, backgroundColor: c.surface, paddingHorizontal: 18, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12 },
+    socialIconShell:   { width: 28, height: 28, borderRadius: 999, backgroundColor: c.accentMuted, alignItems: 'center', justifyContent: 'center' },
+    socialIconLabel:   { color: c.accent, fontFamily: FontFamily.sansBold, fontSize: 14 },
+    socialButtonLabel: { color: c.ink, fontFamily: FontFamily.sansSemiBold, fontSize: 15 },
+
+    successText: { color: c.success, fontFamily: FontFamily.sansRegular, fontSize: 13, lineHeight: 20, textAlign: 'center' },
+    errorText:   { color: c.danger,  fontFamily: FontFamily.sansRegular, fontSize: 13, lineHeight: 20, textAlign: 'center' },
+
+    footerRow:  { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 },
+    footerText: { color: c.inkMute, fontFamily: FontFamily.sansRegular, fontSize: 14 },
+    footerLink: { color: c.accent,  fontFamily: FontFamily.sansBold,    fontSize: 14 },
+  });
+}

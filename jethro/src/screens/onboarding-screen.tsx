@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -12,9 +12,16 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { JethroColors } from '@/constants/theme';
 import { appStorage } from '@/src/lib/app-storage';
 import { onboardingService } from '@/src/services/onboarding/onboarding-service';
+import { useTheme } from '@/src/theme/ThemeContext';
+import type { ThemeColors } from '@/src/theme/colors';
+import { palette } from '@/src/theme/colors';
+import { FontFamily } from '@/src/theme/typography';
+import { getShadow, Radius, Spacing } from '@/src/theme/spacing';
+import { EyebrowLabel } from '@/src/components/ui/EyebrowLabel';
+import { PrimaryButton } from '@/src/components/ui/PrimaryButton';
+import { GhostButton } from '@/src/components/ui/GhostButton';
 
 const DRAFT_KEY = 'onboarding_draft';
 
@@ -38,7 +45,6 @@ type Question = {
 
 type Answers = Record<string, string>;
 
-// Avalia se uma pergunta deve ser visível com base nas respostas actuais do onboarding
 function isVisible(q: Question, answers: Answers): boolean {
   const showIfAnswer = q.metadata?.showIfAnswer as ShowIfAnswer | undefined;
   if (!showIfAnswer) return true;
@@ -53,7 +59,6 @@ function isVisible(q: Question, answers: Answers): boolean {
   }
 }
 
-// Agrupa perguntas por fase (metadata.phase)
 function groupByPhase(questions: Question[]): Question[][] {
   const order = ['1', '3a', '3b', '3c', 'ob', '4', '6'];
   const map = new Map<string, Question[]>();
@@ -67,60 +72,54 @@ function groupByPhase(questions: Question[]): Question[][] {
     const group = map.get(key);
     if (group && group.length > 0) result.push(group);
   }
-  // Adiciona fases não mapeadas
   for (const [key, group] of map.entries()) {
     if (!order.includes(key) && group.length > 0) result.push(group);
   }
   return result;
 }
 
-// ─── Componente de pergunta individual ───────────────────────────────────────
+// ─── Question sub-components ─────────────────────────────────────────────────
 
 function RangeWithOptional({
-  question,
-  value,
-  onChange,
+  question, value, onChange,
 }: {
-  question: Question;
-  value: string;
-  onChange: (v: string) => void;
+  question: Question; value: string; onChange: (v: string) => void;
 }) {
-  // value format: "A" or "A|7500"
+  const { colors } = useTheme();
+  const s = useMemo(() => makeQuestionStyles(colors), [colors]);
   const [rangeCode, optVal] = value.split('|');
   const optionalText = optVal ?? '';
 
   function selectRange(code: string) {
-    // Mantém valor opcional se já existia
     onChange(optionalText ? `${code}|${optionalText}` : code);
   }
-
   function setOptional(text: string) {
     const code = rangeCode ?? '';
     onChange(text ? `${code}|${text}` : code);
   }
 
   return (
-    <View style={styles.rangeWrap}>
+    <View style={s.rangeWrap}>
       {question.options.map((opt) => (
         <Pressable
           key={opt.value}
-          style={[styles.optionPill, rangeCode === opt.value && styles.optionPillActive]}
+          style={[s.optionPill, rangeCode === opt.value && s.optionPillActive]}
           onPress={() => selectRange(opt.value)}
         >
-          <Text style={[styles.optionLabel, rangeCode === opt.value && styles.optionLabelActive]}>
+          <Text style={[s.optionLabel, rangeCode === opt.value && s.optionLabelActive]}>
             {opt.label}
           </Text>
         </Pressable>
       ))}
       {rangeCode && rangeCode !== 'G' && (
-        <View style={styles.optionalInputWrap}>
-          <Text style={styles.optionalLabel}>Valor exacto (opcional):</Text>
+        <View style={s.optionalInputWrap}>
+          <Text style={s.optionalLabel}>Valor exacto (opcional):</Text>
           <TextInput
-            style={styles.optionalInput}
+            style={s.optionalInput}
             value={optionalText}
             onChangeText={setOptional}
             placeholder="Ex: 8500"
-            placeholderTextColor={JethroColors.muted}
+            placeholderTextColor={colors.inkMute}
             keyboardType="number-pad"
           />
         </View>
@@ -130,15 +129,12 @@ function RangeWithOptional({
 }
 
 function MultiSelect({
-  question,
-  value,
-  onChange,
+  question, value, onChange,
 }: {
-  question: Question;
-  value: string;
-  onChange: (v: string) => void;
+  question: Question; value: string; onChange: (v: string) => void;
 }) {
-  // value format: "A,B,C"
+  const { colors } = useTheme();
+  const s = useMemo(() => makeQuestionStyles(colors), [colors]);
   const selected = value ? value.split(',').filter(Boolean) : [];
 
   function toggle(code: string) {
@@ -149,22 +145,20 @@ function MultiSelect({
   }
 
   return (
-    <View style={styles.optionsWrap}>
+    <View style={s.optionsWrap}>
       {question.options.map((opt) => {
         const active = selected.includes(opt.value);
         return (
           <Pressable
             key={opt.value}
-            style={[styles.optionPill, active && styles.optionPillActive]}
+            style={[s.optionPill, active && s.optionPillActive]}
             onPress={() => toggle(opt.value)}
           >
-            <View style={styles.multiRow}>
-              <View style={[styles.checkbox, active && styles.checkboxActive]}>
-                {active && <Text style={styles.checkmark}>✓</Text>}
+            <View style={s.multiRow}>
+              <View style={[s.checkbox, active && s.checkboxActive]}>
+                {active && <Text style={s.checkmark}>✓</Text>}
               </View>
-              <Text style={[styles.optionLabel, active && styles.optionLabelActive]}>
-                {opt.label}
-              </Text>
+              <Text style={[s.optionLabel, active && s.optionLabelActive]}>{opt.label}</Text>
             </View>
           </Pressable>
         );
@@ -176,64 +170,57 @@ function MultiSelect({
 type TeamSlot = { nome: string; funcao: string };
 
 function TeamSlots({
-  question,
-  value,
-  onChange,
+  question, value, onChange,
 }: {
-  question: Question;
-  value: string;
-  onChange: (v: string) => void;
+  question: Question; value: string; onChange: (v: string) => void;
 }) {
+  const { colors } = useTheme();
+  const s = useMemo(() => makeQuestionStyles(colors), [colors]);
   const maxSlots = (question.metadata?.maxSlots as number) ?? 5;
-
   let slots: TeamSlot[] = [];
-  try {
-    if (value) slots = JSON.parse(value) as TeamSlot[];
-  } catch {}
+  try { if (value) slots = JSON.parse(value) as TeamSlot[]; } catch {}
   if (slots.length === 0) slots = [{ nome: '', funcao: '' }];
 
   function update(index: number, field: 'nome' | 'funcao', val: string) {
-    const next = slots.map((s, i) => (i === index ? { ...s, [field]: val } : s));
+    const next = slots.map((sl, i) => (i === index ? { ...sl, [field]: val } : sl));
     onChange(JSON.stringify(next));
   }
-
   function addSlot() {
     if (slots.length >= maxSlots) return;
     onChange(JSON.stringify([...slots, { nome: '', funcao: '' }]));
   }
-
   function removeSlot(index: number) {
     const next = slots.filter((_, i) => i !== index);
     onChange(next.length > 0 ? JSON.stringify(next) : '');
   }
 
   return (
-    <View style={styles.slotsWrap}>
+    <View style={s.slotsWrap}>
       {slots.map((slot, i) => (
-        <View key={i} style={styles.slotCard}>
-          <View style={styles.slotHeader}>
+        <View key={i} style={s.slotCard}>
+          <View style={s.slotHeader}>
             <TextInput
-              style={styles.slotNomeInput}
+              style={s.slotNomeInput}
               value={slot.nome}
               onChangeText={(v) => update(i, 'nome', v)}
               placeholder="Nome (opcional)"
-              placeholderTextColor={JethroColors.muted}
+              placeholderTextColor={colors.inkMute}
               autoCapitalize="words"
             />
             {slots.length > 1 && (
-              <Pressable style={styles.slotRemoveBtn} onPress={() => removeSlot(i)}>
-                <Text style={styles.slotRemoveText}>×</Text>
+              <Pressable style={s.slotRemoveBtn} onPress={() => removeSlot(i)}>
+                <Text style={s.slotRemoveText}>×</Text>
               </Pressable>
             )}
           </View>
-          <View style={styles.funcaoWrap}>
+          <View style={s.funcaoWrap}>
             {question.options.map((opt) => (
               <Pressable
                 key={opt.value}
-                style={[styles.funcaoChip, slot.funcao === opt.value && styles.funcaoChipActive]}
+                style={[s.funcaoChip, slot.funcao === opt.value && s.funcaoChipActive]}
                 onPress={() => update(i, 'funcao', slot.funcao === opt.value ? '' : opt.value)}
               >
-                <Text style={[styles.funcaoChipLabel, slot.funcao === opt.value && styles.funcaoChipLabelActive]}>
+                <Text style={[s.funcaoChipLabel, slot.funcao === opt.value && s.funcaoChipLabelActive]}>
                   {opt.label}
                 </Text>
               </Pressable>
@@ -242,8 +229,8 @@ function TeamSlots({
         </View>
       ))}
       {slots.length < maxSlots && (
-        <Pressable style={styles.addSlotBtn} onPress={addSlot}>
-          <Text style={styles.addSlotText}>+ Adicionar pessoa</Text>
+        <Pressable style={s.addSlotBtn} onPress={addSlot}>
+          <Text style={s.addSlotText}>+ Adicionar pessoa</Text>
         </Pressable>
       )}
     </View>
@@ -251,37 +238,34 @@ function TeamSlots({
 }
 
 function QuestionBlock({
-  question,
-  value,
-  onChange,
-  answers,
+  question, value, onChange, answers,
 }: {
-  question: Question;
-  value: string;
-  onChange: (v: string) => void;
-  answers: Answers;
+  question: Question; value: string; onChange: (v: string) => void; answers: Answers;
 }) {
+  const { colors } = useTheme();
+  const s = useMemo(() => makeQuestionStyles(colors), [colors]);
+
   if (!isVisible(question, answers)) return null;
 
   const { question_type, label, helper_text, options, is_required } = question;
 
   return (
-    <View style={styles.qBlock}>
-      <Text style={styles.qLabel}>
+    <View style={s.qBlock}>
+      <Text style={s.qLabel}>
         {label}
-        {is_required ? <Text style={styles.qRequired}> *</Text> : null}
+        {is_required ? <Text style={s.qRequired}> *</Text> : null}
       </Text>
-      {helper_text ? <Text style={styles.qHelper}>{helper_text}</Text> : null}
+      {helper_text ? <Text style={s.qHelper}>{helper_text}</Text> : null}
 
       {question_type === 'single_select' && (
-        <View style={styles.optionsWrap}>
+        <View style={s.optionsWrap}>
           {options.map((opt) => (
             <Pressable
               key={opt.value}
-              style={[styles.optionPill, value === opt.value && styles.optionPillActive]}
+              style={[s.optionPill, value === opt.value && s.optionPillActive]}
               onPress={() => onChange(opt.value)}
             >
-              <Text style={[styles.optionLabel, value === opt.value && styles.optionLabelActive]}>
+              <Text style={[s.optionLabel, value === opt.value && s.optionLabelActive]}>
                 {opt.label}
               </Text>
             </Pressable>
@@ -303,11 +287,11 @@ function QuestionBlock({
 
       {(question_type === 'text' || question_type === 'email' || question_type === 'number') && (
         <TextInput
-          style={styles.input}
+          style={s.input}
           value={value}
           onChangeText={onChange}
           placeholder="Escreve aqui..."
-          placeholderTextColor={JethroColors.muted}
+          placeholderTextColor={colors.inkMute}
           keyboardType={
             question_type === 'number' ? 'number-pad'
             : question_type === 'email' ? 'email-address'
@@ -319,11 +303,11 @@ function QuestionBlock({
 
       {question_type === 'textarea' && (
         <TextInput
-          style={[styles.input, styles.textarea]}
+          style={[s.input, s.textarea]}
           value={value}
           onChangeText={onChange}
           placeholder="Escreve com detalhe..."
-          placeholderTextColor={JethroColors.muted}
+          placeholderTextColor={colors.inkMute}
           multiline
           numberOfLines={4}
           textAlignVertical="top"
@@ -333,17 +317,84 @@ function QuestionBlock({
   );
 }
 
-// ─── Ecrã principal ───────────────────────────────────────────────────────────
+function makeQuestionStyles(c: ThemeColors) {
+  return StyleSheet.create({
+    qBlock:    { gap: 10 },
+    qLabel:    { fontFamily: FontFamily.sansSemiBold, fontSize: 16, color: c.ink,    lineHeight: 23 },
+    qRequired: { color: c.accent },
+    qHelper:   { fontFamily: FontFamily.sansRegular,  fontSize: 13, color: c.inkMute, lineHeight: 19 },
+
+    optionsWrap: { gap: 10 },
+    optionPill: {
+      minHeight: 52, borderRadius: Radius.sm, borderWidth: 1,
+      borderColor: c.hairline, backgroundColor: c.surface,
+      paddingHorizontal: 16, paddingVertical: 14, justifyContent: 'center',
+      ...getShadow(1),
+    },
+    optionPillActive:  { borderColor: c.accent, backgroundColor: c.accentMuted },
+    optionLabel:       { fontFamily: FontFamily.sansMedium,   fontSize: 15, color: c.inkSoft },
+    optionLabelActive: { fontFamily: FontFamily.sansSemiBold, fontSize: 15, color: c.ink },
+
+    rangeWrap: { gap: 10 },
+    optionalInputWrap: {
+      flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 4,
+      backgroundColor: c.surface, borderRadius: Radius.button, padding: 12,
+      borderWidth: 1, borderColor: c.accent,
+    },
+    optionalLabel: { fontFamily: FontFamily.sansRegular,  fontSize: 13, color: c.accent, flex: 1 },
+    optionalInput: { fontFamily: FontFamily.sansSemiBold, fontSize: 15, color: c.ink,   minWidth: 80, textAlign: 'right' },
+
+    multiRow:      { flexDirection: 'row', alignItems: 'center', gap: 12 },
+    checkbox:      { width: 22, height: 22, borderRadius: 6, borderWidth: 2, borderColor: c.hairline, justifyContent: 'center', alignItems: 'center', backgroundColor: c.surface },
+    checkboxActive:{ borderColor: c.accent, backgroundColor: c.accent },
+    checkmark:     { fontFamily: FontFamily.sansBold, fontSize: 13, color: palette.paper },
+
+    input: {
+      fontFamily: FontFamily.sansRegular, fontSize: 15, color: c.ink,
+      backgroundColor: c.surface, borderWidth: 1, borderColor: c.hairline,
+      borderRadius: Radius.button, paddingHorizontal: 14, paddingVertical: 13,
+      ...getShadow(1),
+    },
+    textarea: { minHeight: 100, textAlignVertical: 'top' },
+
+    slotsWrap: { gap: 10 },
+    slotCard: {
+      backgroundColor: c.surface, borderRadius: Radius.button, padding: 12, gap: 10,
+      borderWidth: 1, borderColor: c.hairline, ...getShadow(1),
+    },
+    slotHeader:    { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    slotNomeInput: {
+      flex: 1, height: 40, backgroundColor: c.background,
+      borderRadius: Radius.icon, paddingHorizontal: 12,
+      fontFamily: FontFamily.sansRegular, fontSize: 14, color: c.ink,
+      borderWidth: 1, borderColor: c.hairline,
+    },
+    slotRemoveBtn:  { width: 32, height: 32, borderRadius: 16, backgroundColor: c.hairline, alignItems: 'center', justifyContent: 'center' },
+    slotRemoveText: { fontFamily: FontFamily.sansBold, fontSize: 18, color: c.inkMute, lineHeight: 22 },
+    funcaoWrap:     { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
+    funcaoChip:           { paddingHorizontal: 10, paddingVertical: 6, borderRadius: Radius.icon, borderWidth: 1, borderColor: c.hairline, backgroundColor: c.surface },
+    funcaoChipActive:     { borderColor: c.accent, backgroundColor: c.accentMuted },
+    funcaoChipLabel:      { fontFamily: FontFamily.sansMedium,   fontSize: 12, color: c.inkSoft },
+    funcaoChipLabelActive:{ fontFamily: FontFamily.sansSemiBold, fontSize: 12, color: c.ink },
+    addSlotBtn:  { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 12, borderRadius: Radius.button, borderWidth: 1, borderColor: c.hairline },
+    addSlotText: { fontFamily: FontFamily.sansSemiBold, fontSize: 14, color: c.accent },
+  });
+}
+
+// ─── Main screen ──────────────────────────────────────────────────────────────
 
 export function OnboardingScreen() {
   const router = useRouter();
+  const { colors } = useTheme();
+  const s = useMemo(() => makeStyles(colors), [colors]);
+
   const [questions, setQuestions] = useState<Question[]>([]);
-  const [steps, setSteps] = useState<Question[][]>([]);
+  const [steps,     setSteps]     = useState<Question[][]>([]);
   const [stepIndex, setStepIndex] = useState(0);
-  const [answers, setAnswers] = useState<Answers>({});
-  const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [answers,   setAnswers]   = useState<Answers>({});
+  const [loading,   setLoading]   = useState(true);
+  const [submitting,setSubmitting]= useState(false);
+  const [error,     setError]     = useState<string | null>(null);
   const draftLoaded = useRef(false);
 
   useEffect(() => {
@@ -356,7 +407,6 @@ export function OnboardingScreen() {
         const qs = (data as unknown as { questions: Question[] }).questions ?? (data as unknown as Question[]);
         setQuestions(qs);
         setSteps(groupByPhase(qs));
-
         if (draftRaw && draftRaw.length > 2) {
           const draft = JSON.parse(draftRaw) as { answers: Answers; stepIndex: number };
           setAnswers(draft.answers ?? {});
@@ -371,7 +421,6 @@ export function OnboardingScreen() {
     })();
   }, []);
 
-  // Guarda draft sempre que respostas ou passo mudam
   useEffect(() => {
     if (!draftLoaded.current) return;
     void appStorage.setItem(DRAFT_KEY, JSON.stringify({ answers, stepIndex }));
@@ -382,11 +431,9 @@ export function OnboardingScreen() {
   }, []);
 
   const currentStepQuestions = steps[stepIndex] ?? [];
-  const totalSteps = steps.length;
-  const isLast = stepIndex === totalSteps - 1;
-
-  // Perguntas visíveis no passo actual (filtra condicionais baseadas em respostas)
-  const visibleQuestions = currentStepQuestions.filter((q) => isVisible(q, answers));
+  const totalSteps            = steps.length;
+  const isLast                = stepIndex === totalSteps - 1;
+  const visibleQuestions      = currentStepQuestions.filter((q) => isVisible(q, answers));
 
   function validateStep(): boolean {
     for (const q of visibleQuestions) {
@@ -423,19 +470,19 @@ export function OnboardingScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView style={[styles.safe, styles.center]} edges={['top']}>
-        <ActivityIndicator size="large" color={JethroColors.gold} />
-        <Text style={styles.loadingText}>A preparar o teu onboarding...</Text>
+      <SafeAreaView style={[s.safe, s.center]} edges={['top']}>
+        <ActivityIndicator size="large" color={colors.accent} />
+        <Text style={s.loadingText}>A preparar o teu onboarding...</Text>
       </SafeAreaView>
     );
   }
 
   if (error) {
     return (
-      <SafeAreaView style={[styles.safe, styles.center]} edges={['top']}>
-        <Text style={styles.errorText}>{error}</Text>
-        <Pressable style={styles.retryBtn} onPress={() => router.replace('/onboarding')}>
-          <Text style={styles.retryBtnText}>Tentar novamente</Text>
+      <SafeAreaView style={[s.safe, s.center]} edges={['top']}>
+        <Text style={s.errorText}>{error}</Text>
+        <Pressable style={s.retryBtn} onPress={() => router.replace('/onboarding')}>
+          <Text style={s.retryBtnText}>Tentar novamente</Text>
         </Pressable>
       </SafeAreaView>
     );
@@ -443,10 +490,10 @@ export function OnboardingScreen() {
 
   if (questions.length === 0) {
     return (
-      <SafeAreaView style={[styles.safe, styles.center]} edges={['top']}>
-        <Text style={styles.errorText}>Sem perguntas disponíveis.</Text>
-        <Pressable style={styles.retryBtn} onPress={() => router.replace('/onboarding-result')}>
-          <Text style={styles.retryBtnText}>Continuar sem onboarding</Text>
+      <SafeAreaView style={[s.safe, s.center]} edges={['top']}>
+        <Text style={s.errorText}>Sem perguntas disponíveis.</Text>
+        <Pressable style={s.retryBtn} onPress={() => router.replace('/onboarding-result')}>
+          <Text style={s.retryBtnText}>Continuar sem onboarding</Text>
         </Pressable>
       </SafeAreaView>
     );
@@ -457,40 +504,37 @@ export function OnboardingScreen() {
     '3c': 'Diagnóstico', 'ob': 'Contexto expandido', '4': 'Aprofundamento', '6': 'Fechamento',
   };
   const currentPhase = String(currentStepQuestions[0]?.metadata?.phase ?? '');
-  const phaseLabel = phaseLabels[currentPhase] ?? '';
+  const phaseLabel   = phaseLabels[currentPhase] ?? '';
 
   return (
-    <SafeAreaView style={styles.safe} edges={['top']}>
+    <SafeAreaView style={s.safe} edges={['top']}>
       <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={styles.container}
+        style={s.scroll}
+        contentContainerStyle={s.container}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
         {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.eyebrow}>✦ Personalização</Text>
-          <Text style={styles.title}>Conta-nos mais sobre o teu negócio</Text>
-          <Text style={styles.subtitle}>
+        <View style={s.header}>
+          <EyebrowLabel>✦ Personalização</EyebrowLabel>
+          <Text style={s.title}>Conta-nos mais sobre o teu negócio</Text>
+          <Text style={s.subtitle}>
             Estas respostas permitem ao Jethro criar um plano verdadeiramente personalizado.
           </Text>
         </View>
 
         {/* Progress */}
-        <View style={styles.progressRow}>
+        <View style={s.progressRow}>
           {steps.map((_, i) => (
-            <View
-              key={i}
-              style={[styles.progressSeg, i <= stepIndex ? styles.progressSegActive : null]}
-            />
+            <View key={i} style={[s.progressSeg, i <= stepIndex && s.progressSegActive]} />
           ))}
         </View>
-        <Text style={styles.progressLabel}>
+        <Text style={s.progressLabel}>
           {phaseLabel ? `${phaseLabel} · ` : ''}Parte {stepIndex + 1} de {totalSteps}
         </Text>
 
         {/* Questions */}
-        <View style={styles.questionsWrap}>
+        <View style={s.questionsWrap}>
           {currentStepQuestions.map((q) => (
             <QuestionBlock
               key={q.code}
@@ -503,28 +547,27 @@ export function OnboardingScreen() {
         </View>
 
         {/* Navigation */}
-        <View style={styles.navRow}>
+        <View style={s.navRow}>
           {stepIndex > 0 && (
-            <Pressable style={styles.backBtn} onPress={() => setStepIndex((i) => i - 1)}>
-              <Text style={styles.backBtnText}>← Voltar</Text>
-            </Pressable>
+            <GhostButton
+              label="← Voltar"
+              onPress={() => setStepIndex((i) => i - 1)}
+              style={s.backBtn}
+            />
           )}
           {isLast ? (
-            <Pressable
-              style={[styles.nextBtn, submitting && styles.nextBtnDisabled]}
+            <PrimaryButton
+              label="Concluir onboarding →"
               onPress={() => void handleSubmit()}
-              disabled={submitting}
-            >
-              {submitting ? (
-                <ActivityIndicator color={JethroColors.navy} />
-              ) : (
-                <Text style={styles.nextBtnText}>Concluir onboarding →</Text>
-              )}
-            </Pressable>
+              loading={submitting}
+              style={s.nextBtn}
+            />
           ) : (
-            <Pressable style={styles.nextBtn} onPress={handleNext}>
-              <Text style={styles.nextBtnText}>Continuar →</Text>
-            </Pressable>
+            <PrimaryButton
+              label="Continuar →"
+              onPress={handleNext}
+              style={s.nextBtn}
+            />
           )}
         </View>
 
@@ -534,104 +577,31 @@ export function OnboardingScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: JethroColors.navy },
-  center: { justifyContent: 'center', alignItems: 'center', gap: 16, paddingHorizontal: 24 },
-  scroll: { flex: 1 },
-  container: { paddingHorizontal: 20, paddingTop: 20 },
-  header: { marginBottom: 20, gap: 8 },
-  eyebrow: { fontSize: 12, fontWeight: '700', color: JethroColors.gold, letterSpacing: 1.5, textTransform: 'uppercase' },
-  title: { fontSize: 26, fontWeight: '800', color: JethroColors.creme, lineHeight: 34 },
-  subtitle: { fontSize: 14, color: JethroColors.muted, lineHeight: 21 },
-  progressRow: { flexDirection: 'row', gap: 6, marginBottom: 6 },
-  progressSeg: { flex: 1, height: 4, borderRadius: 2, backgroundColor: JethroColors.navyDeep },
-  progressSegActive: { backgroundColor: JethroColors.gold },
-  progressLabel: { fontSize: 12, color: JethroColors.muted, marginBottom: 20 },
-  questionsWrap: { gap: 24, marginBottom: 24 },
-  qBlock: { gap: 10 },
-  qLabel: { fontSize: 16, fontWeight: '600', color: JethroColors.creme, lineHeight: 23 },
-  qRequired: { color: JethroColors.gold },
-  qHelper: { fontSize: 13, color: JethroColors.muted, lineHeight: 19 },
-  optionsWrap: { gap: 10 },
-  optionPill: {
-    minHeight: 52, borderRadius: 14, borderWidth: 1, borderColor: JethroColors.navySurface,
-    backgroundColor: JethroColors.navyDeep, paddingHorizontal: 16, paddingVertical: 14,
-    justifyContent: 'center',
-  },
-  optionPillActive: { borderColor: JethroColors.gold, backgroundColor: JethroColors.goldMuted },
-  optionLabel: { fontSize: 15, color: JethroColors.cremeMuted, fontWeight: '500' },
-  optionLabelActive: { color: JethroColors.creme, fontWeight: '700' },
-  // Range with optional
-  rangeWrap: { gap: 10 },
-  optionalInputWrap: {
-    flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 4,
-    backgroundColor: JethroColors.navySurface, borderRadius: 12, padding: 12,
-    borderWidth: 1, borderColor: JethroColors.gold,
-  },
-  optionalLabel: { fontSize: 13, color: JethroColors.gold, flex: 1 },
-  optionalInput: {
-    fontSize: 15, color: JethroColors.creme, fontWeight: '700',
-    minWidth: 80, textAlign: 'right',
-  },
-  // Multi-select
-  multiRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  checkbox: {
-    width: 22, height: 22, borderRadius: 6, borderWidth: 2,
-    borderColor: JethroColors.muted, justifyContent: 'center', alignItems: 'center',
-  },
-  checkboxActive: { borderColor: JethroColors.gold, backgroundColor: JethroColors.gold },
-  checkmark: { fontSize: 13, color: JethroColors.navy, fontWeight: '800' },
-  // Text inputs
-  input: {
-    backgroundColor: JethroColors.navySurface, borderWidth: 1, borderColor: JethroColors.navyDeep,
-    borderRadius: 12, paddingHorizontal: 14, paddingVertical: 13, fontSize: 15, color: JethroColors.creme,
-  },
-  textarea: { minHeight: 100, textAlignVertical: 'top' },
-  // Team slots
-  slotsWrap:       { gap: 10 },
-  slotCard:        {
-    backgroundColor: JethroColors.navyDeep, borderRadius: 12, padding: 12, gap: 10,
-    borderWidth: 1, borderColor: JethroColors.navySurface,
-  },
-  slotHeader:      { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  slotNomeInput:   {
-    flex: 1, height: 40, backgroundColor: JethroColors.navySurface,
-    borderRadius: 8, paddingHorizontal: 12, fontSize: 14, color: JethroColors.creme,
-    borderWidth: 1, borderColor: JethroColors.navyDeep,
-  },
-  slotRemoveBtn:   {
-    width: 32, height: 32, borderRadius: 16,
-    backgroundColor: JethroColors.navySurface, alignItems: 'center', justifyContent: 'center',
-  },
-  slotRemoveText:  { fontSize: 18, color: JethroColors.muted, fontWeight: '700', lineHeight: 22 },
-  funcaoWrap:      { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
-  funcaoChip:      {
-    paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8,
-    borderWidth: 1, borderColor: JethroColors.navySurface, backgroundColor: JethroColors.navySurface,
-  },
-  funcaoChipActive:      { borderColor: JethroColors.gold, backgroundColor: JethroColors.goldMuted },
-  funcaoChipLabel:       { fontSize: 12, color: JethroColors.cremeMuted, fontWeight: '500' },
-  funcaoChipLabelActive: { color: JethroColors.creme, fontWeight: '700' },
-  addSlotBtn:      {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    padding: 12, borderRadius: 12, borderWidth: 1, borderColor: JethroColors.navySurface,
-  },
-  addSlotText:     { fontSize: 14, color: JethroColors.gold, fontWeight: '600' },
-  // Navigation
-  navRow: { flexDirection: 'row', gap: 12 },
-  backBtn: {
-    flex: 1, borderWidth: 1, borderColor: JethroColors.navySurface, borderRadius: 12,
-    paddingVertical: 15, alignItems: 'center',
-  },
-  backBtnText: { fontSize: 15, fontWeight: '600', color: JethroColors.muted },
-  nextBtn: {
-    flex: 2, backgroundColor: JethroColors.gold, borderRadius: 12,
-    paddingVertical: 15, alignItems: 'center',
-  },
-  nextBtnDisabled: { opacity: 0.7 },
-  nextBtnText: { fontSize: 15, fontWeight: '700', color: JethroColors.navy },
-  loadingText: { fontSize: 15, color: JethroColors.muted, marginTop: 12 },
-  errorText: { fontSize: 14, color: JethroColors.danger, textAlign: 'center' },
-  retryBtn: { backgroundColor: JethroColors.gold, borderRadius: 12, paddingVertical: 13, paddingHorizontal: 24 },
-  retryBtnText: { fontSize: 15, fontWeight: '700', color: JethroColors.navy },
-});
+function makeStyles(c: ThemeColors) {
+  return StyleSheet.create({
+    safe:   { flex: 1, backgroundColor: c.background },
+    center: { justifyContent: 'center', alignItems: 'center', gap: 16, paddingHorizontal: 24 },
+    scroll: { flex: 1 },
+    container: { paddingHorizontal: Spacing.screenH, paddingTop: 20 },
+
+    header:   { marginBottom: 20, gap: 8 },
+    title:    { fontFamily: FontFamily.serifSemiBold, fontSize: 26, color: c.ink,    lineHeight: 32 },
+    subtitle: { fontFamily: FontFamily.sansRegular,   fontSize: 14, color: c.inkSoft, lineHeight: 21 },
+
+    progressRow:       { flexDirection: 'row', gap: 6, marginBottom: 6 },
+    progressSeg:       { flex: 1, height: 3, borderRadius: 2, backgroundColor: c.hairline },
+    progressSegActive: { backgroundColor: c.accent },
+    progressLabel:     { fontFamily: FontFamily.sansRegular, fontSize: 12, color: c.inkMute, marginBottom: 20 },
+
+    questionsWrap: { gap: 24, marginBottom: 24 },
+
+    navRow:  { flexDirection: 'row', gap: 12 },
+    backBtn: { flex: 1 },
+    nextBtn: { flex: 2 },
+
+    loadingText:  { fontFamily: FontFamily.sansRegular,  fontSize: 15, color: c.inkMute, marginTop: 12 },
+    errorText:    { fontFamily: FontFamily.sansRegular,  fontSize: 14, color: c.liveRed, textAlign: 'center' },
+    retryBtn:     { backgroundColor: c.accent, borderRadius: Radius.button, paddingVertical: 13, paddingHorizontal: 24 },
+    retryBtnText: { fontFamily: FontFamily.sansSemiBold, fontSize: 15, color: palette.navy800 },
+  });
+}

@@ -1,32 +1,32 @@
 import * as WebBrowser from 'expo-web-browser';
 import { useRouter } from 'expo-router';
-import { useCallback, useState } from 'react';
-import {
-  ActivityIndicator,
-  Alert,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { useCallback, useMemo, useState } from 'react';
+import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { JethroColors } from '@/constants/theme';
 import { getAuthHeaders } from '@/src/lib/auth-headers';
 import { subscriptionService } from '@/src/services/subscription/subscription-service';
+import { useTheme } from '@/src/theme/ThemeContext';
+import type { ThemeColors } from '@/src/theme/colors';
+import { palette } from '@/src/theme/colors';
+import { FontFamily } from '@/src/theme/typography';
+import { Radius, Spacing, getShadow } from '@/src/theme/spacing';
+import { EyebrowLabel } from '@/src/components/ui/EyebrowLabel';
 
 const features = [
-  { icon: '✦', label: 'Diagnóstico do negócio por IA', sub: 'Motor v2.8 com 9 modelos A–I + X' },
-  { icon: '◈', label: 'Plano de 24 semanas personalizado', sub: 'Gerado pela Alma do Rogério + Claude' },
-  { icon: '◆', label: 'Mentor IA disponível 24/7', sub: 'Chat com o Jethro em qualquer momento' },
-  { icon: '◉', label: 'Biblioteca PBN completa', sub: '14 guias × 7 pilares do negócio' },
-  { icon: '●', label: 'Gate de avanço semanal', sub: 'Progresso medido e desbloqueado com disciplina' },
+  { icon: '✦', label: 'Diagnóstico do negócio por IA',        sub: 'Motor v2.8 com 9 modelos A–I + X' },
+  { icon: '◈', label: 'Plano de 24 semanas personalizado',     sub: 'Gerado pela Alma do Rogério + Claude' },
+  { icon: '◆', label: 'Mentor IA disponível 24/7',             sub: 'Chat com o Jethro em qualquer momento' },
+  { icon: '◉', label: 'Biblioteca PBN completa',               sub: '14 guias × 7 pilares do negócio' },
+  { icon: '●', label: 'Gate de avanço semanal',                sub: 'Progresso medido e desbloqueado com disciplina' },
 ];
 
 export function PaywallScreen() {
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
+  const { colors } = useTheme();
+  const s = useMemo(() => makeStyles(colors), [colors]);
+
+  const [loading,   setLoading]   = useState(false);
   const [verifying, setVerifying] = useState(false);
 
   const checkAndProceed = useCallback(async () => {
@@ -36,15 +36,10 @@ export function PaywallScreen() {
       if (status && ['active', 'trial', 'grace_period'].includes(status.status)) {
         router.replace('/onboarding');
       } else {
-        Alert.alert(
-          'Pagamento não detectado',
-          'Completa o pagamento no checkout e toca em "Verificar" para continuar.',
-          [{ text: 'OK' }]
-        );
+        Alert.alert('Pagamento não detectado', 'Completa o pagamento no checkout e toca em "Verificar" para continuar.', [{ text: 'OK' }]);
       }
     } catch (e) {
-      const msg = e instanceof Error ? e.message : String(e);
-      Alert.alert('Erro ao verificar', msg, [{ text: 'OK' }]);
+      Alert.alert('Erro ao verificar', e instanceof Error ? e.message : String(e), [{ text: 'OK' }]);
     } finally {
       setVerifying(false);
     }
@@ -56,13 +51,11 @@ export function PaywallScreen() {
       const { url } = await subscriptionService.createCheckout();
       await WebBrowser.openBrowserAsync(url, {
         presentationStyle: WebBrowser.WebBrowserPresentationStyle.PAGE_SHEET,
-        controlsColor: JethroColors.gold,
+        controlsColor: palette.gold500,
       });
-      // After browser closes, auto-check
       await checkAndProceed();
     } catch (e) {
-      const msg = e instanceof Error ? e.message : String(e);
-      Alert.alert('Erro no checkout', msg, [{ text: 'OK' }]);
+      Alert.alert('Erro no checkout', e instanceof Error ? e.message : String(e), [{ text: 'OK' }]);
     } finally {
       setLoading(false);
     }
@@ -70,68 +63,54 @@ export function PaywallScreen() {
 
   const handleSandbox = useCallback(async () => {
     setLoading(true);
-
-    // Debug: check auth token first
     const headers = await getAuthHeaders();
     const hasToken = 'Authorization' in headers;
-    console.log('[sandbox] hasToken:', hasToken, hasToken ? headers.Authorization?.slice(0, 30) + '...' : 'NONE');
-
     if (!hasToken) {
       setLoading(false);
       Alert.alert('Sem sessão', 'Token de autenticação ausente. Faz logout e login novamente.', [{ text: 'OK' }]);
       return;
     }
-
     try {
       await subscriptionService.activateSandbox();
-      console.log('[sandbox] activateSandbox OK');
       router.replace('/onboarding');
     } catch (e) {
-      const msg = e instanceof Error ? e.message : String(e);
-      console.warn('[sandbox] activateSandbox failed:', msg);
-      Alert.alert('Erro no sandbox', msg, [{ text: 'OK' }]);
+      Alert.alert('Erro no sandbox', e instanceof Error ? e.message : String(e), [{ text: 'OK' }]);
     } finally {
       setLoading(false);
     }
   }, [router]);
 
   return (
-    <SafeAreaView style={styles.safe} edges={['top']}>
-      <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={styles.container}
-        showsVerticalScrollIndicator={false}
-      >
+    <SafeAreaView style={s.safe} edges={['top']}>
+      <ScrollView style={s.scroll} contentContainerStyle={s.container} showsVerticalScrollIndicator={false}>
         {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.eyebrow}>✦ Jethro Mentor PBN</Text>
-          <Text style={styles.title}>O teu negócio merece{'\n'}uma rota clara</Text>
-          <Text style={styles.subtitle}>
-            Diagnóstico feito. Agora ativa o plano completo e começa a semana 1.
-          </Text>
+        <View style={s.header}>
+          <EyebrowLabel>✦ Jethro Mentor PBN</EyebrowLabel>
+          <Text style={s.title}>O teu negócio merece{'\n'}uma rota clara</Text>
+          <Text style={s.subtitle}>Diagnóstico feito. Agora ativa o plano completo e começa a semana 1.</Text>
         </View>
 
-        {/* Pricing card */}
-        <View style={styles.pricingCard}>
-          <View style={styles.pricingBadge}>
-            <Text style={styles.pricingBadgeLabel}>Plano Pro</Text>
+        {/* Pricing card — usa surfaceFeature (navy) para destaque em ambos os modos */}
+        <View style={s.pricingCard}>
+          <View style={s.pricingBadge}>
+            <Text style={s.pricingBadgeLabel}>Plano Pro</Text>
           </View>
-          <View style={styles.pricingRow}>
-            <Text style={styles.pricingCurrency}>R$</Text>
-            <Text style={styles.pricingAmount}>147</Text>
-            <Text style={styles.pricingPeriod}>/mês</Text>
+          <View style={s.pricingRow}>
+            <Text style={s.pricingCurrency}>R$</Text>
+            <Text style={s.pricingAmount}>147</Text>
+            <Text style={s.pricingPeriod}>/mês</Text>
           </View>
-          <Text style={styles.pricingNote}>Cancela quando quiseres · Sem contratos</Text>
+          <Text style={s.pricingNote}>Cancela quando quiseres · Sem contratos</Text>
         </View>
 
         {/* Features */}
-        <View style={styles.featuresCard}>
+        <View style={s.featuresCard}>
           {features.map((f) => (
-            <View key={f.label} style={styles.featureRow}>
-              <Text style={styles.featureIcon}>{f.icon}</Text>
-              <View style={styles.featureText}>
-                <Text style={styles.featureLabel}>{f.label}</Text>
-                <Text style={styles.featureSub}>{f.sub}</Text>
+            <View key={f.label} style={s.featureRow}>
+              <Text style={s.featureIcon}>{f.icon}</Text>
+              <View style={s.featureText}>
+                <Text style={s.featureLabel}>{f.label}</Text>
+                <Text style={s.featureSub}>{f.sub}</Text>
               </View>
             </View>
           ))}
@@ -139,44 +118,29 @@ export function PaywallScreen() {
 
         {/* CTA */}
         <Pressable
-          style={[styles.ctaBtn, loading && styles.ctaBtnDisabled]}
+          style={[s.ctaBtn, loading && s.ctaBtnDisabled]}
           onPress={handleCheckout}
           disabled={loading || verifying}
         >
-          {loading ? (
-            <ActivityIndicator color={JethroColors.navy} />
-          ) : (
-            <Text style={styles.ctaBtnText}>Ativar plano — R$147/mês</Text>
-          )}
+          {loading
+            ? <ActivityIndicator color={palette.navy800} />
+            : <Text style={s.ctaBtnText}>Ativar plano — R$147/mês</Text>
+          }
         </Pressable>
 
-        {/* Verificar após pagar */}
-        <Pressable
-          style={styles.verifyBtn}
-          onPress={checkAndProceed}
-          disabled={loading || verifying}
-        >
-          {verifying ? (
-            <ActivityIndicator color={JethroColors.gold} size="small" />
-          ) : (
-            <Text style={styles.verifyBtnText}>Já paguei — verificar</Text>
-          )}
+        <Pressable style={s.verifyBtn} onPress={checkAndProceed} disabled={loading || verifying}>
+          {verifying
+            ? <ActivityIndicator color={colors.accent} size="small" />
+            : <Text style={s.verifyBtnText}>Já paguei — verificar</Text>
+          }
         </Pressable>
 
-        {/* Sandbox dev button */}
-        <Pressable
-          style={styles.sandboxBtn}
-          onPress={handleSandbox}
-          disabled={loading || verifying}
-        >
-          <Text style={styles.sandboxBtnText}>
-            Modo sandbox — ativar sem pagamento
-          </Text>
+        <Pressable style={s.sandboxBtn} onPress={handleSandbox} disabled={loading || verifying}>
+          <Text style={s.sandboxBtnText}>Modo sandbox — ativar sem pagamento</Text>
         </Pressable>
 
-        <Text style={styles.legal}>
-          Ao prosseguir aceitas os Termos de Serviço. Pagamento processado por Stripe com encriptação
-          de ponta a ponta.
+        <Text style={s.legal}>
+          Ao prosseguir aceitas os Termos de Serviço. Pagamento processado por Stripe com encriptação de ponta a ponta.
         </Text>
 
         <View style={{ height: 40 }} />
@@ -185,63 +149,79 @@ export function PaywallScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: JethroColors.navy },
-  scroll: { flex: 1 },
-  container: { paddingHorizontal: 24, paddingTop: 24 },
-  header: { marginBottom: 28, gap: 10 },
-  eyebrow: {
-    fontSize: 12, fontWeight: '700', color: JethroColors.gold,
-    letterSpacing: 1.5, textTransform: 'uppercase',
-  },
-  title: { fontSize: 30, fontWeight: '800', color: JethroColors.creme, lineHeight: 38 },
-  subtitle: { fontSize: 15, color: JethroColors.muted, lineHeight: 22 },
-  pricingCard: {
-    backgroundColor: JethroColors.navySurface, borderRadius: 20,
-    borderWidth: 1, borderColor: JethroColors.gold, padding: 24,
-    alignItems: 'center', marginBottom: 20, gap: 8,
-  },
-  pricingBadge: {
-    backgroundColor: JethroColors.goldMuted, borderRadius: 20,
-    paddingHorizontal: 14, paddingVertical: 5,
-  },
-  pricingBadgeLabel: { fontSize: 12, fontWeight: '700', color: JethroColors.gold, letterSpacing: 1 },
-  pricingRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 2 },
-  pricingCurrency: { fontSize: 22, fontWeight: '700', color: JethroColors.creme, paddingBottom: 4 },
-  pricingAmount: { fontSize: 56, fontWeight: '800', color: JethroColors.creme, lineHeight: 64 },
-  pricingPeriod: { fontSize: 18, color: JethroColors.muted, paddingBottom: 8 },
-  pricingNote: { fontSize: 13, color: JethroColors.muted },
-  featuresCard: {
-    backgroundColor: JethroColors.navySurface, borderRadius: 16,
-    borderWidth: 1, borderColor: JethroColors.navyDeep,
-    padding: 20, marginBottom: 24, gap: 16,
-  },
-  featureRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 14 },
-  featureIcon: { fontSize: 18, color: JethroColors.gold, width: 24, textAlign: 'center', marginTop: 1 },
-  featureText: { flex: 1, gap: 2 },
-  featureLabel: { fontSize: 15, fontWeight: '600', color: JethroColors.creme },
-  featureSub: { fontSize: 12, color: JethroColors.muted },
-  ctaBtn: {
-    backgroundColor: JethroColors.gold, borderRadius: 14,
-    paddingVertical: 17, alignItems: 'center', marginBottom: 12,
-    shadowColor: JethroColors.gold, shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3, shadowRadius: 10, elevation: 6,
-  },
-  ctaBtnDisabled: { opacity: 0.7 },
-  ctaBtnText: { fontSize: 16, fontWeight: '800', color: JethroColors.navy },
-  verifyBtn: {
-    borderWidth: 1.5, borderColor: JethroColors.gold, borderRadius: 14,
-    paddingVertical: 14, alignItems: 'center', marginBottom: 12,
-  },
-  verifyBtnText: { fontSize: 15, fontWeight: '600', color: JethroColors.gold },
-  sandboxBtn: {
-    borderWidth: 1, borderColor: JethroColors.navySurface, borderRadius: 12,
-    paddingVertical: 12, alignItems: 'center', marginBottom: 20,
-    borderStyle: 'dashed',
-  },
-  sandboxBtnText: { fontSize: 13, color: JethroColors.muted },
-  legal: {
-    fontSize: 11, color: JethroColors.muted, textAlign: 'center',
-    lineHeight: 17, paddingHorizontal: 8,
-  },
-});
+function makeStyles(c: ThemeColors) {
+  return StyleSheet.create({
+    safe:      { flex: 1, backgroundColor: c.background },
+    scroll:    { flex: 1 },
+    container: { paddingHorizontal: Spacing.screenH, paddingTop: 24 },
+
+    header:   { marginBottom: 28, gap: 10 },
+    title:    { fontFamily: FontFamily.serifSemiBold, fontSize: 30, color: c.ink, lineHeight: 38 },
+    subtitle: { fontFamily: FontFamily.sansRegular,   fontSize: 15, color: c.inkMute, lineHeight: 22 },
+
+    // Pricing card — sempre navy para criar impacto
+    pricingCard: {
+      backgroundColor: palette.navy800,
+      borderRadius:    Radius.hero,
+      borderWidth:     1,
+      borderColor:     palette.gold500,
+      padding:         24,
+      alignItems:      'center',
+      marginBottom:    20,
+      gap:             8,
+      ...getShadow(2),
+    },
+    pricingBadge: {
+      backgroundColor:  palette.goldMuted,
+      borderRadius:     20,
+      paddingHorizontal: 14,
+      paddingVertical:   5,
+    },
+    pricingBadgeLabel: { fontFamily: FontFamily.sansBold, fontSize: 12, color: palette.gold500, letterSpacing: 1 },
+    pricingRow:        { flexDirection: 'row', alignItems: 'flex-end', gap: 2 },
+    pricingCurrency:   { fontFamily: FontFamily.sansBold, fontSize: 22, color: palette.paper, paddingBottom: 4 },
+    pricingAmount:     { fontFamily: FontFamily.serifSemiBold, fontSize: 56, color: palette.paper, lineHeight: 64 },
+    pricingPeriod:     { fontFamily: FontFamily.sansRegular, fontSize: 18, color: 'rgba(239,239,234,0.55)', paddingBottom: 8 },
+    pricingNote:       { fontFamily: FontFamily.sansRegular, fontSize: 13, color: 'rgba(239,239,234,0.55)' },
+
+    // Features card
+    featuresCard: {
+      backgroundColor: c.surface,
+      borderRadius:    Radius.md,
+      borderWidth:     StyleSheet.hairlineWidth,
+      borderColor:     c.hairline,
+      padding:         20,
+      marginBottom:    24,
+      gap:             16,
+      ...getShadow(1),
+    },
+    featureRow:  { flexDirection: 'row', alignItems: 'flex-start', gap: 14 },
+    featureIcon: { fontFamily: FontFamily.sansRegular, fontSize: 18, color: c.accent, width: 24, textAlign: 'center', marginTop: 1 },
+    featureText: { flex: 1, gap: 2 },
+    featureLabel:{ fontFamily: FontFamily.sansSemiBold, fontSize: 15, color: c.ink },
+    featureSub:  { fontFamily: FontFamily.sansRegular,  fontSize: 12, color: c.inkMute },
+
+    ctaBtn: {
+      backgroundColor:  palette.gold500,
+      borderRadius:     Radius.button,
+      paddingVertical:  17,
+      alignItems:       'center',
+      marginBottom:     12,
+      shadowColor:      palette.gold500,
+      shadowOffset:     { width: 0, height: 4 },
+      shadowOpacity:    0.3,
+      shadowRadius:     10,
+      elevation:        6,
+    },
+    ctaBtnDisabled: { opacity: 0.7 },
+    ctaBtnText:     { fontFamily: FontFamily.sansBold, fontSize: 16, color: palette.navy800 },
+
+    verifyBtn:     { borderWidth: 1.5, borderColor: c.accent, borderRadius: Radius.button, paddingVertical: 14, alignItems: 'center', marginBottom: 12 },
+    verifyBtnText: { fontFamily: FontFamily.sansSemiBold, fontSize: 15, color: c.accent },
+
+    sandboxBtn:     { borderWidth: 1, borderColor: c.hairline, borderRadius: Radius.md, paddingVertical: 12, alignItems: 'center', marginBottom: 20, borderStyle: 'dashed' },
+    sandboxBtnText: { fontFamily: FontFamily.sansRegular, fontSize: 13, color: c.inkMute },
+
+    legal: { fontFamily: FontFamily.sansRegular, fontSize: 11, color: c.inkMute, textAlign: 'center', lineHeight: 17, paddingHorizontal: 8 },
+  });
+}

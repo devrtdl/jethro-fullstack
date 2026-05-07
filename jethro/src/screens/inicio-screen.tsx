@@ -1,8 +1,9 @@
 import { useRouter } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  FlatList,
   Modal,
   Pressable,
   RefreshControl,
@@ -13,10 +14,23 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Svg, { Line } from 'react-native-svg';
+import { Ionicons } from '@expo/vector-icons';
 
-import { JethroColors } from '@/constants/theme';
 import { useAuthSession } from '@/src/hooks/use-auth-session';
 import { homeService, type HomeData } from '@/src/services/home/home-service';
+import { useTheme } from '@/src/theme/ThemeContext';
+import type { ThemeColors } from '@/src/theme/colors';
+import { palette } from '@/src/theme/colors';
+import { FontFamily } from '@/src/theme/typography';
+import { getShadow, Radius, Spacing } from '@/src/theme/spacing';
+import { EyebrowLabel } from '@/src/components/ui/EyebrowLabel';
+import { PrimaryButton } from '@/src/components/ui/PrimaryButton';
+import { GhostButton } from '@/src/components/ui/GhostButton';
+import { FeatureCard } from '@/src/components/ui/FeatureCard';
+import { SectionCard } from '@/src/components/section-card';
+
+// ─── Pure helpers ─────────────────────────────────────────────────────────────
 
 function getUserFirstName(email: string): string {
   return email.split('@')[0]?.split('.')[0] ?? 'Empresário';
@@ -32,19 +46,15 @@ function getGreeting(): string {
 function getFormattedDate(): string {
   return new Date().toLocaleDateString('pt-BR', {
     weekday: 'long',
-    day: 'numeric',
-    month: 'long',
+    day:     'numeric',
+    month:   'long',
   });
 }
 
 function faseLabel(fase: string): string {
   const map: Record<string, string> = {
-    fundamento: 'Fundamento',
-    estrutura: 'Estrutura',
-    controlo: 'Controlo',
-    crescimento: 'Crescimento',
-    escala: 'Escala',
-    legado: 'Legado',
+    fundamento: 'Fundamento', estrutura: 'Estrutura', controlo: 'Controlo',
+    crescimento: 'Crescimento', escala: 'Escala', legado: 'Legado',
   };
   return map[fase] ?? fase;
 }
@@ -54,105 +64,209 @@ function formatKpiValue(val: string | number | null): string {
   return String(val);
 }
 
-// ─── Check-in Modal ──────────────────────────────────────────────────────────
+function prioBgColor(p: string) {
+  if (p === 'critica') return palette.liveRed;
+  if (p === 'alta')    return palette.gold500;
+  if (p === 'media')   return '#6B9FD4';
+  return palette.inkMute;
+}
+
+function prioLabel(p: string) {
+  if (p === 'critica') return 'URGENTE';
+  if (p === 'alta')    return 'ALTA';
+  if (p === 'media')   return 'MÉDIA';
+  return 'TAREFA';
+}
+
+// ─── Striped thumbnail ────────────────────────────────────────────────────────
+
+function StripedThumb({ children }: { children?: React.ReactNode }) {
+  return (
+    <View style={thumb.container}>
+      <Svg style={StyleSheet.absoluteFill} accessible={false}>
+        {Array.from({ length: 16 }).map((_, i) => (
+          <Line
+            key={i}
+            x1={i * 24 - 40} y1={-10}
+            x2={i * 24 + 60} y2={110}
+            stroke={palette.navy800}
+            strokeWidth={10}
+            opacity={0.055}
+          />
+        ))}
+      </Svg>
+      {children}
+    </View>
+  );
+}
+
+const thumb = StyleSheet.create({
+  container: { backgroundColor: 'rgba(212,175,55,0.10)', overflow: 'hidden' },
+});
+
+// ─── Tarefa card (horizontal FlatList) ────────────────────────────────────────
+
+type Tarefa = NonNullable<HomeData['plano']>['tarefas'][number];
+
+function TarefaCard({ tarefa, onRecursoPress }: { tarefa: Tarefa; onRecursoPress: () => void }) {
+  const { colors } = useTheme();
+  const c = useMemo(() => makeCardStyles(colors), [colors]);
+  const color = prioBgColor(tarefa.prioridade);
+  const label = prioLabel(tarefa.prioridade);
+
+  return (
+    <View style={[c.wrap, tarefa.completada && c.wrapDone]}>
+      <StripedThumb>
+        <View style={c.thumbInner}>
+          <View style={[c.badge, { backgroundColor: color }]}>
+            <Text style={c.badgeText}>{label}</Text>
+          </View>
+          {tarefa.completada && (
+            <View style={c.doneOverlay}>
+              <Text style={c.doneCheck}>✓</Text>
+            </View>
+          )}
+        </View>
+      </StripedThumb>
+      <View style={c.body}>
+        <Text style={[c.title, tarefa.completada && c.titleDone]} numberOfLines={3}>
+          {tarefa.descricao}
+        </Text>
+        {tarefa.completada ? (
+          <Text style={c.completadaLabel}>✓ Concluída</Text>
+        ) : tarefa.recurso_biblioteca ? (
+          <Pressable style={c.resourceChip} onPress={onRecursoPress}>
+            <Text style={c.resourceText} numberOfLines={1}>◈ {tarefa.recurso_biblioteca}</Text>
+          </Pressable>
+        ) : null}
+      </View>
+    </View>
+  );
+}
+
+function makeCardStyles(c: ThemeColors) {
+  return StyleSheet.create({
+    wrap:     { width: 180, borderRadius: Radius.md, backgroundColor: c.surface, overflow: 'hidden', ...getShadow(1) },
+    wrapDone: { opacity: 0.7 },
+    thumbInner: { height: 90, padding: 10 },
+    badge:    { alignSelf: 'flex-start', borderRadius: Radius.pill, paddingHorizontal: 10, paddingVertical: 4 },
+    badgeText:{ fontFamily: FontFamily.sansBold, fontSize: 10, color: palette.paper, letterSpacing: 0.5, textTransform: 'uppercase' },
+    doneOverlay: { position: 'absolute', bottom: 8, right: 10, width: 28, height: 28, borderRadius: 14, backgroundColor: palette.success, justifyContent: 'center', alignItems: 'center' },
+    doneCheck:   { fontFamily: FontFamily.sansBold, fontSize: 14, color: palette.paper, lineHeight: 18 },
+    body:  { padding: 12, gap: 8, flex: 1 },
+    title: { fontFamily: FontFamily.serifMedium, fontSize: 13, color: c.ink, lineHeight: 19, flex: 1 },
+    titleDone:       { textDecorationLine: 'line-through', color: c.inkMute },
+    completadaLabel: { fontFamily: FontFamily.sansRegular, fontSize: 11, color: palette.success },
+    resourceChip:    { borderWidth: 1, borderColor: c.accent, borderRadius: Radius.xs, paddingHorizontal: 8, paddingVertical: 3, alignSelf: 'flex-start' },
+    resourceText:    { fontFamily: FontFamily.sansRegular, fontSize: 10, color: c.accent },
+  });
+}
+
+// ─── Check-in Modal ───────────────────────────────────────────────────────────
 
 type CheckInModalProps = {
-  visible: boolean;
-  onClose: () => void;
+  visible:  boolean;
+  onClose:  () => void;
   onSubmit: (cumpriu: boolean, nota: string) => void;
-  loading: boolean;
+  loading:  boolean;
 };
 
 function CheckInModal({ visible, onClose, onSubmit, loading }: CheckInModalProps) {
+  const { colors } = useTheme();
+  const m = useMemo(() => makeModalStyles(colors), [colors]);
   const [cumpriu, setCumpriu] = useState<boolean | null>(null);
-  const [nota, setNota] = useState('');
+  const [nota,    setNota]    = useState('');
 
   function handleSubmit() {
     if (cumpriu === null) return;
     onSubmit(cumpriu, nota);
-  }
-
-  function reset() {
     setCumpriu(null);
     setNota('');
   }
 
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="slide"
-      onRequestClose={onClose}
-    >
-      <Pressable style={styles.modalOverlay} onPress={onClose}>
-        <Pressable style={styles.modalSheet} onPress={() => {}}>
-          <View style={styles.modalHandle} />
-          <Text style={styles.modalTitle}>Check-in do dia</Text>
-          <Text style={styles.modalSub}>
-            Regista o teu dia de trabalho. Após 5 dias, o gate de avanço abre.
-          </Text>
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+      <Pressable style={m.overlay} onPress={onClose}>
+        <Pressable style={m.sheet} onPress={() => {}}>
+          <View style={m.handle} />
+          <Text style={m.title}>Check-in do dia</Text>
+          <Text style={m.sub}>Regista o teu dia de trabalho. Após 5 dias, o gate de avanço abre.</Text>
 
-          <Text style={styles.modalQuestion}>Cumpri as tarefas de hoje?</Text>
-          <View style={styles.yesNoRow}>
-            <Pressable
-              style={[styles.yesNoBtn, cumpriu === true && styles.yesNoBtnActive]}
-              onPress={() => setCumpriu(true)}
-            >
-              <Text style={[styles.yesNoText, cumpriu === true && styles.yesNoTextActive]}>
-                ✓ Sim
-              </Text>
+          <Text style={m.question}>Cumpri as tarefas de hoje?</Text>
+          <View style={m.yesNoRow}>
+            <Pressable style={[m.yesNoBtn, cumpriu === true  && m.yesNoBtnActive]}   onPress={() => setCumpriu(true)}>
+              <Text style={[m.yesNoText, cumpriu === true  && m.yesNoTextActive]}>✓ Sim</Text>
             </Pressable>
-            <Pressable
-              style={[styles.yesNoBtn, cumpriu === false && styles.yesNoBtnActiveNo]}
-              onPress={() => setCumpriu(false)}
-            >
-              <Text style={[styles.yesNoText, cumpriu === false && styles.yesNoTextActive]}>
-                ✗ Não
-              </Text>
+            <Pressable style={[m.yesNoBtn, cumpriu === false && m.yesNoBtnActiveNo]} onPress={() => setCumpriu(false)}>
+              <Text style={[m.yesNoText, cumpriu === false && m.yesNoTextActive]}>✗ Não</Text>
             </Pressable>
           </View>
 
           <TextInput
-            style={styles.modalInput}
+            style={m.input}
             placeholder="Nota do dia (opcional)"
-            placeholderTextColor={JethroColors.muted}
+            placeholderTextColor={colors.inkMute}
             value={nota}
             onChangeText={setNota}
             multiline
             maxLength={300}
           />
 
-          <Pressable
-            style={[styles.modalBtn, (cumpriu === null || loading) && styles.modalBtnDisabled]}
+          <PrimaryButton
+            label="Registar dia"
             onPress={handleSubmit}
-            disabled={cumpriu === null || loading}
-            onResponderRelease={reset}
-          >
-            {loading ? (
-              <ActivityIndicator size="small" color={JethroColors.navy} />
-            ) : (
-              <Text style={styles.modalBtnText}>Registar dia</Text>
-            )}
-          </Pressable>
+            loading={loading}
+            disabled={cumpriu === null}
+            accessibilityLabel="Registar dia de trabalho"
+          />
         </Pressable>
       </Pressable>
     </Modal>
   );
 }
 
-// ─── Main Screen ─────────────────────────────────────────────────────────────
+function makeModalStyles(c: ThemeColors) {
+  return StyleSheet.create({
+    overlay: { flex: 1, backgroundColor: 'rgba(11,31,59,0.55)', justifyContent: 'flex-end' },
+    sheet: {
+      backgroundColor: c.surface, borderTopLeftRadius: 24, borderTopRightRadius: 24,
+      padding: 24, paddingBottom: 40, gap: 0, ...getShadow(2),
+    },
+    handle:       { width: 40, height: 4, backgroundColor: c.hairline, borderRadius: 2, alignSelf: 'center', marginBottom: 20 },
+    title:        { fontFamily: FontFamily.serifSemiBold, fontSize: 20, color: c.ink,    marginBottom: 6 },
+    sub:          { fontFamily: FontFamily.sansRegular,   fontSize: 13, color: c.inkMute, lineHeight: 19, marginBottom: 20 },
+    question:     { fontFamily: FontFamily.sansSemiBold,  fontSize: 15, color: c.ink,    marginBottom: 12 },
+    yesNoRow:     { flexDirection: 'row', gap: 12, marginBottom: 16 },
+    yesNoBtn:     { flex: 1, paddingVertical: 13, borderRadius: Radius.xs, borderWidth: 1.5, borderColor: c.hairline, alignItems: 'center', backgroundColor: c.surface },
+    yesNoBtnActive:   { borderColor: c.accent,   backgroundColor: c.accentMuted },
+    yesNoBtnActiveNo: { borderColor: c.liveRed,  backgroundColor: 'rgba(226,72,60,0.08)' },
+    yesNoText:        { fontFamily: FontFamily.sansSemiBold, fontSize: 15, color: c.inkMute },
+    yesNoTextActive:  { color: c.ink },
+    input: {
+      backgroundColor: c.background, borderRadius: Radius.xs, padding: 14,
+      fontFamily: FontFamily.sansRegular, fontSize: 14, color: c.ink,
+      minHeight: 72, textAlignVertical: 'top', marginBottom: 16,
+      borderWidth: 1, borderColor: c.hairline,
+    },
+  });
+}
+
+// ─── Main Screen ──────────────────────────────────────────────────────────────
 
 export function InicioScreen() {
   const router = useRouter();
   const { session } = useAuthSession();
-  const [data, setData] = useState<HomeData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
+  const { colors, colorScheme, toggleColorScheme } = useTheme();
+  const s = useMemo(() => makeStyles(colors), [colors]);
+
+  const [data,           setData]           = useState<HomeData | null>(null);
+  const [loading,        setLoading]        = useState(true);
+  const [refreshing,     setRefreshing]     = useState(false);
   const [generatingPlan, setGeneratingPlan] = useState(false);
   const [checkInVisible, setCheckInVisible] = useState(false);
   const [checkInLoading, setCheckInLoading] = useState(false);
-  const [advancingGate, setAdvancingGate] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [advancingGate,  setAdvancingGate]  = useState(false);
+  const [error,          setError]          = useState<string | null>(null);
 
   const userEmail = session?.user?.email ?? '';
   const firstName = getUserFirstName(userEmail);
@@ -170,9 +284,7 @@ export function InicioScreen() {
     }
   }, []);
 
-  useEffect(() => {
-    void loadData();
-  }, [loadData]);
+  useEffect(() => { void loadData(); }, [loadData]);
 
   const handleRefresh = useCallback(() => {
     setRefreshing(true);
@@ -191,41 +303,34 @@ export function InicioScreen() {
     }
   }, [loadData]);
 
-  const handleCheckIn = useCallback(
-    async (cumpriu: boolean, nota: string) => {
-      setCheckInLoading(true);
-      try {
-        const result = await homeService.checkIn(cumpriu, nota);
-        setCheckInVisible(false);
-        if (result.skipped && result.reason === 'already_done_today') {
-          Alert.alert('Já registado', 'Já fizeste o check-in de hoje. Volta amanhã!');
-          return;
-        }
-        await loadData();
-        if (result.gateDesbloqueado) {
-          Alert.alert(
-            '🎉 Gate desbloqueado!',
-            'Completaste 5 dias de trabalho. Podes avançar para a próxima semana!'
-          );
-        }
-      } catch {
-        Alert.alert('Erro', 'Não foi possível registar o check-in.');
-      } finally {
-        setCheckInLoading(false);
+  const handleCheckIn = useCallback(async (cumpriu: boolean, nota: string) => {
+    setCheckInLoading(true);
+    try {
+      const result = await homeService.checkIn(cumpriu, nota);
+      setCheckInVisible(false);
+      if (result.skipped && result.reason === 'already_done_today') {
+        Alert.alert('Já registado', 'Já fizeste o check-in de hoje. Volta amanhã!');
+        return;
       }
-    },
-    [loadData]
-  );
+      await loadData();
+      if (result.gateDesbloqueado) {
+        Alert.alert('🎉 Gate desbloqueado!', 'Completaste 5 dias de trabalho. Podes avançar para a próxima semana!');
+      }
+    } catch {
+      Alert.alert('Erro', 'Não foi possível registar o check-in.');
+    } finally {
+      setCheckInLoading(false);
+    }
+  }, [loadData]);
 
   const handleGateAdvance = useCallback(async () => {
     setAdvancingGate(true);
     try {
       const result = await homeService.gateAdvance();
       if (!result.advanced) {
-        const msg =
-          result.reason === 'insufficient_checkins'
-            ? 'Ainda não tens check-ins suficientes para avançar.'
-            : 'Não foi possível avançar.';
+        const msg = result.reason === 'insufficient_checkins'
+          ? 'Ainda não tens check-ins suficientes para avançar.'
+          : 'Não foi possível avançar.';
         Alert.alert('Ainda não', msg);
         return;
       }
@@ -233,10 +338,7 @@ export function InicioScreen() {
       if (result.programaConcluido) {
         Alert.alert('🏆 Programa concluído!', 'Completaste as 24 semanas do Programa PBN. Parabéns!');
       } else {
-        Alert.alert(
-          `Semana ${result.proximaSemana} desbloqueada`,
-          'O teu plano avançou. Bom trabalho!'
-        );
+        Alert.alert(`Semana ${result.proximaSemana} desbloqueada`, 'O teu plano avançou. Bom trabalho!');
       }
     } catch {
       Alert.alert('Erro', 'Não foi possível avançar o gate.');
@@ -245,250 +347,237 @@ export function InicioScreen() {
     }
   }, [loadData]);
 
-  const modelo = data?.modelo ?? null;
-  const devocional = data?.devocional ?? null;
-  const plano = data?.plano ?? null;
-  const kpis = data?.kpis ?? null;
+  const devocional         = data?.devocional ?? null;
+  const plano              = data?.plano      ?? null;
+  const kpis               = data?.kpis       ?? null;
   const onboardingCompleto = data?.onboardingCompleto ?? false;
 
-  const checkInsCount = plano?.checkInsCount ?? 0;
+  const checkInsCount       = plano?.checkInsCount       ?? 0;
   const checkInsNecessarios = plano?.checkInsNecessarios ?? 5;
-  const todayCheckedIn = plano?.todayCheckedIn ?? false;
-  const gateProgress = checkInsCount / checkInsNecessarios;
-  const gateUnlocked =
-    plano?.gateStatus === 'available' && checkInsCount >= checkInsNecessarios;
+  const todayCheckedIn      = plano?.todayCheckedIn      ?? false;
+  const gateProgress        = checkInsCount / checkInsNecessarios;
+  const gateUnlocked        = plano?.gateStatus === 'available' && checkInsCount >= checkInsNecessarios;
+
+  const andamentoStatus = gateUnlocked ? 'GATE DESBLOQUEADO' : 'EM ANDAMENTO';
+  const andamentoPct    = Math.round(Math.min(gateProgress, 1) * 100);
 
   if (loading) {
     return (
-      <SafeAreaView style={[styles.safe, styles.center]} edges={['top']}>
-        <ActivityIndicator size="large" color={JethroColors.gold} />
+      <SafeAreaView style={[s.safe, s.center]} edges={['top']}>
+        <ActivityIndicator size="large" color={colors.accent} />
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.safe} edges={['top']}>
+    <SafeAreaView style={s.safe} edges={['top']}>
       <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={styles.container}
+        style={s.scroll}
+        contentContainerStyle={s.container}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={handleRefresh}
-            tintColor={JethroColors.gold}
-          />
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={colors.accent} />
         }
       >
-        {/* Header */}
-        <View style={styles.header}>
+        {/* ── Header ── */}
+        <View style={s.header}>
           <View>
-            <Text style={styles.greeting}>{getGreeting()}, {firstName}</Text>
-            <Text style={styles.date}>{getFormattedDate()}</Text>
+            <Text style={s.greeting}>{getGreeting()}, {firstName}</Text>
+            <Text style={s.date}>{getFormattedDate()}</Text>
           </View>
-          {modelo ? (
-            <View style={styles.modeloBadge}>
-              <Text style={styles.modeloText}>Modelo {modelo}</Text>
-            </View>
-          ) : null}
+          <Pressable
+            style={s.themeToggle}
+            onPress={toggleColorScheme}
+            accessibilityRole="button"
+            accessibilityLabel={colorScheme === 'dark' ? 'Ativar modo claro' : 'Ativar modo escuro'}
+          >
+            <Ionicons
+              name={colorScheme === 'dark' ? 'bulb' : 'bulb-outline'}
+              size={20}
+              color={colorScheme === 'dark' ? palette.gold500 : colors.ink}
+            />
+          </Pressable>
         </View>
 
-        {/* Erro */}
+        {/* ── Erro ── */}
         {error ? (
-          <Pressable style={styles.errorBanner} onPress={loadData}>
-            <Text style={styles.errorText}>{error}</Text>
-            <Text style={styles.errorRetry}>Toca para tentar novamente</Text>
+          <Pressable style={s.errorBanner} onPress={loadData}>
+            <Text style={s.errorText}>{error}</Text>
+            <Text style={s.errorRetry}>Toca para tentar novamente</Text>
           </Pressable>
         ) : null}
 
-        {/* Devocional */}
+        {/* ── Devocional ── */}
         {devocional ? (
-          <View style={styles.devocionalCard}>
-            <View style={styles.devocionalHeader}>
-              <Text style={styles.devocionalTag}>✦ Devocional do dia</Text>
-              <Text style={styles.devocionalRef}>{devocional.versiculo}</Text>
+          <FeatureCard style={s.devocionalCard}>
+            <Text style={s.devocionalQuoteMark}>"</Text>
+            <View style={s.devocionalHeader}>
+              <EyebrowLabel color={palette.gold500}>Devocional do dia</EyebrowLabel>
+              <Text style={s.devocionalRef}>{devocional.versiculo}</Text>
             </View>
-            <Text style={styles.devocionalVerso}>{devocional.titulo}</Text>
-            <View style={styles.divider} />
-            <Text style={styles.devocionalReflexao}>{devocional.texto}</Text>
-          </View>
+            <Text style={s.devocionalVerso}>{devocional.titulo}</Text>
+            <View style={s.divider} />
+            <Text style={s.devocionalReflexao}>{devocional.texto}</Text>
+          </FeatureCard>
         ) : null}
 
-        {/* KPIs */}
+        {/* ── KPIs ── */}
         {kpis ? (
           <>
-            <Text style={styles.sectionTitle}>Indicadores</Text>
-            <View style={styles.kpiRow}>
-              <View style={styles.kpiCard}>
-                <Text style={styles.kpiValue}>{formatKpiValue(kpis.receitaAtual)}</Text>
-                <Text style={styles.kpiLabel}>Receita Actual</Text>
-              </View>
-              <View style={styles.kpiCard}>
-                <Text style={styles.kpiValue}>{formatKpiValue(kpis.ticketMedio)}</Text>
-                <Text style={styles.kpiLabel}>Ticket Médio</Text>
-              </View>
-              <View style={styles.kpiCard}>
-                <Text style={styles.kpiValue}>{formatKpiValue(kpis.clientesAtivos)}</Text>
-                <Text style={styles.kpiLabel}>Clientes Activos</Text>
-              </View>
+            <EyebrowLabel style={s.sectionLabel}>Indicadores</EyebrowLabel>
+            <View style={s.kpiRow}>
+              <SectionCard style={s.kpiCard}>
+                <Text style={s.kpiValue}>{formatKpiValue(kpis.receitaAtual)}</Text>
+                <EyebrowLabel size="sm" color={colors.inkMute}>Receita Actual</EyebrowLabel>
+              </SectionCard>
+              <SectionCard style={s.kpiCard}>
+                <Text style={s.kpiValue}>{formatKpiValue(kpis.ticketMedio)}</Text>
+                <EyebrowLabel size="sm" color={colors.inkMute}>Ticket Médio</EyebrowLabel>
+              </SectionCard>
+              <SectionCard style={s.kpiCard}>
+                <Text style={s.kpiValue}>{formatKpiValue(kpis.clientesAtivos)}</Text>
+                <EyebrowLabel size="sm" color={colors.inkMute}>Clientes Activos</EyebrowLabel>
+              </SectionCard>
             </View>
           </>
         ) : null}
 
-        {/* Plano da Semana */}
-        <Text style={styles.sectionTitle}>Plano da Semana</Text>
+        {/* ── Plano da Semana ── */}
+        <EyebrowLabel style={s.sectionLabel}>Plano da Semana</EyebrowLabel>
 
         {!onboardingCompleto ? (
-          <View style={styles.emptyCard}>
-            <Text style={styles.emptyTitle}>Completa o onboarding</Text>
-            <Text style={styles.emptyText}>
+          <SectionCard style={s.emptyCard}>
+            <Text style={s.emptyTitle}>Completa o onboarding</Text>
+            <Text style={s.emptyText}>
               Para receberes o teu plano personalizado, precisas de completar o onboarding primeiro.
             </Text>
-          </View>
+          </SectionCard>
         ) : !plano ? (
-          <View style={styles.emptyCard}>
-            <Text style={styles.emptyTitle}>Plano ainda não gerado</Text>
-            <Text style={styles.emptyText}>
+          <SectionCard style={s.emptyCard}>
+            <Text style={s.emptyTitle}>Plano ainda não gerado</Text>
+            <Text style={s.emptyText}>
               O Jethro vai criar o teu plano de 24 semanas personalizado com base no teu diagnóstico e onboarding.
             </Text>
-            <Pressable
-              style={[styles.generateBtn, generatingPlan && styles.generateBtnLoading]}
-              onPress={handleGeneratePlan}
-              disabled={generatingPlan}
-            >
-              {generatingPlan ? (
-                <>
-                  <ActivityIndicator size="small" color={JethroColors.navy} />
-                  <Text style={styles.generateBtnText}>A gerar plano...</Text>
-                </>
-              ) : (
-                <Text style={styles.generateBtnText}>✦ Gerar o meu plano</Text>
-              )}
-            </Pressable>
-          </View>
+            <PrimaryButton
+              label={generatingPlan ? 'A gerar plano...' : '✦ Gerar o meu plano'}
+              onPress={() => void handleGeneratePlan()}
+              loading={generatingPlan}
+              style={s.generateBtn}
+            />
+          </SectionCard>
         ) : (
-          <View style={styles.planoCard}>
-            <View style={styles.planoHeader}>
-              <View style={styles.semanaBadge}>
-                <Text style={styles.semanaNum}>S{plano.semanaNumero}</Text>
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.planoTitle}>{plano.objetivo}</Text>
-                <Text style={styles.planoSub}>
-                  {(plano.bloco ?? plano.tag ?? faseLabel(plano.fase))} · Semana {plano.semanaNumero} de 24
-                </Text>
-              </View>
-            </View>
-            {plano.tarefas.map((t, i) => (
-              <View key={i} style={styles.planoTarefa}>
-                <Text style={[styles.planoCheck, t.completada && styles.planoCheckDone]}>
-                  {t.completada ? '●' : '○'}
-                </Text>
-                <View style={styles.planoTarefaBody}>
-                  <Text style={[styles.planoTarefaText, t.completada && styles.planoTarefaDone]}>
-                    {t.descricao}
+          <>
+            {/* Plano header card */}
+            <SectionCard style={s.planoHeaderCard}>
+              <View style={s.planoHeader}>
+                <View style={s.semanaBadge}>
+                  <Text style={s.semanaNum}>S{plano.semanaNumero}</Text>
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={s.planoTitle}>{plano.objetivo}</Text>
+                  <Text style={s.planoSub}>
+                    {(plano.bloco ?? plano.tag ?? faseLabel(plano.fase))} · Semana {plano.semanaNumero} de 24
                   </Text>
-                  {t.recurso_biblioteca && (
-                    <Pressable
-                      style={styles.recursoChip}
-                      onPress={() => router.push('/(tabs)/biblioteca')}
-                    >
-                      <Text style={styles.recursoChipText}>◈ {t.recurso_biblioteca}</Text>
-                    </Pressable>
-                  )}
                 </View>
               </View>
-            ))}
-          </View>
+            </SectionCard>
+
+            {/* Horizontal task cards */}
+            <FlatList
+              data={plano.tarefas}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              keyExtractor={(_, i) => String(i)}
+              contentContainerStyle={s.tarefasList}
+              style={s.tarefasFlatList}
+              renderItem={({ item }) => (
+                <TarefaCard
+                  tarefa={item}
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  onRecursoPress={() => router.push('/(tabs)/biblioteca' as any)}
+                />
+              )}
+            />
+          </>
         )}
 
-        {/* Gate de Avanço */}
+        {/* ── Gate de Avanço ── */}
         {plano ? (
           <>
-            <Text style={styles.sectionTitle}>Gate de Avanço</Text>
-            <View style={styles.gateCard}>
-              {/* Progress dos dias */}
-              <View style={styles.gateTopRow}>
-                <Text style={styles.gateLabel}>Dias registados</Text>
-                <Text style={styles.gateHoras}>
-                  {checkInsCount}/{checkInsNecessarios} dias
-                </Text>
-              </View>
-
-              {/* Dots dos dias */}
-              <View style={styles.dotsRow}>
-                {Array.from({ length: checkInsNecessarios }).map((_, i) => (
-                  <View
-                    key={i}
-                    style={[styles.dot, i < checkInsCount ? styles.dotFilled : styles.dotEmpty]}
-                  />
-                ))}
-              </View>
-
-              <View style={styles.progressBarBg}>
-                <View
-                  style={[styles.progressBarFill, { width: `${Math.min(gateProgress, 1) * 100}%` }]}
-                />
-              </View>
-
-              <Text style={styles.gateNote}>
-                {gateUnlocked
-                  ? '✓ Completo! Podes avançar para a próxima semana.'
-                  : todayCheckedIn
-                  ? `Check-in de hoje já registado. Faltam ${checkInsNecessarios - checkInsCount} dias.`
-                  : `Regista o dia de hoje para avançar. Faltam ${checkInsNecessarios - checkInsCount} dias.`}
-              </Text>
-
-              {/* Botão check-in diário */}
-              {!gateUnlocked && (
-                <Pressable
-                  style={[
-                    styles.checkInBtn,
-                    todayCheckedIn && styles.checkInBtnDone,
-                  ]}
-                  onPress={() => setCheckInVisible(true)}
-                  disabled={todayCheckedIn}
-                >
-                  <Text style={[styles.checkInBtnText, todayCheckedIn && styles.checkInBtnTextDone]}>
-                    {todayCheckedIn ? '✓ Check-in feito hoje' : '+ Registar dia de trabalho'}
-                  </Text>
-                </Pressable>
-              )}
-
-              {/* Botão avançar semana */}
-              {gateUnlocked && (
-                <Pressable
-                  style={[styles.gateBtn, advancingGate && styles.gateBtnLoading]}
-                  onPress={handleGateAdvance}
-                  disabled={advancingGate}
-                >
-                  {advancingGate ? (
-                    <ActivityIndicator size="small" color={JethroColors.navy} />
-                  ) : (
-                    <Text style={styles.gateBtnText}>
-                      Avançar para Semana {plano.semanaNumero + 1} →
-                    </Text>
-                  )}
-                </Pressable>
-              )}
+            <View style={s.sectionHeaderRow}>
+              <EyebrowLabel>Gate de Avanço</EyebrowLabel>
+              <Pressable
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                onPress={() => router.push('/(tabs)/biblioteca' as any)}
+                accessibilityRole="button"
+                accessibilityLabel="Ver tudo na biblioteca"
+              >
+                <Text style={s.verTudo}>Ver tudo</Text>
+              </Pressable>
             </View>
+
+            {/* Andamento card */}
+            <SectionCard style={s.andamentoCard}>
+              <View style={s.andamentoInner}>
+                <View style={s.andamentoThumbWrap}>
+                  <StripedThumb>
+                    <View style={s.andamentoThumbContent}>
+                      <View style={s.andamentoCircle}>
+                        <Text style={s.andamentoCircleText}>S{plano.semanaNumero}</Text>
+                      </View>
+                    </View>
+                  </StripedThumb>
+                </View>
+
+                <View style={s.andamentoContent}>
+                  <Text style={s.andamentoEyebrow}>SEMANA {plano.semanaNumero} · {andamentoStatus}</Text>
+                  <Text style={s.andamentoTitle} numberOfLines={2}>{plano.objetivo}</Text>
+                  <View style={s.andamentoBarBg}>
+                    <View style={[s.andamentoBarFill, { width: `${andamentoPct}%` as `${number}%` }]} />
+                  </View>
+                  <View style={s.andamentoMeta}>
+                    <Text style={s.andamentoMetaLeft}>{checkInsCount}/{checkInsNecessarios} check-ins</Text>
+                    <Text style={s.andamentoMetaRight}>{andamentoPct}%</Text>
+                  </View>
+                </View>
+              </View>
+            </SectionCard>
+
+            {!gateUnlocked && (
+              <GhostButton
+                label={todayCheckedIn ? '✓ Check-in feito hoje' : '+ Registar dia de trabalho'}
+                onPress={() => setCheckInVisible(true)}
+                disabled={todayCheckedIn}
+                textColor={todayCheckedIn ? colors.success : colors.accent}
+                style={todayCheckedIn ? s.checkInBtnDone : s.checkInBtn}
+              />
+            )}
+
+            {gateUnlocked && (
+              <PrimaryButton
+                label={`Avançar para Semana ${plano.semanaNumero + 1} →`}
+                onPress={() => void handleGateAdvance()}
+                loading={advancingGate}
+              />
+            )}
           </>
         ) : null}
 
         <View style={{ height: 100 }} />
       </ScrollView>
 
-      {/* FAB */}
+      {/* ── FAB ── */}
       <Pressable
-        style={styles.fab}
+        style={s.fab}
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         onPress={() => router.push('/mentor' as any)}
+        accessibilityLabel="Falar com Jethro"
+        accessibilityRole="button"
       >
-        <Text style={styles.fabIcon}>✦</Text>
-        <Text style={styles.fabText}>Falar com Jethro</Text>
+        <Text style={s.fabIcon}>✦</Text>
+        <Text style={s.fabText}>Falar com Jethro</Text>
       </Pressable>
 
-      {/* Check-in Modal */}
       <CheckInModal
         visible={checkInVisible}
         onClose={() => setCheckInVisible(false)}
@@ -499,162 +588,87 @@ export function InicioScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: JethroColors.navy },
-  center: { justifyContent: 'center', alignItems: 'center' },
-  scroll: { flex: 1 },
-  container: { paddingHorizontal: 20, paddingTop: 16 },
-  header: {
-    flexDirection: 'row', justifyContent: 'space-between',
-    alignItems: 'flex-start', marginBottom: 24,
-  },
-  greeting: { fontSize: 22, fontWeight: '700', color: JethroColors.creme, textTransform: 'capitalize' },
-  date: { fontSize: 13, color: JethroColors.muted, marginTop: 2, textTransform: 'capitalize' },
-  modeloBadge: {
-    backgroundColor: JethroColors.goldMuted, borderWidth: 1,
-    borderColor: JethroColors.gold, paddingHorizontal: 12, paddingVertical: 5, borderRadius: 20,
-  },
-  modeloText: { fontSize: 12, color: JethroColors.gold, fontWeight: '600' },
-  errorBanner: {
-    backgroundColor: 'rgba(224, 92, 92, 0.12)', borderRadius: 10,
-    padding: 14, marginBottom: 16, borderWidth: 1, borderColor: JethroColors.danger,
-  },
-  errorText: { fontSize: 13, color: JethroColors.danger, marginBottom: 4 },
-  errorRetry: { fontSize: 12, color: JethroColors.muted },
-  devocionalCard: {
-    backgroundColor: JethroColors.navySurface, borderWidth: 1,
-    borderColor: JethroColors.goldMuted, borderRadius: 16, padding: 20, marginBottom: 24,
-  },
-  devocionalHeader: {
-    flexDirection: 'row', justifyContent: 'space-between',
-    alignItems: 'center', marginBottom: 14,
-  },
-  devocionalTag: { fontSize: 11, color: JethroColors.gold, fontWeight: '600', letterSpacing: 0.5, textTransform: 'uppercase' },
-  devocionalRef: { fontSize: 11, color: JethroColors.muted },
-  devocionalVerso: { fontSize: 17, color: JethroColors.creme, fontWeight: '600', lineHeight: 26, marginBottom: 14 },
-  divider: { height: 1, backgroundColor: JethroColors.goldMuted, marginBottom: 12 },
-  devocionalReflexao: { fontSize: 13, color: JethroColors.muted, lineHeight: 20 },
-  sectionTitle: {
-    fontSize: 13, fontWeight: '700', color: JethroColors.gold,
-    letterSpacing: 1, textTransform: 'uppercase', marginBottom: 12,
-  },
-  kpiRow: { flexDirection: 'row', gap: 10, marginBottom: 24 },
-  kpiCard: {
-    flex: 1, backgroundColor: JethroColors.navySurface, borderRadius: 12,
-    padding: 14, borderWidth: 1, borderColor: JethroColors.navyDeep,
-  },
-  kpiValue: { fontSize: 16, fontWeight: '700', color: JethroColors.creme, marginBottom: 4 },
-  kpiLabel: { fontSize: 10, color: JethroColors.muted, textTransform: 'uppercase', letterSpacing: 0.3 },
-  emptyCard: {
-    backgroundColor: JethroColors.navySurface, borderRadius: 16,
-    padding: 20, marginBottom: 24, alignItems: 'center',
-  },
-  emptyTitle: { fontSize: 16, fontWeight: '700', color: JethroColors.creme, marginBottom: 8 },
-  emptyText: { fontSize: 13, color: JethroColors.muted, lineHeight: 20, textAlign: 'center', marginBottom: 16 },
-  generateBtn: {
-    flexDirection: 'row', alignItems: 'center', gap: 8,
-    backgroundColor: JethroColors.gold, borderRadius: 12, paddingVertical: 13, paddingHorizontal: 24,
-  },
-  generateBtnLoading: { opacity: 0.75 },
-  generateBtnText: { fontSize: 15, fontWeight: '700', color: JethroColors.navy },
-  planoCard: { backgroundColor: JethroColors.navySurface, borderRadius: 16, padding: 18, marginBottom: 24 },
-  planoHeader: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 16 },
-  semanaBadge: {
-    width: 44, height: 44, borderRadius: 22,
-    backgroundColor: JethroColors.gold, justifyContent: 'center', alignItems: 'center',
-  },
-  semanaNum: { fontSize: 14, fontWeight: '800', color: JethroColors.navy },
-  planoTitle: { fontSize: 15, fontWeight: '700', color: JethroColors.creme },
-  planoSub: { fontSize: 12, color: JethroColors.muted, marginTop: 2 },
-  planoTarefa: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, marginBottom: 10 },
-  planoTarefaBody: { flex: 1, gap: 4 },
-  planoCheck: { fontSize: 16, color: JethroColors.gold, lineHeight: 22 },
-  planoCheckDone: { color: JethroColors.success },
-  planoTarefaText: { fontSize: 14, color: JethroColors.cremeMuted, lineHeight: 22 },
-  planoTarefaDone: { textDecorationLine: 'line-through', color: JethroColors.muted },
-  recursoChip: {
-    alignSelf: 'flex-start',
-    borderWidth: 1, borderColor: JethroColors.gold,
-    borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3,
-  },
-  recursoChipText: { fontSize: 11, color: JethroColors.gold },
-  // Gate
-  gateCard: { backgroundColor: JethroColors.navySurface, borderRadius: 16, padding: 18, marginBottom: 24 },
-  gateTopRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 },
-  gateLabel: { fontSize: 14, fontWeight: '600', color: JethroColors.creme },
-  gateHoras: { fontSize: 14, fontWeight: '700', color: JethroColors.gold },
-  dotsRow: { flexDirection: 'row', gap: 8, marginBottom: 12 },
-  dot: { width: 28, height: 28, borderRadius: 14, flex: 1 },
-  dotFilled: { backgroundColor: JethroColors.gold },
-  dotEmpty: { backgroundColor: JethroColors.navyDeep, borderWidth: 1, borderColor: JethroColors.navySurface },
-  progressBarBg: {
-    height: 4, backgroundColor: JethroColors.navyDeep,
-    borderRadius: 2, marginBottom: 12, overflow: 'hidden',
-  },
-  progressBarFill: { height: '100%', backgroundColor: JethroColors.gold, borderRadius: 2 },
-  gateNote: { fontSize: 12, color: JethroColors.muted, marginBottom: 14, lineHeight: 18 },
-  checkInBtn: {
-    backgroundColor: JethroColors.navyDeep, borderWidth: 1.5,
-    borderColor: JethroColors.gold, borderRadius: 10,
-    paddingVertical: 13, alignItems: 'center',
-  },
-  checkInBtnDone: {
-    borderColor: JethroColors.success, borderStyle: 'solid',
-  },
-  checkInBtnText: { fontSize: 14, fontWeight: '600', color: JethroColors.gold },
-  checkInBtnTextDone: { color: JethroColors.success },
-  gateBtn: {
-    backgroundColor: JethroColors.gold, borderRadius: 10, paddingVertical: 13, alignItems: 'center',
-    flexDirection: 'row', justifyContent: 'center', gap: 8,
-  },
-  gateBtnLoading: { opacity: 0.75 },
-  gateBtnText: { fontSize: 14, fontWeight: '700', color: JethroColors.navy },
-  fab: {
-    position: 'absolute', bottom: 24, right: 20,
-    flexDirection: 'row', alignItems: 'center', gap: 8,
-    backgroundColor: JethroColors.gold, borderRadius: 28,
-    paddingVertical: 13, paddingHorizontal: 20,
-    shadowColor: JethroColors.gold, shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35, shadowRadius: 10, elevation: 8,
-  },
-  fabIcon: { fontSize: 14, color: JethroColors.navy },
-  fabText: { fontSize: 14, fontWeight: '700', color: JethroColors.navy },
-  // Modal
-  modalOverlay: {
-    flex: 1, backgroundColor: 'rgba(11, 30, 53, 0.85)',
-    justifyContent: 'flex-end',
-  },
-  modalSheet: {
-    backgroundColor: JethroColors.navySurface, borderTopLeftRadius: 24, borderTopRightRadius: 24,
-    padding: 24, paddingBottom: 40,
-  },
-  modalHandle: {
-    width: 40, height: 4, backgroundColor: JethroColors.muted,
-    borderRadius: 2, alignSelf: 'center', marginBottom: 20,
-  },
-  modalTitle: { fontSize: 20, fontWeight: '700', color: JethroColors.creme, marginBottom: 6 },
-  modalSub: { fontSize: 13, color: JethroColors.muted, lineHeight: 19, marginBottom: 20 },
-  modalQuestion: { fontSize: 15, fontWeight: '600', color: JethroColors.creme, marginBottom: 12 },
-  yesNoRow: { flexDirection: 'row', gap: 12, marginBottom: 16 },
-  yesNoBtn: {
-    flex: 1, paddingVertical: 13, borderRadius: 10,
-    borderWidth: 1.5, borderColor: JethroColors.navyDeep,
-    alignItems: 'center', backgroundColor: JethroColors.navy,
-  },
-  yesNoBtnActive: { borderColor: JethroColors.gold, backgroundColor: JethroColors.goldMuted },
-  yesNoBtnActiveNo: { borderColor: JethroColors.danger, backgroundColor: 'rgba(224,92,92,0.1)' },
-  yesNoText: { fontSize: 15, fontWeight: '600', color: JethroColors.muted },
-  yesNoTextActive: { color: JethroColors.creme },
-  modalInput: {
-    backgroundColor: JethroColors.navy, borderRadius: 10,
-    padding: 14, fontSize: 14, color: JethroColors.creme,
-    minHeight: 72, textAlignVertical: 'top', marginBottom: 16,
-    borderWidth: 1, borderColor: JethroColors.navyDeep,
-  },
-  modalBtn: {
-    backgroundColor: JethroColors.gold, borderRadius: 12,
-    paddingVertical: 14, alignItems: 'center',
-  },
-  modalBtnDisabled: { backgroundColor: JethroColors.navyDeep },
-  modalBtnText: { fontSize: 15, fontWeight: '700', color: JethroColors.navy },
-});
+// ─── Styles ───────────────────────────────────────────────────────────────────
+
+function makeStyles(c: ThemeColors) {
+  return StyleSheet.create({
+    safe:   { flex: 1, backgroundColor: c.background },
+    center: { justifyContent: 'center', alignItems: 'center' },
+    scroll: { flex: 1 },
+    container: { paddingHorizontal: Spacing.screenH, paddingTop: 16 },
+
+    header:      { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 },
+    themeToggle: {
+      width: 40, height: 40, borderRadius: 20,
+      backgroundColor: c.surface, borderWidth: StyleSheet.hairlineWidth, borderColor: c.hairline,
+      justifyContent: 'center', alignItems: 'center', ...getShadow(1),
+    },
+    greeting: { fontFamily: FontFamily.serifMedium, fontSize: 22, color: c.ink,    textTransform: 'capitalize' },
+    date:     { fontFamily: FontFamily.sansRegular,  fontSize: 13, color: c.inkMute, marginTop: 2, textTransform: 'capitalize' },
+
+    sectionLabel: { marginBottom: 12 },
+
+    sectionHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
+    verTudo:          { fontFamily: FontFamily.sansMedium, fontSize: 13, color: c.accent },
+
+    errorBanner: { backgroundColor: 'rgba(226,72,60,0.08)', borderRadius: Radius.xs, padding: 14, marginBottom: 16, borderWidth: 1, borderColor: c.liveRed },
+    errorText:   { fontFamily: FontFamily.sansRegular, fontSize: 13, color: c.liveRed,  marginBottom: 4 },
+    errorRetry:  { fontFamily: FontFamily.sansRegular, fontSize: 12, color: c.inkMute },
+
+    devocionalCard:      { marginBottom: 24 },
+    devocionalQuoteMark: { position: 'absolute', top: 10, right: 16, fontFamily: FontFamily.serifSemiBold, fontSize: 80, lineHeight: 80, color: palette.gold500, opacity: 0.18 },
+    devocionalHeader:    { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 },
+    devocionalRef:       { fontFamily: FontFamily.sansRegular, fontSize: 11, color: palette.gold400 },
+    devocionalVerso:     { fontFamily: FontFamily.serifMediumItalic, fontSize: 17, color: palette.paper, lineHeight: 26, marginBottom: 14 },
+    divider:             { height: 1, backgroundColor: palette.goldMuted, marginBottom: 12 },
+    devocionalReflexao:  { fontFamily: FontFamily.sansRegular, fontSize: 13, color: 'rgba(239,239,234,0.60)', lineHeight: 20 },
+
+    kpiRow:   { flexDirection: 'row', gap: 10, marginBottom: 24 },
+    kpiCard:  { flex: 1, gap: 4, padding: 14 },
+    kpiValue: { fontFamily: FontFamily.serifSemiBold, fontSize: 18, color: c.ink },
+
+    emptyCard:   { marginBottom: 24, alignItems: 'center' },
+    emptyTitle:  { fontFamily: FontFamily.serifMedium, fontSize: 16, color: c.ink,     marginBottom: 8 },
+    emptyText:   { fontFamily: FontFamily.sansRegular,  fontSize: 13, color: c.inkSoft, lineHeight: 20, textAlign: 'center', marginBottom: 16 },
+    generateBtn: { alignSelf: 'stretch' },
+
+    planoHeaderCard: { marginBottom: 14 },
+    planoHeader:     { flexDirection: 'row', alignItems: 'center', gap: 12 },
+    semanaBadge:     { width: 44, height: 44, borderRadius: 22, backgroundColor: palette.gold500, justifyContent: 'center', alignItems: 'center' },
+    semanaNum:       { fontFamily: FontFamily.serifSemiBold, fontSize: 14, color: palette.navy800 },
+    planoTitle:      { fontFamily: FontFamily.serifMedium,   fontSize: 15, color: c.ink },
+    planoSub:        { fontFamily: FontFamily.sansRegular,   fontSize: 12, color: c.inkMute, marginTop: 2 },
+
+    tarefasFlatList: { marginHorizontal: -Spacing.screenH, marginBottom: 24 },
+    tarefasList:     { paddingHorizontal: Spacing.screenH, paddingVertical: 4, gap: 12 },
+
+    andamentoCard:         { marginBottom: 16, padding: 0, overflow: 'hidden' },
+    andamentoInner:        { flexDirection: 'row' },
+    andamentoThumbWrap:    { width: 110 },
+    andamentoThumbContent: { height: 100, justifyContent: 'center', alignItems: 'center' },
+    andamentoCircle:       { width: 44, height: 44, borderRadius: 22, backgroundColor: palette.navy800, justifyContent: 'center', alignItems: 'center' },
+    andamentoCircleText:   { fontFamily: FontFamily.serifSemiBold, fontSize: 14, color: palette.gold500 },
+    andamentoContent:      { flex: 1, padding: 14, gap: 5, justifyContent: 'center' },
+    andamentoEyebrow:      { fontFamily: FontFamily.sansBold, fontSize: 10, color: c.accent, letterSpacing: 0.5, textTransform: 'uppercase' },
+    andamentoTitle:        { fontFamily: FontFamily.serifMedium, fontSize: 14, color: c.ink, lineHeight: 20 },
+    andamentoBarBg:        { height: 3, backgroundColor: c.hairline, borderRadius: 2, overflow: 'hidden', marginTop: 4 },
+    andamentoBarFill:      { height: '100%', backgroundColor: c.accent, borderRadius: 2 },
+    andamentoMeta:         { flexDirection: 'row', justifyContent: 'space-between', marginTop: 2 },
+    andamentoMetaLeft:     { fontFamily: FontFamily.sansRegular,  fontSize: 11, color: c.inkMute },
+    andamentoMetaRight:    { fontFamily: FontFamily.sansSemiBold, fontSize: 11, color: c.accent },
+
+    checkInBtn:     { borderColor: c.accent,   marginBottom: 24 },
+    checkInBtnDone: { borderColor: c.success,  marginBottom: 24 },
+
+    fab: {
+      position: 'absolute', bottom: 24, right: Spacing.screenH,
+      flexDirection: 'row', alignItems: 'center', gap: 8,
+      backgroundColor: palette.gold500, borderRadius: 28,
+      paddingVertical: 13, paddingHorizontal: 20,
+      shadowColor: palette.gold500, shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.35, shadowRadius: 10, elevation: 8,
+    },
+    fabIcon: { fontFamily: FontFamily.sansRegular,  fontSize: 14, color: palette.navy800 },
+    fabText: { fontFamily: FontFamily.sansSemiBold, fontSize: 14, color: palette.navy800 },
+  });
+}

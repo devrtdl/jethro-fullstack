@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   Alert,
   Pressable,
@@ -10,9 +10,19 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { JethroColors } from '@/constants/theme';
 import { useAuthSession } from '@/src/hooks/use-auth-session';
 import { authService } from '@/src/services/auth/auth-service';
+import { useTheme } from '@/src/theme/ThemeContext';
+import type { ThemeColors } from '@/src/theme/colors';
+import { palette } from '@/src/theme/colors';
+import { FontFamily } from '@/src/theme/typography';
+import { Radius, Spacing } from '@/src/theme/spacing';
+import { EyebrowLabel } from '@/src/components/ui/EyebrowLabel';
+import { GhostButton } from '@/src/components/ui/GhostButton';
+import { SectionCard } from '@/src/components/section-card';
+import { StatusBadge } from '@/src/components/status-badge';
+
+// ─── Helpers (unchanged) ─────────────────────────────────────────────────────
 
 function getInitials(email: string): string {
   const name = email.split('@')[0] ?? '';
@@ -24,29 +34,33 @@ function getInitials(email: string): string {
 }
 
 function RowItem({ icon, label, value }: { icon: string; label: string; value?: string }) {
+  const { colors } = useTheme();
+  const s = useMemo(() => makeStyles(colors), [colors]);
   return (
-    <View style={styles.rowItem}>
-      <Text style={styles.rowIcon}>{icon}</Text>
+    <View style={s.rowItem}>
+      <Text style={s.rowIcon}>{icon}</Text>
       <View style={{ flex: 1 }}>
-        <Text style={styles.rowLabel}>{label}</Text>
-        {value ? <Text style={styles.rowValue}>{value}</Text> : null}
+        <Text style={s.rowLabel}>{label}</Text>
+        {value ? <Text style={s.rowValue}>{value}</Text> : null}
       </View>
     </View>
   );
 }
 
+// ─── Screen ───────────────────────────────────────────────────────────────────
+
 export function PerfilScreen() {
   const router = useRouter();
   const { session } = useAuthSession();
+  const { colors } = useTheme();
+  const s = useMemo(() => makeStyles(colors), [colors]);
   const [signingOut, setSigningOut] = useState(false);
 
-  const email = session?.user?.email ?? '';
+  const email    = session?.user?.email ?? '';
   const initials = getInitials(email);
   const createdAt = session?.user?.created_at
     ? new Date(session.user.created_at).toLocaleDateString('pt-BR', {
-        day: '2-digit',
-        month: 'long',
-        year: 'numeric',
+        day: '2-digit', month: 'long', year: 'numeric',
       })
     : '—';
 
@@ -72,340 +86,184 @@ export function PerfilScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.safe} edges={['top']}>
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
-        {/* Header */}
-        <Text style={styles.pageTitle}>Perfil</Text>
+    <SafeAreaView style={s.safe} edges={['top']}>
+      <ScrollView
+        style={s.scroll}
+        contentContainerStyle={s.container}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* ── Header ── */}
+        <Text style={s.pageTitle}>Perfil</Text>
 
-        {/* Avatar + identity */}
-        <View style={styles.avatarCard}>
-          <View style={styles.avatarCircle}>
-            <Text style={styles.avatarText}>{initials}</Text>
+        {/* ── Avatar + identity ── */}
+        <SectionCard style={s.avatarCard}>
+          <View style={s.avatarCircle}>
+            <Text style={s.avatarText}>{initials}</Text>
           </View>
-          <Text style={styles.userEmail}>{email}</Text>
-          <Text style={styles.userSince}>Membro desde {createdAt}</Text>
-        </View>
+          <Text style={s.userEmail}>{email}</Text>
+          <Text style={s.userSince}>Membro desde {createdAt}</Text>
+        </SectionCard>
 
-        {/* Subscription status */}
-        <Text style={styles.sectionTitle}>Assinatura</Text>
-        <View style={styles.card}>
-          <View style={styles.subscriptionRow}>
-            <View style={styles.subscriptionBadge}>
-              <Text style={styles.subscriptionBadgeText}>✓ Activa</Text>
-            </View>
-            <Text style={styles.subscriptionPlan}>Plano PBN 24 semanas</Text>
+        {/* ── Assinatura ── */}
+        <EyebrowLabel style={s.sectionLabel}>Assinatura</EyebrowLabel>
+        <SectionCard style={s.card}>
+          <View style={s.subscriptionRow}>
+            <StatusBadge label="✓ Activa" tone="success" variant="outline" />
+            <Text style={s.subscriptionPlan}>Plano PBN 24 semanas</Text>
           </View>
-          <Text style={styles.subscriptionNote}>
+          <Text style={s.subscriptionNote}>
             Acesso completo ao programa, mentor Jethro e biblioteca de guias.
           </Text>
-        </View>
+        </SectionCard>
 
-        {/* Progresso */}
-        <Text style={styles.sectionTitle}>Progresso</Text>
-        <View style={styles.card}>
-          <View style={styles.progressGrid}>
-            <View style={styles.progressItem}>
-              <Text style={styles.progressValue}>1</Text>
-              <Text style={styles.progressLabel}>Semana actual</Text>
+        {/* ── Progresso ── */}
+        <EyebrowLabel style={s.sectionLabel}>Progresso</EyebrowLabel>
+        <SectionCard style={s.card}>
+          <View style={s.progressGrid}>
+            <View style={s.progressItem}>
+              <Text style={s.progressValue}>1</Text>
+              <Text style={s.progressLabel}>Semana actual</Text>
             </View>
-            <View style={styles.progressDivider} />
-            <View style={styles.progressItem}>
-              <Text style={styles.progressValue}>24</Text>
-              <Text style={styles.progressLabel}>Semanas totais</Text>
+            <View style={s.progressDivider} />
+            <View style={s.progressItem}>
+              <Text style={s.progressValue}>24</Text>
+              <Text style={s.progressLabel}>Semanas totais</Text>
             </View>
-            <View style={styles.progressDivider} />
-            <View style={styles.progressItem}>
-              <Text style={styles.progressValue}>0</Text>
-              <Text style={styles.progressLabel}>Gates concluídos</Text>
+            <View style={s.progressDivider} />
+            <View style={s.progressItem}>
+              <Text style={s.progressValue}>0</Text>
+              <Text style={s.progressLabel}>Gates concluídos</Text>
             </View>
           </View>
-          <View style={styles.progressBarBg}>
-            <View style={[styles.progressBarFill, { width: `${(1 / 24) * 100}%` }]} />
+          <View style={s.progressBarBg}>
+            <View style={[s.progressBarFill, { width: `${(1 / 24) * 100}%` }]} />
           </View>
-          <Text style={styles.progressNote}>Semana 1 de 24 · 4,2% do programa</Text>
-        </View>
+          <Text style={s.progressNote}>Semana 1 de 24 · 4,2% do programa</Text>
+        </SectionCard>
 
-        {/* Account details */}
-        <Text style={styles.sectionTitle}>Conta</Text>
-        <View style={styles.card}>
+        {/* ── Conta ── */}
+        <EyebrowLabel style={s.sectionLabel}>Conta</EyebrowLabel>
+        <SectionCard style={s.card}>
           <RowItem icon="✉" label="Email" value={email} />
-          <View style={styles.cardDivider} />
+          <View style={s.cardDivider} />
           <RowItem icon="◎" label="Modelo de diagnóstico" value="—" />
-          <View style={styles.cardDivider} />
+          <View style={s.cardDivider} />
           <RowItem icon="◈" label="Onboarding" value="Completo" />
-        </View>
+        </SectionCard>
 
-        {/* FAQ */}
-        <Text style={styles.sectionTitle}>Ajuda</Text>
+        {/* ── Ajuda ── */}
+        <EyebrowLabel style={s.sectionLabel}>Ajuda</EyebrowLabel>
         <Pressable
-          style={({ pressed }) => [styles.card, styles.faqRow, pressed && { opacity: 0.75 }]}
+          style={({ pressed }) => [pressed && { opacity: 0.75 }]}
           onPress={() => router.push('/faq' as never)}
+          accessibilityRole="button"
+          accessibilityLabel="Perguntas Frequentes"
         >
-          <Text style={styles.faqIcon}>?</Text>
-          <Text style={styles.faqLabel}>Perguntas Frequentes</Text>
-          <Text style={styles.faqChevron}>›</Text>
+          <SectionCard style={s.faqRow}>
+            <View style={s.faqIconWrap}>
+              <Text style={s.faqIconText}>?</Text>
+            </View>
+            <Text style={s.faqLabel}>Perguntas Frequentes</Text>
+            <Text style={s.faqChevron}>›</Text>
+          </SectionCard>
         </Pressable>
 
-        {/* Novo diagnóstico */}
-        <Text style={styles.sectionTitle}>Diagnóstico</Text>
-        <View style={styles.card}>
-          <Text style={styles.diagInfo}>
+        {/* ── Diagnóstico ── */}
+        <EyebrowLabel style={s.sectionLabel}>Diagnóstico</EyebrowLabel>
+        <SectionCard style={s.card}>
+          <Text style={s.diagInfo}>
             O diagnóstico identifica o modelo do teu negócio e orienta todo o plano de 24 semanas.
             Podes refazê-lo a qualquer momento.
           </Text>
-          <Pressable
-            style={({ pressed }) => [styles.diagBtn, pressed && { opacity: 0.8 }]}
+          <GhostButton
+            label="◎ Fazer novo diagnóstico"
+            textColor={colors.accent}
+            style={s.diagBtn}
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             onPress={() => router.push('/diagnostico' as any)}
-          >
-            <Text style={styles.diagBtnText}>◎ Fazer novo diagnóstico</Text>
-          </Pressable>
-        </View>
+          />
+        </SectionCard>
 
-        {/* Sign out */}
+        {/* ── Terminar sessão ── */}
         <Pressable
-          style={({ pressed }) => [styles.signOutBtn, pressed && styles.signOutBtnPressed, signingOut && styles.signOutBtnDisabled]}
-          onPress={handleSignOut}
+          style={({ pressed }) => [
+            s.signOutBtn,
+            pressed && s.signOutBtnPressed,
+            signingOut && s.signOutBtnDisabled,
+          ]}
+          onPress={() => void handleSignOut()}
           disabled={signingOut}
+          accessibilityRole="button"
+          accessibilityLabel="Terminar sessão"
         >
-          <Text style={styles.signOutText}>{signingOut ? 'A sair...' : 'Terminar sessão'}</Text>
+          <Text style={s.signOutText}>{signingOut ? 'A sair...' : 'Terminar sessão'}</Text>
         </Pressable>
 
-        <View style={{ height: 40 }} />
+        <View style={{ height: 100 }} />
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
-  safe: {
-    flex: 1,
-    backgroundColor: JethroColors.navy,
-  },
-  scroll: {
-    flex: 1,
-  },
-  container: {
-    paddingHorizontal: 20,
-    paddingTop: 16,
-  },
-  pageTitle: {
-    fontSize: 28,
-    fontWeight: '800',
-    color: JethroColors.creme,
-    marginBottom: 20,
-  },
-  avatarCard: {
-    alignItems: 'center',
-    paddingVertical: 24,
-    backgroundColor: JethroColors.navySurface,
-    borderRadius: 16,
-    marginBottom: 24,
-    borderWidth: 1,
-    borderColor: JethroColors.goldMuted,
-  },
-  avatarCircle: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    backgroundColor: JethroColors.gold,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  avatarText: {
-    fontSize: 26,
-    fontWeight: '800',
-    color: JethroColors.navy,
-  },
-  userEmail: {
-    fontSize: 16,
-    color: JethroColors.creme,
-    fontWeight: '600',
-    marginBottom: 4,
-  },
-  userSince: {
-    fontSize: 12,
-    color: JethroColors.muted,
-  },
-  sectionTitle: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: JethroColors.gold,
-    letterSpacing: 1,
-    textTransform: 'uppercase',
-    marginBottom: 10,
-  },
-  card: {
-    backgroundColor: JethroColors.navySurface,
-    borderRadius: 14,
-    padding: 16,
-    marginBottom: 24,
-  },
-  subscriptionRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    marginBottom: 8,
-  },
-  subscriptionBadge: {
-    backgroundColor: 'rgba(76, 175, 125, 0.15)',
-    borderWidth: 1,
-    borderColor: JethroColors.success,
-    borderRadius: 20,
-    paddingHorizontal: 10,
-    paddingVertical: 3,
-  },
-  subscriptionBadgeText: {
-    fontSize: 12,
-    color: JethroColors.success,
-    fontWeight: '600',
-  },
-  subscriptionPlan: {
-    fontSize: 14,
-    color: JethroColors.creme,
-    fontWeight: '600',
-  },
-  subscriptionNote: {
-    fontSize: 13,
-    color: JethroColors.muted,
-    lineHeight: 19,
-  },
-  progressGrid: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginBottom: 16,
-  },
-  progressItem: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  progressDivider: {
-    width: 1,
-    backgroundColor: JethroColors.navyDeep,
-  },
-  progressValue: {
-    fontSize: 28,
-    fontWeight: '800',
-    color: JethroColors.gold,
-    lineHeight: 34,
-  },
-  progressLabel: {
-    fontSize: 11,
-    color: JethroColors.muted,
-    textAlign: 'center',
-    marginTop: 2,
-  },
-  progressBarBg: {
-    height: 6,
-    backgroundColor: JethroColors.navyDeep,
-    borderRadius: 3,
-    overflow: 'hidden',
-    marginBottom: 8,
-  },
-  progressBarFill: {
-    height: '100%',
-    backgroundColor: JethroColors.gold,
-    borderRadius: 3,
-  },
-  progressNote: {
-    fontSize: 12,
-    color: JethroColors.muted,
-  },
-  rowItem: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 12,
-    paddingVertical: 4,
-  },
-  rowIcon: {
-    fontSize: 16,
-    color: JethroColors.gold,
-    width: 22,
-    textAlign: 'center',
-    marginTop: 1,
-  },
-  rowLabel: {
-    fontSize: 12,
-    color: JethroColors.muted,
-    marginBottom: 2,
-  },
-  rowValue: {
-    fontSize: 14,
-    color: JethroColors.creme,
-    fontWeight: '500',
-  },
-  cardDivider: {
-    height: 1,
-    backgroundColor: JethroColors.navyDeep,
-    marginVertical: 10,
-  },
-  signOutBtn: {
-    borderWidth: 1,
-    borderColor: JethroColors.danger,
-    borderRadius: 12,
-    paddingVertical: 14,
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  signOutBtnPressed: {
-    backgroundColor: 'rgba(224, 92, 92, 0.08)',
-  },
-  signOutBtnDisabled: {
-    opacity: 0.5,
-  },
-  signOutText: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: JethroColors.danger,
-  },
-  faqRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 14,
-    gap: 12,
-  },
-  faqIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: JethroColors.gold,
-    textAlign: 'center',
-    textAlignVertical: 'center',
-    lineHeight: 32,
-    fontSize: 16,
-    fontWeight: '700',
-    color: JethroColors.navy,
-    overflow: 'hidden',
-  },
-  faqLabel: {
-    flex: 1,
-    fontSize: 15,
-    fontWeight: '600',
-    color: JethroColors.creme,
-  },
-  faqChevron: {
-    fontSize: 22,
-    color: JethroColors.muted,
-    fontWeight: '300',
-  },
-  diagInfo: {
-    fontSize: 13,
-    color: JethroColors.muted,
-    lineHeight: 19,
-    marginBottom: 14,
-  },
-  diagBtn: {
-    backgroundColor: JethroColors.navyDeep,
-    borderWidth: 1,
-    borderColor: JethroColors.gold,
-    borderRadius: 12,
-    paddingVertical: 13,
-    alignItems: 'center',
-  },
-  diagBtnText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: JethroColors.gold,
-  },
-});
+function makeStyles(c: ThemeColors) {
+  return StyleSheet.create({
+    safe:      { flex: 1, backgroundColor: c.background },
+    scroll:    { flex: 1 },
+    container: { paddingHorizontal: Spacing.screenH, paddingTop: 16 },
+
+    pageTitle: {
+      fontFamily:   FontFamily.serifMedium,
+      fontSize:     28,
+      lineHeight:   34,
+      color:        c.ink,
+      marginBottom: 20,
+    },
+
+    sectionLabel: { marginBottom: 10 },
+
+    avatarCard: { alignItems: 'center', paddingVertical: 24, marginBottom: 24, gap: 6 },
+    avatarCircle: {
+      width: 72, height: 72, borderRadius: 36,
+      backgroundColor: palette.gold500,
+      justifyContent: 'center', alignItems: 'center', marginBottom: 6,
+    },
+    avatarText:  { fontFamily: FontFamily.serifSemiBold, fontSize: 26, color: palette.navy800 },
+    userEmail:   { fontFamily: FontFamily.sansSemiBold,  fontSize: 16, color: c.ink },
+    userSince:   { fontFamily: FontFamily.sansRegular,   fontSize: 12, color: c.inkMute },
+
+    card: { marginBottom: 24 },
+
+    subscriptionRow:  { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 8 },
+    subscriptionPlan: { fontFamily: FontFamily.sansSemiBold, fontSize: 14, color: c.ink },
+    subscriptionNote: { fontFamily: FontFamily.sansRegular,  fontSize: 13, color: c.inkMute, lineHeight: 19 },
+
+    progressGrid:    { flexDirection: 'row', justifyContent: 'space-around', marginBottom: 16 },
+    progressItem:    { flex: 1, alignItems: 'center' },
+    progressDivider: { width: 1, backgroundColor: c.hairline },
+    progressValue:   { fontFamily: FontFamily.serifSemiBold, fontSize: 28, color: c.ink, lineHeight: 34 },
+    progressLabel:   { fontFamily: FontFamily.sansRegular, fontSize: 11, color: c.inkMute, textAlign: 'center', marginTop: 2 },
+    progressBarBg:   { height: 3, backgroundColor: c.hairline, borderRadius: 2, overflow: 'hidden', marginBottom: 8 },
+    progressBarFill: { height: '100%', backgroundColor: c.accent, borderRadius: 2 },
+    progressNote:    { fontFamily: FontFamily.sansRegular, fontSize: 12, color: c.inkMute },
+
+    rowItem:     { flexDirection: 'row', alignItems: 'flex-start', gap: 12, paddingVertical: 4 },
+    rowIcon:     { fontSize: 16, color: c.accent, width: 22, textAlign: 'center', marginTop: 1 },
+    rowLabel:    { fontFamily: FontFamily.sansRegular, fontSize: 12, color: c.inkMute, marginBottom: 2 },
+    rowValue:    { fontFamily: FontFamily.sansMedium,  fontSize: 14, color: c.ink },
+    cardDivider: { height: 1, backgroundColor: c.hairline, marginVertical: 10 },
+
+    faqRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 14, gap: 12, marginBottom: 24 },
+    faqIconWrap: { width: 32, height: 32, borderRadius: 16, backgroundColor: c.accentMuted, alignItems: 'center', justifyContent: 'center' },
+    faqIconText: { fontFamily: FontFamily.sansBold, fontSize: 15, color: c.accent },
+    faqLabel:    { flex: 1, fontFamily: FontFamily.sansSemiBold, fontSize: 15, color: c.ink },
+    faqChevron:  { fontFamily: FontFamily.sansRegular, fontSize: 22, color: c.inkMute },
+
+    diagInfo: { fontFamily: FontFamily.sansRegular, fontSize: 13, color: c.inkSoft, lineHeight: 19, marginBottom: 14 },
+    diagBtn:  { borderColor: c.accent },
+
+    signOutBtn:         { borderWidth: 1, borderColor: c.liveRed, borderRadius: Radius.button, paddingVertical: 14, alignItems: 'center', marginBottom: 16 },
+    signOutBtnPressed:  { backgroundColor: 'rgba(226,72,60,0.06)' },
+    signOutBtnDisabled: { opacity: 0.5 },
+    signOutText:        { fontFamily: FontFamily.sansSemiBold, fontSize: 15, color: c.liveRed },
+  });
+}
