@@ -384,10 +384,19 @@ export function InicioScreen() {
                 <Text style={[styles.planoCheck, t.completada && styles.planoCheckDone]}>
                   {t.completada ? '●' : '○'}
                 </Text>
-                <Text style={[styles.planoTarefaText, t.completada && styles.planoTarefaDone]}>
-                  {t.descricao}
-                  {t.recurso_biblioteca ? `\nRecurso: ${t.recurso_biblioteca}` : ''}
-                </Text>
+                <View style={styles.planoTarefaBody}>
+                  <Text style={[styles.planoTarefaText, t.completada && styles.planoTarefaDone]}>
+                    {t.descricao}
+                  </Text>
+                  {t.recurso_biblioteca && (
+                    <Pressable
+                      style={styles.recursoChip}
+                      onPress={() => router.push('/(tabs)/biblioteca')}
+                    >
+                      <Text style={styles.recursoChipText}>◈ {t.recurso_biblioteca}</Text>
+                    </Pressable>
+                  )}
+                </View>
               </View>
             ))}
           </View>
@@ -558,10 +567,17 @@ const styles = StyleSheet.create({
   planoTitle: { fontSize: 15, fontWeight: '700', color: JethroColors.creme },
   planoSub: { fontSize: 12, color: JethroColors.muted, marginTop: 2 },
   planoTarefa: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, marginBottom: 10 },
+  planoTarefaBody: { flex: 1, gap: 4 },
   planoCheck: { fontSize: 16, color: JethroColors.gold, lineHeight: 22 },
   planoCheckDone: { color: JethroColors.success },
-  planoTarefaText: { flex: 1, fontSize: 14, color: JethroColors.cremeMuted, lineHeight: 22 },
+  planoTarefaText: { fontSize: 14, color: JethroColors.cremeMuted, lineHeight: 22 },
   planoTarefaDone: { textDecorationLine: 'line-through', color: JethroColors.muted },
+  recursoChip: {
+    alignSelf: 'flex-start',
+    borderWidth: 1, borderColor: JethroColors.gold,
+    borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3,
+  },
+  recursoChipText: { fontSize: 11, color: JethroColors.gold },
   // Gate
   gateCard: { backgroundColor: JethroColors.navySurface, borderRadius: 16, padding: 18, marginBottom: 24 },
   gateTopRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 },

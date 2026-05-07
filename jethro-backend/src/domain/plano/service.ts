@@ -3,6 +3,7 @@ import type Anthropic from '@anthropic-ai/sdk';
 import { getDbPool } from '../../lib/db.js';
 import { getAnthropicClient } from '../../lib/anthropic.js';
 import { loadAlmaContent } from '../../lib/alma-loader.js';
+import { filterAlmaForModel, type AcaoAlma } from '../../lib/alma-filter.js';
 import { AppError } from '../../lib/errors.js';
 
 const MODEL = 'claude-sonnet-4-6';
@@ -192,6 +193,13 @@ REGRAS ABSOLUTAS:
 7. Use os nomes de blocos personalizados por modelo informados no prompt do usuário.
 8. Se ticket_medio = 0, não use como base de cálculo. A tarefa deve definir quanto cobrar pelo primeiro pacote.
 9. Referencie materiais da Biblioteca no campo recurso_biblioteca em cada tarefa, usando T01-T12 ou materiais específicos do modelo quando fizer sentido.
+10. AÇÕES E METÁFORAS DA ALMA (consultar primeiro, nunca ignorar)
+A seção "AÇÕES ALMA PRIORIZADAS" contém ações escritas pelo mentor Rogério Teixeira, pré-selecionadas para este modelo. A seção "METÁFORAS ALMA" contém metáforas bíblicas e empresariais curadas pelo mentor.
+FLUXO OBRIGATÓRIO para cada tarefa do plano:
+PASSO 1: Verificar se existe ação em "AÇÕES ALMA PRIORIZADAS" que corresponda à necessidade da semana. Se existir — usar a descrição e linguagem da ação como base, personalizando com os dados do empreendedor.
+PASSO 2: Independente de ter encontrado ação ou não, verificar "METÁFORAS ALMA" e incluir metáforas relevantes no campo por_que_importa ou na descrição das tarefas.
+PASSO 3: SOMENTE se "AÇÕES ALMA PRIORIZADAS" não contiver NENHUMA ação relevante (0 ações) E "METÁFORAS ALMA" não contiver NENHUMA metáfora aplicável (0 metáforas) — a IA cria ações e linguagem próprias, mantendo o tom do mentor.
+REGRAS DA ALMA: NUNCA substituir uma ação da Alma por versão genérica. NUNCA ignorar as ações priorizadas se contiverem ações relevantes. Metáforas da Alma TÊM PRIORIDADE sobre metáforas inventadas. Quando a IA criar ação nova, manter o mesmo nível de concretude e tom das ações da Alma. A Alma NÃO é limitante — a IA pode e deve criar ações novas quando necessário, mas SEMPRE consultando a Alma primeiro.
 
 TOM:
 Direto, cuidador, espiritual. Use "a gente" nas partes conversacionais. Celebre antes de corrigir. Números primeiro.`;
@@ -206,10 +214,20 @@ function buildRemainingWeeksExample(diagnosticModel: string): string {
 
 function buildInitialPlanPrompt(
   diagnosticModel: string,
-  onboardingJson: Record<string, unknown>
+  onboardingJson: Record<string, unknown>,
+  acoes: AcaoAlma[],
+  metaforas: string[]
 ): string {
   const ctx = buildStudentContext(diagnosticModel, onboardingJson);
   const blocos = (BLOCOS_POR_MODELO[diagnosticModel] ?? BLOCOS_PADRAO) as [string, string, string, string, string];
+
+  const acoesAlmaBlock = acoes.length > 0
+    ? `\nAÇÕES ALMA PRIORIZADAS (distribua ao longo do plano):\n${acoes.map((a) => `• [${a.codigo}] ${a.nome}: ${a.descricao}`).join('\n')}\n`
+    : '';
+
+  const metaforasAlmaBlock = metaforas.length > 0
+    ? `\nMETÁFORAS ALMA (use pelo menos uma no plano):\n${metaforas.map((m) => `• ${m}`).join('\n')}\n`
+    : '';
 
   return `TAREFA:
 Gerar a estrutura completa do Plano de Ação de 24 semanas com base no diagnóstico e onboarding do empreendedor. A Semana 1 deve ser gerada completa. As Semanas 2 a 24 devem ser geradas apenas com número, bloco, tag, nome da semana e objetivo estratégico.
@@ -223,7 +241,7 @@ BLOCOS PERSONALIZADOS DO MODELO ${diagnosticModel}:
 3. ${blocos[2]} (S11-S15, tag Controlo)
 4. ${blocos[3]} (S16-S20, tag Crescimento)
 5. ${blocos[4]} (S21-S24, tag Legado)
-
+${acoesAlmaBlock}${metaforasAlmaBlock}
 FORMATO DE SAÍDA (JSON puro, sem markdown, sem texto antes ou depois):
 {
   "semana_1": {
@@ -254,7 +272,9 @@ function buildSemanaFullPrompt(
   semanaObjetivo: string,
   diagnosticModel: string,
   onboardingJson: Record<string, unknown>,
-  todasSemanas: SemanaOutline[]
+  todasSemanas: SemanaOutline[],
+  acoes: AcaoAlma[],
+  metaforas: string[]
 ): string {
   const ctx = buildStudentContext(diagnosticModel, onboardingJson);
 
@@ -269,6 +289,14 @@ function buildSemanaFullPrompt(
     objetivo: semanaObjetivo,
   };
 
+  const acoesAlmaBlock = acoes.length > 0
+    ? `\nAÇÕES ALMA DISPONÍVEIS PARA ESTA SEMANA (use as relevantes para o contexto):\n${acoes.map((a) => `• [${a.codigo}] ${a.nome}: ${a.descricao}`).join('\n')}\n`
+    : '';
+
+  const metaforasAlmaBlock = metaforas.length > 0
+    ? `\nMETÁFORAS ALMA (use se enriquecer a lógica da semana):\n${metaforas.map((m) => `• ${m}`).join('\n')}\n`
+    : '';
+
   return `TAREFA:
 Gerar o conteúdo completo de UMA semana do Plano de Ação.
 
@@ -280,7 +308,7 @@ ${outlineText}
 
 SEMANA A GERAR:
 ${JSON.stringify(semana, null, 2)}
-
+${acoesAlmaBlock}${metaforasAlmaBlock}
 Gere o conteúdo completo desta semana, mantendo coerência com o contexto do empreendedor e com as semanas anteriores e seguintes do plano.
 
 REGRAS:
@@ -454,6 +482,8 @@ export async function generateSemanaCompleta(semanaId: string): Promise<void> {
     objetivo: s.objetivo,
   }));
 
+  const { acoes: acoesB, metaforas: metaforasB } = filterAlmaForModel(planoRow.modelo, onbRow.json_completo);
+
   const prompt = buildSemanaFullPrompt(
     semanaRow.numero,
     semanaRow.bloco ?? blocoForSemana(planoRow.modelo, semanaRow.numero),
@@ -462,7 +492,9 @@ export async function generateSemanaCompleta(semanaId: string): Promise<void> {
     semanaRow.objetivo,
     planoRow.modelo,
     onbRow.json_completo,
-    outlines
+    outlines,
+    acoesB,
+    metaforasB
   );
 
   let response: Anthropic.Messages.Message;
@@ -560,7 +592,8 @@ async function runGeneratePlanoBackground(
   ];
   (systemBlocks[0] as unknown as { cache_control: { type: string } }).cache_control = { type: 'ephemeral' };
 
-  const prompt = buildInitialPlanPrompt(diagnosticModel, onboardingJson as Record<string, unknown>);
+  const { acoes: acoesA, metaforas: metaforasA } = filterAlmaForModel(diagnosticModel, onboardingJson as Record<string, unknown>);
+  const prompt = buildInitialPlanPrompt(diagnosticModel, onboardingJson as Record<string, unknown>, acoesA, metaforasA);
 
   let response: Anthropic.Messages.Message;
   try {

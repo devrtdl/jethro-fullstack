@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useRouter } from 'expo-router';
 import {
   ActivityIndicator,
   Pressable,
@@ -58,6 +59,7 @@ function prioridadeColor(p: string) {
 }
 
 function SemanaCard({ semana }: { semana: PlanoSemanaCompleta }) {
+  const router = useRouter();
   const [expanded, setExpanded] = useState(false);
   const isLocked = semana.gate_status === 'locked';
   const isGenerating = !isLocked && !semana.conteudo_completo;
@@ -127,10 +129,19 @@ function SemanaCard({ semana }: { semana: PlanoSemanaCompleta }) {
                   <Text style={[styles.tarefaPrio, { color: prioridadeColor(t.prioridade) }]}>
                     ◆
                   </Text>
-                  <Text style={[styles.tarefaDesc, t.completada && styles.tarefaDone]}>
-                    {t.descricao}
-                    {t.recurso_biblioteca ? `\nRecurso: ${t.recurso_biblioteca}` : ''}
-                  </Text>
+                  <View style={styles.tarefaBody}>
+                    <Text style={[styles.tarefaDesc, t.completada && styles.tarefaDone]}>
+                      {t.descricao}
+                    </Text>
+                    {t.recurso_biblioteca && (
+                      <Pressable
+                        style={styles.recursoChip}
+                        onPress={() => router.push('/(tabs)/biblioteca')}
+                      >
+                        <Text style={styles.recursoChipText}>◈ {t.recurso_biblioteca}</Text>
+                      </Pressable>
+                    )}
+                  </View>
                 </View>
               ))}
             </View>
@@ -344,8 +355,15 @@ const styles = StyleSheet.create({
 
   tarefaRow: { flexDirection: 'row', gap: 8, alignItems: 'flex-start' },
   tarefaPrio: { fontSize: 10, marginTop: 4 },
-  tarefaDesc: { fontSize: 13, color: JethroColors.cremeMuted, flex: 1, lineHeight: 20 },
+  tarefaBody: { flex: 1, gap: 4 },
+  tarefaDesc: { fontSize: 13, color: JethroColors.cremeMuted, lineHeight: 20 },
   tarefaDone: { textDecorationLine: 'line-through', color: JethroColors.muted },
+  recursoChip: {
+    alignSelf: 'flex-start',
+    borderWidth: 1, borderColor: JethroColors.gold,
+    borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3,
+  },
+  recursoChipText: { fontSize: 11, color: JethroColors.gold },
 
   resultadoWrap: {
     backgroundColor: JethroColors.goldMuted, borderRadius: 8, padding: 10,
