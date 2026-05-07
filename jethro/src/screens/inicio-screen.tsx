@@ -53,7 +53,7 @@ function getFormattedDate(): string {
 
 function faseLabel(fase: string): string {
   const map: Record<string, string> = {
-    fundamento: 'Fundamento', estrutura: 'Estrutura', controlo: 'Controlo',
+    fundamento: 'Fundamento', estrutura: 'Estrutura', controlo: 'Controle',
     crescimento: 'Crescimento', escala: 'Escala', legado: 'Legado',
   };
   return map[fase] ?? fase;
@@ -190,7 +190,7 @@ function CheckInModal({ visible, onClose, onSubmit, loading }: CheckInModalProps
         <Pressable style={m.sheet} onPress={() => {}}>
           <View style={m.handle} />
           <Text style={m.title}>Check-in do dia</Text>
-          <Text style={m.sub}>Regista o teu dia de trabalho. Após 5 dias, o gate de avanço abre.</Text>
+          <Text style={m.sub}>Registre o seu dia de trabalho. Após 5 dias, o gate de avanço abre.</Text>
 
           <Text style={m.question}>Cumpri as tarefas de hoje?</Text>
           <View style={m.yesNoRow}>
@@ -213,11 +213,11 @@ function CheckInModal({ visible, onClose, onSubmit, loading }: CheckInModalProps
           />
 
           <PrimaryButton
-            label="Registar dia"
+            label="Registrar dia"
             onPress={handleSubmit}
             loading={loading}
             disabled={cumpriu === null}
-            accessibilityLabel="Registar dia de trabalho"
+            accessibilityLabel="Registrar dia de trabalho"
           />
         </Pressable>
       </Pressable>
@@ -309,15 +309,15 @@ export function InicioScreen() {
       const result = await homeService.checkIn(cumpriu, nota);
       setCheckInVisible(false);
       if (result.skipped && result.reason === 'already_done_today') {
-        Alert.alert('Já registado', 'Já fizeste o check-in de hoje. Volta amanhã!');
+        Alert.alert('Já registrado', 'Você já fez o check-in de hoje. Volte amanhã!');
         return;
       }
       await loadData();
       if (result.gateDesbloqueado) {
-        Alert.alert('🎉 Gate desbloqueado!', 'Completaste 5 dias de trabalho. Podes avançar para a próxima semana!');
+        Alert.alert('🎉 Gate desbloqueado!', 'Você completou 5 dias de trabalho. Pode avançar para a próxima semana!');
       }
     } catch {
-      Alert.alert('Erro', 'Não foi possível registar o check-in.');
+      Alert.alert('Erro', 'Não foi possível registrar o check-in.');
     } finally {
       setCheckInLoading(false);
     }
@@ -329,16 +329,16 @@ export function InicioScreen() {
       const result = await homeService.gateAdvance();
       if (!result.advanced) {
         const msg = result.reason === 'insufficient_checkins'
-          ? 'Ainda não tens check-ins suficientes para avançar.'
+          ? 'Ainda não há check-ins suficientes para avançar.'
           : 'Não foi possível avançar.';
         Alert.alert('Ainda não', msg);
         return;
       }
       await loadData();
       if (result.programaConcluido) {
-        Alert.alert('🏆 Programa concluído!', 'Completaste as 24 semanas do Programa PBN. Parabéns!');
+        Alert.alert('🏆 Programa concluído!', 'Você completou as 24 semanas do Programa PBN. Parabéns!');
       } else {
-        Alert.alert(`Semana ${result.proximaSemana} desbloqueada`, 'O teu plano avançou. Bom trabalho!');
+        Alert.alert(`Semana ${result.proximaSemana} desbloqueada`, 'Seu plano avançou. Bom trabalho!');
       }
     } catch {
       Alert.alert('Erro', 'Não foi possível avançar o gate.');
@@ -428,7 +428,7 @@ export function InicioScreen() {
             <View style={s.kpiRow}>
               <SectionCard style={s.kpiCard}>
                 <Text style={s.kpiValue}>{formatKpiValue(kpis.receitaAtual)}</Text>
-                <EyebrowLabel size="sm" color={colors.inkMute}>Receita Actual</EyebrowLabel>
+                <EyebrowLabel size="sm" color={colors.inkMute}>Receita Atual</EyebrowLabel>
               </SectionCard>
               <SectionCard style={s.kpiCard}>
                 <Text style={s.kpiValue}>{formatKpiValue(kpis.ticketMedio)}</Text>
@@ -436,7 +436,7 @@ export function InicioScreen() {
               </SectionCard>
               <SectionCard style={s.kpiCard}>
                 <Text style={s.kpiValue}>{formatKpiValue(kpis.clientesAtivos)}</Text>
-                <EyebrowLabel size="sm" color={colors.inkMute}>Clientes Activos</EyebrowLabel>
+                <EyebrowLabel size="sm" color={colors.inkMute}>Clientes Ativos</EyebrowLabel>
               </SectionCard>
             </View>
           </>
@@ -449,14 +449,14 @@ export function InicioScreen() {
           <SectionCard style={s.emptyCard}>
             <Text style={s.emptyTitle}>Completa o onboarding</Text>
             <Text style={s.emptyText}>
-              Para receberes o teu plano personalizado, precisas de completar o onboarding primeiro.
+              Para receber o seu plano personalizado, complete o onboarding primeiro.
             </Text>
           </SectionCard>
         ) : !plano ? (
           <SectionCard style={s.emptyCard}>
             <Text style={s.emptyTitle}>Plano ainda não gerado</Text>
             <Text style={s.emptyText}>
-              O Jethro vai criar o teu plano de 24 semanas personalizado com base no teu diagnóstico e onboarding.
+              O Jethro vai criar o seu plano de 24 semanas personalizado com base no seu diagnóstico e onboarding.
             </Text>
             <PrimaryButton
               label={generatingPlan ? 'A gerar plano...' : '✦ Gerar o meu plano'}
@@ -545,7 +545,7 @@ export function InicioScreen() {
 
             {!gateUnlocked && (
               <GhostButton
-                label={todayCheckedIn ? '✓ Check-in feito hoje' : '+ Registar dia de trabalho'}
+                label={todayCheckedIn ? '✓ Check-in feito hoje' : '+ Registrar dia de trabalho'}
                 onPress={() => setCheckInVisible(true)}
                 disabled={todayCheckedIn}
                 textColor={todayCheckedIn ? colors.success : colors.accent}

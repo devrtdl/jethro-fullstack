@@ -26,7 +26,7 @@ type Bloco = {
 const BLOCOS_DEF = [
   { titulo: 'Fundamento',  subtitulo: 'Semanas 1-5',   range: [1, 5] },
   { titulo: 'Estrutura',   subtitulo: 'Semanas 6-10',  range: [6, 10] },
-  { titulo: 'Controlo',    subtitulo: 'Semanas 11-15', range: [11, 15] },
+  { titulo: 'Controle',    subtitulo: 'Semanas 11-15', range: [11, 15] },
   { titulo: 'Crescimento', subtitulo: 'Semanas 16-20', range: [16, 20] },
   { titulo: 'Legado',      subtitulo: 'Semanas 21-24', range: [21, 24] },
 ];
@@ -44,7 +44,7 @@ function gateColor(status: string, accent: string, muted: string) {
 
 function faseLabel(fase: string) {
   const map: Record<string, string> = {
-    fundamento: 'Fundamento', estrutura: 'Estrutura', controlo: 'Controlo',
+    fundamento: 'Fundamento', estrutura: 'Estrutura', controlo: 'Controle',
     crescimento: 'Crescimento', escala: 'Escala', legado: 'Legado',
   };
   return map[fase] ?? fase;
@@ -268,7 +268,7 @@ export function BibliotecaScreen() {
         <Text style={s.emptyIcon}>◈</Text>
         <Text style={s.emptyTitle}>Plano ainda não gerado</Text>
         <Text style={s.emptyText}>
-          Completa o onboarding e gera o teu plano de 24 semanas para ver o teu percurso aqui.
+          Complete o onboarding e gere o seu plano de 24 semanas para ver o seu progresso aqui.
         </Text>
       </SafeAreaView>
     );
@@ -286,7 +286,7 @@ export function BibliotecaScreen() {
     <SafeAreaView style={s.safe} edges={['top']}>
       <ScrollView style={s.scroll} contentContainerStyle={s.container} showsVerticalScrollIndicator={false}>
         <View style={s.pageHeader}>
-          <Text style={s.pageTitle}>O teu plano</Text>
+          <Text style={s.pageTitle}>Seu plano</Text>
           <Text style={s.pageSub}>{totalCompletas} de {plano.totalSemanas} semanas concluídas</Text>
         </View>
 

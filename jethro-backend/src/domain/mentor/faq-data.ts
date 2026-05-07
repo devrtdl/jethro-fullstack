@@ -21,7 +21,7 @@ export const FAQ_GLOBAL: FaqItem[] = [
   },
   {
     q: 'O que é o plano de 24 semanas',
-    a: 'É o seu roteiro de transformação empresarial dividido em 5 blocos: Fundamento (S1-S5), Estrutura (S6-S10), Controlo (S11-S15), Crescimento (S16-S20) e Legado (S21-S24). Cada semana tem ações concretas, uma âncora bíblica e um material técnico de referência. Você avança semana a semana com acompanhamento do Jethro.',
+    a: 'É o seu roteiro de transformação empresarial dividido em 5 blocos: Fundamento (S1-S5), Estrutura (S6-S10), Controle (S11-S15), Crescimento (S16-S20) e Legado (S21-S24). Cada semana tem ações concretas, uma âncora bíblica e um material técnico de referência. Você avança semana a semana com acompanhamento do Jethro.',
   },
   {
     q: 'O que é o Gate de Avanço',
@@ -296,7 +296,7 @@ export const INSTRUCOES_IA = `INSTRUÇÕES OBRIGATÓRIAS:
 5. Se não estiver no FAQ, responda com a voz do Rogério Teixeira: direto, bíblico, sem floreios.
 6. JAMAIS mencione outros métodos, ferramentas ou concorrentes pelo nome.
 7. Se o usuário demonstrar desânimo ou querer desistir, acione âncora bíblica + convite a continuar.
-8. Máximo 3 parágrafos por resposta. Directo, cuidador, espiritual.`;
+8. Máximo 3 parágrafos por resposta. Direto, cuidador, espiritual.`;
 
 // Sugestões iniciais exibidas no chat antes da primeira mensagem
 export const SUGESTOES_CHAT = [
@@ -309,7 +309,7 @@ export const SUGESTOES_CHAT = [
 export function derivarFase(semana: number): string {
   if (semana <= 5) return 'Fundamento';
   if (semana <= 10) return 'Estrutura';
-  if (semana <= 15) return 'Controlo';
+  if (semana <= 15) return 'Controle';
   if (semana <= 20) return 'Crescimento';
   return 'Legado';
 }

@@ -282,7 +282,7 @@ const onboardingQuestions: DiagnosticQuestionSeed[] = [
   {
     code: 'onb_o1_dedicacao',
     orderIndex: 100,
-    label: 'Além do teu negócio, tens outra fonte de renda hoje?',
+    label: 'Além do seu negócio, você tem outra fonte de renda hoje?',
     questionType: 'single_select',
     isRequired: true,
     options: [
@@ -330,7 +330,7 @@ const onboardingQuestions: DiagnosticQuestionSeed[] = [
   {
     code: 'onb_o2b_equipa_detalhada',
     orderIndex: 103,
-    label: 'Quem são as pessoas-chave da tua equipa?',
+    label: 'Quem são as pessoas-chave da sua equipe?',
     helperText: 'Até 5 pessoas — escreve o nome (opcional) e selecciona a função.',
     questionType: 'team_slots',
     options: [
@@ -369,7 +369,7 @@ const onboardingQuestions: DiagnosticQuestionSeed[] = [
     questionType: 'single_select',
     isRequired: true,
     options: [
-      { label: 'Manter o actual', value: 'A' },
+      { label: 'Manter o atual', value: 'A' },
       { label: 'R$10 mil', value: 'B' },
       { label: 'R$20 mil', value: 'C' },
       { label: 'R$50 mil', value: 'D' },
@@ -381,14 +381,14 @@ const onboardingQuestions: DiagnosticQuestionSeed[] = [
   {
     code: 'onb_o3a_problema',
     orderIndex: 106,
-    label: 'Para isso, o que precisa mudar primeiro na tua opinião?',
+    label: 'Para isso, o que precisa mudar primeiro na sua opinião?',
     questionType: 'single_select',
     isRequired: true,
     options: [
       { label: 'Vender mais', value: 'A' },
       { label: 'Cobrar melhor', value: 'B' },
       { label: 'Organizar finanças', value: 'C' },
-      { label: 'Montar equipa', value: 'D' },
+      { label: 'Montar equipe', value: 'D' },
       { label: 'Ter mais tempo', value: 'E' },
       { label: 'Ter mais clareza de direção', value: 'F' },
     ],
@@ -399,7 +399,7 @@ const onboardingQuestions: DiagnosticQuestionSeed[] = [
     code: 'onb_o4_faturamento',
     orderIndex: 120,
     label: 'Qual foi o faturamento médio dos últimos 3 meses?',
-    helperText: 'Seleciona a faixa. Podes adicionar o valor exacto abaixo.',
+    helperText: 'Selecione a faixa. Você pode adicionar o valor exato abaixo.',
     questionType: 'range_with_optional',
     isRequired: true,
     options: [
@@ -424,7 +424,7 @@ const onboardingQuestions: DiagnosticQuestionSeed[] = [
       { label: 'Sobra pouco', value: 'B' },
       { label: 'Sobra razoável', value: 'C' },
       { label: 'Sobra bem', value: 'D' },
-      { label: 'Não sei — não controlo', value: 'E' },
+      { label: 'Não sei — não tenho controle', value: 'E' },
     ],
     metadata: { form: 'onboarding', phase: '3a', fields: ['o_que_sobra'] },
   },
@@ -474,7 +474,7 @@ const onboardingQuestions: DiagnosticQuestionSeed[] = [
     code: 'onb_o6_custos',
     orderIndex: 125,
     label: 'Quanto gastas por mês para manter o negócio?',
-    helperText: 'Seleciona a faixa. Podes adicionar o valor exacto abaixo.',
+    helperText: 'Selecione a faixa. Você pode adicionar o valor exato abaixo.',
     questionType: 'range_with_optional',
     isRequired: true,
     options: [
@@ -491,14 +491,14 @@ const onboardingQuestions: DiagnosticQuestionSeed[] = [
   {
     code: 'onb_o6a_dre',
     orderIndex: 126,
-    label: 'Tens controlo financeiro mensal (DRE, planilha)?',
+    label: 'Você tem controle financeiro mensal (DRE, planilha)?',
     questionType: 'single_select',
     isRequired: true,
     options: [
       { label: 'Sim, acompanho todo mês', value: 'A' },
       { label: 'Tenho planilha mas não actualizo', value: 'B' },
       { label: 'Só o que o contabilista manda', value: 'C' },
-      { label: 'Não tenho nenhum controlo', value: 'D' },
+      { label: 'Não tenho nenhum controle', value: 'D' },
     ],
     metadata: { form: 'onboarding', phase: '3a', fields: ['sem_dre_flag'] },
   },
@@ -521,7 +521,7 @@ const onboardingQuestions: DiagnosticQuestionSeed[] = [
   {
     code: 'onb_o7a_clientes',
     orderIndex: 134,
-    label: 'Quantos clientes activos tens (compraram nos últimos 12 meses)?',
+    label: 'Quantos clientes ativos você tem (compraram nos últimos 12 meses)?',
     questionType: 'single_select',
     isRequired: true,
     options: [
@@ -553,7 +553,7 @@ const onboardingQuestions: DiagnosticQuestionSeed[] = [
     code: 'onb_o7b_ticket',
     orderIndex: 136,
     label: 'Qual o valor médio que cada cliente paga (ticket)?',
-    helperText: 'Seleciona a faixa. Podes adicionar o valor exacto abaixo.',
+    helperText: 'Selecione a faixa. Você pode adicionar o valor exato abaixo.',
     questionType: 'range_with_optional',
     isRequired: true,
     options: [
@@ -645,7 +645,7 @@ const onboardingQuestions: DiagnosticQuestionSeed[] = [
   {
     code: 'onb_o10_tentou',
     orderIndex: 145,
-    label: 'Já tentaste resolver esse problema antes? (podes seleccionar vários)',
+    label: 'Você já tentou resolver esse problema antes? (pode selecionar vários)',
     questionType: 'multi_select',
     isRequired: true,
     options: [
@@ -661,7 +661,7 @@ const onboardingQuestions: DiagnosticQuestionSeed[] = [
   {
     code: 'onb_o11_impacto',
     orderIndex: 146,
-    label: 'Se o negócio estiver onde precisa em 6 meses, o que muda na tua vida pessoal?',
+    label: 'Se o negócio estiver onde precisa em 6 meses, o que muda na sua vida pessoal?',
     questionType: 'single_select',
     isRequired: true,
     options: [
@@ -693,7 +693,7 @@ const onboardingQuestions: DiagnosticQuestionSeed[] = [
   {
     code: 'onb_ob09_equipe',
     orderIndex: 150,
-    label: 'Qual o maior desafio com a tua equipa?',
+    label: 'Qual o maior desafio com a sua equipe?',
     questionType: 'single_select',
     options: [
       { label: 'Encontrar gente boa', value: 'A' },
@@ -852,7 +852,7 @@ const onboardingQuestions: DiagnosticQuestionSeed[] = [
   {
     code: 'onb_o17_num_ofertas',
     orderIndex: 165,
-    label: 'Quantas ofertas/serviços diferentes tens hoje?',
+    label: 'Quantas ofertas/serviços diferentes você tem hoje?',
     questionType: 'single_select',
     options: [
       { label: '1 principal', value: 'A' },
@@ -885,7 +885,7 @@ const onboardingQuestions: DiagnosticQuestionSeed[] = [
       { label: 'Quase tudo', value: 'A' },
       { label: '3 a 4 actividades críticas', value: 'B' },
       { label: '1 a 2 específicas', value: 'C' },
-      { label: 'A equipa resolve quase tudo', value: 'D' },
+      { label: 'A equipe resolve quase tudo', value: 'D' },
     ],
     metadata: {
       form: 'onboarding', phase: '4', conditional: true, fields: ['dependencia_dono_pct'],
@@ -916,7 +916,7 @@ const onboardingQuestions: DiagnosticQuestionSeed[] = [
       { label: 'Tudo para', value: 'A' },
       { label: 'As vendas param', value: 'B' },
       { label: 'A operação para', value: 'C' },
-      { label: 'Quase nada — a equipa gere', value: 'D' },
+      { label: 'Quase nada — a equipe resolve', value: 'D' },
     ],
     metadata: {
       form: 'onboarding', phase: '4', conditional: true, fields: ['teste_ferias'],
@@ -927,7 +927,7 @@ const onboardingQuestions: DiagnosticQuestionSeed[] = [
   {
     code: 'onb_o22_metas_equipa',
     orderIndex: 172,
-    label: 'Cada pessoa da equipa sabe a meta desta semana?',
+    label: 'Cada pessoa da equipe sabe a meta desta semana?',
     questionType: 'single_select',
     options: [
       { label: 'Sim, toda a gente', value: 'A' },
@@ -943,13 +943,13 @@ const onboardingQuestions: DiagnosticQuestionSeed[] = [
   {
     code: 'onb_o22a_decisoes',
     orderIndex: 173,
-    label: 'Quais decisões do dia a dia ainda passam por ti? (podes seleccionar vários)',
+    label: 'Quais decisões do dia a dia ainda passam por você? (pode selecionar vários)',
     questionType: 'multi_select',
     options: [
       { label: 'Preços e descontos', value: 'A' },
       { label: 'Atendimento ao cliente', value: 'B' },
       { label: 'Compras e pagamentos', value: 'C' },
-      { label: 'Problemas da equipa', value: 'D' },
+      { label: 'Problemas da equipe', value: 'D' },
       { label: 'Redes sociais', value: 'E' },
       { label: 'Quase tudo passa por mim', value: 'F' },
     ],
@@ -1024,7 +1024,7 @@ const onboardingQuestions: DiagnosticQuestionSeed[] = [
     questionType: 'single_select',
     options: [
       { label: 'Não sei por onde escalar', value: 'A' },
-      { label: 'Não tenho equipa suficiente', value: 'B' },
+      { label: 'Não tenho equipe suficiente', value: 'B' },
       { label: 'Não tenho tempo', value: 'C' },
       { label: 'Não sei se o mercado aguenta', value: 'D' },
       { label: 'Só falta um plano estruturado', value: 'E' },
@@ -1037,12 +1037,12 @@ const onboardingQuestions: DiagnosticQuestionSeed[] = [
   {
     code: 'onb_o29_mentoria',
     orderIndex: 181,
-    label: 'Já tiveste ou tens mentoria individual para o negócio?',
+    label: 'Você já teve ou tem mentoria individual para o negócio?',
     questionType: 'single_select',
     options: [
       { label: 'Nunca tive', value: 'A' },
       { label: 'Já tive, não estou mais', value: 'B' },
-      { label: 'Tenho actualmente', value: 'C' },
+      { label: 'Tenho atualmente', value: 'C' },
       { label: 'Já tentei, não funcionou', value: 'D' },
     ],
     metadata: {
@@ -1054,7 +1054,7 @@ const onboardingQuestions: DiagnosticQuestionSeed[] = [
   {
     code: 'onb_o23_tipo_oferta',
     orderIndex: 185,
-    label: 'Qual o tipo principal de oferta do teu negócio?',
+    label: 'Qual o tipo principal de oferta do seu negócio?',
     questionType: 'single_select',
     isRequired: true,
     options: [

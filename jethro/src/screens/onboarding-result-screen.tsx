@@ -15,16 +15,16 @@ type OnboardingSummary = Record<string, unknown>;
 
 const SUMMARY_LABELS: Record<string, string> = {
   nome_completo: 'Nome', email: 'E-mail', setor: 'Setor',
-  modelo_confirmado: 'Modelo de negócio', receita_atual: 'Receita actual',
-  ticket_medio: 'Ticket médio', clientes_ativos_total: 'Clientes activos',
+  modelo_confirmado: 'Modelo de negócio', receita_atual: 'Receita atual',
+  ticket_medio: 'Ticket médio', clientes_ativos_total: 'Clientes ativos',
   anos_negocio: 'Anos de negócio', maior_desafio: 'Maior desafio', meta_90_dias: 'Meta 90 dias',
 };
 
 const STEPS = [
-  { icon: '◈', text: 'A IA analisa o teu diagnóstico e onboarding' },
+  { icon: '◈', text: 'A IA analisa o seu diagnóstico e onboarding' },
   { icon: '◆', text: 'Cria o plano de 24 semanas personalizado' },
   { icon: '◉', text: 'Prepara o conteúdo completo da semana 1' },
-  { icon: '●', text: 'Activa o gate de avanço e finaliza' },
+  { icon: '●', text: 'Ativa o gate de avanço e finaliza' },
 ];
 
 const STEP_INTERVAL_MS = 20_000;
@@ -121,7 +121,7 @@ export function OnboardingResultScreen() {
         <View style={s.header}>
           <Text style={s.checkmark}>✦</Text>
           <Text style={s.title}>Onboarding concluído!</Text>
-          <Text style={s.subtitle}>O Jethro já conhece o teu negócio. Agora vamos criar o teu plano de 24 semanas.</Text>
+          <Text style={s.subtitle}>O Jethro já conhece o seu negócio. Agora vamos criar o seu plano de 24 semanas.</Text>
         </View>
 
         {visibleFields.length > 0 && !generating && (

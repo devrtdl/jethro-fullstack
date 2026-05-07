@@ -134,7 +134,7 @@ export const ACOES_ALMA: Record<string, AcaoAlma> = {
   'FIN-19': {
     codigo: 'FIN-19',
     nome: 'Acompanhamento Semanal do Break-Even',
-    descricao: 'Toda sexta-feira: comparar faturação da semana com o break-even semanal. Se passou: qualquer receita adicional é lucro puro. Se falta: ativar imediatamente (ligar para clientes, priorizar serviços de maior ticket). Break-even semanal = custo fixo mensal ÷ semanas de trabalho.',
+    descricao: 'Toda sexta-feira: comparar faturamento da semana com o break-even semanal. Se passou: qualquer receita adicional é lucro puro. Se falta: ativar imediatamente (ligar para clientes, priorizar serviços de maior ticket). Break-even semanal = custo fixo mensal ÷ semanas de trabalho.',
     guia: 'G02',
   },
   'FIN-20': {

@@ -35,7 +35,7 @@ const SUCCESS_HTML = (sessionId: string) => `<!DOCTYPE html>
 <body>
   <div class="icon">✦</div>
   <h1>Pagamento concluído!</h1>
-  <p>A tua assinatura Jethro está ativa. Fecha esta janela e volta ao aplicativo para continuar.</p>
+  <p>Sua assinatura Jethro está ativa. Feche esta janela e volte ao aplicativo para continuar.</p>
   <p class="note">O aplicativo será atualizado automaticamente.</p>
   <p class="sid">Ref: ${sessionId.slice(-12)}</p>
   <script>
@@ -134,7 +134,7 @@ export async function registerSubscriptionRoutes(app: FastifyInstance) {
             await activateSubscription(userId, sessionId);
           }
         } catch {
-          // Falha silenciosa — o webhook activará como fallback
+          // Falha silenciosa — o webhook ativará como fallback
         }
       }
 
@@ -152,7 +152,7 @@ export async function registerSubscriptionRoutes(app: FastifyInstance) {
 
   /**
    * GET /subscription/status
-   * Retorna o estado atual da assinatura do utilizador.
+   * Retorna o estado atual da assinatura do usuário.
    */
   app.get('/subscription/status', { preHandler: userAuthPreHandler }, async (request) => {
     const userId = request.userId!;

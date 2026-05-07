@@ -122,7 +122,7 @@ export function PerfilScreen() {
           <View style={s.progressGrid}>
             <View style={s.progressItem}>
               <Text style={s.progressValue}>1</Text>
-              <Text style={s.progressLabel}>Semana actual</Text>
+              <Text style={s.progressLabel}>Semana atual</Text>
             </View>
             <View style={s.progressDivider} />
             <View style={s.progressItem}>
@@ -172,8 +172,8 @@ export function PerfilScreen() {
         <EyebrowLabel style={s.sectionLabel}>Diagnóstico</EyebrowLabel>
         <SectionCard style={s.card}>
           <Text style={s.diagInfo}>
-            O diagnóstico identifica o modelo do teu negócio e orienta todo o plano de 24 semanas.
-            Podes refazê-lo a qualquer momento.
+            O diagnóstico identifica o modelo do seu negócio e orienta todo o plano de 24 semanas.
+            Você pode refazê-lo a qualquer momento.
           </Text>
           <GhostButton
             label="◎ Fazer novo diagnóstico"

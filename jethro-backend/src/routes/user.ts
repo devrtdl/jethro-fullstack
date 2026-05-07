@@ -8,7 +8,7 @@ import { generateSemanaCompleta } from '../domain/plano/service.js';
 export async function registerUserRoutes(app: FastifyInstance) {
   /**
    * GET /user/flow-status
-   * Retorna em que passo do fluxo o utilizador se encontra.
+   * Retorna em que passo do fluxo o usuário se encontra.
    */
   app.get('/user/flow-status', { preHandler: userAuthPreHandler }, async (request) => {
     const userId = request.userId!;
@@ -50,10 +50,10 @@ export async function registerUserRoutes(app: FastifyInstance) {
   /**
    * GET /home
    * Dados necessários para a tab Início do app:
-   * - devocional da semana actual
+   * - devocional da semana atual
    * - KPIs do onboarding (ticker, clientes, receita)
-   * - plano actual (semana, objectivo, tarefas)
-   * - gate de avanço (horas registadas, status)
+   * - plano atual (semana, objetivo, tarefas)
+   * - gate de avanço (horas registradas, status)
    * - modelo diagnóstico
    */
   app.get('/home', { preHandler: userAuthPreHandler }, async (request) => {
@@ -113,7 +113,7 @@ export async function registerUserRoutes(app: FastifyInstance) {
       onboardingRow?.modelo_confirmado ?? diagnosticoRow?.modelo_identificado ?? null;
     const json = onboardingRow?.json_completo ?? null;
 
-    // Devocional da semana actual (ou semana 1 se sem plano)
+    // Devocional da semana atual (ou semana 1 se sem plano)
     const semanaNumero = planoRow?.semana_numero ?? 1;
     const devocionalRow = await pool
       .query<{ titulo: string; texto: string; versiculo: string }>(
@@ -122,7 +122,7 @@ export async function registerUserRoutes(app: FastifyInstance) {
       )
       .then((r) => r.rows[0] ?? null);
 
-    // Tarefas da semana actual
+    // Tarefas da semana atual
     const tarefas = planoRow
       ? await pool
           .query<{ descricao: string; prioridade: string; completada: boolean; recurso_biblioteca: string | null }>(
@@ -134,7 +134,7 @@ export async function registerUserRoutes(app: FastifyInstance) {
           .then((r) => r.rows)
       : [];
 
-    // Horas registadas: cada check-in = 1 dia de trabalho = 24h (gate abre com 5 check-ins / 120h)
+    // Horas registradas: cada check-in = 1 dia de trabalho = 24h (gate abre com 5 check-ins / 120h)
     const checkInData = planoRow
       ? await pool
           .query<{ count: number; today_done: boolean }>(
@@ -151,7 +151,7 @@ export async function registerUserRoutes(app: FastifyInstance) {
           .then((r) => r.rows[0] ?? { count: 0, today_done: false })
       : { count: 0, today_done: false };
 
-    const horasRegistadas = checkInData.count * 24;
+    const horasRegistradas = checkInData.count * 24;
 
     return successResponse({
       modelo,
@@ -165,7 +165,7 @@ export async function registerUserRoutes(app: FastifyInstance) {
             tag: planoRow.tag,
             objetivo: planoRow.objetivo,
             gateStatus: planoRow.gate_status,
-            horasRegistadas,
+            horasRegistradas,
             horasNecessarias: 120,
             checkInsCount: checkInData.count,
             checkInsNecessarios: 5,
@@ -186,7 +186,7 @@ export async function registerUserRoutes(app: FastifyInstance) {
 
   /**
    * GET /diagnostic/latest
-   * Último resultado de diagnóstico do utilizador autenticado.
+   * Último resultado de diagnóstico do usuário autenticado.
    */
   app.get('/diagnostic/latest', { preHandler: userAuthPreHandler }, async (request) => {
     const userId = request.userId!;
@@ -245,7 +245,7 @@ export async function registerUserRoutes(app: FastifyInstance) {
 
   /**
    * POST /check-in
-   * Regista um dia de trabalho para a semana actual.
+   * Registra um dia de trabalho para a semana atual.
    * Apenas 1 check-in por dia por semana (idempotente dentro do mesmo dia).
    * Body: { cumpriu: boolean, nota?: string }
    */
@@ -257,7 +257,7 @@ export async function registerUserRoutes(app: FastifyInstance) {
       const { cumpriu, nota = '' } = request.body ?? {};
       const pool = getDbPool();
 
-      // Encontra a semana actual com gate available
+      // Encontra a semana atual com gate available
       const semanaRow = await pool
         .query<{ semana_id: string; semana_numero: number }>(
           `SELECT s.id AS semana_id, s.numero AS semana_numero
@@ -327,7 +327,7 @@ export async function registerUserRoutes(app: FastifyInstance) {
   /**
    * POST /gate/advance
    * Avança para a próxima semana se as condições forem cumpridas (>= 5 check-ins).
-   * Marca a semana actual como 'completed' e a próxima como 'available'.
+   * Marca a semana atual como 'completed' e a próxima como 'available'.
    */
   app.post(
     '/gate/advance',
@@ -336,7 +336,7 @@ export async function registerUserRoutes(app: FastifyInstance) {
       const userId = request.userId!;
       const pool = getDbPool();
 
-      // Semana actual com gate available
+      // Semana atual com gate available
       const currentRow = await pool
         .query<{ semana_id: string; plano_id: string; semana_numero: number }>(
           `SELECT s.id AS semana_id, s.plano_id, s.numero AS semana_numero
@@ -390,7 +390,7 @@ export async function registerUserRoutes(app: FastifyInstance) {
       try {
         await client.query('BEGIN');
 
-        // Marca semana actual como completed
+        // Marca semana atual como completed
         await client.query(
           `UPDATE gates_semanais SET gate_status = 'completed', avancou_em = NOW()
            WHERE user_id = $1 AND semana_id = $2`,

@@ -86,8 +86,8 @@ export function PaywallScreen() {
         {/* Header */}
         <View style={s.header}>
           <EyebrowLabel>✦ Jethro Mentor PBN</EyebrowLabel>
-          <Text style={s.title}>O teu negócio merece{'\n'}uma rota clara</Text>
-          <Text style={s.subtitle}>Diagnóstico feito. Agora ativa o plano completo e começa a semana 1.</Text>
+          <Text style={s.title}>Seu negócio merece{'\n'}uma rota clara</Text>
+          <Text style={s.subtitle}>Diagnóstico feito. Agora ative o plano completo e comece a semana 1.</Text>
         </View>
 
         {/* Pricing card — usa surfaceFeature (navy) para destaque em ambos os modos */}

@@ -22,7 +22,7 @@ export type PlanoSemana = {
   tag?: string | null;
   objetivo: string;
   gateStatus: 'locked' | 'available' | 'completed' | 'overdue';
-  horasRegistadas: number;
+  horasRegistradas: number;
   horasNecessarias: number;
   checkInsCount: number;
   checkInsNecessarios: number;

@@ -31,7 +31,7 @@ function generateSessionId(): string {
 const INITIAL_MESSAGE: MentorMessage = {
   role: 'assistant',
   content:
-    'Olá! Sou o Jethro, o teu mentor PBN.\n\nEstou aqui para te ajudar a construir um negócio com propósito, estrutura e fé. O que está no coração hoje?',
+    'Olá! Sou o Jethro, o seu mentor PBN.\n\nEstou aqui para ajudá-lo a construir um negócio com propósito, estrutura e fé. O que está no coração hoje?',
 };
 
 const SUGESTOES = [
@@ -196,7 +196,7 @@ export function MentorScreen() {
         <View style={s.inputBar}>
           <TextInput
             style={s.textInput}
-            placeholder="Escreve a tua pergunta..."
+            placeholder="Escreva sua pergunta..."
             placeholderTextColor={colors.inkMute}
             value={input}
             onChangeText={setInput}

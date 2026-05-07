@@ -65,7 +65,7 @@ export async function userAuthPreHandler(request: FastifyRequest) {
       .then((r) => r.rows[0] ?? null);
 
     if (!newUser) {
-      throw new AppError('Nao foi possivel criar o utilizador.', 500, 'USER_CREATE_FAILED');
+      throw new AppError('Não foi possível criar o usuário.', 500, 'USER_CREATE_FAILED');
     }
     userRow = newUser;
   }

@@ -59,7 +59,7 @@ export async function createMentorChat(
 ): Promise<MentorChatResult> {
   const pool = getDbPool();
 
-  // Carrega contexto do utilizador
+  // Carrega contexto do usuário
   const contextRow = await pool
     .query<ContextRow>(
       `SELECT
@@ -118,7 +118,7 @@ export async function createMentorChat(
   const fase = semanaNumero != null ? derivarFase(semanaNumero) : null;
 
   const contextoLinhas: string[] = [
-    `Contexto do utilizador:`,
+    `Contexto do usuário:`,
     `Nome: ${nome}`,
     `Modelo diagnóstico: ${modelo ?? 'não identificado'}`,
     `Semana atual: ${semanaNumero != null ? `${semanaNumero} de 24` : 'não iniciada'}`,
