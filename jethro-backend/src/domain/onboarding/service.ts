@@ -76,6 +76,7 @@ export type OnboardingJson = {
   risco_concentracao: boolean;
   risco_plataforma: boolean;
   precisa_primeiro_contrato: boolean;
+  pre_receita: boolean;
   // CAMPOS LEGADOS (compatibilidade com plano/IA)
   equipa: string | null;
   ativos_fisicos: string | null;
@@ -164,7 +165,8 @@ function resolveRange(
 
 export function buildOnboardingJson(
   answers: Record<string, JsonValue>,
-  diagnosticModel: string
+  diagnosticModel: string,
+  revenueLevel?: string | null
 ): OnboardingJson {
   // Lê valores chave
   const equipa_total_raw = str(answers['onb_o2_equipa_total']);
@@ -222,12 +224,12 @@ export function buildOnboardingJson(
 
   // Labels legíveis para campos que o plano usa como texto
   const meta_labels: Record<string, string> = {
-    A: 'Manter o actual', B: 'R$10 mil', C: 'R$20 mil',
+    A: 'Manter o atual', B: 'R$10 mil', C: 'R$20 mil',
     D: 'R$50 mil', E: 'R$100 mil', F: 'Acima de R$100 mil',
   };
   const problema_labels: Record<string, string> = {
     A: 'Vender mais', B: 'Cobrar melhor', C: 'Organizar finanças',
-    D: 'Montar equipa', E: 'Ter mais tempo', F: 'Ter mais clareza de direção',
+    D: 'Montar equipe', E: 'Ter mais tempo', F: 'Ter mais clareza de direção',
   };
   const impacto_labels: Record<string, string> = {
     A: 'Mais tempo com a família', B: 'Liberdade financeira',
@@ -283,6 +285,7 @@ export function buildOnboardingJson(
   const risco_plataforma = dependencia_plataforma === 'A' || dependencia_plataforma === 'B';
   const precisa_primeiro_contrato =
     equipe_desafio === 'A' && ['G', 'H', 'B'].includes(diagnosticModel);
+  const pre_receita = revenueLevel === 'A' || faturamento === 0;
 
   // Campos adaptativos (Fase 4)
   const clareza_posicionamento = str(answers['onb_o16_clareza_pos']);
@@ -301,7 +304,7 @@ export function buildOnboardingJson(
   const experiencia_mentoria = str(answers['onb_o29_mentoria']);
 
   return {
-    // IDENTIDADE (área/tempo vêm do diagnóstico; onboarding não os coleta directamente)
+    // IDENTIDADE (área/tempo vêm do diagnóstico; onboarding não os coleta diretamente)
     area_negocio: null,
     tempo_negocio: null,
     regime_dedicacao: str(answers['onb_o1_dedicacao']),
@@ -376,6 +379,7 @@ export function buildOnboardingJson(
     risco_concentracao,
     risco_plataforma,
     precisa_primeiro_contrato,
+    pre_receita,
     // CAMPOS LEGADOS (aliases para compatibilidade com plano/IA existente)
     equipa: equipa_total_num ? String(equipa_total_num) : null,
     ativos_fisicos: str(answers['onb_o2c_ativo_fisico']),

@@ -91,7 +91,12 @@ function RangeWithOptional({
   const optionalText = optVal ?? '';
 
   function selectRange(code: string) {
-    onChange(optionalText ? `${code}|${optionalText}` : code);
+    if (rangeCode === code) {
+      onChange('');
+      return;
+    }
+    // troca de opção: descarta o valor exato anterior
+    onChange(code);
   }
   function setOptional(text: string) {
     const code = rangeCode ?? '';
@@ -113,7 +118,7 @@ function RangeWithOptional({
       ))}
       {rangeCode && rangeCode !== 'G' && (
         <View style={s.optionalInputWrap}>
-          <Text style={s.optionalLabel}>Valor exacto (opcional):</Text>
+          <Text style={s.optionalLabel}>Valor exato (opcional):</Text>
           <TextInput
             style={s.optionalInput}
             value={optionalText}
@@ -263,7 +268,7 @@ function QuestionBlock({
             <Pressable
               key={opt.value}
               style={[s.optionPill, value === opt.value && s.optionPillActive]}
-              onPress={() => onChange(opt.value)}
+              onPress={() => onChange(value === opt.value ? '' : opt.value)}
             >
               <Text style={[s.optionLabel, value === opt.value && s.optionLabelActive]}>
                 {opt.label}
@@ -290,7 +295,7 @@ function QuestionBlock({
           style={s.input}
           value={value}
           onChangeText={onChange}
-          placeholder="Escreve aqui..."
+          placeholder="Escreva aqui..."
           placeholderTextColor={colors.inkMute}
           keyboardType={
             question_type === 'number' ? 'number-pad'
@@ -306,7 +311,7 @@ function QuestionBlock({
           style={[s.input, s.textarea]}
           value={value}
           onChangeText={onChange}
-          placeholder="Escreve com detalhe..."
+          placeholder="Escreva com detalhes..."
           placeholderTextColor={colors.inkMute}
           multiline
           numberOfLines={4}
@@ -472,7 +477,7 @@ export function OnboardingScreen() {
     return (
       <SafeAreaView style={[s.safe, s.center]} edges={['top']}>
         <ActivityIndicator size="large" color={colors.accent} />
-        <Text style={s.loadingText}>A preparar o teu onboarding...</Text>
+        <Text style={s.loadingText}>Preparando o seu onboarding...</Text>
       </SafeAreaView>
     );
   }
@@ -517,9 +522,9 @@ export function OnboardingScreen() {
         {/* Header */}
         <View style={s.header}>
           <EyebrowLabel>✦ Personalização</EyebrowLabel>
-          <Text style={s.title}>Conta-nos mais sobre o teu negócio</Text>
+          <Text style={s.title}>Conte-nos mais sobre o seu negócio</Text>
           <Text style={s.subtitle}>
-            Estas respostas permitem ao Jethro criar um plano verdadeiramente personalizado.
+            Suas respostas permitem ao Jethro criar um plano verdadeiramente personalizado.
           </Text>
         </View>
 

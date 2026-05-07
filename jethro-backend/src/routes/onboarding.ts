@@ -12,12 +12,12 @@ const onboardingSubmitSchema = z.object({
 });
 
 export async function registerOnboardingRoutes(app: FastifyInstance) {
-  // Retorna as perguntas do onboarding filtradas pelo contexto diagnóstico do utilizador
+  // Retorna as perguntas do onboarding filtradas pelo contexto diagnóstico do usuário
   app.get('/onboarding/questions', { preHandler: userAuthPreHandler }, async (request) => {
     const userId = request.userId!;
     const pool = getDbPool();
 
-    // Carrega diagnóstico mais recente do utilizador para filtrar perguntas condicionais
+    // Carrega diagnóstico mais recente do usuário para filtrar perguntas condicionais
     const diagRow = await pool
       .query<{
         modelo_identificado: string;
@@ -98,7 +98,26 @@ export async function registerOnboardingRoutes(app: FastifyInstance) {
       return true;
     });
 
-    return successResponse(filtered);
+    const isPreReceita = revenueLevel === 'A';
+
+    const adapted = filtered
+      .filter((q) => {
+        // Esconder O7A2 (recorrentes) quando usuário ainda não fatura
+        if (isPreReceita && q.code === 'onb_o7a2_recorrentes') return false;
+        return true;
+      })
+      .map((q) => {
+        // Adaptar label de O7A para linguagem de pré-receita
+        if (isPreReceita && q.code === 'onb_o7a_clientes') {
+          return {
+            ...q,
+            label: 'Quantas pessoas já demonstraram interesse ou foram atendidas de alguma forma?',
+          };
+        }
+        return q;
+      });
+
+    return successResponse(adapted);
   });
 
 
@@ -131,8 +150,8 @@ export async function registerOnboardingRoutes(app: FastifyInstance) {
 
       // Carrega modelo e respostas do diagnóstico mais recente
       const diagRow = await pool
-        .query<{ id: string; modelo_identificado: string; answers_by_code: Record<string, string> }>(
-          `SELECT id, modelo_identificado, answers_by_code FROM diagnostico_respostas
+        .query<{ id: string; modelo_identificado: string; q11_faturamento: string | null; answers_by_code: Record<string, string> }>(
+          `SELECT id, modelo_identificado, q11_faturamento, answers_by_code FROM diagnostico_respostas
            WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1`,
           [userId]
         )
@@ -147,7 +166,8 @@ export async function registerOnboardingRoutes(app: FastifyInstance) {
 
       const jsonCompleto = buildOnboardingJson(
         answers as Record<string, string | number | boolean | null>,
-        diagnosticModel
+        diagnosticModel,
+        diagRow.q11_faturamento
       );
 
       // Enriquece com campos que só existem no diagnóstico
@@ -183,7 +203,7 @@ export async function registerOnboardingRoutes(app: FastifyInstance) {
     }
   );
 
-  // Lê o JSON de onboarding do utilizador autenticado
+  // Lê o JSON de onboarding do usuário autenticado
   app.get(
     '/onboarding/summary',
     { preHandler: userAuthPreHandler },

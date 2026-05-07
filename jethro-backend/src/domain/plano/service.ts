@@ -24,7 +24,7 @@ const FASES: Record<number, string> = {
 const TAGS_POR_SEMANA: Record<number, string> = {
   1: 'Fundamento', 2: 'Fundamento', 3: 'Fundamento', 4: 'Fundamento', 5: 'Fundamento',
   6: 'Estrutura', 7: 'Estrutura', 8: 'Estrutura', 9: 'Estrutura', 10: 'Estrutura',
-  11: 'Controlo', 12: 'Controlo', 13: 'Controlo', 14: 'Controlo', 15: 'Controlo',
+  11: 'Controle', 12: 'Controle', 13: 'Controle', 14: 'Controle', 15: 'Controle',
   16: 'Crescimento', 17: 'Crescimento', 18: 'Crescimento', 19: 'Crescimento', 20: 'Crescimento',
   21: 'Legado', 22: 'Legado', 23: 'Legado', 24: 'Legado',
 };
@@ -32,13 +32,13 @@ const TAGS_POR_SEMANA: Record<number, string> = {
 const BLOCOS_POR_MODELO: Record<string, string[]> = {
   D: ['Estancar e Diagnosticar', 'Reorganizar Finanças', 'Controlar e Corrigir', 'Reconstruir com Base', 'Sustentabilidade e Governo'],
   E: ['Definir e Validar', 'Construir a Oferta', 'Primeiros Clientes', 'Escalar com Método', 'Consistência e Governo'],
-  C: ['Diagnóstico de Valor', 'Posicionamento e Preço Justo', 'Controlo e Margem Real', 'Crescimento com Preço Correto', 'Autoridade e Legado'],
-  F: ['Diagnóstico de Canal', 'Estrutura Comercial', 'Diversificação e Controlo', 'Motor de Aquisição', 'Governo e Multiplicação'],
-  G: ['Diagnóstico Operacional', 'Processos e Delegação', 'Controlo e Padrão', 'Escala com Sistema', 'Governo e Autonomia'],
+  C: ['Diagnóstico de Valor', 'Posicionamento e Preço Justo', 'Controle e Margem Real', 'Crescimento com Preço Correto', 'Autoridade e Legado'],
+  F: ['Diagnóstico de Canal', 'Estrutura Comercial', 'Diversificação e Controle', 'Motor de Aquisição', 'Governo e Multiplicação'],
+  G: ['Diagnóstico Operacional', 'Processos e Delegação', 'Controle e Padrão', 'Escala com Sistema', 'Governo e Autonomia'],
   H: ['Mapa de Centralização', 'Delegação Estruturada', 'Liderança e Indicadores', 'Crescimento sem Gargalo', 'Governo Pessoal e Legado'],
-  B: ['Diagnóstico do Platô', 'Destravar o Crescimento', 'Novos Canais e Controlo', 'Expansão com Base', 'Consolidação e Legado'],
+  B: ['Diagnóstico do Platô', 'Destravar o Crescimento', 'Novos Canais e Controle', 'Expansão com Base', 'Consolidação e Legado'],
   X: ['Inventário de Alavancas', 'Blindagem Operacional', 'Escala Controlada', 'Multiplicação com Sistema', 'Governo e Próximo Nível'],
-  A: ['Clareza e Prioridade', 'Organização Mínima', 'Controlo e Direção', 'Crescimento com Foco', 'Governo e Propósito'],
+  A: ['Clareza e Prioridade', 'Organização Mínima', 'Controle e Direção', 'Crescimento com Foco', 'Governo e Propósito'],
 };
 
 const BLOCOS_PADRAO = BLOCOS_POR_MODELO.A as [string, string, string, string, string];
@@ -186,8 +186,8 @@ Você é o Jethro, mentor empresarial cristão criado pelo Rogério Teixeira com
 REGRAS ABSOLUTAS:
 1. Nunca inventar números. Use sempre o faturamento_medio_3m declarado no onboarding. Nunca recalcule faturamento multiplicando ticket_medio por clientes_ativos_total. Se faturamento_medio_3m = 0, adapte tarefas para registrar investimento e listar interessados.
 2. Nunca use "aluno". Use sempre o nome do empreendedor ou "empreendedor".
-3. Versículos fixos por bloco: Fundamento/S1-S5 = Provérbios 27:23; Estrutura/S6-S10 = Êxodo 18:17-18; Controlo/S11-S15 = Salmo 119:105; Crescimento/S16-S20 = Lucas 16:10; Legado/S21-S24 = Mateus 25:21.
-4. Tags por bloco: S1-S5 = Fundamento; S6-S10 = Estrutura; S11-S15 = Controlo; S16-S20 = Crescimento; S21-S24 = Legado. Nunca use "Escala" para todas.
+3. Versículos fixos por bloco: Fundamento/S1-S5 = Provérbios 27:23; Estrutura/S6-S10 = Êxodo 18:17-18; Controle/S11-S15 = Salmo 119:105; Crescimento/S16-S20 = Lucas 16:10; Legado/S21-S24 = Mateus 25:21.
+4. Tags por bloco: S1-S5 = Fundamento; S6-S10 = Estrutura; S11-S15 = Controle; S16-S20 = Crescimento; S21-S24 = Legado. Nunca use "Escala" para todas.
 5. Regras condicionais obrigatórias: dividas_fornecedores > 0 ou dividas > 0 gera renegociação em S2/S3; inadimplencia = frequente gera cobrança em S2/S3; dependencia_plataforma alta gera risco em S1 e diversificação antes da S10; Q18 modelo D/E + empreendedor solo gera carga horária antes do bloco 4; concentracao_receita alta gera mitigação em S3/S4.
 6. S1 específica por modelo: D = sangramento; E = ponto de partida; C = gap de preço; F = dependência de canal; G = dependência operacional; H = centralização; B = platô; X = alavancas; A = priorização de caos.
 7. Use os nomes de blocos personalizados por modelo informados no prompt do usuário.
@@ -196,6 +196,8 @@ REGRAS ABSOLUTAS:
 10. AÇÕES E METÁFORAS DA ALMA (consultar primeiro, nunca ignorar)
 A seção "AÇÕES ALMA PRIORIZADAS" contém ações escritas pelo mentor Rogério Teixeira, pré-selecionadas para este modelo. A seção "METÁFORAS ALMA" contém metáforas bíblicas e empresariais curadas pelo mentor.
 FLUXO OBRIGATÓRIO para cada tarefa do plano:
+11. EMPREENDEDOR EM PRÉ-RECEITA: Se faturamento_medio_3m = 0 ou pre_receita = true: substituir "clientes ativos" por "pessoas interessadas" ou "possíveis clientes"; substituir "registrar receita" por "registrar investimento"; substituir "faturamento médio" por "investimento acumulado"; NÃO calcular break-even nem ticket médio; focar em validação, não em otimização.
+12. CÓDIGOS INTERNOS DA ALMA: NUNCA incluir códigos internos no texto visível ao empreendedor (FIN-01, MET-5, PRE-03, COM-01, etc.). Usar apenas o conteúdo da ação ou metáfora. Exemplo errado: "construa a fundação (MET-5)". Exemplo correto: "construa a fundação".
 PASSO 1: Verificar se existe ação em "AÇÕES ALMA PRIORIZADAS" que corresponda à necessidade da semana. Se existir — usar a descrição e linguagem da ação como base, personalizando com os dados do empreendedor.
 PASSO 2: Independente de ter encontrado ação ou não, verificar "METÁFORAS ALMA" e incluir metáforas relevantes no campo por_que_importa ou na descrição das tarefas.
 PASSO 3: SOMENTE se "AÇÕES ALMA PRIORIZADAS" não contiver NENHUMA ação relevante (0 ações) E "METÁFORAS ALMA" não contiver NENHUMA metáfora aplicável (0 metáforas) — a IA cria ações e linguagem próprias, mantendo o tom do mentor.
@@ -238,7 +240,7 @@ ${ctx}
 BLOCOS PERSONALIZADOS DO MODELO ${diagnosticModel}:
 1. ${blocos[0]} (S1-S5, tag Fundamento)
 2. ${blocos[1]} (S6-S10, tag Estrutura)
-3. ${blocos[2]} (S11-S15, tag Controlo)
+3. ${blocos[2]} (S11-S15, tag Controle)
 4. ${blocos[3]} (S16-S20, tag Crescimento)
 5. ${blocos[4]} (S21-S24, tag Legado)
 ${acoesAlmaBlock}${metaforasAlmaBlock}
@@ -314,7 +316,7 @@ Gere o conteúdo completo desta semana, mantendo coerência com o contexto do em
 REGRAS:
 1. Use dados declarados: faturamento_medio_3m, custo_fixo_mensal, ticket_medio, clientes_ativos_total. Se faturamento_medio_3m = 0, adapte para pré-receita.
 2. Use nome do empreendedor, nunca "aluno".
-3. Use o versículo fixo do bloco: Fundamento = Provérbios 27:23; Estrutura = Êxodo 18:17-18; Controlo = Salmo 119:105; Crescimento = Lucas 16:10; Legado = Mateus 25:21.
+3. Use o versículo fixo do bloco: Fundamento = Provérbios 27:23; Estrutura = Êxodo 18:17-18; Controle = Salmo 119:105; Crescimento = Lucas 16:10; Legado = Mateus 25:21.
 4. Respeite dados condicionais: dívidas, inadimplência, plataforma, carga horária e concentração.
 5. Referencie materiais da Biblioteca no campo recurso_biblioteca.
 6. Tarefas concretas, aplicáveis e mensuráveis (2 a 4 tarefas). Prioridades: baixa / media / alta / critica.
