@@ -1,5 +1,3 @@
-import { SetupScreen } from '@/src/screens/setup-screen';
+import { PlanoScreen } from '@/src/screens/plano-screen';
 
-export default function ExploreRoute() {
-  return <SetupScreen />;
-}
+export default PlanoScreen;

@@ -3,7 +3,6 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
-  FlatList,
   Modal,
   Pressable,
   RefreshControl,
@@ -14,7 +13,6 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Svg, { Line } from 'react-native-svg';
 import { Ionicons } from '@expo/vector-icons';
 
 import { useAuthSession } from '@/src/hooks/use-auth-session';
@@ -29,8 +27,6 @@ import { PrimaryButton } from '@/src/components/ui/PrimaryButton';
 import { GhostButton } from '@/src/components/ui/GhostButton';
 import { FeatureCard } from '@/src/components/ui/FeatureCard';
 import { SectionCard } from '@/src/components/section-card';
-
-// ─── Pure helpers ─────────────────────────────────────────────────────────────
 
 function getUserFirstName(email: string): string {
   return email.split('@')[0]?.split('.')[0] ?? 'Empresário';
@@ -63,89 +59,6 @@ function formatKpiValue(val: string | number | null): string {
   if (val == null) return '—';
   return String(val);
 }
-
-
-// ─── Striped thumbnail ────────────────────────────────────────────────────────
-
-function StripedThumb({ children }: { children?: React.ReactNode }) {
-  return (
-    <View style={thumb.container}>
-      <Svg style={StyleSheet.absoluteFill} accessible={false}>
-        {Array.from({ length: 16 }).map((_, i) => (
-          <Line
-            key={i}
-            x1={i * 24 - 40} y1={-10}
-            x2={i * 24 + 60} y2={110}
-            stroke={palette.navy800}
-            strokeWidth={10}
-            opacity={0.055}
-          />
-        ))}
-      </Svg>
-      {children}
-    </View>
-  );
-}
-
-const thumb = StyleSheet.create({
-  container: { backgroundColor: 'rgba(212,175,55,0.10)', overflow: 'hidden' },
-});
-
-// ─── Tarefa card (horizontal FlatList) ────────────────────────────────────────
-
-type Acao = NonNullable<HomeData['plano']>['tarefas'][number];
-
-function TarefaCard({ tarefa }: { tarefa: Acao; onRecursoPress: () => void }) {
-  const { colors } = useTheme();
-  const c = useMemo(() => makeCardStyles(colors), [colors]);
-
-  return (
-    <View style={[c.wrap, tarefa.completada && c.wrapDone]}>
-      <StripedThumb>
-        <View style={c.thumbInner}>
-          {tarefa.tag && (
-            <View style={c.badge}>
-              <Text style={c.badgeText}>{tarefa.tag}</Text>
-            </View>
-          )}
-          {tarefa.completada && (
-            <View style={c.doneOverlay}>
-              <Text style={c.doneCheck}>✓</Text>
-            </View>
-          )}
-        </View>
-      </StripedThumb>
-      <View style={c.body}>
-        <Text style={[c.title, tarefa.completada && c.titleDone]} numberOfLines={3}>
-          {tarefa.texto}
-        </Text>
-        {tarefa.completada && (
-          <Text style={c.completadaLabel}>✓ Concluída</Text>
-        )}
-      </View>
-    </View>
-  );
-}
-
-function makeCardStyles(c: ThemeColors) {
-  return StyleSheet.create({
-    wrap:     { width: 180, borderRadius: Radius.md, backgroundColor: c.surface, overflow: 'hidden', ...getShadow(1) },
-    wrapDone: { opacity: 0.7 },
-    thumbInner: { height: 90, padding: 10 },
-    badge:    { alignSelf: 'flex-start', borderRadius: Radius.pill, paddingHorizontal: 10, paddingVertical: 4 },
-    badgeText:{ fontFamily: FontFamily.sansBold, fontSize: 10, color: palette.paper, letterSpacing: 0.5, textTransform: 'uppercase' },
-    doneOverlay: { position: 'absolute', bottom: 8, right: 10, width: 28, height: 28, borderRadius: 14, backgroundColor: palette.success, justifyContent: 'center', alignItems: 'center' },
-    doneCheck:   { fontFamily: FontFamily.sansBold, fontSize: 14, color: palette.paper, lineHeight: 18 },
-    body:  { padding: 12, gap: 8, flex: 1 },
-    title: { fontFamily: FontFamily.serifMedium, fontSize: 13, color: c.ink, lineHeight: 19, flex: 1 },
-    titleDone:       { textDecorationLine: 'line-through', color: c.inkMute },
-    completadaLabel: { fontFamily: FontFamily.sansRegular, fontSize: 11, color: palette.success },
-    resourceChip:    { borderWidth: 1, borderColor: c.accent, borderRadius: Radius.xs, paddingHorizontal: 8, paddingVertical: 3, alignSelf: 'flex-start' },
-    resourceText:    { fontFamily: FontFamily.sansRegular, fontSize: 10, color: c.accent },
-  });
-}
-
-// ─── Check-in Modal ───────────────────────────────────────────────────────────
 
 type CheckInModalProps = {
   visible:  boolean;
@@ -215,12 +128,12 @@ function makeModalStyles(c: ThemeColors) {
       backgroundColor: c.surface, borderTopLeftRadius: 24, borderTopRightRadius: 24,
       padding: 24, paddingBottom: 40, gap: 0, ...getShadow(2),
     },
-    handle:       { width: 40, height: 4, backgroundColor: c.hairline, borderRadius: 2, alignSelf: 'center', marginBottom: 20 },
-    title:        { fontFamily: FontFamily.serifSemiBold, fontSize: 20, color: c.ink,    marginBottom: 6 },
-    sub:          { fontFamily: FontFamily.sansRegular,   fontSize: 13, color: c.inkMute, lineHeight: 19, marginBottom: 20 },
-    question:     { fontFamily: FontFamily.sansSemiBold,  fontSize: 15, color: c.ink,    marginBottom: 12 },
-    yesNoRow:     { flexDirection: 'row', gap: 12, marginBottom: 16 },
-    yesNoBtn:     { flex: 1, paddingVertical: 13, borderRadius: Radius.xs, borderWidth: 1.5, borderColor: c.hairline, alignItems: 'center', backgroundColor: c.surface },
+    handle:           { width: 40, height: 4, backgroundColor: c.hairline, borderRadius: 2, alignSelf: 'center', marginBottom: 20 },
+    title:            { fontFamily: FontFamily.serifSemiBold, fontSize: 20, color: c.ink,    marginBottom: 6 },
+    sub:              { fontFamily: FontFamily.sansRegular,   fontSize: 13, color: c.inkMute, lineHeight: 19, marginBottom: 20 },
+    question:         { fontFamily: FontFamily.sansSemiBold,  fontSize: 15, color: c.ink,    marginBottom: 12 },
+    yesNoRow:         { flexDirection: 'row', gap: 12, marginBottom: 16 },
+    yesNoBtn:         { flex: 1, paddingVertical: 13, borderRadius: Radius.xs, borderWidth: 1.5, borderColor: c.hairline, alignItems: 'center', backgroundColor: c.surface },
     yesNoBtnActive:   { borderColor: c.accent,   backgroundColor: c.accentMuted },
     yesNoBtnActiveNo: { borderColor: c.liveRed,  backgroundColor: 'rgba(226,72,60,0.08)' },
     yesNoText:        { fontFamily: FontFamily.sansSemiBold, fontSize: 15, color: c.inkMute },
@@ -233,8 +146,6 @@ function makeModalStyles(c: ThemeColors) {
     },
   });
 }
-
-// ─── Main Screen ──────────────────────────────────────────────────────────────
 
 export function InicioScreen() {
   const router = useRouter();
@@ -250,6 +161,7 @@ export function InicioScreen() {
   const [checkInLoading, setCheckInLoading] = useState(false);
   const [advancingGate,  setAdvancingGate]  = useState(false);
   const [error,          setError]          = useState<string | null>(null);
+  const [focusStatus,    setFocusStatus]    = useState<'done' | 'ongoing' | null>(null);
 
   const userEmail = session?.user?.email ?? '';
   const firstName = getUserFirstName(userEmail);
@@ -344,6 +256,12 @@ export function InicioScreen() {
   const andamentoStatus = gateUnlocked ? 'GATE DESBLOQUEADO' : 'EM ANDAMENTO';
   const andamentoPct    = Math.round(Math.min(gateProgress, 1) * 100);
 
+  const tarefas         = plano?.tarefas ?? [];
+  const completadas     = tarefas.filter(t => t.completada).length;
+  const totalTarefas    = tarefas.length;
+  const progressoPct    = totalTarefas > 0 ? Math.round((completadas / totalTarefas) * 100) : 0;
+  const acaoPrincipal   = tarefas[0] ?? null;
+
   if (loading) {
     return (
       <SafeAreaView style={[s.safe, s.center]} edges={['top']}>
@@ -390,6 +308,147 @@ export function InicioScreen() {
           </Pressable>
         ) : null}
 
+        {/* ── Conteúdo principal ── */}
+        {plano ? (
+          <>
+            {/* Âncora de propósito */}
+            <FeatureCard style={s.anchoraCard}>
+              <Text style={s.anchoraEyebrow}>✦ Âncora de propósito</Text>
+              <Text style={s.anchoraText}>"{plano.objetivo}"</Text>
+            </FeatureCard>
+
+            {/* Princípio da semana */}
+            <SectionCard style={s.principioCard}>
+              <View style={s.principioIcon}>
+                <Text style={s.principioIconText}>✦</Text>
+              </View>
+              <View style={{ flex: 1 }}>
+                <EyebrowLabel style={{ marginBottom: 4 }}>Princípio da semana</EyebrowLabel>
+                <Text style={s.principioTitulo}>{plano.bloco ?? plano.tag ?? faseLabel(plano.fase)}</Text>
+                <Text style={s.principioSub} numberOfLines={2}>{plano.objetivo}</Text>
+              </View>
+            </SectionCard>
+
+            {/* Foco de hoje — HERO */}
+            <View style={s.focoCard}>
+              <EyebrowLabel style={{ marginBottom: 6 }}>Foco de hoje</EyebrowLabel>
+              <Text style={s.focoTitle}>
+                {acaoPrincipal?.texto ?? 'Complete a primeira ação da semana'}
+              </Text>
+              <View style={s.focoBtnRow}>
+                <Pressable
+                  style={[s.focoBtn, focusStatus === 'done' && s.focoBtnActive]}
+                  onPress={() => setFocusStatus(prev => prev === 'done' ? null : 'done')}
+                  accessibilityRole="button"
+                >
+                  <Text style={[s.focoBtnText, focusStatus === 'done' && s.focoBtnTextActive]}>✓ Feito</Text>
+                </Pressable>
+                <Pressable
+                  style={[s.focoBtn, focusStatus === 'ongoing' && s.focoBtnActive]}
+                  onPress={() => setFocusStatus(prev => prev === 'ongoing' ? null : 'ongoing')}
+                  accessibilityRole="button"
+                >
+                  <Text style={[s.focoBtnText, focusStatus === 'ongoing' && s.focoBtnTextActive]}>◑ Em andamento</Text>
+                </Pressable>
+              </View>
+              <Pressable
+                style={s.focoLink}
+                onPress={() => router.push('/mentor' as Parameters<typeof router.push>[0])}
+                accessibilityRole="link"
+              >
+                <Text style={s.focoLinkText}>Pedir ajuda ao Jethro →</Text>
+              </Pressable>
+            </View>
+
+            {/* Métricas 2:1 */}
+            <View style={s.metricsRow}>
+              <SectionCard style={s.progressoCard}>
+                <EyebrowLabel style={{ marginBottom: 2 }}>Progresso</EyebrowLabel>
+                <Text style={s.metricValue}>{completadas}/{totalTarefas}</Text>
+                <View style={s.metricBar}>
+                  <View style={[s.metricBarFill, { width: `${progressoPct}%` as `${number}%` }]} />
+                </View>
+                <Text style={s.metricLabel}>{completadas} ações concluídas</Text>
+              </SectionCard>
+              <SectionCard style={s.sequenciaCard}>
+                <EyebrowLabel style={{ marginBottom: 2 }}>Sequência</EyebrowLabel>
+                <Text style={s.metricValue}>{checkInsCount}</Text>
+                <Text style={s.metricLabel}>dias de trabalho</Text>
+                <Text style={{ fontSize: 18, marginTop: 2 }}>🔥</Text>
+              </SectionCard>
+            </View>
+
+            {/* Gate de Avanço */}
+            <View style={s.sectionHeaderRow}>
+              <EyebrowLabel>Gate de Avanço</EyebrowLabel>
+              <Pressable
+                onPress={() => router.push('/(tabs)/biblioteca' as Parameters<typeof router.push>[0])}
+                accessibilityRole="button"
+                accessibilityLabel="Ver tudo na biblioteca"
+              >
+                <Text style={s.verTudo}>Ver tudo</Text>
+              </Pressable>
+            </View>
+
+            <SectionCard style={s.andamentoCard}>
+              <View style={s.andamentoInner}>
+                <View style={s.andamentoCircle}>
+                  <Text style={s.andamentoCircleText}>S{plano.semanaNumero}</Text>
+                </View>
+                <View style={s.andamentoContent}>
+                  <Text style={s.andamentoEyebrow}>SEMANA {plano.semanaNumero} · {andamentoStatus}</Text>
+                  <Text style={s.andamentoTitle} numberOfLines={2}>{plano.objetivo}</Text>
+                  <View style={s.andamentoBarBg}>
+                    <View style={[s.andamentoBarFill, { width: `${andamentoPct}%` as `${number}%` }]} />
+                  </View>
+                  <View style={s.andamentoMeta}>
+                    <Text style={s.andamentoMetaLeft}>{checkInsCount}/{checkInsNecessarios} check-ins</Text>
+                    <Text style={s.andamentoMetaRight}>{andamentoPct}%</Text>
+                  </View>
+                </View>
+              </View>
+            </SectionCard>
+
+            {!gateUnlocked && (
+              <GhostButton
+                label={todayCheckedIn ? '✓ Check-in feito hoje' : '+ Registrar dia de trabalho'}
+                onPress={() => setCheckInVisible(true)}
+                disabled={todayCheckedIn}
+                textColor={todayCheckedIn ? colors.success : colors.accent}
+                style={todayCheckedIn ? s.checkInBtnDone : s.checkInBtn}
+              />
+            )}
+
+            {gateUnlocked && (
+              <PrimaryButton
+                label={`Avançar para Semana ${plano.semanaNumero + 1} →`}
+                onPress={() => void handleGateAdvance()}
+                loading={advancingGate}
+              />
+            )}
+          </>
+        ) : !onboardingCompleto ? (
+          <SectionCard style={s.emptyCard}>
+            <Text style={s.emptyTitle}>Completa o onboarding</Text>
+            <Text style={s.emptyText}>
+              Para receber o seu plano personalizado, complete o onboarding primeiro.
+            </Text>
+          </SectionCard>
+        ) : (
+          <SectionCard style={s.emptyCard}>
+            <Text style={s.emptyTitle}>Plano ainda não gerado</Text>
+            <Text style={s.emptyText}>
+              O Jethro vai criar o seu plano de 24 semanas personalizado com base no seu diagnóstico e onboarding.
+            </Text>
+            <PrimaryButton
+              label={generatingPlan ? 'A gerar plano...' : '✦ Gerar o meu plano'}
+              onPress={() => void handleGeneratePlan()}
+              loading={generatingPlan}
+              style={s.generateBtn}
+            />
+          </SectionCard>
+        )}
+
         {/* ── Devocional ── */}
         {devocional ? (
           <FeatureCard style={s.devocionalCard}>
@@ -425,135 +484,13 @@ export function InicioScreen() {
           </>
         ) : null}
 
-        {/* ── Plano da Semana ── */}
-        <EyebrowLabel style={s.sectionLabel}>Plano da Semana</EyebrowLabel>
-
-        {!onboardingCompleto ? (
-          <SectionCard style={s.emptyCard}>
-            <Text style={s.emptyTitle}>Completa o onboarding</Text>
-            <Text style={s.emptyText}>
-              Para receber o seu plano personalizado, complete o onboarding primeiro.
-            </Text>
-          </SectionCard>
-        ) : !plano ? (
-          <SectionCard style={s.emptyCard}>
-            <Text style={s.emptyTitle}>Plano ainda não gerado</Text>
-            <Text style={s.emptyText}>
-              O Jethro vai criar o seu plano de 24 semanas personalizado com base no seu diagnóstico e onboarding.
-            </Text>
-            <PrimaryButton
-              label={generatingPlan ? 'A gerar plano...' : '✦ Gerar o meu plano'}
-              onPress={() => void handleGeneratePlan()}
-              loading={generatingPlan}
-              style={s.generateBtn}
-            />
-          </SectionCard>
-        ) : (
-          <>
-            {/* Plano header card */}
-            <SectionCard style={s.planoHeaderCard}>
-              <View style={s.planoHeader}>
-                <View style={s.semanaBadge}>
-                  <Text style={s.semanaNum}>S{plano.semanaNumero}</Text>
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={s.planoTitle}>{plano.objetivo}</Text>
-                  <Text style={s.planoSub}>
-                    {(plano.bloco ?? plano.tag ?? faseLabel(plano.fase))} · Semana {plano.semanaNumero} de 24
-                  </Text>
-                </View>
-              </View>
-            </SectionCard>
-
-            {/* Horizontal task cards */}
-            <FlatList
-              data={plano.tarefas}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              keyExtractor={(_, i) => String(i)}
-              contentContainerStyle={s.tarefasList}
-              style={s.tarefasFlatList}
-              renderItem={({ item }) => (
-                <TarefaCard
-                  tarefa={item}
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  onRecursoPress={() => router.push('/(tabs)/biblioteca' as any)}
-                />
-              )}
-            />
-          </>
-        )}
-
-        {/* ── Gate de Avanço ── */}
-        {plano ? (
-          <>
-            <View style={s.sectionHeaderRow}>
-              <EyebrowLabel>Gate de Avanço</EyebrowLabel>
-              <Pressable
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                onPress={() => router.push('/(tabs)/biblioteca' as any)}
-                accessibilityRole="button"
-                accessibilityLabel="Ver tudo na biblioteca"
-              >
-                <Text style={s.verTudo}>Ver tudo</Text>
-              </Pressable>
-            </View>
-
-            {/* Andamento card */}
-            <SectionCard style={s.andamentoCard}>
-              <View style={s.andamentoInner}>
-                <View style={s.andamentoThumbWrap}>
-                  <StripedThumb>
-                    <View style={s.andamentoThumbContent}>
-                      <View style={s.andamentoCircle}>
-                        <Text style={s.andamentoCircleText}>S{plano.semanaNumero}</Text>
-                      </View>
-                    </View>
-                  </StripedThumb>
-                </View>
-
-                <View style={s.andamentoContent}>
-                  <Text style={s.andamentoEyebrow}>SEMANA {plano.semanaNumero} · {andamentoStatus}</Text>
-                  <Text style={s.andamentoTitle} numberOfLines={2}>{plano.objetivo}</Text>
-                  <View style={s.andamentoBarBg}>
-                    <View style={[s.andamentoBarFill, { width: `${andamentoPct}%` as `${number}%` }]} />
-                  </View>
-                  <View style={s.andamentoMeta}>
-                    <Text style={s.andamentoMetaLeft}>{checkInsCount}/{checkInsNecessarios} check-ins</Text>
-                    <Text style={s.andamentoMetaRight}>{andamentoPct}%</Text>
-                  </View>
-                </View>
-              </View>
-            </SectionCard>
-
-            {!gateUnlocked && (
-              <GhostButton
-                label={todayCheckedIn ? '✓ Check-in feito hoje' : '+ Registrar dia de trabalho'}
-                onPress={() => setCheckInVisible(true)}
-                disabled={todayCheckedIn}
-                textColor={todayCheckedIn ? colors.success : colors.accent}
-                style={todayCheckedIn ? s.checkInBtnDone : s.checkInBtn}
-              />
-            )}
-
-            {gateUnlocked && (
-              <PrimaryButton
-                label={`Avançar para Semana ${plano.semanaNumero + 1} →`}
-                onPress={() => void handleGateAdvance()}
-                loading={advancingGate}
-              />
-            )}
-          </>
-        ) : null}
-
         <View style={{ height: 100 }} />
       </ScrollView>
 
       {/* ── FAB ── */}
       <Pressable
         style={s.fab}
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        onPress={() => router.push('/mentor' as any)}
+        onPress={() => router.push('/mentor' as Parameters<typeof router.push>[0])}
         accessibilityLabel="Falar com Jethro"
         accessibilityRole="button"
       >
@@ -570,8 +507,6 @@ export function InicioScreen() {
     </SafeAreaView>
   );
 }
-
-// ─── Styles ───────────────────────────────────────────────────────────────────
 
 function makeStyles(c: ThemeColors) {
   return StyleSheet.create({
@@ -598,7 +533,56 @@ function makeStyles(c: ThemeColors) {
     errorText:   { fontFamily: FontFamily.sansRegular, fontSize: 13, color: c.liveRed,  marginBottom: 4 },
     errorRetry:  { fontFamily: FontFamily.sansRegular, fontSize: 12, color: c.inkMute },
 
-    devocionalCard:      { marginBottom: 24 },
+    anchoraCard:    { marginBottom: 16, paddingVertical: 18, paddingHorizontal: 18 },
+    anchoraEyebrow: { fontFamily: FontFamily.sansSemiBold, fontSize: 10, color: 'rgba(212,175,55,0.75)', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 8 },
+    anchoraText:    { fontFamily: FontFamily.serifMediumItalic, fontSize: 16, color: palette.paper, lineHeight: 24 },
+
+    principioCard:     { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 16, padding: 16 },
+    principioIcon:     { width: 40, height: 40, borderRadius: Radius.icon, backgroundColor: palette.goldMuted, justifyContent: 'center', alignItems: 'center', flexShrink: 0 },
+    principioIconText: { fontFamily: FontFamily.serifSemiBold, fontSize: 18, color: palette.navy800 },
+    principioTitulo:   { fontFamily: FontFamily.serifMedium, fontSize: 14, color: c.ink, lineHeight: 19, marginBottom: 2 },
+    principioSub:      { fontFamily: FontFamily.sansRegular, fontSize: 11, color: c.inkMute, lineHeight: 17 },
+
+    focoCard:       { backgroundColor: c.surface, borderRadius: Radius.md, padding: 16, borderWidth: 1.5, borderColor: palette.gold500, marginBottom: 16, gap: 10, ...getShadow(1) },
+    focoTitle:      { fontFamily: FontFamily.serifMedium, fontSize: 17, color: c.ink, lineHeight: 25 },
+    focoBtnRow:     { flexDirection: 'row', gap: 8 },
+    focoBtn:        { flex: 1, height: 44, borderRadius: Radius.xs, borderWidth: StyleSheet.hairlineWidth, borderColor: c.hairline, justifyContent: 'center', alignItems: 'center' },
+    focoBtnActive:  { backgroundColor: palette.navy800, borderColor: palette.navy800 },
+    focoBtnText:    { fontFamily: FontFamily.sansMedium, fontSize: 13, color: c.inkSoft },
+    focoBtnTextActive: { color: palette.paper },
+    focoLink:       { alignItems: 'center', marginTop: 2 },
+    focoLinkText:   { fontFamily: FontFamily.sansRegular, fontSize: 12, color: c.inkMute },
+
+    metricsRow:   { flexDirection: 'row', gap: 10, marginBottom: 16 },
+    progressoCard:{ flex: 2, padding: 14, gap: 4 },
+    sequenciaCard:{ flex: 1, padding: 14, gap: 4 },
+    metricValue:  { fontFamily: FontFamily.serifSemiBold, fontSize: 28, color: c.ink },
+    metricLabel:  { fontFamily: FontFamily.sansRegular, fontSize: 11, color: c.inkMute },
+    metricBar:    { height: 3, backgroundColor: c.hairline, borderRadius: 2, overflow: 'hidden', marginTop: 4 },
+    metricBarFill:{ height: '100%', backgroundColor: c.accent, borderRadius: 2 },
+
+    andamentoCard:        { marginBottom: 16, padding: 14 },
+    andamentoInner:       { flexDirection: 'row', alignItems: 'center', gap: 12 },
+    andamentoCircle:      { width: 44, height: 44, borderRadius: 22, backgroundColor: palette.navy800, justifyContent: 'center', alignItems: 'center', flexShrink: 0 },
+    andamentoCircleText:  { fontFamily: FontFamily.serifSemiBold, fontSize: 14, color: palette.gold500 },
+    andamentoContent:     { flex: 1, gap: 4 },
+    andamentoEyebrow:     { fontFamily: FontFamily.sansBold, fontSize: 10, color: c.accent, letterSpacing: 0.5, textTransform: 'uppercase' },
+    andamentoTitle:       { fontFamily: FontFamily.serifMedium, fontSize: 14, color: c.ink, lineHeight: 20 },
+    andamentoBarBg:       { height: 3, backgroundColor: c.hairline, borderRadius: 2, overflow: 'hidden', marginTop: 2 },
+    andamentoBarFill:     { height: '100%', backgroundColor: c.accent, borderRadius: 2 },
+    andamentoMeta:        { flexDirection: 'row', justifyContent: 'space-between', marginTop: 2 },
+    andamentoMetaLeft:    { fontFamily: FontFamily.sansRegular,  fontSize: 11, color: c.inkMute },
+    andamentoMetaRight:   { fontFamily: FontFamily.sansSemiBold, fontSize: 11, color: c.accent },
+
+    checkInBtn:     { borderColor: c.accent,  marginBottom: 24 },
+    checkInBtnDone: { borderColor: c.success, marginBottom: 24 },
+
+    emptyCard:   { marginBottom: 24, alignItems: 'center' },
+    emptyTitle:  { fontFamily: FontFamily.serifMedium, fontSize: 16, color: c.ink,     marginBottom: 8 },
+    emptyText:   { fontFamily: FontFamily.sansRegular,  fontSize: 13, color: c.inkSoft, lineHeight: 20, textAlign: 'center', marginBottom: 16 },
+    generateBtn: { alignSelf: 'stretch' },
+
+    devocionalCard:      { marginBottom: 24, marginTop: 8 },
     devocionalQuoteMark: { position: 'absolute', top: 10, right: 16, fontFamily: FontFamily.serifSemiBold, fontSize: 80, lineHeight: 80, color: palette.gold500, opacity: 0.18 },
     devocionalHeader:    { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 },
     devocionalRef:       { fontFamily: FontFamily.sansRegular, fontSize: 11, color: palette.gold400 },
@@ -609,39 +593,6 @@ function makeStyles(c: ThemeColors) {
     kpiRow:   { flexDirection: 'row', gap: 10, marginBottom: 24 },
     kpiCard:  { flex: 1, gap: 4, padding: 14 },
     kpiValue: { fontFamily: FontFamily.serifSemiBold, fontSize: 18, color: c.ink },
-
-    emptyCard:   { marginBottom: 24, alignItems: 'center' },
-    emptyTitle:  { fontFamily: FontFamily.serifMedium, fontSize: 16, color: c.ink,     marginBottom: 8 },
-    emptyText:   { fontFamily: FontFamily.sansRegular,  fontSize: 13, color: c.inkSoft, lineHeight: 20, textAlign: 'center', marginBottom: 16 },
-    generateBtn: { alignSelf: 'stretch' },
-
-    planoHeaderCard: { marginBottom: 14 },
-    planoHeader:     { flexDirection: 'row', alignItems: 'center', gap: 12 },
-    semanaBadge:     { width: 44, height: 44, borderRadius: 22, backgroundColor: palette.gold500, justifyContent: 'center', alignItems: 'center' },
-    semanaNum:       { fontFamily: FontFamily.serifSemiBold, fontSize: 14, color: palette.navy800 },
-    planoTitle:      { fontFamily: FontFamily.serifMedium,   fontSize: 15, color: c.ink },
-    planoSub:        { fontFamily: FontFamily.sansRegular,   fontSize: 12, color: c.inkMute, marginTop: 2 },
-
-    tarefasFlatList: { marginHorizontal: -Spacing.screenH, marginBottom: 24 },
-    tarefasList:     { paddingHorizontal: Spacing.screenH, paddingVertical: 4, gap: 12 },
-
-    andamentoCard:         { marginBottom: 16, padding: 0, overflow: 'hidden' },
-    andamentoInner:        { flexDirection: 'row' },
-    andamentoThumbWrap:    { width: 110 },
-    andamentoThumbContent: { height: 100, justifyContent: 'center', alignItems: 'center' },
-    andamentoCircle:       { width: 44, height: 44, borderRadius: 22, backgroundColor: palette.navy800, justifyContent: 'center', alignItems: 'center' },
-    andamentoCircleText:   { fontFamily: FontFamily.serifSemiBold, fontSize: 14, color: palette.gold500 },
-    andamentoContent:      { flex: 1, padding: 14, gap: 5, justifyContent: 'center' },
-    andamentoEyebrow:      { fontFamily: FontFamily.sansBold, fontSize: 10, color: c.accent, letterSpacing: 0.5, textTransform: 'uppercase' },
-    andamentoTitle:        { fontFamily: FontFamily.serifMedium, fontSize: 14, color: c.ink, lineHeight: 20 },
-    andamentoBarBg:        { height: 3, backgroundColor: c.hairline, borderRadius: 2, overflow: 'hidden', marginTop: 4 },
-    andamentoBarFill:      { height: '100%', backgroundColor: c.accent, borderRadius: 2 },
-    andamentoMeta:         { flexDirection: 'row', justifyContent: 'space-between', marginTop: 2 },
-    andamentoMetaLeft:     { fontFamily: FontFamily.sansRegular,  fontSize: 11, color: c.inkMute },
-    andamentoMetaRight:    { fontFamily: FontFamily.sansSemiBold, fontSize: 11, color: c.accent },
-
-    checkInBtn:     { borderColor: c.accent,   marginBottom: 24 },
-    checkInBtnDone: { borderColor: c.success,  marginBottom: 24 },
 
     fab: {
       position: 'absolute', bottom: 24, right: Spacing.screenH,

@@ -84,6 +84,15 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="explore"
+        options={{
+          title: 'Plano',
+          tabBarIcon: ({ color, size, focused }) => (
+            <TabIcon name={focused ? 'grid' : 'grid-outline'} color={color} size={size} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="biblioteca"
         options={{
           title: 'Biblioteca',
@@ -92,17 +101,8 @@ export default function TabLayout() {
           ),
         }}
       />
-      <Tabs.Screen
-        name="perfil"
-        options={{
-          title: 'Perfil',
-          tabBarIcon: ({ color, size, focused }) => (
-            <TabIcon name={focused ? 'person' : 'person-outline'} color={color} size={size} />
-          ),
-        }}
-      />
-      <Tabs.Screen name="explore" options={{ href: null }} />
-      <Tabs.Screen name="account" options={{ href: null }} />
+      <Tabs.Screen name="perfil"   options={{ href: null }} />
+      <Tabs.Screen name="account"  options={{ href: null }} />
     </Tabs>
   );
 }
