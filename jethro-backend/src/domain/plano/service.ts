@@ -231,7 +231,7 @@ function buildInitialPlanPrompt(
   const blocos = (BLOCOS_POR_MODELO[diagnosticModel] ?? BLOCOS_PADRAO) as [string, string, string, string, string];
 
   const acoesAlmaBlock = acoes.length > 0
-    ? `\nAÇÕES ALMA PRIORIZADAS (distribua ao longo do plano):\n${acoes.map((a) => `• [${a.codigo}] ${a.nome}: ${a.descricao}`).join('\n')}\n`
+    ? `\nAÇÕES ALMA PRIORIZADAS (distribua ao longo do plano):\n${acoes.map((a) => `• ${a.nome}: ${a.descricao}`).join('\n')}\n`
     : '';
 
   const metaforasAlmaBlock = metaforas.length > 0
@@ -299,7 +299,7 @@ function buildSemanaFullPrompt(
   };
 
   const acoesAlmaBlock = acoes.length > 0
-    ? `\nAÇÕES ALMA DISPONÍVEIS PARA ESTA SEMANA (use as relevantes para o contexto):\n${acoes.map((a) => `• [${a.codigo}] ${a.nome}: ${a.descricao}`).join('\n')}\n`
+    ? `\nAÇÕES ALMA DISPONÍVEIS PARA ESTA SEMANA (use as relevantes para o contexto):\n${acoes.map((a) => `• ${a.nome}: ${a.descricao}`).join('\n')}\n`
     : '';
 
   const metaforasAlmaBlock = metaforas.length > 0
