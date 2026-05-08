@@ -379,32 +379,32 @@ export function HomeScreen() {
           <AuthCard />
         ) : diagnostic.submitResult ? (
           <View style={s.primaryCard}>
-            <Text style={s.sectionTitle}>Resultado do diagnóstico</Text>
             {diagnostic.isViewingSavedResult ? <Text style={s.savedResultLabel}>Último diagnóstico salvo</Text> : null}
 
             {resultStep === 'block1' ? (
               <>
-                <Text style={s.resultSectionLabel}>Realidade Direta</Text>
-                <Text style={s.valueHighlight}>{diagnostic.submitResult.diagnostic.block1Title}</Text>
-                <Text style={s.bodyText}>{diagnostic.submitResult.diagnostic.block1Body}</Text>
+                <Text style={s.diagEyebrowGold}>Resultado do diagnóstico</Text>
+                <Text style={s.diagEyebrowMuted}>Realidade Direta</Text>
+                <Text style={s.diagTitulo}>{diagnostic.submitResult.diagnostic.block1Title}</Text>
+                <Text style={s.diagParagrafo}>{diagnostic.submitResult.diagnostic.block1Body}</Text>
 
-                <View style={s.causeCard}>
-                  <Text style={s.causeLabel}>Causa raiz</Text>
-                  <Text style={s.causeText}>{diagnostic.submitResult.diagnostic.rootCause ?? 'Seu diagnóstico anterior foi restaurado para você retomar a jornada.'}</Text>
+                <View style={s.diagCausaCard}>
+                  <Text style={s.diagCausaLabel}>Causa Raiz</Text>
+                  <Text style={s.diagCausaTitulo}>{diagnostic.submitResult.diagnostic.rootCause ?? 'Seu diagnóstico anterior foi restaurado para você retomar a jornada.'}</Text>
                 </View>
 
                 {(diagnostic.submitResult.diagnostic.scriptureText || diagnostic.submitResult.diagnostic.scriptureVerse) ? (
-                  <View style={s.scriptureCard}>
-                    <Text style={s.scriptureEyebrow}>Palavra Para Este Momento</Text>
-                    {diagnostic.submitResult.diagnostic.palavraIntro ? <Text style={s.scriptureIntro}>{diagnostic.submitResult.diagnostic.palavraIntro}</Text> : null}
-                    {diagnostic.submitResult.diagnostic.scriptureText  ? <Text style={s.scriptureText}>{diagnostic.submitResult.diagnostic.scriptureText}</Text>   : null}
-                    {diagnostic.submitResult.diagnostic.scriptureVerse ? <Text style={s.scriptureVerse}>{diagnostic.submitResult.diagnostic.scriptureVerse}</Text>  : null}
+                  <View style={s.diagVersiculoCard}>
+                    <Text style={s.diagVersiculoEyebrow}>Palavra para este momento</Text>
+                    {diagnostic.submitResult.diagnostic.scriptureText  ? <Text style={s.diagVersiculoTexto}>"{diagnostic.submitResult.diagnostic.scriptureText}"</Text>  : null}
+                    {diagnostic.submitResult.diagnostic.scriptureVerse ? <Text style={s.diagVersiculoRef}>{diagnostic.submitResult.diagnostic.scriptureVerse}</Text>      : null}
+                    {diagnostic.submitResult.diagnostic.palavraIntro   ? <Text style={s.diagVersiculoContexto}>{diagnostic.submitResult.diagnostic.palavraIntro}</Text>  : null}
                   </View>
                 ) : null}
 
-                <Text style={s.bodyText}>Gerado em {formatDate(diagnostic.submitResult.diagnostic.generatedAt)}.</Text>
+                <Text style={s.diagDataLabel}>Gerado em {formatDate(diagnostic.submitResult.diagnostic.generatedAt)}.</Text>
                 <Pressable style={s.primaryButton} onPress={() => setResultStep('block2')}>
-                  <Text style={s.primaryButtonLabel}>Ir para a parte final do diagnóstico</Text>
+                  <Text style={s.primaryButtonLabel}>Ir para a parte final do diagnóstico →</Text>
                 </Pressable>
                 <Pressable style={s.secondaryButton} onPress={() => { setResultStep('block1'); diagnostic.reset(); }}>
                   <Text style={s.secondaryButtonLabel}>Responder novamente</Text>
@@ -412,12 +412,22 @@ export function HomeScreen() {
               </>
             ) : resultStep === 'block2' ? (
               <>
-                <Text style={s.resultSectionLabel}>Precipício</Text>
-                <Text style={s.valueHighlight}>{diagnostic.submitResult.diagnostic.block2Title}</Text>
-                <Text style={s.bodyText}>{diagnostic.submitResult.diagnostic.block2Body}</Text>
-                <Text style={s.bodyText}>Gerado em {formatDate(diagnostic.submitResult.diagnostic.generatedAt)}.</Text>
-                <Pressable style={s.primaryButton} onPress={() => homeRouter.replace('/paywall' as never)}>
-                  <Text style={s.primaryButtonLabel}>{diagnostic.submitResult.diagnostic.ctaLabel}</Text>
+                <Text style={s.diagEyebrowGold}>Resultado do diagnóstico</Text>
+                <Text style={s.diagEyebrowMuted}>Precipício</Text>
+                <Text style={s.diagTitulo}>{diagnostic.submitResult.diagnostic.block2Title}</Text>
+                <Text style={s.diagParagrafo}>{diagnostic.submitResult.diagnostic.block2Body}</Text>
+
+                {(diagnostic.submitResult.diagnostic.scriptureText || diagnostic.submitResult.diagnostic.scriptureVerse) ? (
+                  <View style={s.diagVersiculoGoldCard}>
+                    {diagnostic.submitResult.diagnostic.scriptureText  ? <Text style={s.diagVersiculoGoldTexto}>"{diagnostic.submitResult.diagnostic.scriptureText}"</Text>  : null}
+                    {diagnostic.submitResult.diagnostic.scriptureVerse ? <Text style={s.diagVersiculoGoldRef}>{diagnostic.submitResult.diagnostic.scriptureVerse}</Text>      : null}
+                    {diagnostic.submitResult.diagnostic.palavraIntro   ? <Text style={s.diagVersiculoGoldContexto}>{diagnostic.submitResult.diagnostic.palavraIntro}</Text>  : null}
+                  </View>
+                ) : null}
+
+                <Text style={s.diagDataLabel}>Gerado em {formatDate(diagnostic.submitResult.diagnostic.generatedAt)}.</Text>
+                <Pressable style={s.diagCtaGold} onPress={() => homeRouter.replace('/paywall' as never)}>
+                  <Text style={s.diagCtaGoldLabel}>{diagnostic.submitResult.diagnostic.ctaLabel ?? 'QUERO MEU PLANO DE AÇÃO'}</Text>
                 </Pressable>
                 <Pressable style={s.secondaryButton} onPress={() => setResultStep('block1')}>
                   <Text style={s.secondaryButtonLabel}>Voltar para o diagnóstico</Text>
@@ -547,28 +557,36 @@ function makeStyles(c: ThemeColors) {
     menuItem:     { paddingHorizontal: 18, paddingVertical: 14, alignItems: 'flex-start' },
     menuItemLabel:{ color: c.ink, fontSize: 14, fontWeight: '600' },
 
-    causeCard: { borderRadius: 22, backgroundColor: c.surface, borderWidth: 1, borderColor: c.hairline, padding: 18, gap: 8 },
-    causeLabel:{ color: c.accentSoft, fontSize: 12, fontWeight: '800', letterSpacing: 1.4, textTransform: 'uppercase' },
-    causeText: { color: c.ink, fontSize: 16, lineHeight: 25 },
-
     primaryCard: { gap: 14, paddingBottom: 22 },
     paywallCard: { gap: 18, paddingBottom: 22 },
 
-    scriptureCard:   { borderRadius: 22, backgroundColor: c.accentMuted, borderWidth: 1, borderColor: c.accentMuted, padding: 18, gap: 8 },
-    savedResultLabel:{ alignSelf: 'flex-start', borderRadius: 999, backgroundColor: 'rgba(76,175,125,0.16)', borderWidth: 1, borderColor: 'rgba(76,175,125,0.28)', color: c.success, fontSize: 12, fontWeight: '800', letterSpacing: 1.2, paddingHorizontal: 12, paddingVertical: 7, textTransform: 'uppercase' },
-    scriptureEyebrow:{ color: c.accent, fontSize: 12, fontWeight: '800', letterSpacing: 1.4, textTransform: 'uppercase' },
-    scriptureIntro:  { color: c.inkMute, fontSize: 13, lineHeight: 20, fontStyle: 'italic' },
-    scriptureText:   { color: c.ink, fontSize: 17, lineHeight: 26, fontWeight: '600' },
-    scriptureVerse:  { color: c.accentSoft, fontSize: 14, lineHeight: 22, fontWeight: '700' },
+    savedResultLabel: { alignSelf: 'flex-start', borderRadius: 999, backgroundColor: 'rgba(76,175,125,0.16)', borderWidth: 1, borderColor: 'rgba(76,175,125,0.28)', color: c.success, fontSize: 12, fontWeight: '800', letterSpacing: 1.2, paddingHorizontal: 12, paddingVertical: 7, textTransform: 'uppercase' },
+    sectionHeader:    { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
+    sectionTitle:     { color: c.accentSoft, fontSize: 14, fontWeight: '800', letterSpacing: 2, textTransform: 'uppercase' },
+    statusChip:       { borderRadius: 999, backgroundColor: c.hairline, paddingHorizontal: 12, paddingVertical: 8 },
+    statusLabel:      { color: c.ink, fontSize: 11, fontWeight: '800', letterSpacing: 1.4 },
+    bodyText:         { color: c.inkMute, fontSize: 15, lineHeight: 24 },
 
-    sectionHeader:     { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
-    sectionTitle:      { color: c.accentSoft, fontSize: 14, fontWeight: '800', letterSpacing: 2, textTransform: 'uppercase' },
-    resultSectionLabel:{ color: c.accentSoft, fontSize: 12, fontWeight: '800', letterSpacing: 1.8, textTransform: 'uppercase' },
-    statusChip:        { borderRadius: 999, backgroundColor: c.hairline, paddingHorizontal: 12, paddingVertical: 8 },
-    statusLabel:       { color: c.ink, fontSize: 11, fontWeight: '800', letterSpacing: 1.4 },
-
-    bodyText:      { color: c.inkMute, fontSize: 15, lineHeight: 24 },
-    valueHighlight:{ color: c.ink, fontSize: 26, lineHeight: 32, fontWeight: '600' },
+    // ── Resultado do diagnóstico (PO v2) ───────────────────────────────────────
+    diagEyebrowGold:       { fontFamily: 'Inter_500Medium', fontSize: 10, letterSpacing: 2.5, textTransform: 'uppercase', color: c.accent, marginBottom: 2 },
+    diagEyebrowMuted:      { fontFamily: 'Inter_500Medium', fontSize: 10, letterSpacing: 2.0, textTransform: 'uppercase', color: c.inkMute, marginBottom: 14 },
+    diagTitulo:            { fontFamily: 'CormorantGaramond_500Medium', fontSize: 26, color: c.ink, lineHeight: 33 },
+    diagParagrafo:         { fontSize: 14, color: c.inkMute, lineHeight: 24 },
+    diagCausaCard:         { backgroundColor: c.surface, borderRadius: 16, padding: 18, borderWidth: 1, borderColor: c.hairline, gap: 8 },
+    diagCausaLabel:        { fontFamily: 'Inter_500Medium', fontSize: 10, letterSpacing: 2.5, textTransform: 'uppercase', color: c.accent },
+    diagCausaTitulo:       { fontFamily: 'CormorantGaramond_500Medium', fontSize: 17, color: c.ink, lineHeight: 26 },
+    diagVersiculoCard:     { backgroundColor: palette.navy800, borderRadius: 16, padding: 20, gap: 8, overflow: 'hidden' },
+    diagVersiculoEyebrow:  { fontFamily: 'Inter_500Medium', fontSize: 10, letterSpacing: 2.5, textTransform: 'uppercase', color: palette.gold500 },
+    diagVersiculoTexto:    { fontFamily: 'CormorantGaramond_500Medium', fontSize: 15, fontStyle: 'italic', color: palette.paper, lineHeight: 24 },
+    diagVersiculoRef:      { fontFamily: 'Inter_500Medium', fontSize: 11, color: 'rgba(201,166,85,0.7)' },
+    diagVersiculoContexto: { fontSize: 12, color: 'rgba(245,240,232,0.6)', lineHeight: 20 },
+    diagVersiculoGoldCard:     { backgroundColor: 'rgba(201,166,85,0.06)', borderRadius: 16, padding: 18, borderWidth: 1, borderColor: 'rgba(201,166,85,0.2)', gap: 8 },
+    diagVersiculoGoldTexto:    { fontFamily: 'CormorantGaramond_500Medium', fontSize: 15, fontStyle: 'italic', color: c.ink, lineHeight: 24 },
+    diagVersiculoGoldRef:      { fontFamily: 'Inter_500Medium', fontSize: 11, color: c.accent },
+    diagVersiculoGoldContexto: { fontSize: 13, color: c.inkMute, lineHeight: 22 },
+    diagDataLabel:             { fontSize: 11, color: c.inkMute },
+    diagCtaGold:               { alignItems: 'center', justifyContent: 'center', borderRadius: 16, backgroundColor: c.accent, minHeight: 54, paddingHorizontal: 18 },
+    diagCtaGoldLabel:          { fontFamily: 'CormorantGaramond_500Medium', fontSize: 16, fontWeight: '600', color: palette.navy800, letterSpacing: 1 },
 
     input: {
       borderRadius: 16, backgroundColor: c.surface, borderWidth: 1, borderColor: c.accentMuted,
