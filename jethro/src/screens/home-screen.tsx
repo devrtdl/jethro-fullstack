@@ -321,6 +321,10 @@ function GrowthChartCard() {
   );
 }
 
+// ─── Phase names (4 diagnostic phases matching PO spec) ──────────────────────
+
+const DIAG_PHASE_NAMES = ['Quem és', 'Onde estás', 'Como funciona', 'Para onde vais'];
+
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 
 export function HomeScreen() {
@@ -475,7 +479,9 @@ export function HomeScreen() {
                       <View key={step.id} style={[s.progressSegment, index <= diagnostic.currentStepIndex && s.progressSegmentActive]} />
                     ))}
                   </View>
-                  <Text style={s.progressCounter}>{diagnostic.currentStepIndex + 1}/{diagnostic.steps.length}</Text>
+                  <Text style={s.progressLabel}>
+                    {diagnostic.currentStepIndex + 1}/{diagnostic.steps.length} · {DIAG_PHASE_NAMES[Math.min(diagnostic.currentStepIndex, DIAG_PHASE_NAMES.length - 1)]}
+                  </Text>
                 </View>
 
                 <View style={s.formQuestionStack}>
@@ -591,24 +597,24 @@ function makeStyles(c: ThemeColors) {
 
     loaderBlock: { alignItems: 'flex-start', gap: 12 },
 
-    progressHeader:  { flexDirection: 'row', alignItems: 'center', gap: 12 },
-    progressCounter: { color: c.ink, fontSize: 14, fontWeight: '700', opacity: 0.9 },
-    progressTrack:   { flex: 1, flexDirection: 'row', gap: 8 },
-    progressSegment:      { flex: 1, height: 6, borderRadius: 999, backgroundColor: c.hairline },
-    progressSegmentActive:{ backgroundColor: c.accentSoft },
+    progressHeader:  { gap: 6 },
+    progressTrack:   { flexDirection: 'row', gap: 6 },
+    progressSegment:      { flex: 1, height: 3, borderRadius: 2, backgroundColor: c.hairline },
+    progressSegmentActive:{ backgroundColor: c.accent },
+    progressLabel:        { fontFamily: 'Inter_500Medium', fontSize: 11, color: c.accent, letterSpacing: 0.5 },
 
     formQuestionStack: { gap: 16, marginTop: 8 },
 
     stack:         { gap: 12 },
     questionBlock: { gap: 12 },
-    questionLabel: { color: c.ink, fontSize: 16, lineHeight: 22, fontWeight: '600', textAlign: 'center' },
-    questionHelper:{ color: c.inkMute, fontSize: 13, lineHeight: 20, textAlign: 'center' },
+    questionLabel: { fontFamily: 'CormorantGaramond_500Medium', color: c.ink, fontSize: 19, lineHeight: 26, fontWeight: '500' },
+    questionHelper:{ color: c.inkMute, fontSize: 13, lineHeight: 20 },
 
-    optionWrap: { gap: 12 },
-    optionPill: { minHeight: 58, borderRadius: 18, borderWidth: 1, borderColor: c.accentMuted, backgroundColor: c.surface, paddingHorizontal: 18, paddingVertical: 16, justifyContent: 'center' },
-    optionPillActive:  { backgroundColor: c.accentMuted, borderColor: c.accent },
-    optionLabel:       { color: c.ink,  fontSize: 16, lineHeight: 22, fontWeight: '500' },
-    optionLabelActive: { color: c.ink,  fontWeight: '800' },
+    optionWrap: { gap: 10 },
+    optionPill: { minHeight: 52, borderRadius: 12, borderWidth: 1.5, borderColor: c.hairline, backgroundColor: c.surface, paddingHorizontal: 16, paddingVertical: 13, justifyContent: 'center' },
+    optionPillActive:  { backgroundColor: palette.navy800, borderColor: palette.navy800 },
+    optionLabel:       { color: c.ink,       fontSize: 14, lineHeight: 21 },
+    optionLabelActive: { color: palette.paper, fontWeight: '600' },
 
     footerActions: { flexDirection: 'column', gap: 12, marginTop: 10 },
 

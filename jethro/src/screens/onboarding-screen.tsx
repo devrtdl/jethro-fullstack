@@ -325,20 +325,20 @@ function QuestionBlock({
 function makeQuestionStyles(c: ThemeColors) {
   return StyleSheet.create({
     qBlock:    { gap: 10 },
-    qLabel:    { fontFamily: FontFamily.sansSemiBold, fontSize: 16, color: c.ink,    lineHeight: 23 },
+    qLabel:    { fontFamily: FontFamily.serifMedium, fontSize: 19, color: c.ink, lineHeight: 26 },
     qRequired: { color: c.accent },
-    qHelper:   { fontFamily: FontFamily.sansRegular,  fontSize: 13, color: c.inkMute, lineHeight: 19 },
+    qHelper:   { fontFamily: FontFamily.sansRegular, fontSize: 13, color: c.inkMute, lineHeight: 19 },
 
     optionsWrap: { gap: 10 },
     optionPill: {
-      minHeight: 52, borderRadius: Radius.sm, borderWidth: 1,
+      minHeight: 52, borderRadius: 12, borderWidth: 1.5,
       borderColor: c.hairline, backgroundColor: c.surface,
-      paddingHorizontal: 16, paddingVertical: 14, justifyContent: 'center',
+      paddingHorizontal: 16, paddingVertical: 13, justifyContent: 'center',
       ...getShadow(1),
     },
-    optionPillActive:  { borderColor: c.accent, backgroundColor: c.accentMuted },
-    optionLabel:       { fontFamily: FontFamily.sansMedium,   fontSize: 15, color: c.inkSoft },
-    optionLabelActive: { fontFamily: FontFamily.sansSemiBold, fontSize: 15, color: c.ink },
+    optionPillActive:  { borderColor: palette.navy800, backgroundColor: palette.navy800 },
+    optionLabel:       { fontFamily: FontFamily.sansMedium,   fontSize: 14, color: c.inkSoft },
+    optionLabelActive: { fontFamily: FontFamily.sansSemiBold, fontSize: 14, color: palette.paper },
 
     rangeWrap: { gap: 10 },
     optionalInputWrap: {
@@ -351,7 +351,7 @@ function makeQuestionStyles(c: ThemeColors) {
 
     multiRow:      { flexDirection: 'row', alignItems: 'center', gap: 12 },
     checkbox:      { width: 22, height: 22, borderRadius: 6, borderWidth: 2, borderColor: c.hairline, justifyContent: 'center', alignItems: 'center', backgroundColor: c.surface },
-    checkboxActive:{ borderColor: c.accent, backgroundColor: c.accent },
+    checkboxActive:{ borderColor: palette.navy800, backgroundColor: palette.navy800 },
     checkmark:     { fontFamily: FontFamily.sansBold, fontSize: 13, color: palette.paper },
 
     input: {
@@ -505,8 +505,13 @@ export function OnboardingScreen() {
   }
 
   const phaseLabels: Record<string, string> = {
-    '1': 'Contexto', '3a': 'Financeiro', '3b': 'Comercial',
-    '3c': 'Diagnóstico', 'ob': 'Contexto expandido', '4': 'Aprofundamento', '6': 'Fechamento',
+    '1':  'O teu contexto',
+    '3a': 'Os teus números',
+    '3b': 'Como vendes',
+    '3c': 'O teu histórico',
+    'ob': 'A tua estrutura',
+    '4':  'O teu potencial',
+    '6':  'Para finalizar',
   };
   const currentPhase = String(currentStepQuestions[0]?.metadata?.phase ?? '');
   const phaseLabel   = phaseLabels[currentPhase] ?? '';
@@ -535,7 +540,7 @@ export function OnboardingScreen() {
           ))}
         </View>
         <Text style={s.progressLabel}>
-          {phaseLabel ? `${phaseLabel} · ` : ''}Parte {stepIndex + 1} de {totalSteps}
+          {stepIndex + 1}/{totalSteps}{phaseLabel ? ` · ${phaseLabel}` : ''}
         </Text>
 
         {/* Questions */}
@@ -593,10 +598,10 @@ function makeStyles(c: ThemeColors) {
     title:    { fontFamily: FontFamily.serifSemiBold, fontSize: 26, color: c.ink,    lineHeight: 32 },
     subtitle: { fontFamily: FontFamily.sansRegular,   fontSize: 14, color: c.inkSoft, lineHeight: 21 },
 
-    progressRow:       { flexDirection: 'row', gap: 6, marginBottom: 6 },
+    progressRow:       { flexDirection: 'row', gap: 4, marginBottom: 6 },
     progressSeg:       { flex: 1, height: 3, borderRadius: 2, backgroundColor: c.hairline },
     progressSegActive: { backgroundColor: c.accent },
-    progressLabel:     { fontFamily: FontFamily.sansRegular, fontSize: 12, color: c.inkMute, marginBottom: 20 },
+    progressLabel:     { fontFamily: FontFamily.sansMedium, fontSize: 11, color: c.accent, letterSpacing: 0.4, marginBottom: 20 },
 
     questionsWrap: { gap: 24, marginBottom: 24 },
 
