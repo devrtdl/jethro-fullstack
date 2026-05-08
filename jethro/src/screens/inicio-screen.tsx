@@ -64,19 +64,6 @@ function formatKpiValue(val: string | number | null): string {
   return String(val);
 }
 
-function prioBgColor(p: string) {
-  if (p === 'critica') return palette.liveRed;
-  if (p === 'alta')    return palette.gold500;
-  if (p === 'media')   return '#6B9FD4';
-  return palette.inkMute;
-}
-
-function prioLabel(p: string) {
-  if (p === 'critica') return 'URGENTE';
-  if (p === 'alta')    return 'ALTA';
-  if (p === 'media')   return 'MÉDIA';
-  return 'TAREFA';
-}
 
 // ─── Striped thumbnail ────────────────────────────────────────────────────────
 
@@ -106,21 +93,21 @@ const thumb = StyleSheet.create({
 
 // ─── Tarefa card (horizontal FlatList) ────────────────────────────────────────
 
-type Tarefa = NonNullable<HomeData['plano']>['tarefas'][number];
+type Acao = NonNullable<HomeData['plano']>['tarefas'][number];
 
-function TarefaCard({ tarefa, onRecursoPress }: { tarefa: Tarefa; onRecursoPress: () => void }) {
+function TarefaCard({ tarefa }: { tarefa: Acao; onRecursoPress: () => void }) {
   const { colors } = useTheme();
   const c = useMemo(() => makeCardStyles(colors), [colors]);
-  const color = prioBgColor(tarefa.prioridade);
-  const label = prioLabel(tarefa.prioridade);
 
   return (
     <View style={[c.wrap, tarefa.completada && c.wrapDone]}>
       <StripedThumb>
         <View style={c.thumbInner}>
-          <View style={[c.badge, { backgroundColor: color }]}>
-            <Text style={c.badgeText}>{label}</Text>
-          </View>
+          {tarefa.tag && (
+            <View style={c.badge}>
+              <Text style={c.badgeText}>{tarefa.tag}</Text>
+            </View>
+          )}
           {tarefa.completada && (
             <View style={c.doneOverlay}>
               <Text style={c.doneCheck}>✓</Text>
@@ -130,15 +117,11 @@ function TarefaCard({ tarefa, onRecursoPress }: { tarefa: Tarefa; onRecursoPress
       </StripedThumb>
       <View style={c.body}>
         <Text style={[c.title, tarefa.completada && c.titleDone]} numberOfLines={3}>
-          {tarefa.descricao}
+          {tarefa.texto}
         </Text>
-        {tarefa.completada ? (
+        {tarefa.completada && (
           <Text style={c.completadaLabel}>✓ Concluída</Text>
-        ) : tarefa.recurso_biblioteca ? (
-          <Pressable style={c.resourceChip} onPress={onRecursoPress}>
-            <Text style={c.resourceText} numberOfLines={1}>◈ {tarefa.recurso_biblioteca}</Text>
-          </Pressable>
-        ) : null}
+        )}
       </View>
     </View>
   );

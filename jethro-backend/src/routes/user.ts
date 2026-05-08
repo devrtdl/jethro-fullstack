@@ -125,10 +125,10 @@ export async function registerUserRoutes(app: FastifyInstance) {
     // Tarefas da semana atual
     const tarefas = planoRow
       ? await pool
-          .query<{ descricao: string; prioridade: string; completada: boolean; recurso_biblioteca: string | null }>(
-            `SELECT descricao, prioridade, completada, recurso_biblioteca
+          .query<{ texto: string; ordem: number | null; completada: boolean; tag: string | null }>(
+            `SELECT texto, ordem, completada, tag
              FROM tarefas_semana WHERE semana_id = $1
-             ORDER BY prioridade DESC, created_at ASC`,
+             ORDER BY ordem ASC NULLS LAST, created_at ASC`,
             [planoRow.semana_id]
           )
           .then((r) => r.rows)

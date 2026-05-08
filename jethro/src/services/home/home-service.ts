@@ -7,11 +7,11 @@ export type Devocional = {
   versiculo: string;
 };
 
-export type Tarefa = {
-  descricao: string;
-  prioridade: 'baixa' | 'media' | 'alta' | 'critica';
+export type Acao = {
+  texto: string;
+  ordem: number | null;
   completada: boolean;
-  recurso_biblioteca?: string | null;
+  tag: string | null;
 };
 
 export type PlanoSemana = {
@@ -27,7 +27,7 @@ export type PlanoSemana = {
   checkInsCount: number;
   checkInsNecessarios: number;
   todayCheckedIn: boolean;
-  tarefas: Tarefa[];
+  tarefas: Acao[];
 };
 
 export type HomeKpis = {
@@ -89,18 +89,20 @@ type PlanoStatusResponse = {
 
 export type PlanoSemanaCompleta = {
   numero: number;
-  nome: string | null;
+  titulo: string | null;
   objetivo: string;
   por_que_importa: string | null;
-  versiculo: string | null;
+  versiculo_ancora: string | null;
+  versiculo_texto: string | null;
   fase: string;
   bloco: string | null;
   tag: string | null;
   gate_status: 'locked' | 'available' | 'completed' | 'overdue';
-  indicador_conclusao: string | null;
-  resultado_esperado: string | null;
+  status: 'ativa' | 'bloqueada';
+  indicador_sucesso: string | null;
+  materiais_biblioteca: string[] | null;
   conteudo_completo: boolean;
-  tarefas: { descricao: string; prioridade: string; completada: boolean; recurso_biblioteca?: string | null }[];
+  acoes: { texto: string; ordem: number | null; completada: boolean; tag: string | null }[];
 };
 
 export type PlanoCompleto = {

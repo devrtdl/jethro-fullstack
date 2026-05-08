@@ -77,7 +77,7 @@ function SemanaCard({ semana }: { semana: PlanoSemanaCompleta }) {
         </View>
         <View style={s.semanaInfo}>
           <Text style={[s.semanaNome, isLocked && s.textMuted]} numberOfLines={2}>
-            {semana.nome ?? semana.objetivo}
+            {semana.titulo ?? semana.objetivo}
           </Text>
           <Text style={s.semanaFase}>
             {semana.bloco ? `${semana.bloco} · ${semana.tag ?? faseLabel(semana.fase)}` : faseLabel(semana.fase)}
@@ -96,7 +96,7 @@ function SemanaCard({ semana }: { semana: PlanoSemanaCompleta }) {
 
       {expanded && semana.conteudo_completo && (
         <View style={s.semanaDetail}>
-          {semana.nome && <Text style={s.detailObjetivo}>{semana.objetivo}</Text>}
+          {semana.titulo && <Text style={s.detailObjetivo}>{semana.objetivo}</Text>}
 
           {semana.por_que_importa && (
             <View style={s.detailBlock}>
@@ -105,42 +105,39 @@ function SemanaCard({ semana }: { semana: PlanoSemanaCompleta }) {
             </View>
           )}
 
-          {semana.versiculo && (
+          {semana.versiculo_ancora && (
             <View style={s.versiculoWrap}>
-              <Text style={s.versiculoText}>✦ {semana.versiculo}</Text>
+              <Text style={s.versiculoText}>✦ {semana.versiculo_ancora}{semana.versiculo_texto ? ` — ${semana.versiculo_texto}` : ''}</Text>
             </View>
           )}
 
-          {semana.tarefas.length > 0 && (
+          {semana.acoes.length > 0 && (
             <View style={s.detailBlock}>
-              <Text style={s.detailLabel}>Tarefas</Text>
-              {semana.tarefas.map((t, i) => (
+              <Text style={s.detailLabel}>Ações</Text>
+              {semana.acoes.map((a, i) => (
                 <View key={i} style={s.tarefaRow}>
-                  <Text style={[s.tarefaPrio, { color: prioridadeColor(t.prioridade) }]}>◆</Text>
+                  <Text style={[s.tarefaPrio, { color: prioridadeColor('media') }]}>◆</Text>
                   <View style={s.tarefaBody}>
-                    <Text style={[s.tarefaDesc, t.completada && s.tarefaDone]}>{t.descricao}</Text>
-                    {t.recurso_biblioteca && (
-                      <Pressable style={s.recursoChip} onPress={() => router.push('/(tabs)/biblioteca')}>
-                        <Text style={s.recursoChipText}>◈ {t.recurso_biblioteca}</Text>
-                      </Pressable>
-                    )}
+                    <Text style={[s.tarefaDesc, a.completada && s.tarefaDone]}>{a.texto}</Text>
                   </View>
                 </View>
               ))}
             </View>
           )}
 
-          {semana.indicador_conclusao && (
+          {semana.indicador_sucesso && (
             <View style={s.detailBlock}>
-              <Text style={s.detailLabel}>Indicador de conclusão</Text>
-              <Text style={s.detailText}>{semana.indicador_conclusao}</Text>
+              <Text style={s.detailLabel}>Indicador de sucesso</Text>
+              <Text style={s.detailText}>{semana.indicador_sucesso}</Text>
             </View>
           )}
 
-          {semana.resultado_esperado && (
-            <View style={s.resultadoWrap}>
-              <Text style={s.resultadoLabel}>Resultado esperado</Text>
-              <Text style={s.resultadoText}>{semana.resultado_esperado}</Text>
+          {semana.materiais_biblioteca && semana.materiais_biblioteca.length > 0 && (
+            <View style={s.detailBlock}>
+              <Text style={s.detailLabel}>Materiais</Text>
+              <Pressable style={s.recursoChip} onPress={() => router.push('/(tabs)/biblioteca')}>
+                <Text style={s.recursoChipText}>◈ {semana.materiais_biblioteca.join(', ')}</Text>
+              </Pressable>
             </View>
           )}
         </View>

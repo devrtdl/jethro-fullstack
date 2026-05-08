@@ -54,25 +54,28 @@ type SemanaOutline = {
   numero: number;
   bloco?: string;
   tag?: string;
-  nome: string;
+  titulo: string;
   objetivo: string;
+};
+
+type AcaoCompleta = {
+  id: number;
+  texto: string;
+  tag: string;
 };
 
 type SemanaCompleta = {
   numero: number;
   bloco?: string;
   tag?: string;
-  nome: string;
+  titulo: string;
   objetivo: string;
   por_que_importa: string;
-  versiculo: string | null;
-  tarefas: Array<{
-    descricao: string;
-    prioridade: 'baixa' | 'media' | 'alta' | 'critica';
-    recurso_biblioteca?: string | null;
-  }>;
-  indicador_conclusao: string;
-  resultado_esperado: string;
+  versiculo_ancora: string | null;
+  versiculo_texto: string | null;
+  acoes: AcaoCompleta[];
+  indicador_sucesso: string;
+  materiais_biblioteca?: string[] | null;
 };
 
 type InitialPlanGerado = {
@@ -81,21 +84,6 @@ type InitialPlanGerado = {
 };
 
 type OnboardingRow = { id: string; modelo_confirmado: string; json_completo: Record<string, unknown> };
-type TarefaPrioridade = 'baixa' | 'media' | 'alta' | 'critica';
-
-function normalizePrioridade(value: unknown): TarefaPrioridade {
-  const normalized = String(value ?? 'media')
-    .normalize('NFD')
-    .replace(/\p{Diacritic}/gu, '')
-    .trim()
-    .toLowerCase();
-
-  if (normalized === 'baixa' || normalized === 'baixo') return 'baixa';
-  if (normalized === 'media' || normalized === 'medio') return 'media';
-  if (normalized === 'alta' || normalized === 'alto') return 'alta';
-  if (normalized === 'critica' || normalized === 'critico' || normalized === 'urgente') return 'critica';
-  return 'media';
-}
 
 async function recordAiUsage(
   userId: string,
@@ -192,7 +180,7 @@ REGRAS ABSOLUTAS:
 6. S1 específica por modelo: D = sangramento; E = ponto de partida; C = gap de preço; F = dependência de canal; G = dependência operacional; H = centralização; B = platô; X = alavancas; A = priorização de caos.
 7. Use os nomes de blocos personalizados por modelo informados no prompt do usuário.
 8. Se ticket_medio = 0, não use como base de cálculo. A tarefa deve definir quanto cobrar pelo primeiro pacote.
-9. Referencie materiais da Biblioteca no campo recurso_biblioteca em cada tarefa, usando T01-T12 ou materiais específicos do modelo quando fizer sentido.
+9. Referencie materiais da Biblioteca no campo materiais_biblioteca da semana (array de tags, ex: ["P1","P2"]). As ações usam apenas tag sequencial (T01–T05), não referência de biblioteca.
 10. AÇÕES E METÁFORAS DA ALMA (consultar primeiro, nunca ignorar)
 A seção "AÇÕES ALMA PRIORIZADAS" contém ações escritas pelo mentor Rogério Teixeira, pré-selecionadas para este modelo. A seção "METÁFORAS ALMA" contém metáforas bíblicas e empresariais curadas pelo mentor.
 FLUXO OBRIGATÓRIO para cada tarefa do plano:
@@ -217,7 +205,7 @@ Direto, cuidador, espiritual. Use "a gente" nas partes conversacionais. Celebre 
 function buildRemainingWeeksExample(diagnosticModel: string): string {
   return Array.from({ length: 23 }, (_, index) => {
     const numero = index + 2;
-    return `    { "numero": ${numero}, "bloco": "${blocoForSemana(diagnosticModel, numero)}", "tag": "${tagForSemana(numero)}", "nome": "Nome da semana ${numero}", "objetivo": "Objetivo da semana ${numero}" }`;
+    return `    { "numero": ${numero}, "bloco": "${blocoForSemana(diagnosticModel, numero)}", "tag": "${tagForSemana(numero)}", "titulo": "Título da semana ${numero}", "objetivo": "Objetivo da semana ${numero}" }`;
   }).join(',\n');
 }
 
@@ -239,7 +227,7 @@ function buildInitialPlanPrompt(
     : '';
 
   return `TAREFA:
-Gerar a estrutura completa do Plano de Ação de 24 semanas com base no diagnóstico e onboarding do empreendedor. A Semana 1 deve ser gerada completa. As Semanas 2 a 24 devem ser geradas apenas com número, bloco, tag, nome da semana e objetivo estratégico.
+Gerar a estrutura completa do Plano de Ação de 24 semanas com base no diagnóstico e onboarding do empreendedor. A Semana 1 deve ser gerada completa. As Semanas 2 a 24 devem ser geradas apenas com número, bloco, tag, título e objetivo estratégico.
 
 CONTEXTO DO EMPREENDEDOR:
 ${ctx}
@@ -257,15 +245,20 @@ FORMATO DE SAÍDA (JSON puro, sem markdown, sem texto antes ou depois):
     "numero": 1,
     "bloco": "${blocoForSemana(diagnosticModel, 1)}",
     "tag": "Fundamento",
-    "nome": "Nome da semana",
+    "titulo": "Título da semana",
     "objetivo": "1 frase estratégica e específica",
     "por_que_importa": "Parágrafo explicando a lógica estratégica desta etapa",
-    "versiculo": "Provérbios 27:23 — texto do versículo",
-    "tarefas": [
-      { "descricao": "Tarefa concreta e mensurável", "prioridade": "alta", "recurso_biblioteca": "T01" }
+    "versiculo_ancora": "Provérbios 27:23",
+    "versiculo_texto": "texto completo do versículo",
+    "acoes": [
+      { "id": 1, "texto": "Ação concreta e mensurável", "tag": "T01" },
+      { "id": 2, "texto": "Ação concreta e mensurável", "tag": "T02" },
+      { "id": 3, "texto": "Ação concreta e mensurável", "tag": "T03" },
+      { "id": 4, "texto": "Ação concreta e mensurável", "tag": "T04" },
+      { "id": 5, "texto": "Ação concreta e mensurável", "tag": "T05" }
     ],
-    "indicador_conclusao": "Como saber praticamente se a semana foi cumprida",
-    "resultado_esperado": "Ganho concreto gerado ao final da execução"
+    "indicador_sucesso": "Como saber praticamente se a semana foi cumprida",
+    "materiais_biblioteca": ["P1", "P2"]
   },
   "semanas_restantes": [
 ${buildRemainingWeeksExample(diagnosticModel)}
@@ -288,13 +281,13 @@ function buildSemanaFullPrompt(
   const ctx = buildStudentContext(diagnosticModel, onboardingJson);
 
   const outlineText = todasSemanas
-    .map((s) => `Semana ${s.numero}: bloco="${s.bloco ?? blocoForSemana(diagnosticModel, s.numero)}"; tag="${s.tag ?? tagForSemana(s.numero)}"; nome="${s.nome}" — ${s.objetivo}`)
+    .map((s) => `Semana ${s.numero}: bloco="${s.bloco ?? blocoForSemana(diagnosticModel, s.numero)}"; tag="${s.tag ?? tagForSemana(s.numero)}"; titulo="${s.titulo}" — ${s.objetivo}`)
     .join('\n');
   const semana = {
     numero: semanaNumero,
     bloco: semanaBloco,
     tag: semanaTag,
-    nome: semanaNome,
+    titulo: semanaNome,
     objetivo: semanaObjetivo,
   };
 
@@ -325,8 +318,8 @@ REGRAS:
 2. Use nome do empreendedor, nunca "aluno".
 3. Use o versículo fixo do bloco: Fundamento = Provérbios 27:23; Estrutura = Êxodo 18:17-18; Controle = Salmo 119:105; Crescimento = Lucas 16:10; Legado = Mateus 25:21.
 4. Respeite dados condicionais: dívidas, inadimplência, plataforma, carga horária e concentração.
-5. Referencie materiais da Biblioteca no campo recurso_biblioteca.
-6. Tarefas concretas, aplicáveis e mensuráveis (2 a 4 tarefas). Prioridades: baixa / media / alta / critica.
+5. Referencie materiais da Biblioteca no campo materiais_biblioteca da semana (array de tags, ex: ["P1","P2"]). As ações usam apenas o campo tag para sequência (T01–T05).
+6. Exatamente 5 ações por semana, com tags T01 a T05.
 7. Celebre progresso antes de prescrever.
 
 FORMATO DE SAÍDA (JSON puro, sem markdown, sem texto antes ou depois):
@@ -334,15 +327,20 @@ FORMATO DE SAÍDA (JSON puro, sem markdown, sem texto antes ou depois):
   "numero": ${semanaNumero},
   "bloco": "${semana.bloco}",
   "tag": "${semana.tag}",
-  "nome": "nome da semana",
+  "titulo": "título da semana",
   "objetivo": "objetivo da semana",
   "por_que_importa": "Parágrafo explicando a lógica estratégica desta etapa",
-  "versiculo": "Livro X:Y — texto do versículo fixo do bloco",
-  "tarefas": [
-    { "descricao": "Tarefa concreta e mensurável", "prioridade": "alta", "recurso_biblioteca": "T01" }
+  "versiculo_ancora": "Livro X:Y",
+  "versiculo_texto": "texto completo do versículo fixo do bloco",
+  "acoes": [
+    { "id": 1, "texto": "Ação concreta e mensurável", "tag": "T01" },
+    { "id": 2, "texto": "Ação concreta e mensurável", "tag": "T02" },
+    { "id": 3, "texto": "Ação concreta e mensurável", "tag": "T03" },
+    { "id": 4, "texto": "Ação concreta e mensurável", "tag": "T04" },
+    { "id": 5, "texto": "Ação concreta e mensurável", "tag": "T05" }
   ],
-  "indicador_conclusao": "Como saber praticamente se a semana foi cumprida",
-  "resultado_esperado": "Ganho concreto gerado ao final da execução"
+  "indicador_sucesso": "Como saber praticamente se a semana foi cumprida",
+  "materiais_biblioteca": ["P1", "P2"]
 }`;
 }
 
@@ -436,8 +434,8 @@ export async function generateSemanaCompleta(semanaId: string): Promise<void> {
   const pool = getDbPool();
 
   const semanaRow = await pool
-    .query<{ numero: number; plano_id: string; bloco: string | null; tag: string | null; nome: string | null; objetivo: string }>(
-      `SELECT numero, plano_id, bloco, tag, nome, objetivo FROM semanas WHERE id = $1`,
+    .query<{ numero: number; plano_id: string; bloco: string | null; tag: string | null; titulo: string | null; objetivo: string }>(
+      `SELECT numero, plano_id, bloco, tag, titulo, objetivo FROM semanas WHERE id = $1`,
       [semanaId]
     )
     .then((r) => r.rows[0] ?? null);
@@ -463,8 +461,8 @@ export async function generateSemanaCompleta(semanaId: string): Promise<void> {
   if (!onbRow) return;
 
   const todasSemanas = await pool
-    .query<{ numero: number; bloco: string | null; tag: string | null; nome: string | null; objetivo: string }>(
-      `SELECT numero, bloco, tag, nome, objetivo FROM semanas WHERE plano_id = $1 ORDER BY numero ASC`,
+    .query<{ numero: number; bloco: string | null; tag: string | null; titulo: string | null; objetivo: string }>(
+      `SELECT numero, bloco, tag, titulo, objetivo FROM semanas WHERE plano_id = $1 ORDER BY numero ASC`,
       [semanaRow.plano_id]
     )
     .then((r) => r.rows);
@@ -487,7 +485,7 @@ export async function generateSemanaCompleta(semanaId: string): Promise<void> {
     numero: s.numero,
     bloco: s.bloco ?? blocoForSemana(planoRow.modelo, s.numero),
     tag: s.tag ?? tagForSemana(s.numero),
-    nome: s.nome ?? '',
+    titulo: s.titulo ?? '',
     objetivo: s.objetivo,
   }));
 
@@ -497,7 +495,7 @@ export async function generateSemanaCompleta(semanaId: string): Promise<void> {
     semanaRow.numero,
     semanaRow.bloco ?? blocoForSemana(planoRow.modelo, semanaRow.numero),
     semanaRow.tag ?? tagForSemana(semanaRow.numero),
-    semanaRow.nome ?? '',
+    semanaRow.titulo ?? '',
     semanaRow.objetivo,
     planoRow.modelo,
     onbRow.json_completo,
@@ -537,28 +535,30 @@ export async function generateSemanaCompleta(semanaId: string): Promise<void> {
 
     await client.query(
       `UPDATE semanas
-       SET bloco = $1, tag = $2, fase = $3, por_que_importa = $4, versiculo = $5,
-           indicador_conclusao = $6, resultado_esperado = $7, conteudo_completo = true
-       WHERE id = $8`,
+       SET bloco = $1, tag = $2, fase = $3, por_que_importa = $4,
+           versiculo_ancora = $5, versiculo_texto = $6,
+           indicador_sucesso = $7, materiais_biblioteca = $8, conteudo_completo = true
+       WHERE id = $9`,
       [
         semanaGerada.bloco ?? semanaRow.bloco ?? blocoForSemana(planoRow.modelo, semanaRow.numero),
         semanaGerada.tag ?? semanaRow.tag ?? tagForSemana(semanaRow.numero),
         faseFromTag(semanaGerada.tag ?? semanaRow.tag ?? undefined, semanaRow.numero),
         semanaGerada.por_que_importa ?? null,
-        semanaGerada.versiculo ?? null,
-        semanaGerada.indicador_conclusao ?? null,
-        semanaGerada.resultado_esperado ?? null,
+        semanaGerada.versiculo_ancora ?? null,
+        semanaGerada.versiculo_texto ?? null,
+        semanaGerada.indicador_sucesso ?? null,
+        semanaGerada.materiais_biblioteca ? JSON.stringify(semanaGerada.materiais_biblioteca) : null,
         semanaId,
       ]
     );
 
     await client.query(`DELETE FROM tarefas_semana WHERE semana_id = $1`, [semanaId]);
 
-    for (const tarefa of semanaGerada.tarefas ?? []) {
+    for (const acao of semanaGerada.acoes ?? []) {
       await client.query(
-        `INSERT INTO tarefas_semana (semana_id, descricao, prioridade, acao_codigo, recurso_biblioteca)
+        `INSERT INTO tarefas_semana (semana_id, texto, ordem, acao_codigo, tag)
          VALUES ($1, $2, $3, $4, $5)`,
-        [semanaId, tarefa.descricao, normalizePrioridade(tarefa.prioridade), null, tarefa.recurso_biblioteca ?? null]
+        [semanaId, acao.texto, acao.id, null, acao.tag]
       );
     }
 
@@ -647,29 +647,30 @@ async function runGeneratePlanoBackground(
 
     // Semana 1 — conteúdo completo
     const s1Result = await client.query<{ id: string }>(
-      `INSERT INTO semanas (plano_id, numero, mes, fase, pilar, bloco, tag, versiculo, objetivo, nome, por_que_importa, indicador_conclusao, resultado_esperado, conteudo_completo)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, true) RETURNING id`,
+      `INSERT INTO semanas (plano_id, numero, mes, fase, pilar, bloco, tag, versiculo_ancora, versiculo_texto, objetivo, titulo, por_que_importa, indicador_sucesso, materiais_biblioteca, conteudo_completo)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, true) RETURNING id`,
       [
         planoId, 1, 1,
         faseFromTag(s1.tag, 1),
         PILARES_POR_SEMANA[1] ?? 'P1',
         s1.bloco ?? blocoForSemana(diagnosticModel, 1),
         s1.tag ?? tagForSemana(1),
-        s1.versiculo ?? null,
+        s1.versiculo_ancora ?? null,
+        s1.versiculo_texto ?? null,
         s1.objetivo,
-        s1.nome ?? null,
+        s1.titulo ?? null,
         s1.por_que_importa ?? null,
-        s1.indicador_conclusao ?? null,
-        s1.resultado_esperado ?? null,
+        s1.indicador_sucesso ?? null,
+        s1.materiais_biblioteca ? JSON.stringify(s1.materiais_biblioteca) : null,
       ]
     );
     const semana1Id = s1Result.rows[0]!.id;
 
-    for (const tarefa of s1.tarefas ?? []) {
+    for (const acao of s1.acoes ?? []) {
       await client.query(
-        `INSERT INTO tarefas_semana (semana_id, descricao, prioridade, acao_codigo, recurso_biblioteca)
+        `INSERT INTO tarefas_semana (semana_id, texto, ordem, acao_codigo, tag)
          VALUES ($1, $2, $3, $4, $5)`,
-        [semana1Id, tarefa.descricao, normalizePrioridade(tarefa.prioridade), null, tarefa.recurso_biblioteca ?? null]
+        [semana1Id, acao.texto, acao.id, null, acao.tag]
       );
     }
 
@@ -689,9 +690,9 @@ async function runGeneratePlanoBackground(
       const tag = outline.tag ?? tagForSemana(n);
 
       const semanaResult = await client.query<{ id: string }>(
-        `INSERT INTO semanas (plano_id, numero, mes, fase, pilar, bloco, tag, objetivo, nome, conteudo_completo)
+        `INSERT INTO semanas (plano_id, numero, mes, fase, pilar, bloco, tag, objetivo, titulo, conteudo_completo)
          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, false) RETURNING id`,
-        [planoId, n, Math.ceil(n / 4), fase, pilar, bloco, tag, outline.objetivo, outline.nome ?? null]
+        [planoId, n, Math.ceil(n / 4), fase, pilar, bloco, tag, outline.objetivo, outline.titulo ?? null]
       );
 
       const semanaId = semanaResult.rows[0]!.id;

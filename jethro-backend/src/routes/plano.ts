@@ -64,14 +64,15 @@ export async function registerPlanoRoutes(app: FastifyInstance) {
         bloco: string | null;
         tag: string | null;
         objetivo: string;
-        nome: string | null;
-        versiculo: string | null;
+        titulo: string | null;
+        versiculo_ancora: string | null;
+        versiculo_texto: string | null;
         por_que_importa: string | null;
-        indicador_conclusao: string | null;
-        resultado_esperado: string | null;
+        indicador_sucesso: string | null;
+        materiais_biblioteca: string[] | null;
         conteudo_completo: boolean;
         gate_status: string;
-        tarefas: { descricao: string; prioridade: string; completada: boolean; recurso_biblioteca: string | null }[];
+        acoes: { texto: string; ordem: number | null; completada: boolean; tag: string | null }[];
       }>(
         `SELECT
            s.id AS semana_id,
@@ -80,30 +81,32 @@ export async function registerPlanoRoutes(app: FastifyInstance) {
            s.bloco,
            s.tag,
            s.objetivo,
-           s.nome,
-           s.versiculo,
+           s.titulo,
+           s.versiculo_ancora,
+           s.versiculo_texto,
            s.por_que_importa,
-           s.indicador_conclusao,
-           s.resultado_esperado,
+           s.indicador_sucesso,
+           s.materiais_biblioteca,
            s.conteudo_completo,
            gs.gate_status,
            COALESCE(
              json_agg(
                json_build_object(
-                 'descricao', t.descricao,
-                 'prioridade', t.prioridade,
+                 'texto', t.texto,
+                 'ordem', t.ordem,
                  'completada', t.completada,
-                 'recurso_biblioteca', t.recurso_biblioteca
-               ) ORDER BY t.prioridade DESC, t.created_at ASC
+                 'tag', t.tag
+               ) ORDER BY t.ordem ASC NULLS LAST, t.created_at ASC
              ) FILTER (WHERE t.id IS NOT NULL),
              '[]'
-           ) AS tarefas
+           ) AS acoes
          FROM semanas s
          JOIN gates_semanais gs ON gs.semana_id = s.id AND gs.user_id = $1
          LEFT JOIN tarefas_semana t ON t.semana_id = s.id
          WHERE s.plano_id = $2
-         GROUP BY s.id, s.numero, s.fase, s.bloco, s.tag, s.objetivo, s.nome, s.versiculo,
-                  s.por_que_importa, s.indicador_conclusao, s.resultado_esperado,
+         GROUP BY s.id, s.numero, s.fase, s.bloco, s.tag, s.objetivo, s.titulo,
+                  s.versiculo_ancora, s.versiculo_texto, s.por_que_importa,
+                  s.indicador_sucesso, s.materiais_biblioteca,
                   s.conteudo_completo, gs.gate_status
          ORDER BY s.numero ASC`,
         [userId, planoRow.id]
@@ -116,18 +119,20 @@ export async function registerPlanoRoutes(app: FastifyInstance) {
       totalSemanas: semanas.length,
       semanas: semanas.map((s) => ({
         numero: s.numero,
-        nome: s.nome,
+        titulo: s.titulo,
         objetivo: s.objetivo,
         por_que_importa: s.por_que_importa,
-        versiculo: s.versiculo,
+        versiculo_ancora: s.versiculo_ancora,
+        versiculo_texto: s.versiculo_texto,
         fase: s.fase,
         bloco: s.bloco,
         tag: s.tag,
         gate_status: s.gate_status,
-        indicador_conclusao: s.indicador_conclusao,
-        resultado_esperado: s.resultado_esperado,
+        status: s.gate_status === 'available' || s.gate_status === 'completed' ? 'ativa' : 'bloqueada',
+        indicador_sucesso: s.indicador_sucesso,
+        materiais_biblioteca: s.materiais_biblioteca,
         conteudo_completo: s.conteudo_completo,
-        tarefas: s.tarefas,
+        acoes: s.acoes,
       })),
     });
   });
