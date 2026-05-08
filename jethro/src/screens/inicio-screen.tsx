@@ -28,7 +28,23 @@ import { GhostButton } from '@/src/components/ui/GhostButton';
 import { FeatureCard } from '@/src/components/ui/FeatureCard';
 import { SectionCard } from '@/src/components/section-card';
 
-function getUserFirstName(email: string): string {
+const MODELO_TITULOS: Record<string, string> = {
+  A: 'Negócio Sem Rumo — Várias Frentes Abertas',
+  B: 'Base Sólida, Faturamento Estagnado',
+  C: 'Entrega Bem, Cobra Mal',
+  D: 'Fatura, Mas Não Sobra',
+  E: 'Começou, Mas o Mercado Ainda Não Respondeu',
+  F: 'Vende Bem, Mas Não Sabe Trazer o Próximo Cliente',
+  G: 'A Operação Não Aguenta Crescer',
+  H: 'Sem Você, Nada Anda',
+  X: 'Pronto para Escalar — Negócio Funcional em Ascensão',
+};
+
+function getUserDisplayName(session: { user?: { user_metadata?: { full_name?: string; name?: string }; email?: string } } | null): string {
+  const meta = session?.user?.user_metadata;
+  const fullName = meta?.full_name ?? meta?.name ?? '';
+  if (fullName.trim()) return fullName.trim().split(' ')[0] ?? fullName.trim();
+  const email = session?.user?.email ?? '';
   return email.split('@')[0]?.split('.')[0] ?? 'Empresário';
 }
 
@@ -163,8 +179,9 @@ export function InicioScreen() {
   const [error,          setError]          = useState<string | null>(null);
   const [focusStatus,    setFocusStatus]    = useState<'done' | 'ongoing' | null>(null);
 
-  const userEmail = session?.user?.email ?? '';
-  const firstName = getUserFirstName(userEmail);
+  const firstName   = getUserDisplayName(session);
+  const modeloCode  = data?.modelo ?? null;
+  const modeloLabel = modeloCode ? MODELO_TITULOS[modeloCode] ?? null : null;
 
   const loadData = useCallback(async () => {
     try {
@@ -282,8 +299,14 @@ export function InicioScreen() {
       >
         {/* ── Header ── */}
         <View style={s.header}>
-          <View>
+          <View style={{ flex: 1 }}>
             <Text style={s.greeting}>{getGreeting()}, {firstName}</Text>
+            {modeloLabel ? (
+              <View style={s.modeloBadge}>
+                <Text style={s.modeloDot}>◆</Text>
+                <Text style={s.modeloLabel} numberOfLines={1}>{modeloLabel}</Text>
+              </View>
+            ) : null}
             <Text style={s.date}>{getFormattedDate()}</Text>
           </View>
           <Pressable
@@ -521,8 +544,11 @@ function makeStyles(c: ThemeColors) {
       backgroundColor: c.surface, borderWidth: StyleSheet.hairlineWidth, borderColor: c.hairline,
       justifyContent: 'center', alignItems: 'center', ...getShadow(1),
     },
-    greeting: { fontFamily: FontFamily.serifMedium, fontSize: 22, color: c.ink,    textTransform: 'capitalize' },
-    date:     { fontFamily: FontFamily.sansRegular,  fontSize: 13, color: c.inkMute, marginTop: 2, textTransform: 'capitalize' },
+    greeting:    { fontFamily: FontFamily.serifMedium, fontSize: 22, color: c.ink, textTransform: 'capitalize' },
+    modeloBadge: { flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 4, marginBottom: 2 },
+    modeloDot:   { fontFamily: FontFamily.sansRegular, fontSize: 9, color: palette.gold500 },
+    modeloLabel: { fontFamily: FontFamily.sansRegular, fontSize: 11, color: c.inkMute, flex: 1 },
+    date:        { fontFamily: FontFamily.sansRegular, fontSize: 13, color: c.inkMute, textTransform: 'capitalize' },
 
     sectionLabel: { marginBottom: 12 },
 

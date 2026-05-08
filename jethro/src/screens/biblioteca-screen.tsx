@@ -117,7 +117,7 @@ function makeStyles(c: ThemeColors) {
   return StyleSheet.create({
     safe:      { flex: 1, backgroundColor: c.background },
     scroll:    { flex: 1 },
-    container: { paddingTop: 16 },
+    container: { paddingTop: 16, paddingBottom: 100 },
 
     pageHeader: { paddingHorizontal: Spacing.screenH, marginBottom: 24, gap: 14 },
     pageTitle:  { fontFamily: FontFamily.serifMedium, fontSize: 24, color: c.ink },
