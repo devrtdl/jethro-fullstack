@@ -505,12 +505,12 @@ export function OnboardingScreen() {
   }
 
   const phaseLabels: Record<string, string> = {
-    '1':  'O teu contexto',
-    '3a': 'Os teus números',
-    '3b': 'Como vendes',
-    '3c': 'O teu histórico',
-    'ob': 'A tua estrutura',
-    '4':  'O teu potencial',
+    '1':  'Seu contexto',
+    '3a': 'Seus números',
+    '3b': 'Como você vende',
+    '3c': 'Seu histórico',
+    'ob': 'Sua estrutura',
+    '4':  'Seu potencial',
     '6':  'Para finalizar',
   };
   const currentPhase = String(currentStepQuestions[0]?.metadata?.phase ?? '');

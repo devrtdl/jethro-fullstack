@@ -323,7 +323,7 @@ function GrowthChartCard() {
 
 // ─── Phase names (4 diagnostic phases matching PO spec) ──────────────────────
 
-const DIAG_PHASE_NAMES = ['Quem és', 'Onde estás', 'Como funciona', 'Para onde vais'];
+const DIAG_PHASE_NAMES = ['Quem você é', 'Onde você está', 'Como funciona', 'Para onde vai'];
 
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 
