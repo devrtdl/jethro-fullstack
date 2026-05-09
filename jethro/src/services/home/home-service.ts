@@ -168,6 +168,24 @@ export const homeService = {
     return response.data;
   },
 
+  async getCheckInSemanal(): Promise<{ confianca: number; clareza: number; progresso: number } | null> {
+    const headers = await getAuthHeaders();
+    const response = await apiClient.get<{
+      success: boolean;
+      data: { confianca: number; clareza: number; progresso: number } | null;
+    }>('/check-in-semanal', { headers });
+    return response.data;
+  },
+
+  async checkInSemanal(payload: { confianca: number; clareza: number; progresso: number }): Promise<void> {
+    const headers = await getAuthHeaders();
+    await apiClient.post<{ success: boolean; data: { saved: boolean } }>(
+      '/check-in-semanal',
+      payload,
+      { headers }
+    );
+  },
+
   async gateAdvance(): Promise<{
     advanced: boolean;
     reason?: string;

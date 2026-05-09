@@ -71,10 +71,6 @@ function faseLabel(fase: string): string {
   return map[fase] ?? fase;
 }
 
-function formatKpiValue(val: string | number | null): string {
-  if (val == null) return '—';
-  return String(val);
-}
 
 type CheckInModalProps = {
   visible:  boolean;
@@ -178,6 +174,9 @@ export function InicioScreen() {
   const [advancingGate,  setAdvancingGate]  = useState(false);
   const [error,          setError]          = useState<string | null>(null);
   const [focusStatus,    setFocusStatus]    = useState<'done' | 'ongoing' | null>(null);
+  const [checkInSemanal, setCheckInSemanal] = useState<{ confianca: number | null; clareza: number | null; progresso: number | null }>({ confianca: null, clareza: null, progresso: null });
+  const [checkInSemanalSaved,   setCheckInSemanalSaved]   = useState(false);
+  const [checkInSemanalLoading, setCheckInSemanalLoading] = useState(false);
 
   const firstName   = getUserDisplayName(session);
   const modeloCode  = data?.modelo ?? null;
@@ -186,8 +185,15 @@ export function InicioScreen() {
   const loadData = useCallback(async () => {
     try {
       setError(null);
-      const homeData = await homeService.getHomeData();
+      const [homeData, ciSemanal] = await Promise.all([
+        homeService.getHomeData(),
+        homeService.getCheckInSemanal().catch(() => null),
+      ]);
       setData(homeData);
+      if (ciSemanal) {
+        setCheckInSemanal({ confianca: ciSemanal.confianca, clareza: ciSemanal.clareza, progresso: ciSemanal.progresso });
+        setCheckInSemanalSaved(true);
+      }
     } catch {
       setError('Não foi possível carregar os dados.');
     } finally {
@@ -259,9 +265,22 @@ export function InicioScreen() {
     }
   }, [loadData]);
 
+  const handleCheckInSemanal = useCallback(async () => {
+    const { confianca, clareza, progresso } = checkInSemanal;
+    if (confianca == null || clareza == null || progresso == null) return;
+    setCheckInSemanalLoading(true);
+    try {
+      await homeService.checkInSemanal({ confianca, clareza, progresso });
+      setCheckInSemanalSaved(true);
+    } catch {
+      Alert.alert('Erro', 'Não foi possível guardar o check-in semanal.');
+    } finally {
+      setCheckInSemanalLoading(false);
+    }
+  }, [checkInSemanal]);
+
   const devocional         = data?.devocional ?? null;
   const plano              = data?.plano      ?? null;
-  const kpis               = data?.kpis       ?? null;
   const onboardingCompleto = data?.onboardingCompleto ?? false;
 
   const checkInsCount       = plano?.checkInsCount       ?? 0;
@@ -401,6 +420,50 @@ export function InicioScreen() {
               </SectionCard>
             </View>
 
+            {/* Check-in da Semana */}
+            <SectionCard style={s.checkInSemanalCard}>
+              <View style={s.checkInSemanalHeader}>
+                <View style={s.checkInSemanalDot} />
+                <Text style={s.checkInSemanalEyebrow}>CHECK-IN DA SEMANA</Text>
+              </View>
+              <Text style={s.checkInSemanalTitle}>Como você encerra esta semana?</Text>
+              {([
+                { key: 'confianca' as const, label: 'Confiança no negócio' },
+                { key: 'clareza'   as const, label: 'Clareza da direção'   },
+                { key: 'progresso' as const, label: 'Sensação de progresso' },
+              ]).map(({ key, label }) => (
+                <View key={key} style={s.checkInSemanalQuestion}>
+                  <Text style={s.checkInSemanalLabel}>{label}</Text>
+                  <View style={s.checkInSemanalScale}>
+                    {[1, 2, 3, 4, 5].map(n => (
+                      <Pressable
+                        key={n}
+                        style={[s.checkInSemanalBtn, checkInSemanal[key] === n && s.checkInSemanalBtnActive]}
+                        onPress={() => {
+                          setCheckInSemanal(prev => ({ ...prev, [key]: n }));
+                          setCheckInSemanalSaved(false);
+                        }}
+                        accessibilityRole="button"
+                        accessibilityLabel={`${label} — nota ${n}`}
+                      >
+                        <Text style={[s.checkInSemanalBtnText, checkInSemanal[key] === n && s.checkInSemanalBtnTextActive]}>{n}</Text>
+                      </Pressable>
+                    ))}
+                  </View>
+                </View>
+              ))}
+              {checkInSemanalSaved ? (
+                <Text style={s.checkInSemanalSavedText}>✓ Avaliação guardada</Text>
+              ) : (checkInSemanal.confianca != null && checkInSemanal.clareza != null && checkInSemanal.progresso != null) ? (
+                <PrimaryButton
+                  label={checkInSemanalLoading ? 'A guardar...' : 'Guardar avaliação'}
+                  onPress={() => void handleCheckInSemanal()}
+                  loading={checkInSemanalLoading}
+                  style={s.checkInSemanalSaveBtn}
+                />
+              ) : null}
+            </SectionCard>
+
             {/* Gate de Avanço */}
             <View style={s.sectionHeaderRow}>
               <EyebrowLabel>Gate de Avanço</EyebrowLabel>
@@ -486,26 +549,6 @@ export function InicioScreen() {
           </FeatureCard>
         ) : null}
 
-        {/* ── KPIs ── */}
-        {kpis ? (
-          <>
-            <EyebrowLabel style={s.sectionLabel}>Indicadores</EyebrowLabel>
-            <View style={s.kpiRow}>
-              <SectionCard style={s.kpiCard}>
-                <Text style={s.kpiValue}>{formatKpiValue(kpis.receitaAtual)}</Text>
-                <EyebrowLabel size="sm" color={colors.inkMute}>Receita Atual</EyebrowLabel>
-              </SectionCard>
-              <SectionCard style={s.kpiCard}>
-                <Text style={s.kpiValue}>{formatKpiValue(kpis.ticketMedio)}</Text>
-                <EyebrowLabel size="sm" color={colors.inkMute}>Ticket Médio</EyebrowLabel>
-              </SectionCard>
-              <SectionCard style={s.kpiCard}>
-                <Text style={s.kpiValue}>{formatKpiValue(kpis.clientesAtivos)}</Text>
-                <EyebrowLabel size="sm" color={colors.inkMute}>Clientes Ativos</EyebrowLabel>
-              </SectionCard>
-            </View>
-          </>
-        ) : null}
 
         <View style={{ height: 100 }} />
       </ScrollView>
@@ -616,9 +659,20 @@ function makeStyles(c: ThemeColors) {
     divider:             { height: 1, backgroundColor: palette.goldMuted, marginBottom: 12 },
     devocionalReflexao:  { fontFamily: FontFamily.sansRegular, fontSize: 13, color: 'rgba(239,239,234,0.60)', lineHeight: 20 },
 
-    kpiRow:   { flexDirection: 'row', gap: 10, marginBottom: 24 },
-    kpiCard:  { flex: 1, gap: 4, padding: 14 },
-    kpiValue: { fontFamily: FontFamily.serifSemiBold, fontSize: 18, color: c.ink },
+    checkInSemanalCard:        { marginBottom: 16, padding: 16, gap: 14 },
+    checkInSemanalHeader:      { flexDirection: 'row', alignItems: 'center', gap: 6 },
+    checkInSemanalDot:         { width: 7, height: 7, borderRadius: 4, backgroundColor: palette.gold500 },
+    checkInSemanalEyebrow:     { fontFamily: FontFamily.sansBold, fontSize: 10, color: palette.gold500, letterSpacing: 1.5, textTransform: 'uppercase' },
+    checkInSemanalTitle:       { fontFamily: FontFamily.serifMedium, fontSize: 20, color: c.ink, lineHeight: 26 },
+    checkInSemanalQuestion:    { gap: 8 },
+    checkInSemanalLabel:       { fontFamily: FontFamily.sansRegular, fontSize: 13, color: c.inkSoft },
+    checkInSemanalScale:       { flexDirection: 'row', gap: 6 },
+    checkInSemanalBtn:         { flex: 1, paddingVertical: 12, borderRadius: Radius.xs, borderWidth: 1, borderColor: c.hairline, justifyContent: 'center', alignItems: 'center', backgroundColor: c.surface },
+    checkInSemanalBtnActive:   { borderColor: palette.gold500, backgroundColor: 'rgba(201,166,85,0.12)' },
+    checkInSemanalBtnText:     { fontFamily: FontFamily.sansRegular, fontSize: 14, color: c.inkSoft },
+    checkInSemanalBtnTextActive: { fontFamily: FontFamily.sansSemiBold, color: palette.gold500 },
+    checkInSemanalSaveBtn:   { marginTop: 4 },
+    checkInSemanalSavedText: { fontFamily: FontFamily.sansMedium, fontSize: 13, color: c.success, textAlign: 'center', marginTop: 4 },
 
     fab: {
       position: 'absolute', bottom: 24, right: Spacing.screenH,

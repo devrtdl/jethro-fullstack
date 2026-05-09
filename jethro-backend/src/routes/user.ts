@@ -325,6 +325,99 @@ export async function registerUserRoutes(app: FastifyInstance) {
   );
 
   /**
+   * GET /check-in-semanal
+   * Devolve as ratings da semana atual (null se ainda não preenchidas).
+   */
+  app.get('/check-in-semanal', { preHandler: userAuthPreHandler }, async (request) => {
+    const userId = request.userId!;
+    const pool = getDbPool();
+
+    const semanaRow = await pool
+      .query<{ semana_id: string }>(
+        `SELECT s.id AS semana_id
+         FROM planos_acao pa
+         JOIN (
+           SELECT id FROM onboarding_sessions
+           WHERE user_id = $1 AND status = 'completed'
+           ORDER BY created_at DESC LIMIT 1
+         ) os ON os.id = pa.onboarding_id
+         JOIN semanas s ON s.plano_id = pa.id
+         JOIN gates_semanais gs ON gs.semana_id = s.id AND gs.user_id = pa.user_id
+         WHERE pa.user_id = $1 AND pa.status = 'ready' AND gs.gate_status = 'available'
+         ORDER BY s.numero ASC LIMIT 1`,
+        [userId]
+      )
+      .then((r) => r.rows[0] ?? null);
+
+    if (!semanaRow) return successResponse(null);
+
+    const row = await pool
+      .query<{ confianca: number; clareza: number; progresso: number }>(
+        `SELECT confianca, clareza, progresso
+         FROM check_ins_semanais
+         WHERE user_id = $1 AND semana_id = $2`,
+        [userId, semanaRow.semana_id]
+      )
+      .then((r) => r.rows[0] ?? null);
+
+    return successResponse(row);
+  });
+
+  /**
+   * POST /check-in-semanal
+   * Upsert das 3 ratings da semana atual (1 registo por semana).
+   * Body: { confianca: 1-5, clareza: 1-5, progresso: 1-5 }
+   */
+  app.post<{ Body: { confianca: number; clareza: number; progresso: number } }>(
+    '/check-in-semanal',
+    { preHandler: userAuthPreHandler },
+    async (request) => {
+      const userId = request.userId!;
+      const { confianca, clareza, progresso } = request.body ?? {};
+      const pool = getDbPool();
+
+      if (
+        ![confianca, clareza, progresso].every(
+          (v) => Number.isInteger(v) && v >= 1 && v <= 5
+        )
+      ) {
+        throw Object.assign(new Error('Valores devem ser inteiros entre 1 e 5.'), { statusCode: 400 });
+      }
+
+      const semanaRow = await pool
+        .query<{ semana_id: string }>(
+          `SELECT s.id AS semana_id
+           FROM planos_acao pa
+           JOIN (
+             SELECT id FROM onboarding_sessions
+             WHERE user_id = $1 AND status = 'completed'
+             ORDER BY created_at DESC LIMIT 1
+           ) os ON os.id = pa.onboarding_id
+           JOIN semanas s ON s.plano_id = pa.id
+           JOIN gates_semanais gs ON gs.semana_id = s.id AND gs.user_id = pa.user_id
+           WHERE pa.user_id = $1 AND pa.status = 'ready' AND gs.gate_status = 'available'
+           ORDER BY s.numero ASC LIMIT 1`,
+          [userId]
+        )
+        .then((r) => r.rows[0] ?? null);
+
+      if (!semanaRow) {
+        throw Object.assign(new Error('Nenhuma semana ativa encontrada.'), { statusCode: 404 });
+      }
+
+      await pool.query(
+        `INSERT INTO check_ins_semanais (user_id, semana_id, confianca, clareza, progresso)
+         VALUES ($1, $2, $3, $4, $5)
+         ON CONFLICT (user_id, semana_id)
+         DO UPDATE SET confianca = $3, clareza = $4, progresso = $5, updated_at = now()`,
+        [userId, semanaRow.semana_id, confianca, clareza, progresso]
+      );
+
+      return successResponse({ saved: true });
+    }
+  );
+
+  /**
    * POST /gate/advance
    * Avança para a próxima semana se as condições forem cumpridas (>= 5 check-ins).
    * Marca a semana atual como 'completed' e a próxima como 'available'.
