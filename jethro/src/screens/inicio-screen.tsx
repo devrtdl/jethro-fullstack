@@ -175,8 +175,7 @@ export function InicioScreen() {
   const [error,          setError]          = useState<string | null>(null);
   const [focusStatus,    setFocusStatus]    = useState<'done' | 'ongoing' | null>(null);
   const [checkInSemanal, setCheckInSemanal] = useState<{ confianca: number | null; clareza: number | null; progresso: number | null }>({ confianca: null, clareza: null, progresso: null });
-  const [checkInSemanalSaved,   setCheckInSemanalSaved]   = useState(false);
-  const [checkInSemanalLoading, setCheckInSemanalLoading] = useState(false);
+  const [checkInSemanalSaved, setCheckInSemanalSaved] = useState(false);
 
   const firstName   = getUserDisplayName(session);
   const modeloCode  = data?.modelo ?? null;
@@ -264,20 +263,6 @@ export function InicioScreen() {
       setAdvancingGate(false);
     }
   }, [loadData]);
-
-  const handleCheckInSemanal = useCallback(async () => {
-    const { confianca, clareza, progresso } = checkInSemanal;
-    if (confianca == null || clareza == null || progresso == null) return;
-    setCheckInSemanalLoading(true);
-    try {
-      await homeService.checkInSemanal({ confianca, clareza, progresso });
-      setCheckInSemanalSaved(true);
-    } catch {
-      Alert.alert('Erro', 'Não foi possível guardar o check-in semanal.');
-    } finally {
-      setCheckInSemanalLoading(false);
-    }
-  }, [checkInSemanal]);
 
   const devocional         = data?.devocional ?? null;
   const plano              = data?.plano      ?? null;
@@ -440,8 +425,16 @@ export function InicioScreen() {
                         key={n}
                         style={[s.checkInSemanalBtn, checkInSemanal[key] === n && s.checkInSemanalBtnActive]}
                         onPress={() => {
-                          setCheckInSemanal(prev => ({ ...prev, [key]: n }));
+                          const next = { ...checkInSemanal, [key]: n };
+                          setCheckInSemanal(next);
                           setCheckInSemanalSaved(false);
+                          if (next.confianca != null && next.clareza != null && next.progresso != null) {
+                            void homeService.checkInSemanal({
+                              confianca: next.confianca,
+                              clareza:   next.clareza,
+                              progresso: next.progresso,
+                            }).then(() => setCheckInSemanalSaved(true)).catch(() => {});
+                          }
                         }}
                         accessibilityRole="button"
                         accessibilityLabel={`${label} — nota ${n}`}
@@ -452,16 +445,9 @@ export function InicioScreen() {
                   </View>
                 </View>
               ))}
-              {checkInSemanalSaved ? (
+              {checkInSemanalSaved && (
                 <Text style={s.checkInSemanalSavedText}>✓ Avaliação guardada</Text>
-              ) : (checkInSemanal.confianca != null && checkInSemanal.clareza != null && checkInSemanal.progresso != null) ? (
-                <PrimaryButton
-                  label={checkInSemanalLoading ? 'A guardar...' : 'Guardar avaliação'}
-                  onPress={() => void handleCheckInSemanal()}
-                  loading={checkInSemanalLoading}
-                  style={s.checkInSemanalSaveBtn}
-                />
-              ) : null}
+              )}
             </SectionCard>
 
             {/* Gate de Avanço */}
@@ -671,7 +657,6 @@ function makeStyles(c: ThemeColors) {
     checkInSemanalBtnActive:   { borderColor: palette.gold500, backgroundColor: 'rgba(201,166,85,0.12)' },
     checkInSemanalBtnText:     { fontFamily: FontFamily.sansRegular, fontSize: 14, color: c.inkSoft },
     checkInSemanalBtnTextActive: { fontFamily: FontFamily.sansSemiBold, color: palette.gold500 },
-    checkInSemanalSaveBtn:   { marginTop: 4 },
     checkInSemanalSavedText: { fontFamily: FontFamily.sansMedium, fontSize: 13, color: c.success, textAlign: 'center', marginTop: 4 },
 
     fab: {
