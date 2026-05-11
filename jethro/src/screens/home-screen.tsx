@@ -12,7 +12,7 @@ import {
   View,
 } from 'react-native';
 
-import { ScreenContainer } from '@/src/components/screen-container';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuthSession } from '@/src/hooks/use-auth-session';
 import { useDiagnosticForm } from '@/src/hooks/use-diagnostic-form';
 import { hasSupabaseConfig } from '@/src/lib/supabase';
@@ -25,9 +25,7 @@ import { FontFamily } from '@/src/theme/typography';
 import type { FormQuestion, JsonValue, QuestionOption } from '@/src/types/diagnostic-form';
 
 const phoneCountries = [
-  { label: 'Brasil',        iso: 'BR', code: '+55'  },
-  { label: 'Portugal',      iso: 'PT', code: '+351' },
-  { label: 'Estados Unidos',iso: 'US', code: '+1'   },
+  { label: 'Brasil', iso: 'BR', code: '+55' },
 ] as const;
 
 function formatDate(value: string) {
@@ -188,19 +186,7 @@ function QuestionInput({
       ) : null}
 
       {question.type === 'phone' ? (
-        <View style={s.stack}>
-          <View style={s.optionWrap}>
-            {phoneCountries.map((country) => {
-              const active = getPhoneCountryIso(value) === country.iso;
-              return (
-                <Pressable key={country.iso} style={[s.optionPill, active && s.optionPillActive]} onPress={() => onChange(buildPhoneValue(country.iso, getLocalPhoneDigits(value)))}>
-                  <Text style={[s.optionLabel, active && s.optionLabelActive]}>{country.label}</Text>
-                </Pressable>
-              );
-            })}
-          </View>
-          <TextInput keyboardType="phone-pad" placeholder="Número com DDD" placeholderTextColor={colors.inkMute} style={s.input} value={getLocalPhoneDigits(value)} onChangeText={(text) => onChange(buildPhoneValue(getPhoneCountryIso(value), text))} />
-        </View>
+        <TextInput keyboardType="phone-pad" placeholder="Número com DDD" placeholderTextColor={colors.inkMute} style={s.input} value={getLocalPhoneDigits(value)} onChangeText={(text) => onChange(buildPhoneValue('BR', text))} />
       ) : null}
 
       {(question.type === 'single_select' || question.type === 'money_range') ? (
@@ -357,17 +343,17 @@ export function HomeScreen() {
 
   if (!hasSupabaseConfig()) {
     return (
-      <ScreenContainer backgroundColor={colors.background} contentStyle={s.container} padded={false}>
-        <View style={s.primaryCard}>
+      <SafeAreaView style={[s.safe, { backgroundColor: colors.background }]}>
+        <View style={[s.primaryCard, { padding: 22 }]}>
           <Text style={s.sectionTitle}>Configurar auth</Text>
           <Text style={s.errorText}>Defina `EXPO_PUBLIC_SUPABASE_URL` e `EXPO_PUBLIC_SUPABASE_ANON_KEY` para liberar a autenticação.</Text>
         </View>
-      </ScreenContainer>
+      </SafeAreaView>
     );
   }
 
   return (
-    <ScreenContainer backgroundColor={colors.background} contentStyle={s.container} padded={false}>
+    <SafeAreaView style={[s.safe, { backgroundColor: colors.background }]}>
       <ScrollView ref={scrollRef} contentContainerStyle={s.scrollContent} showsVerticalScrollIndicator={false}>
         <AppTopBar onSignOut={handleSignOut} isSigningOut={isSigningOut} />
 
@@ -534,7 +520,7 @@ export function HomeScreen() {
 
         {errorMessage ? <Text style={s.errorText}>{errorMessage}</Text> : null}
       </ScrollView>
-    </ScreenContainer>
+    </SafeAreaView>
   );
 }
 
@@ -542,6 +528,7 @@ export function HomeScreen() {
 
 function makeStyles(c: ThemeColors) {
   return StyleSheet.create({
+    safe:         { flex: 1 },
     container:    { flex: 1 },
     scrollContent:{ paddingHorizontal: 22, paddingTop: 10, paddingBottom: 40, gap: 18 },
 
