@@ -261,9 +261,11 @@ export function InicioScreen() {
             {/* ⑤ Biblioteca do Jethro */}
             {(() => {
               const matSemana = plano.materiais_semana ?? [];
-              const matBiblioteca = (plano.materiais_biblioteca ?? []).slice(0, 3);
-              const temMateriais = matSemana.length > 0 || matBiblioteca.length > 0;
-              if (!temMateriais) return null;
+              let matBiblioteca = (plano.materiais_biblioteca ?? []).slice(0, 3);
+              // fallback: usa pilar da semana se não há materiais específicos
+              if (matSemana.length === 0 && matBiblioteca.length === 0 && plano.pilar) {
+                matBiblioteca = [plano.pilar];
+              }
               return (
                 <View style={s.bibCard}>
                   <Text style={s.bibLabelMain}>BIBLIOTECA DO JETHRO</Text>
@@ -305,46 +307,58 @@ export function InicioScreen() {
             })()}
 
             {/* ⑥ Dashboard de Progresso */}
-            <View style={s.dashCard}>
-              <View style={s.dashHeader}>
-                <Text style={s.dashLabel}>DASHBOARD DE PROGRESSO</Text>
-                {(data?.sparklineConfianca && data.sparklineConfianca.length > 0) ? (
-                  <Text style={s.sparkTrend}>▲ Confiança histórico</Text>
-                ) : null}
-              </View>
-              <View style={s.dashContent}>
-                {/* Anel 1 */}
-                <View style={s.ringWrap}>
-                  <View style={[s.ringOuter, { borderColor: palette.gold500 }]}>
-                    <Text style={s.ringValue}>{completadas}/{totalTarefas}</Text>
+            {(() => {
+              const spark = data?.sparklineConfianca ?? [];
+              const hasData = spark.length > 0;
+              const placeholders = [0.4, 0.55, 0.35, 0.6, 0.5];
+              return (
+                <View style={s.dashCard}>
+                  <View style={s.dashHeader}>
+                    <Text style={s.dashLabel}>DASHBOARD DE PROGRESSO</Text>
+                    <Text style={[s.sparkTrend, !hasData && { color: '#DDD6C8' }]}>
+                      {hasData ? '▲ Confiança histórico' : '— Confiança histórico'}
+                    </Text>
                   </View>
-                  <Text style={s.ringLabel}>Ações semana</Text>
+                  <View style={s.dashContent}>
+                    {/* Anel 1 */}
+                    <View style={s.ringWrap}>
+                      <View style={[s.ringOuter, { borderColor: palette.gold500 }]}>
+                        <Text style={s.ringValue}>{completadas}/{totalTarefas}</Text>
+                      </View>
+                      <Text style={s.ringLabel}>Ações semana</Text>
+                    </View>
+                    {/* Anel 2 */}
+                    <View style={s.ringWrap}>
+                      <View style={[s.ringOuter, { borderColor: palette.gold500 }]}>
+                        <Text style={s.ringValue}>{plano.semanaNumero}/24</Text>
+                      </View>
+                      <Text style={s.ringLabel}>Semanas plano</Text>
+                    </View>
+                    {/* Sparkline — real ou placeholder */}
+                    <View style={s.sparkWrap}>
+                      {hasData
+                        ? spark.map((val, idx) => {
+                            const max = Math.max(...spark);
+                            const isLast = idx === spark.length - 1;
+                            const h = Math.max(4, (val / max) * 44);
+                            return (
+                              <View key={idx} style={s.sparkBarWrap}>
+                                <View style={[s.sparkBar, { height: h, backgroundColor: isLast ? palette.gold500 : '#DDD6C8' }]} />
+                                <Text style={[s.sparkLbl, isLast && { color: palette.gold500 }]}>S{idx + 1}</Text>
+                              </View>
+                            );
+                          })
+                        : placeholders.map((ratio, idx) => (
+                            <View key={idx} style={s.sparkBarWrap}>
+                              <View style={[s.sparkBar, { height: ratio * 44, backgroundColor: '#EEE8DF', opacity: 0.5 }]} />
+                              <Text style={s.sparkLbl}>·</Text>
+                            </View>
+                          ))}
+                    </View>
+                  </View>
                 </View>
-                {/* Anel 2 */}
-                <View style={s.ringWrap}>
-                  <View style={[s.ringOuter, { borderColor: palette.gold500 }]}>
-                    <Text style={s.ringValue}>{plano.semanaNumero}/24</Text>
-                  </View>
-                  <Text style={s.ringLabel}>Semanas plano</Text>
-                </View>
-                {/* Sparkline ao lado dos anéis */}
-                {(data?.sparklineConfianca && data.sparklineConfianca.length > 0) ? (
-                  <View style={s.sparkWrap}>
-                    {data.sparklineConfianca.map((val, idx) => {
-                      const max = Math.max(...(data.sparklineConfianca ?? [1]));
-                      const isLast = idx === (data.sparklineConfianca?.length ?? 1) - 1;
-                      const h = Math.max(4, (val / max) * 44);
-                      return (
-                        <View key={idx} style={s.sparkBarWrap}>
-                          <View style={[s.sparkBar, { height: h, backgroundColor: isLast ? palette.gold500 : '#DDD6C8' }]} />
-                          <Text style={[s.sparkLbl, isLast && { color: palette.gold500 }]}>S{idx + 1}</Text>
-                        </View>
-                      );
-                    })}
-                  </View>
-                ) : null}
-              </View>
-            </View>
+              );
+            })()}
 
           </>
         ) : !onboardingCompleto ? (
