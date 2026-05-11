@@ -38,8 +38,19 @@ export async function registerPlanoRoutes(app: FastifyInstance) {
     const pool = getDbPool();
 
     const planoRow = await pool
-      .query<{ id: string; modelo: string }>(
-        `SELECT pa.id, pa.modelo
+      .query<{
+        id: string;
+        modelo: string;
+        tagline: string | null;
+        introducao: string | null;
+        diagnostico_geral: string[] | null;
+        fundamento_biblico: { versiculo: string; referencia: string; contexto_aplicado: string | null }[] | null;
+        negocio: string | null;
+        data_geracao: string | null;
+      }>(
+        `SELECT pa.id, pa.modelo, pa.tagline, pa.introducao, pa.diagnostico_geral,
+                pa.fundamento_biblico, pa.negocio,
+                to_char(pa.data_geracao, 'DD Mon YYYY') AS data_geracao
          FROM planos_acao pa
          JOIN (
            SELECT id FROM onboarding_sessions
@@ -121,6 +132,12 @@ export async function registerPlanoRoutes(app: FastifyInstance) {
     return successResponse({
       planoId: planoRow.id,
       modelo: planoRow.modelo,
+      tagline: planoRow.tagline,
+      introducao: planoRow.introducao,
+      diagnostico_geral: planoRow.diagnostico_geral,
+      fundamento_biblico: planoRow.fundamento_biblico,
+      negocio: planoRow.negocio,
+      data_geracao: planoRow.data_geracao,
       totalSemanas: semanas.length,
       semanas: semanas.map((s) => ({
         numero: s.numero,

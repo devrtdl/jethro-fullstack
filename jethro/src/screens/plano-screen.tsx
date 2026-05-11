@@ -690,10 +690,11 @@ function VisaoGeralTab({ plano, colors }: { plano: PlanoCompleto | null; colors:
 
   return (
     <ScrollView style={s.scroll} contentContainerStyle={s.scrollContent} showsVerticalScrollIndicator={false}>
-      {/* Tagline */}
+
+      {/* ① O Seu Plano — card navy com tagline */}
       {plano.tagline ? (
         <View style={s.taglineCard}>
-          <Text style={s.taglineLabel}>✦  O SEU PLANO</Text>
+          <Text style={s.taglineEyebrow}>✦  O SEU PLANO</Text>
           <Text style={s.taglineText}>{plano.tagline}</Text>
           {(plano.negocio || plano.data_geracao) ? (
             <Text style={s.taglineMeta}>
@@ -703,7 +704,7 @@ function VisaoGeralTab({ plano, colors }: { plano: PlanoCompleto | null; colors:
         </View>
       ) : null}
 
-      {/* Introdução */}
+      {/* ② Introdução */}
       {plano.introducao ? (
         <View style={s.secCard}>
           <Text style={s.secLabel}>INTRODUÇÃO</Text>
@@ -711,9 +712,9 @@ function VisaoGeralTab({ plano, colors }: { plano: PlanoCompleto | null; colors:
         </View>
       ) : null}
 
-      {/* Diagnóstico Geral */}
+      {/* ③ Diagnóstico Geral — borda dourada, bullets com dados reais */}
       {(plano.diagnostico_geral?.length ?? 0) > 0 ? (
-        <View style={[s.secCard, s.diagCard]}>
+        <View style={s.diagCard}>
           <Text style={s.secLabel}>DIAGNÓSTICO GERAL</Text>
           {(plano.diagnostico_geral ?? []).map((item, idx) => (
             <View key={idx} style={s.diagItem}>
@@ -724,19 +725,20 @@ function VisaoGeralTab({ plano, colors }: { plano: PlanoCompleto | null; colors:
         </View>
       ) : null}
 
-      {/* Fundamento Bíblico */}
+      {/* ④ Fundamento Bíblico e Mentalidade */}
       {(plano.fundamento_biblico?.length ?? 0) > 0 ? (
         <View style={s.secCard}>
           <Text style={s.secLabel}>FUNDAMENTO BÍBLICO E MENTALIDADE</Text>
           {(plano.fundamento_biblico ?? []).map((fund, idx) => (
-            <View key={idx} style={s.versiculoBlock}>
+            <View key={idx} style={[s.versiculoBlock, idx > 0 && { marginTop: 8 }]}>
+              <Text style={s.versiculoQuote}>"</Text>
               <Text style={s.versiculoTx}>"{fund.versiculo}"</Text>
               <Text style={s.versiculoRef}>{fund.referencia}</Text>
+              {fund.contexto_aplicado ? (
+                <Text style={s.versiculoContexto}>{fund.contexto_aplicado}</Text>
+              ) : null}
             </View>
           ))}
-          {plano.fundamento_biblico?.[0]?.contexto_aplicado ? (
-            <Text style={s.fundContexto}>{plano.fundamento_biblico[0].contexto_aplicado}</Text>
-          ) : null}
         </View>
       ) : null}
 
@@ -748,31 +750,36 @@ function VisaoGeralTab({ plano, colors }: { plano: PlanoCompleto | null; colors:
 function makeVisaoGeralStyles(c: ThemeColors) {
   return StyleSheet.create({
     scroll:         { flex: 1 },
-    scrollContent:  { paddingHorizontal: Spacing.screenH, paddingTop: 8 },
+    scrollContent:  { paddingHorizontal: Spacing.screenH, paddingTop: 12 },
     empty:          { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24 },
     emptyText:      { fontFamily: FontFamily.sansRegular, fontSize: 14, color: c.inkMute },
     placeholderCard:{ backgroundColor: c.surface, borderRadius: Radius.md, padding: 20, marginTop: 8, alignItems: 'center', borderWidth: StyleSheet.hairlineWidth, borderColor: c.hairline },
     placeholderTitle:{ fontFamily: FontFamily.serifMedium, fontSize: 16, color: palette.gold500, marginBottom: 10 },
     placeholderSub:  { fontFamily: FontFamily.sansRegular, fontSize: 13, color: c.inkMute, lineHeight: 20, textAlign: 'center' },
 
-    taglineCard:    { backgroundColor: palette.navy800, borderRadius: Radius.md, padding: 16, marginBottom: 10 },
-    taglineLabel:   { fontFamily: FontFamily.sansBold, fontSize: 9, textTransform: 'uppercase', letterSpacing: 0.7, color: palette.gold500, marginBottom: 8 },
-    taglineText:    { fontFamily: FontFamily.serifSemiBold, fontSize: 15, color: palette.paper, lineHeight: 22, marginBottom: 8 },
-    taglineMeta:    { fontFamily: FontFamily.sansRegular, fontSize: 10, color: palette.gold400 },
+    // ① O Seu Plano — card navy
+    taglineCard:    { backgroundColor: palette.navy800, borderRadius: Radius.md, padding: 18, marginBottom: 12, ...getShadow(2) },
+    taglineEyebrow: { fontFamily: FontFamily.sansBold, fontSize: 9, textTransform: 'uppercase', letterSpacing: 1.5, color: palette.gold500, marginBottom: 10 },
+    taglineText:    { fontFamily: FontFamily.serifSemiBold, fontSize: 18, color: palette.paper, lineHeight: 26, marginBottom: 10 },
+    taglineMeta:    { fontFamily: FontFamily.sansRegular, fontSize: 11, color: 'rgba(201,166,85,0.75)' },
 
-    secCard:        { backgroundColor: c.surface, borderRadius: Radius.md, padding: 14, marginBottom: 10, borderWidth: StyleSheet.hairlineWidth, borderColor: c.hairline, ...getShadow(1) },
-    diagCard:       { borderLeftWidth: 3, borderLeftColor: palette.gold500 },
-    secLabel:       { fontFamily: FontFamily.sansBold, fontSize: 8.5, textTransform: 'uppercase', letterSpacing: 0.7, color: palette.gold500, marginBottom: 8 },
-    secText:        { fontFamily: FontFamily.sansRegular, fontSize: 13, color: c.inkSoft, lineHeight: 20 },
+    // ② Introdução e secções genéricas
+    secCard:        { backgroundColor: c.surface, borderRadius: Radius.md, padding: 16, marginBottom: 12, borderWidth: StyleSheet.hairlineWidth, borderColor: c.hairline, ...getShadow(1) },
+    secLabel:       { fontFamily: FontFamily.sansBold, fontSize: 9, textTransform: 'uppercase', letterSpacing: 1, color: palette.gold500, marginBottom: 10 },
+    secText:        { fontFamily: FontFamily.sansRegular, fontSize: 13, color: c.inkSoft, lineHeight: 21 },
 
-    diagItem:       { flexDirection: 'row', alignItems: 'flex-start', gap: 10, marginBottom: 8 },
-    diagDot:        { width: 6, height: 6, borderRadius: 3, backgroundColor: palette.gold500, marginTop: 6, flexShrink: 0 },
-    diagText:       { flex: 1, fontFamily: FontFamily.sansRegular, fontSize: 12, color: c.ink, lineHeight: 18 },
+    // ③ Diagnóstico Geral — borda dourada esquerda
+    diagCard:       { backgroundColor: c.surface, borderRadius: Radius.md, padding: 16, marginBottom: 12, borderWidth: StyleSheet.hairlineWidth, borderColor: c.hairline, borderLeftWidth: 3, borderLeftColor: palette.gold500, ...getShadow(1) },
+    diagItem:       { flexDirection: 'row', alignItems: 'flex-start', gap: 10, marginBottom: 10 },
+    diagDot:        { width: 7, height: 7, borderRadius: 3.5, backgroundColor: palette.gold500, marginTop: 7, flexShrink: 0 },
+    diagText:       { flex: 1, fontFamily: FontFamily.sansRegular, fontSize: 13, color: c.ink, lineHeight: 20 },
 
-    versiculoBlock: { backgroundColor: palette.navy800, borderRadius: Radius.sm, padding: 14, marginBottom: 8 },
-    versiculoTx:    { fontFamily: FontFamily.serifMediumItalic, fontSize: 13, color: palette.paper, lineHeight: 20, marginBottom: 4 },
-    versiculoRef:   { fontFamily: FontFamily.sansSemiBold, fontSize: 10, color: palette.gold500 },
-    fundContexto:   { fontFamily: FontFamily.sansRegular, fontSize: 11, color: c.inkMute, lineHeight: 17, marginTop: 8 },
+    // ④ Fundamento Bíblico — cards navy em itálico
+    versiculoBlock:   { backgroundColor: palette.navy800, borderRadius: Radius.sm, padding: 16, overflow: 'hidden' },
+    versiculoQuote:   { position: 'absolute', top: 6, right: 14, fontFamily: FontFamily.serifSemiBold, fontSize: 72, lineHeight: 72, color: palette.gold500, opacity: 0.15 },
+    versiculoTx:      { fontFamily: FontFamily.serifMediumItalic, fontSize: 14, color: palette.paper, lineHeight: 22, marginBottom: 8 },
+    versiculoRef:     { fontFamily: FontFamily.sansSemiBold, fontSize: 10, color: palette.gold500, letterSpacing: 0.5 },
+    versiculoContexto:{ fontFamily: FontFamily.sansRegular, fontSize: 11, color: 'rgba(239,239,234,0.55)', lineHeight: 17, marginTop: 8 },
   });
 }
 

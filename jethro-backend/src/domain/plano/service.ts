@@ -81,7 +81,17 @@ type SemanaCompleta = {
   materiais_biblioteca?: string[] | null;
 };
 
+type FundamentoBiblico = {
+  versiculo: string;
+  referencia: string;
+  contexto_aplicado?: string | null;
+};
+
 type InitialPlanGerado = {
+  tagline?: string | null;
+  introducao?: string | null;
+  diagnostico_geral?: string[] | null;
+  fundamento_biblico?: FundamentoBiblico[] | null;
   semana_1: SemanaCompleta;
   semanas_restantes: SemanaOutline[];
 };
@@ -246,6 +256,19 @@ BLOCOS PERSONALIZADOS DO MODELO ${diagnosticModel}:
 ${acoesAlmaBlock}${metaforasAlmaBlock}
 FORMATO DE SAÍDA (JSON puro, sem markdown, sem texto antes ou depois):
 {
+  "tagline": "Frase de transformação que descreve a jornada do empreendedor (máx 15 palavras, impacto imediato)",
+  "introducao": "Parágrafo de contexto da jornada: quem é o empreendedor, qual o propósito dos 6 meses, gerado com base no onboarding (3-5 frases)",
+  "diagnostico_geral": [
+    "Bullet com dado real do negócio (faturamento, estrutura, modelo)",
+    "Bullet com problema ou gargalo identificado",
+    "Bullet com situação operacional ou financeira atual",
+    "Bullet com risco ou oportunidade estratégica",
+    "Bullet com contexto adicional relevante"
+  ],
+  "fundamento_biblico": [
+    { "versiculo": "texto completo do versículo âncora do bloco 1", "referencia": "Provérbios 27:23", "contexto_aplicado": "Como este versículo se aplica especificamente ao negócio e à fase deste empreendedor" },
+    { "versiculo": "texto completo de um segundo versículo relevante para o percurso", "referencia": "Livro X:Y", "contexto_aplicado": null }
+  ],
   "semana_1": {
     "numero": 1,
     "bloco": "${blocoForSemana(diagnosticModel, 1)}",
@@ -714,9 +737,28 @@ async function runGeneratePlanoBackground(
       );
     }
 
+    const negocioNome = (onboardingJson['nome_negocio'] as string | undefined)
+      ?? (onboardingJson['nome'] as string | undefined)
+      ?? null;
+
     await client.query(
-      `UPDATE planos_acao SET status = 'ready' WHERE id = $1`,
-      [planoId]
+      `UPDATE planos_acao
+       SET status = 'ready',
+           tagline = $2,
+           introducao = $3,
+           diagnostico_geral = $4,
+           fundamento_biblico = $5,
+           negocio = $6,
+           data_geracao = CURRENT_DATE
+       WHERE id = $1`,
+      [
+        planoId,
+        planoGerado.tagline ?? null,
+        planoGerado.introducao ?? null,
+        planoGerado.diagnostico_geral ? JSON.stringify(planoGerado.diagnostico_geral) : null,
+        planoGerado.fundamento_biblico ? JSON.stringify(planoGerado.fundamento_biblico) : null,
+        negocioNome,
+      ]
     );
 
     await client.query('COMMIT');
