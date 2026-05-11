@@ -39,9 +39,9 @@ export default function TabLayout() {
           backgroundColor: bgColor,
           borderTopColor:  borderColor,
           borderTopWidth:  StyleSheet.hairlineWidth,
-          paddingTop:      10,
-          paddingBottom:   Platform.OS === 'ios' ? 28 : 8,
-          height:          Platform.OS === 'ios' ? 88 : 68,
+          paddingTop:      6,
+          paddingBottom:   Platform.OS === 'ios' ? 24 : 6,
+          height:          Platform.OS === 'ios' ? 84 : 64,
           position:        'absolute',
         },
         // Translucent blur background (falls back to solid bgColor on Android)
@@ -55,7 +55,14 @@ export default function TabLayout() {
         // Custom label: text + gold dot under active tab
         tabBarLabel: ({ focused, color, children }) => (
           <View style={styles.labelWrap}>
-            <Text style={[styles.labelText, { color }]}>{children as string}</Text>
+            <Text
+              style={[styles.labelText, { color }]}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.75}
+            >
+              {children as string}
+            </Text>
             {focused ? <View style={styles.activeDot} /> : <View style={styles.dotPlaceholder} />}
           </View>
         ),
@@ -102,6 +109,15 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="devocional"
+        options={{
+          title: 'Devocional',
+          tabBarIcon: ({ color, size, focused }) => (
+            <TabIcon name={focused ? 'book' : 'book-outline'} color={color} size={size} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="perfil"
         options={{
           title: 'Perfil',
@@ -122,8 +138,8 @@ const styles = StyleSheet.create({
   },
   labelText: {
     fontFamily: FontFamily.sansMedium,
-    fontSize:   10.5,
-    lineHeight: 14,
+    fontSize:   10,
+    lineHeight: 12,
   },
   activeDot: {
     width:           4,

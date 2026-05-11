@@ -14,6 +14,11 @@ export type Acao = {
   tag: string | null;
 };
 
+export type MateriaisSemana = {
+  tipo: 'AULA' | 'TEMPLATE' | 'ARTIGO';
+  titulo: string;
+};
+
 export type PlanoSemana = {
   semanaNumero: number;
   fase: string;
@@ -28,6 +33,7 @@ export type PlanoSemana = {
   checkInsNecessarios: number;
   todayCheckedIn: boolean;
   tarefas: Acao[];
+  materiais_semana?: MateriaisSemana[] | null;
 };
 
 export type HomeKpis = {
@@ -42,6 +48,7 @@ export type HomeData = {
   plano: PlanoSemana | null;
   kpis: HomeKpis | null;
   onboardingCompleto: boolean;
+  sparklineConfianca?: number[] | null;
 };
 
 type HomeApiResponse = {
@@ -101,8 +108,10 @@ export type PlanoSemanaCompleta = {
   status: 'ativa' | 'bloqueada';
   indicador_sucesso: string | null;
   materiais_biblioteca: string[] | null;
+  materiais_semana?: MateriaisSemana[] | null;
   conteudo_completo: boolean;
-  acoes: { texto: string; ordem: number | null; completada: boolean; tag: string | null }[];
+  acoes: { id: string; texto: string; ordem: number | null; completada: boolean; tag: string | null }[];
+  check_in?: { confianca: number | null; clareza: number | null; progresso: number | null; registrado: boolean } | null;
 };
 
 export type PlanoCompleto = {
@@ -110,6 +119,12 @@ export type PlanoCompleto = {
   modelo: string;
   totalSemanas: number;
   semanas: PlanoSemanaCompleta[];
+  tagline?: string | null;
+  introducao?: string | null;
+  diagnostico_geral?: string[] | null;
+  fundamento_biblico?: Array<{ versiculo: string; referencia: string; contexto_aplicado?: string | null }> | null;
+  negocio?: string | null;
+  data_geracao?: string | null;
 };
 
 type PlanoCompletoResponse = {
@@ -182,6 +197,15 @@ export const homeService = {
     await apiClient.post<{ success: boolean; data: { saved: boolean } }>(
       '/check-in-semanal',
       payload,
+      { headers }
+    );
+  },
+
+  async completarTarefa(tarefaId: string, completada: boolean): Promise<void> {
+    const headers = await getAuthHeaders();
+    await apiClient.patch<{ success: boolean; data: { updated: boolean; completada: boolean } }>(
+      `/plano/tarefa/${tarefaId}`,
+      { completada },
       { headers }
     );
   },

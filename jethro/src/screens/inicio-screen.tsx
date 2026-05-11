@@ -1,4 +1,5 @@
 import { useRouter } from 'expo-router';
+import { mentorContext } from '@/src/lib/mentor-context';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
@@ -157,6 +158,23 @@ function makeModalStyles(c: ThemeColors) {
       borderWidth: 1, borderColor: c.hairline,
     },
   });
+}
+
+function matBadgeBg(tipo: string): object {
+  const map: Record<string, object> = {
+    AULA:     { backgroundColor: '#0B1C35' },
+    TEMPLATE: { backgroundColor: '#FEF3C7' },
+    ARTIGO:   { backgroundColor: '#D1FAE5' },
+  };
+  return map[tipo] ?? { backgroundColor: '#DDD6C8' };
+}
+function matBadgeTx(tipo: string): object {
+  const map: Record<string, object> = {
+    AULA:     { color: '#C9A655' },
+    TEMPLATE: { color: '#92400E' },
+    ARTIGO:   { color: '#065F46' },
+  };
+  return map[tipo] ?? { color: '#666' };
 }
 
 export function InicioScreen() {
@@ -338,10 +356,17 @@ export function InicioScreen() {
         {/* ── Conteúdo principal ── */}
         {plano ? (
           <>
-            {/* Âncora de propósito */}
+            {/* Objetivo Macro desta Semana */}
             <FeatureCard style={s.anchoraCard}>
-              <Text style={s.anchoraEyebrow}>✦ Âncora de propósito</Text>
+              <Text style={s.anchoraEyebrow}>OBJETIVO MACRO DESTA SEMANA</Text>
               <Text style={s.anchoraText}>"{plano.objetivo}"</Text>
+              <Pressable
+                style={s.verPlanoBtn}
+                onPress={() => router.push('/(tabs)/explore' as Parameters<typeof router.push>[0])}
+                accessibilityRole="button"
+              >
+                <Text style={s.verPlanoBtnTx}>Ver plano completo →</Text>
+              </Pressable>
             </FeatureCard>
 
             {/* Princípio da semana */}
@@ -378,31 +403,88 @@ export function InicioScreen() {
                   <Text style={[s.focoBtnText, focusStatus === 'ongoing' && s.focoBtnTextActive]}>◑ Em andamento</Text>
                 </Pressable>
               </View>
+              {/* Botão dourado Jethro — abre mentor com contexto da ação atual */}
               <Pressable
-                style={s.focoLink}
-                onPress={() => router.push('/mentor' as Parameters<typeof router.push>[0])}
-                accessibilityRole="link"
+                style={s.jethroBtn}
+                onPress={() => {
+                  if (acaoPrincipal) {
+                    mentorContext.set(
+                      `Preciso de ajuda com esta ação da Semana ${plano.semanaNumero}: "${acaoPrincipal.texto}"\n\nObjectivo desta semana: ${plano.objetivo}`
+                    );
+                  }
+                  router.push('/(tabs)/mentor');
+                }}
+                accessibilityRole="button"
+                accessibilityLabel="Pedir ajuda ao Jethro com esta ação"
               >
-                <Text style={s.focoLinkText}>Pedir ajuda ao Jethro →</Text>
+                <Text style={s.jethroBtnText}>✦  Jethro, me ajuda com esta ação</Text>
               </Pressable>
             </View>
 
-            {/* Métricas 2:1 */}
-            <View style={s.metricsRow}>
-              <SectionCard style={s.progressoCard}>
-                <EyebrowLabel style={{ marginBottom: 2 }}>Progresso</EyebrowLabel>
-                <Text style={s.metricValue}>{completadas}/{totalTarefas}</Text>
-                <View style={s.metricBar}>
-                  <View style={[s.metricBarFill, { width: `${progressoPct}%` as `${number}%` }]} />
+            {/* Biblioteca do Jethro */}
+            {(plano.materiais_semana && plano.materiais_semana.length > 0) ? (
+              <View style={s.bibCard}>
+                <Text style={s.bibLabelMain}>BIBLIOTECA DO JETHRO</Text>
+                <Text style={s.bibLabelSub}>Materiais recomendados para esta semana</Text>
+                <View style={s.bibDivider} />
+                {plano.materiais_semana.map((mat, idx) => (
+                  <View key={idx}>
+                    <View style={s.bibItem}>
+                      <View style={[s.bibBadge, matBadgeBg(mat.tipo)]}>
+                        <Text style={[s.bibBadgeTx, matBadgeTx(mat.tipo)]}>{mat.tipo}</Text>
+                      </View>
+                      <Text style={s.bibTitulo}>{mat.titulo}</Text>
+                    </View>
+                    {idx < plano.materiais_semana!.length - 1 && <View style={s.bibSep} />}
+                  </View>
+                ))}
+                <View style={s.bibDivider} />
+                <Pressable onPress={() => router.push('/(tabs)/biblioteca' as Parameters<typeof router.push>[0])}>
+                  <Text style={s.bibVerTodos}>Ver todos na Biblioteca →</Text>
+                </Pressable>
+              </View>
+            ) : null}
+
+            {/* Dashboard de progresso — anéis circulares */}
+            <View style={s.dashCard}>
+              <View style={s.ringsRow}>
+                <View style={s.ringWrap}>
+                  <View style={[s.ringOuter, { borderColor: palette.gold500 }]}>
+                    <Text style={s.ringValue}>{completadas}/{totalTarefas}</Text>
+                  </View>
+                  <Text style={s.ringLabel}>Ações semana</Text>
+                  <Text style={s.ringPct}>{progressoPct}%</Text>
                 </View>
-                <Text style={s.metricLabel}>{completadas} ações concluídas</Text>
-              </SectionCard>
-              <SectionCard style={s.sequenciaCard}>
-                <EyebrowLabel style={{ marginBottom: 2 }}>Sequência</EyebrowLabel>
-                <Text style={s.metricValue}>{checkInsCount}</Text>
-                <Text style={s.metricLabel}>dias de trabalho</Text>
-                <Text style={{ fontSize: 18, marginTop: 2 }}>🔥</Text>
-              </SectionCard>
+                <View style={s.ringWrap}>
+                  <View style={[s.ringOuter, { borderColor: palette.gold500 }]}>
+                    <Text style={s.ringValue}>{plano.semanaNumero}/24</Text>
+                  </View>
+                  <Text style={s.ringLabel}>Semanas plano</Text>
+                  <Text style={s.ringPct}>{Math.round((plano.semanaNumero / 24) * 100)}%</Text>
+                </View>
+              </View>
+              {(data?.sparklineConfianca && data.sparklineConfianca.length > 0) ? (
+                <>
+                  <View style={s.dashDivider} />
+                  <View style={s.sparkHeader}>
+                    <Text style={s.sparkTitle}>Confiança — histórico</Text>
+                    <Text style={s.sparkTrend}>▲ crescente</Text>
+                  </View>
+                  <View style={s.sparkRow}>
+                    {data.sparklineConfianca.map((val, idx) => {
+                      const max = Math.max(...(data.sparklineConfianca ?? [1]));
+                      const isLast = idx === (data.sparklineConfianca?.length ?? 1) - 1;
+                      const h = Math.max(4, (val / max) * 28);
+                      return (
+                        <View key={idx} style={s.sparkBarWrap}>
+                          <View style={[s.sparkBar, { height: h, backgroundColor: isLast ? palette.gold500 : '#DDD6C8' }]} />
+                          <Text style={[s.sparkLbl, isLast && { color: palette.gold500 }]}>S{idx + 1}</Text>
+                        </View>
+                      );
+                    })}
+                  </View>
+                </>
+              ) : null}
             </View>
 
             {/* Check-in da Semana */}
@@ -542,7 +624,7 @@ export function InicioScreen() {
       {/* ── FAB ── */}
       <Pressable
         style={s.fab}
-        onPress={() => router.push('/mentor' as Parameters<typeof router.push>[0])}
+        onPress={() => router.push('/(tabs)/mentor')}
         accessibilityLabel="Falar com Jethro"
         accessibilityRole="button"
       >
@@ -598,6 +680,10 @@ function makeStyles(c: ThemeColors) {
     principioTitulo:   { fontFamily: FontFamily.serifMedium, fontSize: 14, color: c.ink, lineHeight: 19, marginBottom: 2 },
     principioSub:      { fontFamily: FontFamily.sansRegular, fontSize: 11, color: c.inkMute, lineHeight: 17 },
 
+    // Âncora / Objetivo Macro
+    verPlanoBtn:    { alignSelf: 'flex-start', backgroundColor: palette.gold500, borderRadius: 6, paddingHorizontal: 10, paddingVertical: 5, marginTop: 10 },
+    verPlanoBtnTx:  { fontFamily: FontFamily.sansBold, fontSize: 10, color: palette.navy800 },
+
     focoCard:       { backgroundColor: c.surface, borderRadius: Radius.md, padding: 16, borderWidth: 1.5, borderColor: palette.gold500, marginBottom: 16, gap: 10, ...getShadow(1) },
     focoTitle:      { fontFamily: FontFamily.serifMedium, fontSize: 17, color: c.ink, lineHeight: 25 },
     focoBtnRow:     { flexDirection: 'row', gap: 8 },
@@ -605,16 +691,37 @@ function makeStyles(c: ThemeColors) {
     focoBtnActive:  { backgroundColor: palette.navy800, borderColor: palette.navy800 },
     focoBtnText:    { fontFamily: FontFamily.sansMedium, fontSize: 13, color: c.inkSoft },
     focoBtnTextActive: { color: palette.paper },
-    focoLink:       { alignItems: 'center', marginTop: 2 },
-    focoLinkText:   { fontFamily: FontFamily.sansRegular, fontSize: 12, color: c.inkMute },
+    jethroBtn:      { backgroundColor: palette.gold500, borderRadius: Radius.xs, paddingVertical: 11, alignItems: 'center' },
+    jethroBtnText:  { fontFamily: FontFamily.sansBold, fontSize: 13, color: palette.navy800 },
 
-    metricsRow:   { flexDirection: 'row', gap: 10, marginBottom: 16 },
-    progressoCard:{ flex: 2, padding: 14, gap: 4 },
-    sequenciaCard:{ flex: 1, padding: 14, gap: 4 },
-    metricValue:  { fontFamily: FontFamily.serifSemiBold, fontSize: 28, color: c.ink },
-    metricLabel:  { fontFamily: FontFamily.sansRegular, fontSize: 11, color: c.inkMute },
-    metricBar:    { height: 3, backgroundColor: c.hairline, borderRadius: 2, overflow: 'hidden', marginTop: 4 },
-    metricBarFill:{ height: '100%', backgroundColor: c.accent, borderRadius: 2 },
+    // Biblioteca do Jethro
+    bibCard:        { backgroundColor: c.surface, borderRadius: Radius.md, padding: 16, marginBottom: 16, ...getShadow(1) },
+    bibLabelMain:   { fontFamily: FontFamily.sansBold, fontSize: 9, letterSpacing: 0.7, textTransform: 'uppercase', color: c.inkMute, marginBottom: 3 },
+    bibLabelSub:    { fontFamily: FontFamily.sansRegular, fontSize: 11, color: c.inkMute, marginBottom: 4 },
+    bibDivider:     { height: 1, backgroundColor: c.hairline, marginVertical: 8 },
+    bibItem:        { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 3 },
+    bibBadge:       { borderRadius: 3, paddingHorizontal: 6, paddingVertical: 2 },
+    bibBadgeTx:     { fontFamily: FontFamily.sansBold, fontSize: 8, textTransform: 'uppercase', letterSpacing: 0.4 },
+    bibTitulo:      { fontFamily: FontFamily.sansSemiBold, fontSize: 12, color: c.ink, flex: 1 },
+    bibSep:         { height: 1, backgroundColor: c.hairline, marginVertical: 4 },
+    bibVerTodos:    { fontFamily: FontFamily.sansBold, fontSize: 11, color: palette.gold500, textAlign: 'center' },
+
+    // Dashboard — anéis
+    dashCard:       { backgroundColor: c.surface, borderRadius: Radius.md, padding: 16, marginBottom: 16, ...getShadow(1) },
+    ringsRow:       { flexDirection: 'row', gap: 12 },
+    ringWrap:       { flex: 1, alignItems: 'center', backgroundColor: c.background, borderRadius: Radius.sm, padding: 12 },
+    ringOuter:      { width: 72, height: 72, borderRadius: 36, borderWidth: 5, justifyContent: 'center', alignItems: 'center', marginBottom: 6 },
+    ringValue:      { fontFamily: FontFamily.serifSemiBold, fontSize: 16, color: c.ink },
+    ringLabel:      { fontFamily: FontFamily.sansBold, fontSize: 10, color: c.ink, textAlign: 'center', marginBottom: 2 },
+    ringPct:        { fontFamily: FontFamily.sansRegular, fontSize: 10, color: c.inkMute },
+    dashDivider:    { height: 1, backgroundColor: c.hairline, marginVertical: 10 },
+    sparkHeader:    { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
+    sparkTitle:     { fontFamily: FontFamily.sansBold, fontSize: 11, color: c.ink },
+    sparkTrend:     { fontFamily: FontFamily.sansBold, fontSize: 9, color: palette.gold500 },
+    sparkRow:       { flexDirection: 'row', alignItems: 'flex-end', gap: 3, height: 40 },
+    sparkBarWrap:   { flex: 1, alignItems: 'center', justifyContent: 'flex-end' },
+    sparkBar:       { width: '100%', borderRadius: 2 },
+    sparkLbl:       { fontFamily: FontFamily.sansRegular, fontSize: 8, color: '#DDD6C8', marginTop: 3 },
 
     andamentoCard:        { marginBottom: 16, padding: 14 },
     andamentoInner:       { flexDirection: 'row', alignItems: 'center', gap: 12 },

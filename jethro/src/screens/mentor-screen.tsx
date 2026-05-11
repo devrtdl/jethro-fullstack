@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -12,8 +12,10 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from 'expo-router';
 
 import { mentorService, type MentorMessage } from '@/src/services/mentor/mentor-service';
+import { mentorContext } from '@/src/lib/mentor-context';
 import { useTheme } from '@/src/theme/ThemeContext';
 import type { ThemeColors } from '@/src/theme/colors';
 import { palette } from '@/src/theme/colors';
@@ -109,6 +111,16 @@ export function MentorScreen() {
     },
     [loading, sessionId]
   );
+
+  // Ref para evitar stale closure no useFocusEffect
+  const sendSugestaoRef = useRef(sendSugestao);
+  useEffect(() => { sendSugestaoRef.current = sendSugestao; }, [sendSugestao]);
+
+  // Ao receber foco, verifica se há uma mensagem pré-preenchida (ex: "Jethro, me ajuda")
+  useFocusEffect(useCallback(() => {
+    const pending = mentorContext.consume();
+    if (pending) void sendSugestaoRef.current(pending);
+  }, []));
 
   const sendMessage = useCallback(async () => {
     const text = input.trim();

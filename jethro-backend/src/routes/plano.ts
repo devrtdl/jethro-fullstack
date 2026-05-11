@@ -4,6 +4,7 @@ import { successResponse } from '../lib/api-response.js';
 import { getDbPool } from '../lib/db.js';
 import { userAuthPreHandler } from '../lib/user-auth.js';
 import { initiateGeneratePlano, getPlanoStatus } from '../domain/plano/service.js';
+import { AppError } from '../lib/errors.js';
 
 
 export async function registerPlanoRoutes(app: FastifyInstance) {
@@ -72,7 +73,7 @@ export async function registerPlanoRoutes(app: FastifyInstance) {
         materiais_biblioteca: string[] | null;
         conteudo_completo: boolean;
         gate_status: string;
-        acoes: { texto: string; ordem: number | null; completada: boolean; tag: string | null }[];
+        acoes: { id: string; texto: string; ordem: number | null; completada: boolean; tag: string | null }[];
       }>(
         `SELECT
            s.id AS semana_id,
@@ -92,6 +93,7 @@ export async function registerPlanoRoutes(app: FastifyInstance) {
            COALESCE(
              json_agg(
                json_build_object(
+                 'id', t.id,
                  'texto', t.texto,
                  'ordem', t.ordem,
                  'completada', t.completada,
@@ -135,5 +137,39 @@ export async function registerPlanoRoutes(app: FastifyInstance) {
         acoes: s.acoes,
       })),
     });
+  });
+
+  /**
+   * PATCH /plano/tarefa/:tarefaId
+   * Marca uma tarefa como completada (ou reverte). A tarefa deve pertencer a um plano do utilizador.
+   */
+  app.patch('/plano/tarefa/:tarefaId', { preHandler: userAuthPreHandler }, async (request) => {
+    const userId = request.userId!;
+    const { tarefaId } = request.params as { tarefaId: string };
+    const { completada } = request.body as { completada: boolean };
+
+    if (typeof completada !== 'boolean') {
+      throw new AppError('Campo "completada" é obrigatório e deve ser boolean.', 400, 'INVALID_BODY');
+    }
+
+    const pool = getDbPool();
+
+    const result = await pool.query<{ id: string }>(
+      `UPDATE tarefas_semana t
+       SET completada = $1, updated_at = now()
+       FROM semanas s
+       JOIN planos_acao pa ON pa.id = s.plano_id
+       WHERE t.id = $2
+         AND t.semana_id = s.id
+         AND pa.user_id = $3
+       RETURNING t.id`,
+      [completada, tarefaId, userId]
+    );
+
+    if (result.rowCount === 0) {
+      throw new AppError('Tarefa não encontrada ou sem permissão.', 404, 'TAREFA_NOT_FOUND');
+    }
+
+    return successResponse({ updated: true, completada });
   });
 }
