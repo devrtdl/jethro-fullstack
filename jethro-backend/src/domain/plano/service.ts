@@ -7,7 +7,7 @@ import { filterAlmaForModel, type AcaoAlma } from '../../lib/alma-filter.js';
 import { AppError } from '../../lib/errors.js';
 
 const MODEL = 'claude-sonnet-4-6';
-const MAX_TOKENS_INITIAL = 8000;
+const MAX_TOKENS_INITIAL = 12000;
 const MAX_TOKENS_SEMANA = 4000;
 const ALMA_VERSION = 'v5.14-doc5-v2';
 const INPUT_COST_PER_MILLION_USD = 3;
