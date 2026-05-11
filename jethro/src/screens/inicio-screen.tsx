@@ -3,14 +3,11 @@ import { mentorContext } from '@/src/lib/mentor-context';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
-  Modal,
   Pressable,
   RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -24,7 +21,6 @@ import { FontFamily } from '@/src/theme/typography';
 import { getShadow, Radius, Spacing } from '@/src/theme/spacing';
 import { EyebrowLabel } from '@/src/components/ui/EyebrowLabel';
 import { PrimaryButton } from '@/src/components/ui/PrimaryButton';
-import { GhostButton } from '@/src/components/ui/GhostButton';
 import { FeatureCard } from '@/src/components/ui/FeatureCard';
 import { SectionCard } from '@/src/components/section-card';
 
@@ -61,92 +57,6 @@ function faseLabel(fase: string): string {
 }
 
 
-type CheckInModalProps = {
-  visible:  boolean;
-  onClose:  () => void;
-  onSubmit: (cumpriu: boolean, nota: string) => void;
-  loading:  boolean;
-};
-
-function CheckInModal({ visible, onClose, onSubmit, loading }: CheckInModalProps) {
-  const { colors } = useTheme();
-  const m = useMemo(() => makeModalStyles(colors), [colors]);
-  const [cumpriu, setCumpriu] = useState<boolean | null>(null);
-  const [nota,    setNota]    = useState('');
-
-  function handleSubmit() {
-    if (cumpriu === null) return;
-    onSubmit(cumpriu, nota);
-    setCumpriu(null);
-    setNota('');
-  }
-
-  return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <Pressable style={m.overlay} onPress={onClose}>
-        <Pressable style={m.sheet} onPress={() => {}}>
-          <View style={m.handle} />
-          <Text style={m.title}>Check-in do dia</Text>
-          <Text style={m.sub}>Registre o seu dia de trabalho. Após 5 dias, o gate de avanço abre.</Text>
-
-          <Text style={m.question}>Cumpri as tarefas de hoje?</Text>
-          <View style={m.yesNoRow}>
-            <Pressable style={[m.yesNoBtn, cumpriu === true  && m.yesNoBtnActive]}   onPress={() => setCumpriu(true)}>
-              <Text style={[m.yesNoText, cumpriu === true  && m.yesNoTextActive]}>✓ Sim</Text>
-            </Pressable>
-            <Pressable style={[m.yesNoBtn, cumpriu === false && m.yesNoBtnActiveNo]} onPress={() => setCumpriu(false)}>
-              <Text style={[m.yesNoText, cumpriu === false && m.yesNoTextActive]}>✗ Não</Text>
-            </Pressable>
-          </View>
-
-          <TextInput
-            style={m.input}
-            placeholder="Nota do dia (opcional)"
-            placeholderTextColor={colors.inkMute}
-            value={nota}
-            onChangeText={setNota}
-            multiline
-            maxLength={300}
-          />
-
-          <PrimaryButton
-            label="Registrar dia"
-            onPress={handleSubmit}
-            loading={loading}
-            disabled={cumpriu === null}
-            accessibilityLabel="Registrar dia de trabalho"
-          />
-        </Pressable>
-      </Pressable>
-    </Modal>
-  );
-}
-
-function makeModalStyles(c: ThemeColors) {
-  return StyleSheet.create({
-    overlay: { flex: 1, backgroundColor: 'rgba(11,31,59,0.55)', justifyContent: 'flex-end' },
-    sheet: {
-      backgroundColor: c.surface, borderTopLeftRadius: 24, borderTopRightRadius: 24,
-      padding: 24, paddingBottom: 40, gap: 0, ...getShadow(2),
-    },
-    handle:           { width: 40, height: 4, backgroundColor: c.hairline, borderRadius: 2, alignSelf: 'center', marginBottom: 20 },
-    title:            { fontFamily: FontFamily.serifSemiBold, fontSize: 20, color: c.ink,    marginBottom: 6 },
-    sub:              { fontFamily: FontFamily.sansRegular,   fontSize: 13, color: c.inkMute, lineHeight: 19, marginBottom: 20 },
-    question:         { fontFamily: FontFamily.sansSemiBold,  fontSize: 15, color: c.ink,    marginBottom: 12 },
-    yesNoRow:         { flexDirection: 'row', gap: 12, marginBottom: 16 },
-    yesNoBtn:         { flex: 1, paddingVertical: 13, borderRadius: Radius.xs, borderWidth: 1.5, borderColor: c.hairline, alignItems: 'center', backgroundColor: c.surface },
-    yesNoBtnActive:   { borderColor: c.accent,   backgroundColor: c.accentMuted },
-    yesNoBtnActiveNo: { borderColor: c.liveRed,  backgroundColor: 'rgba(226,72,60,0.08)' },
-    yesNoText:        { fontFamily: FontFamily.sansSemiBold, fontSize: 15, color: c.inkMute },
-    yesNoTextActive:  { color: c.ink },
-    input: {
-      backgroundColor: c.background, borderRadius: Radius.xs, padding: 14,
-      fontFamily: FontFamily.sansRegular, fontSize: 14, color: c.ink,
-      minHeight: 72, textAlignVertical: 'top', marginBottom: 16,
-      borderWidth: 1, borderColor: c.hairline,
-    },
-  });
-}
 
 const BIBLIOTECA_ITENS: Record<string, { titulo: string }> = {
   P1: { titulo: 'Propósito e Chamado' },
@@ -185,9 +95,6 @@ export function InicioScreen() {
   const [loading,        setLoading]        = useState(true);
   const [refreshing,     setRefreshing]     = useState(false);
   const [generatingPlan, setGeneratingPlan] = useState(false);
-  const [checkInVisible, setCheckInVisible] = useState(false);
-  const [checkInLoading, setCheckInLoading] = useState(false);
-  const [advancingGate,  setAdvancingGate]  = useState(false);
   const [error,          setError]          = useState<string | null>(null);
   const [focusStatus,    setFocusStatus]    = useState<'done' | 'ongoing' | null>(null);
 
@@ -225,64 +132,13 @@ export function InicioScreen() {
     }
   }, [loadData]);
 
-  const handleCheckIn = useCallback(async (cumpriu: boolean, nota: string) => {
-    setCheckInLoading(true);
-    try {
-      const result = await homeService.checkIn(cumpriu, nota);
-      setCheckInVisible(false);
-      if (result.skipped && result.reason === 'already_done_today') {
-        Alert.alert('Já registrado', 'Você já fez o check-in de hoje. Volte amanhã!');
-        return;
-      }
-      await loadData();
-      if (result.gateDesbloqueado) {
-        Alert.alert('🎉 Gate desbloqueado!', 'Você completou 5 dias de trabalho. Pode avançar para a próxima semana!');
-      }
-    } catch {
-      Alert.alert('Erro', 'Não foi possível registrar o check-in.');
-    } finally {
-      setCheckInLoading(false);
-    }
-  }, [loadData]);
-
-  const handleGateAdvance = useCallback(async () => {
-    setAdvancingGate(true);
-    try {
-      const result = await homeService.gateAdvance();
-      if (!result.advanced) {
-        const msg = result.reason === 'insufficient_checkins'
-          ? 'Ainda não há check-ins suficientes para avançar.'
-          : 'Não foi possível avançar.';
-        Alert.alert('Ainda não', msg);
-        return;
-      }
-      await loadData();
-      if (result.programaConcluido) {
-        Alert.alert('🏆 Programa concluído!', 'Você completou as 24 semanas do Programa PBN. Parabéns!');
-      } else {
-        Alert.alert(`Semana ${result.proximaSemana} desbloqueada`, 'Seu plano avançou. Bom trabalho!');
-      }
-    } catch {
-      Alert.alert('Erro', 'Não foi possível avançar o gate.');
-    } finally {
-      setAdvancingGate(false);
-    }
-  }, [loadData]);
-
-  const devocional         = data?.devocional ?? null;
   const plano              = data?.plano      ?? null;
   const onboardingCompleto = data?.onboardingCompleto ?? false;
 
-  const checkInsCount       = plano?.checkInsCount       ?? 0;
-  const checkInsNecessarios = plano?.checkInsNecessarios ?? 5;
-  const todayCheckedIn      = plano?.todayCheckedIn      ?? false;
-  const gateUnlocked        = plano?.gateStatus === 'available' && checkInsCount >= checkInsNecessarios;
-
-  const tarefas         = plano?.tarefas ?? [];
-  const completadas     = tarefas.filter(t => t.completada).length;
-  const totalTarefas    = tarefas.length;
-  const progressoPct    = totalTarefas > 0 ? Math.round((completadas / totalTarefas) * 100) : 0;
-  const acaoPrincipal   = tarefas[0] ?? null;
+  const tarefas       = plano?.tarefas ?? [];
+  const completadas   = tarefas.filter(t => t.completada).length;
+  const totalTarefas  = tarefas.length;
+  const acaoPrincipal = tarefas.find(t => !t.completada) ?? tarefas[0] ?? null;
 
   if (loading) {
     return (
@@ -490,23 +346,6 @@ export function InicioScreen() {
               </View>
             </View>
 
-            {!gateUnlocked && (
-              <GhostButton
-                label={todayCheckedIn ? '✓ Check-in feito hoje' : '+ Registrar dia de trabalho'}
-                onPress={() => setCheckInVisible(true)}
-                disabled={todayCheckedIn}
-                textColor={todayCheckedIn ? colors.success : colors.accent}
-                style={todayCheckedIn ? s.checkInBtnDone : s.checkInBtn}
-              />
-            )}
-
-            {gateUnlocked && (
-              <PrimaryButton
-                label={`Avançar para Semana ${plano.semanaNumero + 1} →`}
-                onPress={() => void handleGateAdvance()}
-                loading={advancingGate}
-              />
-            )}
           </>
         ) : !onboardingCompleto ? (
           <SectionCard style={s.emptyCard}>
@@ -530,19 +369,6 @@ export function InicioScreen() {
           </SectionCard>
         )}
 
-        {/* ── Devocional ── */}
-        {devocional ? (
-          <FeatureCard style={s.devocionalCard}>
-            <Text style={s.devocionalQuoteMark}>"</Text>
-            <View style={s.devocionalHeader}>
-              <EyebrowLabel color={palette.gold500}>Devocional do dia</EyebrowLabel>
-              <Text style={s.devocionalRef}>{devocional.versiculo}</Text>
-            </View>
-            <Text style={s.devocionalVerso}>{devocional.titulo}</Text>
-            <View style={s.divider} />
-            <Text style={s.devocionalReflexao}>{devocional.texto}</Text>
-          </FeatureCard>
-        ) : null}
 
 
         <View style={{ height: 100 }} />
@@ -559,12 +385,6 @@ export function InicioScreen() {
         <Text style={s.fabText}>Falar com Jethro</Text>
       </Pressable>
 
-      <CheckInModal
-        visible={checkInVisible}
-        onClose={() => setCheckInVisible(false)}
-        onSubmit={handleCheckIn}
-        loading={checkInLoading}
-      />
     </SafeAreaView>
   );
 }
@@ -645,21 +465,10 @@ function makeStyles(c: ThemeColors) {
     sparkBar:     { width: '100%', borderRadius: 2 },
     sparkLbl:     { fontFamily: FontFamily.sansRegular, fontSize: 7, color: '#DDD6C8', marginTop: 2 },
 
-    checkInBtn:     { borderColor: c.accent,  marginBottom: 24 },
-    checkInBtnDone: { borderColor: c.success, marginBottom: 24 },
-
     emptyCard:   { marginBottom: 24, alignItems: 'center' },
     emptyTitle:  { fontFamily: FontFamily.serifMedium, fontSize: 16, color: c.ink,     marginBottom: 8 },
     emptyText:   { fontFamily: FontFamily.sansRegular,  fontSize: 13, color: c.inkSoft, lineHeight: 20, textAlign: 'center', marginBottom: 16 },
     generateBtn: { alignSelf: 'stretch' },
-
-    devocionalCard:      { marginBottom: 24, marginTop: 8 },
-    devocionalQuoteMark: { position: 'absolute', top: 10, right: 16, fontFamily: FontFamily.serifSemiBold, fontSize: 80, lineHeight: 80, color: palette.gold500, opacity: 0.18 },
-    devocionalHeader:    { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 },
-    devocionalRef:       { fontFamily: FontFamily.sansRegular, fontSize: 11, color: palette.gold400 },
-    devocionalVerso:     { fontFamily: FontFamily.serifMediumItalic, fontSize: 17, color: palette.paper, lineHeight: 26, marginBottom: 14 },
-    divider:             { height: 1, backgroundColor: palette.goldMuted, marginBottom: 12 },
-    devocionalReflexao:  { fontFamily: FontFamily.sansRegular, fontSize: 13, color: 'rgba(239,239,234,0.60)', lineHeight: 20 },
 
     fab: {
       position: 'absolute', bottom: 24, right: Spacing.screenH,
