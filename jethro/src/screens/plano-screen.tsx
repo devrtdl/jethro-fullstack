@@ -154,15 +154,19 @@ function SemanaDetalhe({ semana, onBack, onWeekAdvanced }: SemanaDetalheProps) {
       </View>
 
       <ScrollView style={s.scroll} contentContainerStyle={s.scrollContent} showsVerticalScrollIndicator={false}>
-        {/* ── Objetivo (sem "Por que importa") ── */}
+        {/* ── Objetivo ── */}
         {aba === 'objetivo' && (
           <View>
             <Text style={s.sectionLabel}>OBJETIVO DA SEMANA</Text>
-            <View style={s.card}><Text style={s.bodyText}>{semana.objetivo}</Text></View>
+            <View style={s.objetivoCard}>
+              <Text style={s.objetivoText}>{semana.objetivo}</Text>
+            </View>
             {semana.indicador_sucesso ? (
               <>
                 <Text style={s.sectionLabel}>INDICADOR DE SUCESSO</Text>
-                <View style={s.cardGold}><Text style={s.bodyText}>{semana.indicador_sucesso}</Text></View>
+                <View style={s.indicadorCard}>
+                  <Text style={s.bodyText}>{semana.indicador_sucesso}</Text>
+                </View>
               </>
             ) : null}
           </View>
@@ -367,6 +371,9 @@ function makeDetalheStyles(c: ThemeColors) {
     scroll:         { flex: 1 },
     scrollContent:  { paddingHorizontal: Spacing.screenH, paddingTop: 16 },
     sectionLabel:   { fontFamily: FontFamily.sansBold, fontSize: 9, color: palette.gold500, letterSpacing: 1.5, textTransform: 'uppercase', marginBottom: 8, marginTop: 4 },
+    objetivoCard:   { backgroundColor: c.surface, borderRadius: Radius.md, padding: 20, marginBottom: 14, borderWidth: StyleSheet.hairlineWidth, borderColor: c.hairline, ...getShadow(1) },
+    objetivoText:   { fontFamily: FontFamily.sansRegular, fontSize: 15, color: c.ink, lineHeight: 24 },
+    indicadorCard:  { backgroundColor: c.surface, borderRadius: Radius.md, padding: 20, marginBottom: 14, borderWidth: StyleSheet.hairlineWidth, borderColor: c.hairline, borderLeftWidth: 3, borderLeftColor: palette.gold500, ...getShadow(1) },
     card:           { backgroundColor: c.surface, borderRadius: Radius.md, padding: 16, marginBottom: 12, borderWidth: StyleSheet.hairlineWidth, borderColor: c.hairline, ...getShadow(1) },
     cardGold:       { backgroundColor: c.surface, borderRadius: Radius.md, padding: 16, marginBottom: 12, borderLeftWidth: 3, borderLeftColor: palette.gold500, borderWidth: StyleSheet.hairlineWidth, borderColor: c.hairline, ...getShadow(1) },
     bodyText:       { fontFamily: FontFamily.sansRegular, fontSize: 14, color: c.ink, lineHeight: 22 },
@@ -469,10 +476,13 @@ function BlocoAccordion({
   const { colors } = useTheme();
   const s = useMemo(() => makeAccordionStyles(colors), [colors]);
 
-  const rangeLabel = `Semana ${String(bloco.range[0]).padStart(2,'0')}–${String(bloco.range[1]).padStart(2,'0')}`;
+  const r0 = String(bloco.range[0]).padStart(2, '0');
+  const r1 = String(bloco.range[1]).padStart(2, '0');
+  const rangeLabel = `Semana ${r0}–${r1}`;
 
   return (
     <View style={s.wrap}>
+      {/* ── Header do bloco ── */}
       <Pressable
         style={[s.header, aberto && s.headerOpen]}
         onPress={onToggle}
@@ -480,51 +490,92 @@ function BlocoAccordion({
         accessibilityState={{ expanded: aberto }}
       >
         <View style={{ flex: 1 }}>
-          <View style={s.headerTop}>
-            <Text style={[s.blocoLabel, aberto && s.blocoLabelOpen]}>Fase {index + 1}</Text>
-            <View style={[s.badge, { backgroundColor: BADGE_COLORS[bloco.titulo]?.bg ?? 'rgba(11,31,59,0.08)' }]}>
-              <Text style={[s.badgeText, { color: BADGE_COLORS[bloco.titulo]?.text ?? palette.navy800 }]}>{bloco.titulo}</Text>
+          {aberto ? (
+            // Expandido: "Fase N" + badge pill
+            <View style={s.headerTop}>
+              <Text style={s.blocoLabelOpen}>Fase {index + 1}</Text>
+              <View style={s.badgeOpen}>
+                <Text style={s.badgeOpenTx}>{bloco.titulo.toUpperCase()}</Text>
+              </View>
             </View>
-          </View>
+          ) : (
+            // Colapsado: "Fase N · NomeFase" inline
+            <Text style={s.blocoLabelClosed}>Fase {index + 1} · {bloco.titulo}</Text>
+          )}
           <Text style={[s.blocoTitulo, aberto && s.blocoTituloOpen]}>{bloco.titulo}</Text>
           <Text style={[s.blocoMeta, aberto && s.blocoMetaOpen]}>{rangeLabel} · {bloco.versiculo}</Text>
         </View>
         <Text style={[s.chevron, aberto && s.chevronOpen]}>{aberto ? '∧' : '∨'}</Text>
       </Pressable>
 
+      {/* ── Lista de semanas (apenas quando expandido) ── */}
       {aberto && (
         <View style={s.semanasList}>
-          {bloco.semanas.map((semana, i) => {
-            const ativa = isAtiva(semana);
-            const emAndamento = semana.gate_status === 'available';
-            const concluidas = emAndamento ? semana.acoes.filter(a => a.completada).length : 0;
-            const totalAcoes  = emAndamento ? semana.acoes.length : 0;
-            const pct = totalAcoes > 0 ? Math.round((concluidas / totalAcoes) * 100) : 0;
-            return (
-              <Pressable
-                key={semana.numero}
-                style={[s.semanaRow, i > 0 && s.semanaRowBorder, !ativa && s.semanaRowLocked]}
-                onPress={() => ativa && onSemanaPress(semana)}
-                disabled={!ativa}
-                accessibilityRole="button"
-                accessibilityState={{ disabled: !ativa }}
-              >
-                <View style={{ flex: 1 }}>
-                  <Text style={s.semanaNum}>Semana {String(semana.numero).padStart(2,'0')}</Text>
-                  <Text style={s.semanaTitulo}>{semana.titulo ?? `Semana ${semana.numero}`}</Text>
-                  {emAndamento && totalAcoes > 0 && (
-                    <View style={s.progressWrap}>
-                      <View style={s.progressTrack}>
-                        <View style={[s.progressFill, { width: `${pct}%` as `${number}%` }]} />
+          {bloco.semanas.map((semana) => {
+            const num = String(semana.numero).padStart(2, '0');
+            const titulo = semana.titulo ?? `Semana ${num}`;
+
+            if (semana.gate_status === 'available') {
+              // Semana ATIVA — card creme com progresso
+              const concluidas = semana.acoes.filter(a => a.completada).length;
+              const total      = semana.acoes.length;
+              const pct        = total > 0 ? Math.round((concluidas / total) * 100) : 0;
+              return (
+                <Pressable
+                  key={semana.numero}
+                  style={s.semanaAtiva}
+                  onPress={() => onSemanaPress(semana)}
+                  accessibilityRole="button"
+                >
+                  <View style={{ flex: 1 }}>
+                    <View style={s.semanaAtivaTop}>
+                      <Text style={s.semanaAtivaNum}>Semana {num}</Text>
+                      <View style={s.ativaBadge}>
+                        <Text style={s.ativaBadgeTx}>ATIVA</Text>
                       </View>
-                      <Text style={s.progressLabel}>{concluidas} de {totalAcoes} ações · {pct}%</Text>
                     </View>
-                  )}
-                </View>
-                <Text style={[s.semanaIcon, ativa && s.semanaIconAtiva]}>
-                  {ativa ? '→' : '🔒'}
+                    <Text style={s.semanaAtivaTitulo}>{titulo}</Text>
+                    {total > 0 && (
+                      <View style={s.progressWrap}>
+                        <Text style={s.progressLabel}>{concluidas} de {total} ações concluídas · {pct}%</Text>
+                        <View style={s.progressTrack}>
+                          <View style={[s.progressFill, { width: `${pct}%` as `${number}%` }]} />
+                        </View>
+                      </View>
+                    )}
+                  </View>
+                  <Text style={s.semanaAtivaArrow}>→</Text>
+                </Pressable>
+              );
+            }
+
+            if (semana.gate_status === 'completed') {
+              // Semana CONCLUÍDA — linha compacta com ✓
+              return (
+                <Pressable
+                  key={semana.numero}
+                  style={s.semanaCompact}
+                  onPress={() => onSemanaPress(semana)}
+                  accessibilityRole="button"
+                >
+                  <Text style={s.semanaCompactTx}>
+                    <Text style={s.semanaCompactNum}>Semana {num}</Text>
+                    {' · '}{titulo}
+                  </Text>
+                  <Text style={s.semanaCompactCheck}>✓</Text>
+                </Pressable>
+              );
+            }
+
+            // Semana BLOQUEADA — linha compacta com cadeado
+            return (
+              <View key={semana.numero} style={s.semanaLocked}>
+                <Text style={s.semanaLockedTx} numberOfLines={1}>
+                  <Text style={s.semanaLockedNum}>Semana {num}</Text>
+                  {' · '}{titulo}
                 </Text>
-              </Pressable>
+                <Text style={s.semanaLockedIcon}>🔒</Text>
+              </View>
             );
           })}
         </View>
@@ -533,42 +584,57 @@ function BlocoAccordion({
   );
 }
 
-const BADGE_COLORS: Record<string, { bg: string; text: string }> = {
-  Fundamento:  { bg: 'rgba(212,175,55,0.15)',  text: '#7A5A10' },
-  Estrutura:   { bg: 'rgba(11,31,59,0.10)',    text: palette.navy800 },
-  Controle:    { bg: 'rgba(59,95,203,0.12)',   text: '#1A3A8F' },
-  Crescimento: { bg: 'rgba(39,120,58,0.12)',   text: '#1A5E2C' },
-  Legado:      { bg: 'rgba(120,39,90,0.12)',   text: '#6B1D52' },
-};
-
 function makeAccordionStyles(c: ThemeColors) {
   return StyleSheet.create({
-    wrap:              { marginBottom: 10 },
-    header:            { padding: 16, backgroundColor: c.surface, borderRadius: Radius.md, flexDirection: 'row', alignItems: 'center', borderWidth: StyleSheet.hairlineWidth, borderColor: c.hairline, ...getShadow(1) },
-    headerOpen:        { backgroundColor: palette.navy800, borderRadius: Radius.md, borderBottomLeftRadius: 0, borderBottomRightRadius: 0, borderColor: palette.navy800 },
-    headerTop:         { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4 },
-    blocoLabel:        { fontFamily: FontFamily.sansRegular, fontSize: 11, color: c.inkMute },
-    blocoLabelOpen:    { color: 'rgba(212,175,55,0.70)' },
-    badge:             { borderRadius: Radius.pill, paddingHorizontal: 10, paddingVertical: 3 },
-    badgeText:         { fontFamily: FontFamily.sansMedium, fontSize: 10, letterSpacing: 0.5, textTransform: 'uppercase' },
-    blocoTitulo:       { fontFamily: FontFamily.serifMedium, fontSize: 16, color: c.ink, marginBottom: 2 },
-    blocoTituloOpen:   { color: palette.paper },
-    blocoMeta:         { fontFamily: FontFamily.sansRegular, fontSize: 11, color: c.inkMute },
-    blocoMetaOpen:     { color: 'rgba(239,239,234,0.50)' },
-    chevron:           { fontFamily: FontFamily.sansRegular, fontSize: 16, color: c.inkMute, marginLeft: 8 },
-    chevronOpen:       { color: palette.gold500 },
-    semanasList:       { backgroundColor: c.surface, borderBottomLeftRadius: Radius.md, borderBottomRightRadius: Radius.md, borderWidth: StyleSheet.hairlineWidth, borderTopWidth: 0, borderColor: c.hairline, overflow: 'hidden' },
-    semanaRow:         { flexDirection: 'row', alignItems: 'center', padding: 14 },
-    semanaRowBorder:   { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: c.hairline },
-    semanaRowLocked:   { opacity: 0.45 },
-    semanaNum:         { fontFamily: FontFamily.sansRegular, fontSize: 11, color: c.inkMute, marginBottom: 2 },
-    semanaTitulo:      { fontFamily: FontFamily.sansRegular, fontSize: 14, color: c.ink },
-    semanaIcon:        { fontFamily: FontFamily.sansRegular, fontSize: 14, color: c.inkMute },
-    semanaIconAtiva:   { color: palette.gold500 },
-    progressWrap:      { marginTop: 6, gap: 4 },
-    progressTrack:     { height: 3, backgroundColor: c.hairline, borderRadius: 2, overflow: 'hidden' },
-    progressFill:      { height: 3, backgroundColor: palette.gold500, borderRadius: 2 },
-    progressLabel:     { fontFamily: FontFamily.sansRegular, fontSize: 10, color: c.inkMute },
+    wrap:            { marginBottom: 10 },
+
+    // ── Header colapsado / expandido ────────────────────────────────────────
+    header:          { padding: 16, backgroundColor: c.surface, borderRadius: Radius.md, flexDirection: 'row', alignItems: 'center', borderWidth: StyleSheet.hairlineWidth, borderColor: c.hairline, ...getShadow(1) },
+    headerOpen:      { backgroundColor: palette.navy800, borderRadius: Radius.md, borderBottomLeftRadius: 0, borderBottomRightRadius: 0, borderColor: palette.navy800 },
+
+    // Colapsado: "Fase N · NomeFase"
+    blocoLabelClosed: { fontFamily: FontFamily.sansRegular, fontSize: 11, color: c.inkMute, marginBottom: 4 },
+    // Expandido: "Fase N" (ouro, subtil)
+    headerTop:        { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4 },
+    blocoLabelOpen:   { fontFamily: FontFamily.sansRegular, fontSize: 11, color: 'rgba(212,175,55,0.70)' },
+    // Badge pill só no expandido
+    badgeOpen:        { borderRadius: Radius.pill, paddingHorizontal: 10, paddingVertical: 3, borderWidth: 1, borderColor: 'rgba(201,166,85,0.50)' },
+    badgeOpenTx:      { fontFamily: FontFamily.sansBold, fontSize: 9, color: palette.gold500, letterSpacing: 1 },
+
+    blocoTitulo:      { fontFamily: FontFamily.serifSemiBold, fontSize: 18, color: c.ink, marginBottom: 3 },
+    blocoTituloOpen:  { color: palette.paper },
+    blocoMeta:        { fontFamily: FontFamily.sansRegular, fontSize: 11, color: c.inkMute },
+    blocoMetaOpen:    { color: 'rgba(239,239,234,0.50)' },
+    chevron:          { fontFamily: FontFamily.sansRegular, fontSize: 16, color: c.inkMute, marginLeft: 8 },
+    chevronOpen:      { color: palette.gold500 },
+
+    // ── Container de semanas ────────────────────────────────────────────────
+    semanasList:      { borderBottomLeftRadius: Radius.md, borderBottomRightRadius: Radius.md, borderWidth: StyleSheet.hairlineWidth, borderTopWidth: 0, borderColor: c.hairline, overflow: 'hidden', backgroundColor: c.surface },
+
+    // Semana ATIVA — fundo creme, borda dourada
+    semanaAtiva:      { backgroundColor: '#FFFBEB', padding: 14, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: c.hairline, flexDirection: 'row', alignItems: 'center', gap: 10 },
+    semanaAtivaTop:   { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4 },
+    semanaAtivaNum:   { fontFamily: FontFamily.sansBold, fontSize: 10, color: palette.gold500, letterSpacing: 0.5 },
+    ativaBadge:       { backgroundColor: '#FEF3C7', borderRadius: Radius.pill, paddingHorizontal: 8, paddingVertical: 2 },
+    ativaBadgeTx:     { fontFamily: FontFamily.sansBold, fontSize: 8, color: '#92400E', letterSpacing: 0.5 },
+    semanaAtivaTitulo:{ fontFamily: FontFamily.serifSemiBold, fontSize: 15, color: c.ink, lineHeight: 21, marginBottom: 6 },
+    semanaAtivaArrow: { fontFamily: FontFamily.sansRegular, fontSize: 18, color: palette.gold500, flexShrink: 0 },
+    progressWrap:     { gap: 4 },
+    progressLabel:    { fontFamily: FontFamily.sansRegular, fontSize: 10, color: c.inkMute },
+    progressTrack:    { height: 3, backgroundColor: c.hairline, borderRadius: 2, overflow: 'hidden' },
+    progressFill:     { height: 3, backgroundColor: palette.gold500, borderRadius: 2 },
+
+    // Semana CONCLUÍDA — linha compacta com ✓
+    semanaCompact:    { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, paddingVertical: 11, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: c.hairline },
+    semanaCompactTx:  { flex: 1, fontFamily: FontFamily.sansRegular, fontSize: 13, color: c.inkSoft },
+    semanaCompactNum: { fontFamily: FontFamily.sansSemiBold, fontSize: 13, color: c.inkSoft },
+    semanaCompactCheck:{ fontFamily: FontFamily.sansBold, fontSize: 13, color: palette.gold500, marginLeft: 8 },
+
+    // Semana BLOQUEADA — linha compacta com cadeado
+    semanaLocked:     { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, paddingVertical: 11, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: c.hairline, opacity: 0.45 },
+    semanaLockedTx:   { flex: 1, fontFamily: FontFamily.sansRegular, fontSize: 13, color: c.inkMute },
+    semanaLockedNum:  { fontFamily: FontFamily.sansSemiBold, fontSize: 13, color: c.inkMute },
+    semanaLockedIcon: { fontSize: 13, marginLeft: 8 },
   });
 }
 
@@ -604,12 +670,13 @@ export function PlanoScreen() {
     );
   }
 
-  const blocos: BlocoData[] = BLOCOS.map(b => ({
-    titulo:    b.titulo,
-    range:     b.range,
-    versiculo: b.versiculo,
-    semanas:   (plano?.semanas ?? []).filter(s => s.numero >= b.range[0] && s.numero <= b.range[1]),
-  }));
+  const blocos: BlocoData[] = BLOCOS.map(b => {
+    const semanasDoBloco = (plano?.semanas ?? []).filter(s => s.numero >= b.range[0] && s.numero <= b.range[1]);
+    // Usa o bloco/tag da primeira semana gerada (título personalizado pelo Claude) ou o hardcoded
+    const primeiraAtiva  = semanasDoBloco.find(s => s.gate_status === 'available' || s.gate_status === 'completed');
+    const titulo = primeiraAtiva?.bloco ?? semanasDoBloco[0]?.bloco ?? semanasDoBloco[0]?.tag ?? b.titulo;
+    return { titulo, range: b.range, versiculo: b.versiculo, semanas: semanasDoBloco };
+  });
 
   return (
     <SafeAreaView style={s.safe} edges={['top']}>
