@@ -21,6 +21,7 @@ import { diagnosticService } from '@/src/services/diagnostic/diagnostic-service'
 import { useTheme } from '@/src/theme/ThemeContext';
 import type { ThemeColors } from '@/src/theme/colors';
 import { palette } from '@/src/theme/colors';
+import { FontFamily } from '@/src/theme/typography';
 import type { FormQuestion, JsonValue, QuestionOption } from '@/src/types/diagnostic-form';
 
 const phoneCountries = [
@@ -583,8 +584,8 @@ function makeStyles(c: ThemeColors) {
     diagVersiculoGoldRef:      { fontFamily: 'Inter_500Medium', fontSize: 11, color: c.accent },
     diagVersiculoGoldContexto: { fontSize: 13, color: c.inkMute, lineHeight: 22 },
     diagDataLabel:             { fontSize: 11, color: c.inkMute },
-    diagCtaGold:               { alignItems: 'center', justifyContent: 'center', borderRadius: 16, backgroundColor: c.accent, minHeight: 54, paddingHorizontal: 18 },
-    diagCtaGoldLabel:          { fontFamily: 'CormorantGaramond_500Medium', fontSize: 16, fontWeight: '600', color: palette.navy800, letterSpacing: 1 },
+    diagCtaGold:               { alignItems: 'center', justifyContent: 'center', borderRadius: 16, backgroundColor: c.accent, minHeight: 54, paddingHorizontal: 20 },
+    diagCtaGoldLabel:          { fontFamily: FontFamily.sansBold, fontSize: 13, color: palette.navy800, letterSpacing: 0.5, textTransform: 'uppercase' },
 
     input: {
       borderRadius: 16, backgroundColor: c.surface, borderWidth: 1, borderColor: c.accentMuted,
@@ -593,9 +594,9 @@ function makeStyles(c: ThemeColors) {
     textarea:   { minHeight: 120 },
     inputError: { borderColor: c.liveRed },
 
-    primaryButton:         { alignItems: 'center', justifyContent: 'center', borderRadius: 16, backgroundColor: c.accent, minHeight: 54, paddingHorizontal: 18 },
+    primaryButton:         { alignItems: 'center', justifyContent: 'center', borderRadius: 16, backgroundColor: c.accent, minHeight: 54, paddingHorizontal: 20 },
     primaryButtonDisabled: { opacity: 0.7 },
-    primaryButtonLabel:    { color: palette.navy800, fontSize: 15, fontWeight: '800' },
+    primaryButtonLabel:    { fontFamily: FontFamily.sansBold, fontSize: 15, color: palette.navy800 },
 
     secondaryButton:      { alignItems: 'center', justifyContent: 'center', borderRadius: 16, borderWidth: 1, borderColor: c.accentMuted, minHeight: 54, paddingHorizontal: 18, backgroundColor: c.surface },
     secondaryButtonLabel: { color: c.ink, fontSize: 15, fontWeight: '700' },
