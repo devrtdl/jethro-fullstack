@@ -402,7 +402,6 @@ export function HomeScreen() {
                   </View>
                 ) : null}
 
-                <Text style={s.diagDataLabel}>Gerado em {formatDate(diagnostic.submitResult.diagnostic.generatedAt)}.</Text>
                 <Pressable style={s.primaryButton} onPress={() => setResultStep('block2')}>
                   <Text style={s.primaryButtonLabel}>Ir para a parte final do diagnóstico →</Text>
                 </Pressable>
@@ -413,7 +412,6 @@ export function HomeScreen() {
             ) : resultStep === 'block2' ? (
               <>
                 <Text style={s.diagEyebrowGold}>Resultado do diagnóstico</Text>
-                <Text style={s.diagEyebrowMuted}>Precipício</Text>
                 <Text style={s.diagTitulo}>{diagnostic.submitResult.diagnostic.block2Title}</Text>
                 <Text style={s.diagParagrafo}>{diagnostic.submitResult.diagnostic.block2Body}</Text>
 
@@ -425,7 +423,6 @@ export function HomeScreen() {
                   </View>
                 ) : null}
 
-                <Text style={s.diagDataLabel}>Gerado em {formatDate(diagnostic.submitResult.diagnostic.generatedAt)}.</Text>
                 <Pressable style={s.diagCtaGold} onPress={() => homeRouter.replace('/paywall' as never)}>
                   <Text style={s.diagCtaGoldLabel}>{diagnostic.submitResult.diagnostic.ctaLabel ?? 'QUERO MEU PLANO DE AÇÃO'}</Text>
                 </Pressable>
