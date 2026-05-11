@@ -9,6 +9,9 @@ export type Devocional = {
 
 export type Acao = {
   texto: string;
+  titulo?: string | null;
+  descricao?: string | null;
+  concluida_quando?: string | null;
   ordem: number | null;
   completada: boolean;
   tag: string | null;

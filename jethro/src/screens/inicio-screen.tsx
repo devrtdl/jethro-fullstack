@@ -58,14 +58,44 @@ function faseLabel(fase: string): string {
 
 
 
-const BIBLIOTECA_ITENS: Record<string, { titulo: string }> = {
-  P1: { titulo: 'Propósito e Chamado' },
-  P2: { titulo: 'Gestão Financeira' },
-  P3: { titulo: 'Precificação Bíblica' },
-  P4: { titulo: 'Vendas com Integridade' },
-  P5: { titulo: 'Liderança e Equipe' },
-  P6: { titulo: 'Processos e Sistemas' },
-  P7: { titulo: 'Visão e Legado' },
+type BibliotecaItem = { tipo: 'AULA' | 'TEMPLATE' | 'ARTIGO'; titulo: string };
+
+const BIBLIOTECA_CONTEUDO: Record<string, BibliotecaItem[]> = {
+  P1: [
+    { tipo: 'AULA',     titulo: 'Definindo Seu Propósito Empresarial' },
+    { tipo: 'ARTIGO',   titulo: 'O Empresário Cristão e Seu Chamado' },
+    { tipo: 'TEMPLATE', titulo: 'Manifesto de Propósito do Negócio' },
+  ],
+  P2: [
+    { tipo: 'AULA',     titulo: 'DRE Simplificado para Pequenas Empresas' },
+    { tipo: 'TEMPLATE', titulo: 'Planilha de Fluxo de Caixa Mensal' },
+    { tipo: 'ARTIGO',   titulo: 'Separando Finanças Pessoais das Empresariais' },
+  ],
+  P3: [
+    { tipo: 'AULA',     titulo: 'Precificação com Justiça e Margem Real' },
+    { tipo: 'TEMPLATE', titulo: 'Calculadora de Preço Justo' },
+    { tipo: 'ARTIGO',   titulo: 'Por Que Cobrar Pouco É um Erro Espiritual' },
+  ],
+  P4: [
+    { tipo: 'AULA',     titulo: 'Processo de Venda que Honra o Cliente' },
+    { tipo: 'TEMPLATE', titulo: 'Script de Proposta de Valor' },
+    { tipo: 'ARTIGO',   titulo: 'Persuasão vs Manipulação: A Linha Bíblica' },
+  ],
+  P5: [
+    { tipo: 'AULA',     titulo: 'Como Delegar com Autoridade e Confiança' },
+    { tipo: 'TEMPLATE', titulo: 'Manual de Onboarding para Equipe' },
+    { tipo: 'ARTIGO',   titulo: 'O Líder que Multiplica, não Centraliza' },
+  ],
+  P6: [
+    { tipo: 'AULA',     titulo: 'Mapeamento de Processos Essenciais' },
+    { tipo: 'TEMPLATE', titulo: 'Checklist de Rotinas Operacionais' },
+    { tipo: 'ARTIGO',   titulo: 'Negócio que Funciona Sem Você' },
+  ],
+  P7: [
+    { tipo: 'AULA',     titulo: 'Construindo uma Visão de 10 Anos' },
+    { tipo: 'TEMPLATE', titulo: 'Canvas de Legado Empresarial' },
+    { tipo: 'ARTIGO',   titulo: 'Mateus 25:21 — O Padrão do Legado Fiel' },
+  ],
 };
 
 function matBadgeBg(tipo: string): object {
@@ -260,44 +290,34 @@ export function InicioScreen() {
 
             {/* ⑤ Biblioteca do Jethro */}
             {(() => {
+              // Monta lista de itens reais (AULA/TEMPLATE/ARTIGO)
+              // Fonte prioritária: materiais_semana do plano (gerado pelo Claude para esta semana)
+              // Fallback: pega 1 item de cada pilar sugerido (materiais_biblioteca) ou do pilar atual
               const matSemana = plano.materiais_semana ?? [];
-              let matBiblioteca = (plano.materiais_biblioteca ?? []).slice(0, 3);
-              // fallback: usa pilar da semana se não há materiais específicos
-              if (matSemana.length === 0 && matBiblioteca.length === 0 && plano.pilar) {
-                matBiblioteca = [plano.pilar];
-              }
+              const pilaresRef = (plano.materiais_biblioteca ?? []).length > 0
+                ? (plano.materiais_biblioteca ?? []).slice(0, 3)
+                : plano.pilar ? [plano.pilar] : [];
+
+              const itensFinais: BibliotecaItem[] = matSemana.length > 0
+                ? matSemana.map((m) => ({ tipo: m.tipo, titulo: m.titulo } as BibliotecaItem))
+                : pilaresRef.flatMap((pid) => (BIBLIOTECA_CONTEUDO[pid] ?? []).slice(0, 1));
+
               return (
                 <View style={s.bibCard}>
                   <Text style={s.bibLabelMain}>BIBLIOTECA DO JETHRO</Text>
                   <Text style={s.bibLabelSub}>Materiais recomendados para esta semana</Text>
                   <View style={s.bibDivider} />
-                  {matSemana.length > 0
-                    ? matSemana.map((mat, idx) => (
-                        <View key={idx}>
-                          <View style={s.bibItem}>
-                            <View style={[s.bibBadge, matBadgeBg(mat.tipo)]}>
-                              <Text style={[s.bibBadgeTx, matBadgeTx(mat.tipo)]}>{mat.tipo}</Text>
-                            </View>
-                            <Text style={s.bibTitulo}>{mat.titulo}</Text>
-                          </View>
-                          {idx < matSemana.length - 1 && <View style={s.bibSep} />}
+                  {itensFinais.map((item, idx) => (
+                    <View key={idx}>
+                      <View style={s.bibItem}>
+                        <View style={[s.bibBadge, matBadgeBg(item.tipo)]}>
+                          <Text style={[s.bibBadgeTx, matBadgeTx(item.tipo)]}>{item.tipo}</Text>
                         </View>
-                      ))
-                    : matBiblioteca.map((pilarId, idx) => {
-                        const item = BIBLIOTECA_ITENS[pilarId];
-                        if (!item) return null;
-                        return (
-                          <View key={pilarId}>
-                            <View style={s.bibItem}>
-                              <View style={[s.bibBadge, { backgroundColor: '#0B1C35' }]}>
-                                <Text style={[s.bibBadgeTx, { color: '#C9A655' }]}>{pilarId}</Text>
-                              </View>
-                              <Text style={s.bibTitulo}>{item.titulo}</Text>
-                            </View>
-                            {idx < matBiblioteca.length - 1 && <View style={s.bibSep} />}
-                          </View>
-                        );
-                      })}
+                        <Text style={s.bibTitulo}>{item.titulo}</Text>
+                      </View>
+                      {idx < itensFinais.length - 1 && <View style={s.bibSep} />}
+                    </View>
+                  ))}
                   <View style={s.bibDivider} />
                   <Pressable onPress={() => router.push('/(tabs)/biblioteca' as Parameters<typeof router.push>[0])}>
                     <Text style={s.bibVerTodos}>Ver todos na Biblioteca →</Text>

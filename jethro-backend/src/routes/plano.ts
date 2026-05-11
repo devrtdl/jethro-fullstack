@@ -73,7 +73,7 @@ export async function registerPlanoRoutes(app: FastifyInstance) {
         materiais_biblioteca: string[] | null;
         conteudo_completo: boolean;
         gate_status: string;
-        acoes: { id: string; texto: string; ordem: number | null; completada: boolean; tag: string | null }[];
+        acoes: { id: string; texto: string; titulo: string | null; descricao: string | null; concluida_quando: string | null; ordem: number | null; completada: boolean; tag: string | null }[];
       }>(
         `SELECT
            s.id AS semana_id,
@@ -95,6 +95,9 @@ export async function registerPlanoRoutes(app: FastifyInstance) {
                json_build_object(
                  'id', t.id,
                  'texto', t.texto,
+                 'titulo', t.titulo,
+                 'descricao', t.descricao,
+                 'concluida_quando', t.concluida_quando,
                  'ordem', t.ordem,
                  'completada', t.completada,
                  'tag', t.tag
