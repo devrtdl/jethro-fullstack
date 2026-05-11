@@ -81,11 +81,16 @@ export async function registerUserRoutes(app: FastifyInstance) {
           bloco: string | null;
           tag: string | null;
           objetivo: string;
+          versiculo_ancora: string | null;
+          versiculo_texto: string | null;
+          materiais_biblioteca: string[] | null;
           gate_status: string;
           avancou_em: string | null;
         }>(
           `SELECT pa.id AS plano_id, s.id AS semana_id, s.numero AS semana_numero,
-                  s.fase, s.pilar, s.bloco, s.tag, s.objetivo, gs.gate_status, gs.avancou_em
+                  s.fase, s.pilar, s.bloco, s.tag, s.objetivo,
+                  s.versiculo_ancora, s.versiculo_texto, s.materiais_biblioteca,
+                  gs.gate_status, gs.avancou_em
            FROM planos_acao pa
            JOIN (
              SELECT id FROM onboarding_sessions
@@ -153,6 +158,22 @@ export async function registerUserRoutes(app: FastifyInstance) {
 
     const horasRegistradas = checkInData.count * 24;
 
+    // Sparkline: confiança histórica das semanas já concluídas (até 7 valores)
+    const sparklineConfianca = planoRow
+      ? await pool
+          .query<{ confianca: number }>(
+            `SELECT cis.confianca
+             FROM check_ins_semanais cis
+             JOIN semanas s ON s.id = cis.semana_id
+             JOIN gates_semanais gs ON gs.semana_id = s.id AND gs.user_id = cis.user_id
+             WHERE cis.user_id = $1 AND s.plano_id = $2
+             ORDER BY s.numero ASC
+             LIMIT 7`,
+            [userId, planoRow.plano_id]
+          )
+          .then((r) => r.rows.map((row) => row.confianca))
+      : [];
+
     return successResponse({
       modelo,
       devocional: devocionalRow,
@@ -164,6 +185,9 @@ export async function registerUserRoutes(app: FastifyInstance) {
             bloco: planoRow.bloco,
             tag: planoRow.tag,
             objetivo: planoRow.objetivo,
+            versiculo_ancora: planoRow.versiculo_ancora,
+            versiculo_texto: planoRow.versiculo_texto,
+            materiais_biblioteca: planoRow.materiais_biblioteca,
             gateStatus: planoRow.gate_status,
             horasRegistradas,
             horasNecessarias: 120,
@@ -181,6 +205,7 @@ export async function registerUserRoutes(app: FastifyInstance) {
           }
         : null,
       onboardingCompleto: !!onboardingRow,
+      sparklineConfianca: sparklineConfianca.length > 0 ? sparklineConfianca : null,
     });
   });
 

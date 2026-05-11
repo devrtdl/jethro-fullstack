@@ -14,7 +14,6 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
 
 import { useAuthSession } from '@/src/hooks/use-auth-session';
 import { homeService, type HomeData } from '@/src/services/home/home-service';
@@ -29,17 +28,6 @@ import { GhostButton } from '@/src/components/ui/GhostButton';
 import { FeatureCard } from '@/src/components/ui/FeatureCard';
 import { SectionCard } from '@/src/components/section-card';
 
-const MODELO_TITULOS: Record<string, string> = {
-  A: 'Negócio Sem Rumo — Várias Frentes Abertas',
-  B: 'Base Sólida, Faturamento Estagnado',
-  C: 'Entrega Bem, Cobra Mal',
-  D: 'Fatura, Mas Não Sobra',
-  E: 'Começou, Mas o Mercado Ainda Não Respondeu',
-  F: 'Vende Bem, Mas Não Sabe Trazer o Próximo Cliente',
-  G: 'A Operação Não Aguenta Crescer',
-  H: 'Sem Você, Nada Anda',
-  X: 'Pronto para Escalar — Negócio Funcional em Ascensão',
-};
 
 function getUserDisplayName(session: { user?: { user_metadata?: { full_name?: string; name?: string }; email?: string } } | null): string {
   const meta = session?.user?.user_metadata;
@@ -160,6 +148,16 @@ function makeModalStyles(c: ThemeColors) {
   });
 }
 
+const BIBLIOTECA_ITENS: Record<string, { titulo: string }> = {
+  P1: { titulo: 'Propósito e Chamado' },
+  P2: { titulo: 'Gestão Financeira' },
+  P3: { titulo: 'Precificação Bíblica' },
+  P4: { titulo: 'Vendas com Integridade' },
+  P5: { titulo: 'Liderança e Equipe' },
+  P6: { titulo: 'Processos e Sistemas' },
+  P7: { titulo: 'Visão e Legado' },
+};
+
 function matBadgeBg(tipo: string): object {
   const map: Record<string, object> = {
     AULA:     { backgroundColor: '#0B1C35' },
@@ -192,25 +190,14 @@ export function InicioScreen() {
   const [advancingGate,  setAdvancingGate]  = useState(false);
   const [error,          setError]          = useState<string | null>(null);
   const [focusStatus,    setFocusStatus]    = useState<'done' | 'ongoing' | null>(null);
-  const [checkInSemanal, setCheckInSemanal] = useState<{ confianca: number | null; clareza: number | null; progresso: number | null }>({ confianca: null, clareza: null, progresso: null });
-  const [checkInSemanalSaved, setCheckInSemanalSaved] = useState(false);
 
-  const firstName   = getUserDisplayName(session);
-  const modeloCode  = data?.modelo ?? null;
-  const modeloLabel = modeloCode ? MODELO_TITULOS[modeloCode] ?? null : null;
+  const firstName = getUserDisplayName(session);
 
   const loadData = useCallback(async () => {
     try {
       setError(null);
-      const [homeData, ciSemanal] = await Promise.all([
-        homeService.getHomeData(),
-        homeService.getCheckInSemanal().catch(() => null),
-      ]);
+      const homeData = await homeService.getHomeData();
       setData(homeData);
-      if (ciSemanal) {
-        setCheckInSemanal({ confianca: ciSemanal.confianca, clareza: ciSemanal.clareza, progresso: ciSemanal.progresso });
-        setCheckInSemanalSaved(true);
-      }
     } catch {
       setError('Não foi possível carregar os dados.');
     } finally {
@@ -289,11 +276,7 @@ export function InicioScreen() {
   const checkInsCount       = plano?.checkInsCount       ?? 0;
   const checkInsNecessarios = plano?.checkInsNecessarios ?? 5;
   const todayCheckedIn      = plano?.todayCheckedIn      ?? false;
-  const gateProgress        = checkInsCount / checkInsNecessarios;
   const gateUnlocked        = plano?.gateStatus === 'available' && checkInsCount >= checkInsNecessarios;
-
-  const andamentoStatus = gateUnlocked ? 'GATE DESBLOQUEADO' : 'EM ANDAMENTO';
-  const andamentoPct    = Math.round(Math.min(gateProgress, 1) * 100);
 
   const tarefas         = plano?.tarefas ?? [];
   const completadas     = tarefas.filter(t => t.completada).length;
@@ -323,27 +306,26 @@ export function InicioScreen() {
         <View style={s.header}>
           <View style={{ flex: 1 }}>
             <Text style={s.greeting}>{getGreeting()}, {firstName}</Text>
-            {modeloLabel ? (
-              <View style={s.modeloBadge}>
-                <Text style={s.modeloDot}>◆</Text>
-                <Text style={s.modeloLabel} numberOfLines={1}>{modeloLabel}</Text>
-              </View>
-            ) : null}
             <Text style={s.date}>{getFormattedDate()}</Text>
+            <Text style={s.mentorLabel}>Jethro, o Mentor do Empreendedor Cristão</Text>
           </View>
           <Pressable
-            style={s.themeToggle}
+            style={s.avatar}
             onPress={toggleColorScheme}
             accessibilityRole="button"
             accessibilityLabel={colorScheme === 'dark' ? 'Ativar modo claro' : 'Ativar modo escuro'}
           >
-            <Ionicons
-              name={colorScheme === 'dark' ? 'bulb' : 'bulb-outline'}
-              size={20}
-              color={colorScheme === 'dark' ? palette.gold500 : colors.ink}
-            />
+            <Text style={s.avatarText}>{firstName.substring(0, 2).toUpperCase()}</Text>
           </Pressable>
         </View>
+
+        {/* ── Propósito do Plano ── */}
+        {data?.tagline ? (
+          <View style={s.propositoCard}>
+            <Text style={s.propositoEyebrow}>PROPÓSITO DO PLANO</Text>
+            <Text style={s.propositoText}>"{data.tagline}"</Text>
+          </View>
+        ) : null}
 
         {/* ── Erro ── */}
         {error ? (
@@ -356,7 +338,18 @@ export function InicioScreen() {
         {/* ── Conteúdo principal ── */}
         {plano ? (
           <>
-            {/* Objetivo Macro desta Semana */}
+            {/* ① Princípio Bíblico da Semana */}
+            <View style={s.principioCard}>
+              <Text style={s.principioEyebrow}>PRINCÍPIO BÍBLICO · SEMANA {plano.semanaNumero}</Text>
+              <Text style={s.principioTitulo}>{plano.bloco ?? plano.tag ?? faseLabel(plano.fase)}</Text>
+              {plano.versiculo_texto ? (
+                <Text style={s.principioVersiculo}>
+                  "{plano.versiculo_texto}"{plano.versiculo_ancora ? ` — ${plano.versiculo_ancora}` : ''}
+                </Text>
+              ) : null}
+            </View>
+
+            {/* ② Objetivo Macro desta Semana */}
             <FeatureCard style={s.anchoraCard}>
               <Text style={s.anchoraEyebrow}>OBJETIVO MACRO DESTA SEMANA</Text>
               <Text style={s.anchoraText}>"{plano.objetivo}"</Text>
@@ -368,18 +361,6 @@ export function InicioScreen() {
                 <Text style={s.verPlanoBtnTx}>Ver plano completo →</Text>
               </Pressable>
             </FeatureCard>
-
-            {/* Princípio da semana */}
-            <SectionCard style={s.principioCard}>
-              <View style={s.principioIcon}>
-                <Text style={s.principioIconText}>✦</Text>
-              </View>
-              <View style={{ flex: 1 }}>
-                <EyebrowLabel style={{ marginBottom: 4 }}>Princípio da semana</EyebrowLabel>
-                <Text style={s.principioTitulo}>{plano.bloco ?? plano.tag ?? faseLabel(plano.fase)}</Text>
-                <Text style={s.principioSub} numberOfLines={2}>{plano.objetivo}</Text>
-              </View>
-            </SectionCard>
 
             {/* Foco de hoje — HERO */}
             <View style={s.focoCard}>
@@ -421,60 +402,82 @@ export function InicioScreen() {
               </Pressable>
             </View>
 
-            {/* Biblioteca do Jethro */}
-            {(plano.materiais_semana && plano.materiais_semana.length > 0) ? (
-              <View style={s.bibCard}>
-                <Text style={s.bibLabelMain}>BIBLIOTECA DO JETHRO</Text>
-                <Text style={s.bibLabelSub}>Materiais recomendados para esta semana</Text>
-                <View style={s.bibDivider} />
-                {plano.materiais_semana.map((mat, idx) => (
-                  <View key={idx}>
-                    <View style={s.bibItem}>
-                      <View style={[s.bibBadge, matBadgeBg(mat.tipo)]}>
-                        <Text style={[s.bibBadgeTx, matBadgeTx(mat.tipo)]}>{mat.tipo}</Text>
-                      </View>
-                      <Text style={s.bibTitulo}>{mat.titulo}</Text>
-                    </View>
-                    {idx < plano.materiais_semana!.length - 1 && <View style={s.bibSep} />}
-                  </View>
-                ))}
-                <View style={s.bibDivider} />
-                <Pressable onPress={() => router.push('/(tabs)/biblioteca' as Parameters<typeof router.push>[0])}>
-                  <Text style={s.bibVerTodos}>Ver todos na Biblioteca →</Text>
-                </Pressable>
-              </View>
-            ) : null}
+            {/* ⑤ Biblioteca do Jethro */}
+            {(() => {
+              const matSemana = plano.materiais_semana ?? [];
+              const matBiblioteca = (plano.materiais_biblioteca ?? []).slice(0, 3);
+              const temMateriais = matSemana.length > 0 || matBiblioteca.length > 0;
+              if (!temMateriais) return null;
+              return (
+                <View style={s.bibCard}>
+                  <Text style={s.bibLabelMain}>BIBLIOTECA DO JETHRO</Text>
+                  <Text style={s.bibLabelSub}>Materiais recomendados para esta semana</Text>
+                  <View style={s.bibDivider} />
+                  {matSemana.length > 0
+                    ? matSemana.map((mat, idx) => (
+                        <View key={idx}>
+                          <View style={s.bibItem}>
+                            <View style={[s.bibBadge, matBadgeBg(mat.tipo)]}>
+                              <Text style={[s.bibBadgeTx, matBadgeTx(mat.tipo)]}>{mat.tipo}</Text>
+                            </View>
+                            <Text style={s.bibTitulo}>{mat.titulo}</Text>
+                          </View>
+                          {idx < matSemana.length - 1 && <View style={s.bibSep} />}
+                        </View>
+                      ))
+                    : matBiblioteca.map((pilarId, idx) => {
+                        const item = BIBLIOTECA_ITENS[pilarId];
+                        if (!item) return null;
+                        return (
+                          <View key={pilarId}>
+                            <View style={s.bibItem}>
+                              <View style={[s.bibBadge, { backgroundColor: '#0B1C35' }]}>
+                                <Text style={[s.bibBadgeTx, { color: '#C9A655' }]}>{pilarId}</Text>
+                              </View>
+                              <Text style={s.bibTitulo}>{item.titulo}</Text>
+                            </View>
+                            {idx < matBiblioteca.length - 1 && <View style={s.bibSep} />}
+                          </View>
+                        );
+                      })}
+                  <View style={s.bibDivider} />
+                  <Pressable onPress={() => router.push('/(tabs)/biblioteca' as Parameters<typeof router.push>[0])}>
+                    <Text style={s.bibVerTodos}>Ver todos na Biblioteca →</Text>
+                  </Pressable>
+                </View>
+              );
+            })()}
 
-            {/* Dashboard de progresso — anéis circulares */}
+            {/* ⑥ Dashboard de Progresso */}
             <View style={s.dashCard}>
-              <View style={s.ringsRow}>
+              <View style={s.dashHeader}>
+                <Text style={s.dashLabel}>DASHBOARD DE PROGRESSO</Text>
+                {(data?.sparklineConfianca && data.sparklineConfianca.length > 0) ? (
+                  <Text style={s.sparkTrend}>▲ Confiança histórico</Text>
+                ) : null}
+              </View>
+              <View style={s.dashContent}>
+                {/* Anel 1 */}
                 <View style={s.ringWrap}>
                   <View style={[s.ringOuter, { borderColor: palette.gold500 }]}>
                     <Text style={s.ringValue}>{completadas}/{totalTarefas}</Text>
                   </View>
                   <Text style={s.ringLabel}>Ações semana</Text>
-                  <Text style={s.ringPct}>{progressoPct}%</Text>
                 </View>
+                {/* Anel 2 */}
                 <View style={s.ringWrap}>
                   <View style={[s.ringOuter, { borderColor: palette.gold500 }]}>
                     <Text style={s.ringValue}>{plano.semanaNumero}/24</Text>
                   </View>
                   <Text style={s.ringLabel}>Semanas plano</Text>
-                  <Text style={s.ringPct}>{Math.round((plano.semanaNumero / 24) * 100)}%</Text>
                 </View>
-              </View>
-              {(data?.sparklineConfianca && data.sparklineConfianca.length > 0) ? (
-                <>
-                  <View style={s.dashDivider} />
-                  <View style={s.sparkHeader}>
-                    <Text style={s.sparkTitle}>Confiança — histórico</Text>
-                    <Text style={s.sparkTrend}>▲ crescente</Text>
-                  </View>
-                  <View style={s.sparkRow}>
+                {/* Sparkline ao lado dos anéis */}
+                {(data?.sparklineConfianca && data.sparklineConfianca.length > 0) ? (
+                  <View style={s.sparkWrap}>
                     {data.sparklineConfianca.map((val, idx) => {
                       const max = Math.max(...(data.sparklineConfianca ?? [1]));
                       const isLast = idx === (data.sparklineConfianca?.length ?? 1) - 1;
-                      const h = Math.max(4, (val / max) * 28);
+                      const h = Math.max(4, (val / max) * 44);
                       return (
                         <View key={idx} style={s.sparkBarWrap}>
                           <View style={[s.sparkBar, { height: h, backgroundColor: isLast ? palette.gold500 : '#DDD6C8' }]} />
@@ -483,85 +486,9 @@ export function InicioScreen() {
                       );
                     })}
                   </View>
-                </>
-              ) : null}
-            </View>
-
-            {/* Check-in da Semana */}
-            <SectionCard style={s.checkInSemanalCard}>
-              <View style={s.checkInSemanalHeader}>
-                <View style={s.checkInSemanalDot} />
-                <Text style={s.checkInSemanalEyebrow}>CHECK-IN DA SEMANA</Text>
+                ) : null}
               </View>
-              <Text style={s.checkInSemanalTitle}>Como você encerra esta semana?</Text>
-              {([
-                { key: 'confianca' as const, label: 'Confiança no negócio' },
-                { key: 'clareza'   as const, label: 'Clareza da direção'   },
-                { key: 'progresso' as const, label: 'Sensação de progresso' },
-              ]).map(({ key, label }) => (
-                <View key={key} style={s.checkInSemanalQuestion}>
-                  <Text style={s.checkInSemanalLabel}>{label}</Text>
-                  <View style={s.checkInSemanalScale}>
-                    {[1, 2, 3, 4, 5].map(n => (
-                      <Pressable
-                        key={n}
-                        style={[s.checkInSemanalBtn, checkInSemanal[key] === n && s.checkInSemanalBtnActive]}
-                        onPress={() => {
-                          const next = { ...checkInSemanal, [key]: n };
-                          setCheckInSemanal(next);
-                          setCheckInSemanalSaved(false);
-                          if (next.confianca != null && next.clareza != null && next.progresso != null) {
-                            void homeService.checkInSemanal({
-                              confianca: next.confianca,
-                              clareza:   next.clareza,
-                              progresso: next.progresso,
-                            }).then(() => setCheckInSemanalSaved(true)).catch(() => {});
-                          }
-                        }}
-                        accessibilityRole="button"
-                        accessibilityLabel={`${label} — nota ${n}`}
-                      >
-                        <Text style={[s.checkInSemanalBtnText, checkInSemanal[key] === n && s.checkInSemanalBtnTextActive]}>{n}</Text>
-                      </Pressable>
-                    ))}
-                  </View>
-                </View>
-              ))}
-              {checkInSemanalSaved && (
-                <Text style={s.checkInSemanalSavedText}>✓ Avaliação guardada</Text>
-              )}
-            </SectionCard>
-
-            {/* Gate de Avanço */}
-            <View style={s.sectionHeaderRow}>
-              <EyebrowLabel>Gate de Avanço</EyebrowLabel>
-              <Pressable
-                onPress={() => router.push('/(tabs)/biblioteca' as Parameters<typeof router.push>[0])}
-                accessibilityRole="button"
-                accessibilityLabel="Ver tudo na biblioteca"
-              >
-                <Text style={s.verTudo}>Ver tudo</Text>
-              </Pressable>
             </View>
-
-            <SectionCard style={s.andamentoCard}>
-              <View style={s.andamentoInner}>
-                <View style={s.andamentoCircle}>
-                  <Text style={s.andamentoCircleText}>S{plano.semanaNumero}</Text>
-                </View>
-                <View style={s.andamentoContent}>
-                  <Text style={s.andamentoEyebrow}>SEMANA {plano.semanaNumero} · {andamentoStatus}</Text>
-                  <Text style={s.andamentoTitle} numberOfLines={2}>{plano.objetivo}</Text>
-                  <View style={s.andamentoBarBg}>
-                    <View style={[s.andamentoBarFill, { width: `${andamentoPct}%` as `${number}%` }]} />
-                  </View>
-                  <View style={s.andamentoMeta}>
-                    <Text style={s.andamentoMetaLeft}>{checkInsCount}/{checkInsNecessarios} check-ins</Text>
-                    <Text style={s.andamentoMetaRight}>{andamentoPct}%</Text>
-                  </View>
-                </View>
-              </View>
-            </SectionCard>
 
             {!gateUnlocked && (
               <GhostButton
@@ -649,22 +576,20 @@ function makeStyles(c: ThemeColors) {
     scroll: { flex: 1 },
     container: { paddingHorizontal: Spacing.screenH, paddingTop: 16 },
 
-    header:      { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 },
-    themeToggle: {
-      width: 40, height: 40, borderRadius: 20,
-      backgroundColor: c.surface, borderWidth: StyleSheet.hairlineWidth, borderColor: c.hairline,
-      justifyContent: 'center', alignItems: 'center', ...getShadow(1),
+    header:      { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 },
+    avatar: {
+      width: 42, height: 42, borderRadius: 21,
+      backgroundColor: palette.navy800, borderWidth: 1.5, borderColor: palette.gold500,
+      justifyContent: 'center', alignItems: 'center', flexShrink: 0,
     },
+    avatarText:  { fontFamily: FontFamily.serifSemiBold, fontSize: 14, color: palette.gold500 },
     greeting:    { fontFamily: FontFamily.serifMedium, fontSize: 22, color: c.ink, textTransform: 'capitalize' },
-    modeloBadge: { flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 4, marginBottom: 2 },
-    modeloDot:   { fontFamily: FontFamily.sansRegular, fontSize: 9, color: palette.gold500 },
-    modeloLabel: { fontFamily: FontFamily.sansRegular, fontSize: 11, color: c.inkMute, flex: 1 },
-    date:        { fontFamily: FontFamily.sansRegular, fontSize: 13, color: c.inkMute, textTransform: 'capitalize' },
+    date:        { fontFamily: FontFamily.sansRegular, fontSize: 13, color: c.inkMute, textTransform: 'capitalize', marginTop: 2 },
+    mentorLabel: { fontFamily: FontFamily.sansSemiBold, fontSize: 13, color: c.ink, marginTop: 3 },
 
-    sectionLabel: { marginBottom: 12 },
-
-    sectionHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
-    verTudo:          { fontFamily: FontFamily.sansMedium, fontSize: 13, color: c.accent },
+    propositoCard:    { backgroundColor: c.surface, borderRadius: Radius.md, padding: 14, marginBottom: 16, borderWidth: StyleSheet.hairlineWidth, borderColor: c.hairline, ...getShadow(1) },
+    propositoEyebrow: { fontFamily: FontFamily.sansBold, fontSize: 9, letterSpacing: 1.5, textTransform: 'uppercase', color: palette.gold500, marginBottom: 6 },
+    propositoText:    { fontFamily: FontFamily.serifMediumItalic, fontSize: 14, color: c.ink, lineHeight: 21 },
 
     errorBanner: { backgroundColor: 'rgba(226,72,60,0.08)', borderRadius: Radius.xs, padding: 14, marginBottom: 16, borderWidth: 1, borderColor: c.liveRed },
     errorText:   { fontFamily: FontFamily.sansRegular, fontSize: 13, color: c.liveRed,  marginBottom: 4 },
@@ -674,11 +599,10 @@ function makeStyles(c: ThemeColors) {
     anchoraEyebrow: { fontFamily: FontFamily.sansSemiBold, fontSize: 10, color: 'rgba(212,175,55,0.75)', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 8 },
     anchoraText:    { fontFamily: FontFamily.serifMediumItalic, fontSize: 16, color: palette.paper, lineHeight: 24 },
 
-    principioCard:     { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 16, padding: 16 },
-    principioIcon:     { width: 40, height: 40, borderRadius: Radius.icon, backgroundColor: palette.goldMuted, justifyContent: 'center', alignItems: 'center', flexShrink: 0 },
-    principioIconText: { fontFamily: FontFamily.serifSemiBold, fontSize: 18, color: palette.navy800 },
-    principioTitulo:   { fontFamily: FontFamily.serifMedium, fontSize: 14, color: c.ink, lineHeight: 19, marginBottom: 2 },
-    principioSub:      { fontFamily: FontFamily.sansRegular, fontSize: 11, color: c.inkMute, lineHeight: 17 },
+    principioCard:      { backgroundColor: c.surface, borderRadius: Radius.md, padding: 16, marginBottom: 16, borderWidth: 1.5, borderColor: palette.gold500, ...getShadow(1) },
+    principioEyebrow:   { fontFamily: FontFamily.sansBold, fontSize: 9, letterSpacing: 1.5, textTransform: 'uppercase', color: palette.gold500, marginBottom: 6 },
+    principioTitulo:    { fontFamily: FontFamily.serifSemiBold, fontSize: 16, color: c.ink, marginBottom: 8 },
+    principioVersiculo: { fontFamily: FontFamily.serifMediumItalic, fontSize: 13, color: c.inkSoft, lineHeight: 20 },
 
     // Âncora / Objetivo Macro
     verPlanoBtn:    { alignSelf: 'flex-start', backgroundColor: palette.gold500, borderRadius: 6, paddingHorizontal: 10, paddingVertical: 5, marginTop: 10 },
@@ -706,35 +630,20 @@ function makeStyles(c: ThemeColors) {
     bibSep:         { height: 1, backgroundColor: c.hairline, marginVertical: 4 },
     bibVerTodos:    { fontFamily: FontFamily.sansBold, fontSize: 11, color: palette.gold500, textAlign: 'center' },
 
-    // Dashboard — anéis
-    dashCard:       { backgroundColor: c.surface, borderRadius: Radius.md, padding: 16, marginBottom: 16, ...getShadow(1) },
-    ringsRow:       { flexDirection: 'row', gap: 12 },
-    ringWrap:       { flex: 1, alignItems: 'center', backgroundColor: c.background, borderRadius: Radius.sm, padding: 12 },
-    ringOuter:      { width: 72, height: 72, borderRadius: 36, borderWidth: 5, justifyContent: 'center', alignItems: 'center', marginBottom: 6 },
-    ringValue:      { fontFamily: FontFamily.serifSemiBold, fontSize: 16, color: c.ink },
-    ringLabel:      { fontFamily: FontFamily.sansBold, fontSize: 10, color: c.ink, textAlign: 'center', marginBottom: 2 },
-    ringPct:        { fontFamily: FontFamily.sansRegular, fontSize: 10, color: c.inkMute },
-    dashDivider:    { height: 1, backgroundColor: c.hairline, marginVertical: 10 },
-    sparkHeader:    { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
-    sparkTitle:     { fontFamily: FontFamily.sansBold, fontSize: 11, color: c.ink },
-    sparkTrend:     { fontFamily: FontFamily.sansBold, fontSize: 9, color: palette.gold500 },
-    sparkRow:       { flexDirection: 'row', alignItems: 'flex-end', gap: 3, height: 40 },
-    sparkBarWrap:   { flex: 1, alignItems: 'center', justifyContent: 'flex-end' },
-    sparkBar:       { width: '100%', borderRadius: 2 },
-    sparkLbl:       { fontFamily: FontFamily.sansRegular, fontSize: 8, color: '#DDD6C8', marginTop: 3 },
-
-    andamentoCard:        { marginBottom: 16, padding: 14 },
-    andamentoInner:       { flexDirection: 'row', alignItems: 'center', gap: 12 },
-    andamentoCircle:      { width: 44, height: 44, borderRadius: 22, backgroundColor: palette.navy800, justifyContent: 'center', alignItems: 'center', flexShrink: 0 },
-    andamentoCircleText:  { fontFamily: FontFamily.serifSemiBold, fontSize: 14, color: palette.gold500 },
-    andamentoContent:     { flex: 1, gap: 4 },
-    andamentoEyebrow:     { fontFamily: FontFamily.sansBold, fontSize: 10, color: c.accent, letterSpacing: 0.5, textTransform: 'uppercase' },
-    andamentoTitle:       { fontFamily: FontFamily.serifMedium, fontSize: 14, color: c.ink, lineHeight: 20 },
-    andamentoBarBg:       { height: 3, backgroundColor: c.hairline, borderRadius: 2, overflow: 'hidden', marginTop: 2 },
-    andamentoBarFill:     { height: '100%', backgroundColor: c.accent, borderRadius: 2 },
-    andamentoMeta:        { flexDirection: 'row', justifyContent: 'space-between', marginTop: 2 },
-    andamentoMetaLeft:    { fontFamily: FontFamily.sansRegular,  fontSize: 11, color: c.inkMute },
-    andamentoMetaRight:   { fontFamily: FontFamily.sansSemiBold, fontSize: 11, color: c.accent },
+    // Dashboard — anéis + sparkline
+    dashCard:     { backgroundColor: c.surface, borderRadius: Radius.md, padding: 16, marginBottom: 16, ...getShadow(1) },
+    dashHeader:   { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
+    dashLabel:    { fontFamily: FontFamily.sansBold, fontSize: 9, letterSpacing: 1, textTransform: 'uppercase', color: c.inkMute },
+    sparkTrend:   { fontFamily: FontFamily.sansBold, fontSize: 9, color: palette.gold500 },
+    dashContent:  { flexDirection: 'row', alignItems: 'flex-end', gap: 8 },
+    ringWrap:     { alignItems: 'center', flex: 1 },
+    ringOuter:    { width: 68, height: 68, borderRadius: 34, borderWidth: 5, justifyContent: 'center', alignItems: 'center', marginBottom: 5 },
+    ringValue:    { fontFamily: FontFamily.serifSemiBold, fontSize: 15, color: c.ink },
+    ringLabel:    { fontFamily: FontFamily.sansBold, fontSize: 9, color: c.inkMute, textAlign: 'center' },
+    sparkWrap:    { flex: 1, flexDirection: 'row', alignItems: 'flex-end', gap: 2, height: 60, paddingBottom: 14 },
+    sparkBarWrap: { flex: 1, alignItems: 'center', justifyContent: 'flex-end' },
+    sparkBar:     { width: '100%', borderRadius: 2 },
+    sparkLbl:     { fontFamily: FontFamily.sansRegular, fontSize: 7, color: '#DDD6C8', marginTop: 2 },
 
     checkInBtn:     { borderColor: c.accent,  marginBottom: 24 },
     checkInBtnDone: { borderColor: c.success, marginBottom: 24 },
@@ -751,20 +660,6 @@ function makeStyles(c: ThemeColors) {
     devocionalVerso:     { fontFamily: FontFamily.serifMediumItalic, fontSize: 17, color: palette.paper, lineHeight: 26, marginBottom: 14 },
     divider:             { height: 1, backgroundColor: palette.goldMuted, marginBottom: 12 },
     devocionalReflexao:  { fontFamily: FontFamily.sansRegular, fontSize: 13, color: 'rgba(239,239,234,0.60)', lineHeight: 20 },
-
-    checkInSemanalCard:        { marginBottom: 16, padding: 16, gap: 14 },
-    checkInSemanalHeader:      { flexDirection: 'row', alignItems: 'center', gap: 6 },
-    checkInSemanalDot:         { width: 7, height: 7, borderRadius: 4, backgroundColor: palette.gold500 },
-    checkInSemanalEyebrow:     { fontFamily: FontFamily.sansBold, fontSize: 10, color: palette.gold500, letterSpacing: 1.5, textTransform: 'uppercase' },
-    checkInSemanalTitle:       { fontFamily: FontFamily.serifMedium, fontSize: 20, color: c.ink, lineHeight: 26 },
-    checkInSemanalQuestion:    { gap: 8 },
-    checkInSemanalLabel:       { fontFamily: FontFamily.sansRegular, fontSize: 13, color: c.inkSoft },
-    checkInSemanalScale:       { flexDirection: 'row', gap: 6 },
-    checkInSemanalBtn:         { flex: 1, paddingVertical: 12, borderRadius: Radius.xs, borderWidth: 1, borderColor: c.hairline, justifyContent: 'center', alignItems: 'center', backgroundColor: c.surface },
-    checkInSemanalBtnActive:   { borderColor: palette.gold500, backgroundColor: 'rgba(201,166,85,0.12)' },
-    checkInSemanalBtnText:     { fontFamily: FontFamily.sansRegular, fontSize: 14, color: c.inkSoft },
-    checkInSemanalBtnTextActive: { fontFamily: FontFamily.sansSemiBold, color: palette.gold500 },
-    checkInSemanalSavedText: { fontFamily: FontFamily.sansMedium, fontSize: 13, color: c.success, textAlign: 'center', marginTop: 4 },
 
     fab: {
       position: 'absolute', bottom: 24, right: Spacing.screenH,

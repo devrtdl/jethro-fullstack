@@ -231,20 +231,26 @@ function SemanaDetalhe({ semana, onBack, onWeekAdvanced }: SemanaDetalheProps) {
           </View>
         )}
 
-        {/* ── Materiais — Biblioteca do Jethro ── */}
+        {/* ── Materiais ── */}
         {aba === 'materiais' && (
           <View style={s.matCard}>
-            <Text style={s.matLabelMain}>BIBLIOTECA DO JETHRO</Text>
-            <Text style={s.matLabelSub}>Materiais recomendados para esta semana</Text>
+            <Text style={s.matLabelMain}>
+              {semana.materiais_semana && semana.materiais_semana.length > 0
+                ? `${semana.materiais_semana.length} MATERIAIS DESTA SEMANA`
+                : 'MATERIAIS DESTA SEMANA'}
+            </Text>
             <View style={s.matDivider} />
             {semana.materiais_semana && semana.materiais_semana.length > 0
               ? semana.materiais_semana.map((mat, idx) => (
                   <View key={idx}>
-                    <View style={s.matItem}>
+                    <View style={s.matItemWrap}>
                       <View style={[s.matBadge, matBgStyle(mat.tipo)]}>
                         <Text style={[s.matBadgeTx, matTxStyle(mat.tipo)]}>{mat.tipo}</Text>
                       </View>
-                      <Text style={s.matTitulo}>{mat.titulo}</Text>
+                      <View style={{ flex: 1 }}>
+                        <Text style={s.matTitulo}>{mat.titulo}</Text>
+                        {mat.descricao ? <Text style={s.matDescricao}>{mat.descricao}</Text> : null}
+                      </View>
                     </View>
                     {idx < (semana.materiais_semana?.length ?? 0) - 1 && <View style={s.matSep} />}
                   </View>
@@ -254,11 +260,11 @@ function SemanaDetalhe({ semana, onBack, onWeekAdvanced }: SemanaDetalheProps) {
                   if (!item) return null;
                   return (
                     <View key={pilarId}>
-                      <View style={s.matItem}>
+                      <View style={s.matItemWrap}>
                         <View style={s.matBadgePilar}><Text style={s.matBadgePilarTx}>{pilarId}</Text></View>
                         <View style={{ flex: 1 }}>
                           <Text style={s.matTitulo}>{item.titulo}</Text>
-                          <Text style={s.matSub}>{item.subtitulo}</Text>
+                          <Text style={s.matDescricao}>{item.subtitulo}</Text>
                         </View>
                       </View>
                       <View style={s.matSep} />
@@ -396,14 +402,16 @@ function makeDetalheStyles(c: ThemeColors) {
     matLabelMain:   { fontFamily: FontFamily.sansBold, fontSize: 9, textTransform: 'uppercase', letterSpacing: 0.7, color: c.inkMute, marginBottom: 3 },
     matLabelSub:    { fontFamily: FontFamily.sansRegular, fontSize: 11, color: c.inkMute },
     matDivider:     { height: 1, backgroundColor: c.hairline, marginVertical: 8 },
+    matItemWrap:    { flexDirection: 'row', alignItems: 'flex-start', gap: 10, paddingVertical: 6 },
     matItem:        { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 3 },
-    matBadge:       { borderRadius: 3, paddingHorizontal: 6, paddingVertical: 2 },
+    matBadge:       { borderRadius: 3, paddingHorizontal: 6, paddingVertical: 2, marginTop: 2 },
     matBadgeTx:     { fontFamily: FontFamily.sansBold, fontSize: 8, textTransform: 'uppercase', letterSpacing: 0.4 },
     matBadgePilar:  { width: 44, height: 44, borderRadius: Radius.xs, backgroundColor: palette.goldMuted, justifyContent: 'center', alignItems: 'center', flexShrink: 0 },
     matBadgePilarTx:{ fontFamily: FontFamily.serifSemiBold, fontSize: 12, color: palette.navy800 },
-    matTitulo:      { fontFamily: FontFamily.sansSemiBold, fontSize: 13, color: c.ink },
+    matTitulo:      { fontFamily: FontFamily.sansSemiBold, fontSize: 13, color: c.ink, marginBottom: 2 },
+    matDescricao:   { fontFamily: FontFamily.sansRegular, fontSize: 12, color: c.inkMute, lineHeight: 17 },
     matSub:         { fontFamily: FontFamily.sansRegular, fontSize: 11, color: c.inkMute },
-    matSep:         { height: 1, backgroundColor: c.hairline, marginVertical: 4 },
+    matSep:         { height: 1, backgroundColor: c.hairline, marginVertical: 2 },
     matVerTodos:    { fontFamily: FontFamily.sansBold, fontSize: 11, color: palette.gold500, textAlign: 'center' },
     checkInCard:    { backgroundColor: c.surface, borderRadius: Radius.md, padding: 16, marginBottom: 10, borderWidth: StyleSheet.hairlineWidth, borderColor: c.hairline, ...getShadow(1) },
     checkInHeader:  { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 10 },

@@ -17,6 +17,7 @@ export type Acao = {
 export type MateriaisSemana = {
   tipo: 'AULA' | 'TEMPLATE' | 'ARTIGO';
   titulo: string;
+  descricao?: string | null;
 };
 
 export type PlanoSemana = {
@@ -26,6 +27,9 @@ export type PlanoSemana = {
   bloco?: string | null;
   tag?: string | null;
   objetivo: string;
+  versiculo_ancora?: string | null;
+  versiculo_texto?: string | null;
+  materiais_biblioteca?: string[] | null;
   gateStatus: 'locked' | 'available' | 'completed' | 'overdue';
   horasRegistradas: number;
   horasNecessarias: number;
@@ -49,6 +53,7 @@ export type HomeData = {
   kpis: HomeKpis | null;
   onboardingCompleto: boolean;
   sparklineConfianca?: number[] | null;
+  tagline?: string | null;
 };
 
 type HomeApiResponse = {
