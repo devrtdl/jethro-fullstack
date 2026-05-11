@@ -5,6 +5,7 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
+  Switch,
   Text,
   View,
 } from 'react-native';
@@ -52,7 +53,7 @@ function RowItem({ icon, label, value }: { icon: string; label: string; value?: 
 export function PerfilScreen() {
   const router = useRouter();
   const { session } = useAuthSession();
-  const { colors } = useTheme();
+  const { colors, colorScheme, toggleColorScheme } = useTheme();
   const s = useMemo(() => makeStyles(colors), [colors]);
   const [signingOut, setSigningOut] = useState(false);
 
@@ -149,6 +150,21 @@ export function PerfilScreen() {
           <RowItem icon="◎" label="Modelo de diagnóstico" value="—" />
           <View style={s.cardDivider} />
           <RowItem icon="◈" label="Onboarding" value="Completo" />
+        </SectionCard>
+
+        {/* ── Aparência ── */}
+        <EyebrowLabel style={s.sectionLabel}>Aparência</EyebrowLabel>
+        <SectionCard style={s.themeCard}>
+          <View style={s.themeRowLeft}>
+            <Text style={s.themeIcon}>🌙</Text>
+            <Text style={s.themeLabel}>Modo escuro</Text>
+          </View>
+          <Switch
+            value={colorScheme === 'dark'}
+            onValueChange={toggleColorScheme}
+            trackColor={{ false: colors.hairline, true: palette.gold500 }}
+            thumbColor={colorScheme === 'dark' ? palette.navy800 : palette.paper}
+          />
         </SectionCard>
 
         {/* ── Ajuda ── */}
@@ -251,6 +267,11 @@ function makeStyles(c: ThemeColors) {
     rowLabel:    { fontFamily: FontFamily.sansRegular, fontSize: 12, color: c.inkMute, marginBottom: 2 },
     rowValue:    { fontFamily: FontFamily.sansMedium,  fontSize: 14, color: c.ink },
     cardDivider: { height: 1, backgroundColor: c.hairline, marginVertical: 10 },
+
+    themeCard:    { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 },
+    themeRowLeft: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+    themeIcon:    { fontSize: 18 },
+    themeLabel:   { fontFamily: FontFamily.sansMedium, fontSize: 15, color: c.ink },
 
     faqRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 14, gap: 12, marginBottom: 24 },
     faqIconWrap: { width: 32, height: 32, borderRadius: 16, backgroundColor: c.accentMuted, alignItems: 'center', justifyContent: 'center' },

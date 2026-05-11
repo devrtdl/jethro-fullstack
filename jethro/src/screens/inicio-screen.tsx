@@ -118,7 +118,7 @@ function matBadgeTx(tipo: string): object {
 export function InicioScreen() {
   const router = useRouter();
   const { session } = useAuthSession();
-  const { colors, colorScheme, toggleColorScheme } = useTheme();
+  const { colors } = useTheme();
   const s = useMemo(() => makeStyles(colors), [colors]);
 
   const [data,           setData]           = useState<HomeData | null>(null);
@@ -197,9 +197,9 @@ export function InicioScreen() {
           </View>
           <Pressable
             style={s.avatar}
-            onPress={toggleColorScheme}
+            onPress={() => router.push('/(tabs)/perfil' as Parameters<typeof router.push>[0])}
             accessibilityRole="button"
-            accessibilityLabel={colorScheme === 'dark' ? 'Ativar modo claro' : 'Ativar modo escuro'}
+            accessibilityLabel="Ver perfil"
           >
             <Text style={s.avatarText}>{firstName.substring(0, 2).toUpperCase()}</Text>
           </Pressable>
