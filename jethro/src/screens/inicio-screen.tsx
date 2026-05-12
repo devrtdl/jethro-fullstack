@@ -207,15 +207,13 @@ export function InicioScreen() {
               <Text style={s.avatarText}>{firstName.substring(0, 2).toUpperCase()}</Text>
             </Pressable>
           </View>
+          {data?.tagline ? (
+            <View style={s.propositoBlock}>
+              <Text style={s.propositoEyebrow}>PROPÓSITO DO PLANO</Text>
+              <Text style={s.propositoText}>"{data.tagline}"</Text>
+            </View>
+          ) : null}
         </View>
-
-        {/* ── Propósito do Plano — card navy idêntico à aba Visão Geral ── */}
-        {data?.tagline ? (
-          <View style={s.taglineCard}>
-            <Text style={s.taglineEyebrow}>PROPÓSITO DO PLANO</Text>
-            <Text style={s.taglineText}>{data.tagline}</Text>
-          </View>
-        ) : null}
 
         {/* ── Erro ── */}
         {error ? (
@@ -463,9 +461,9 @@ function makeStyles(c: ThemeColors) {
     date:        { fontFamily: FontFamily.sansRegular, fontSize: 13, color: c.inkSoft, textTransform: 'capitalize', marginTop: 2 },
     mentorLabel: { fontFamily: FontFamily.sansSemiBold, fontSize: 13, color: c.ink, marginTop: 3 },
 
-    taglineCard:    { backgroundColor: palette.navy800, borderRadius: Radius.md, padding: 18, marginBottom: 16, ...getShadow(2) },
-    taglineEyebrow: { fontFamily: FontFamily.sansBold, fontSize: 9, textTransform: 'uppercase', letterSpacing: 1.5, color: palette.gold500, marginBottom: 10 },
-    taglineText:    { fontFamily: FontFamily.serifSemiBold, fontSize: 18, color: palette.paper, lineHeight: 26 },
+    propositoBlock:   { marginTop: 14, paddingTop: 12, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: c.hairline },
+    propositoEyebrow: { fontFamily: FontFamily.sansBold, fontSize: 9, letterSpacing: 1.5, textTransform: 'uppercase', color: c.inkMute, marginBottom: 5 },
+    propositoText:    { fontFamily: FontFamily.serifMediumItalic, fontSize: 14, color: c.inkSoft, lineHeight: 21 },
 
     errorBanner: { backgroundColor: 'rgba(226,72,60,0.08)', borderRadius: Radius.xs, padding: 14, marginBottom: 16, borderWidth: 1, borderColor: c.liveRed },
     errorText:   { fontFamily: FontFamily.sansRegular, fontSize: 13, color: c.liveRed,  marginBottom: 4 },
