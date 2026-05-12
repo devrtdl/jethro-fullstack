@@ -74,6 +74,7 @@ export async function registerUserRoutes(app: FastifyInstance) {
       pool
         .query<{
           plano_id: string;
+          tagline: string | null;
           semana_id: string;
           semana_numero: number;
           fase: string;
@@ -87,7 +88,7 @@ export async function registerUserRoutes(app: FastifyInstance) {
           gate_status: string;
           avancou_em: string | null;
         }>(
-          `SELECT pa.id AS plano_id, s.id AS semana_id, s.numero AS semana_numero,
+          `SELECT pa.id AS plano_id, pa.tagline, s.id AS semana_id, s.numero AS semana_numero,
                   s.fase, s.pilar, s.bloco, s.tag, s.objetivo,
                   s.versiculo_ancora, s.versiculo_texto, s.materiais_biblioteca,
                   gs.gate_status, gs.avancou_em
@@ -197,6 +198,7 @@ export async function registerUserRoutes(app: FastifyInstance) {
             tarefas,
           }
         : null,
+      tagline: planoRow?.tagline ?? null,
       kpis: json
         ? {
             receitaAtual: json['receita_atual'] ?? null,

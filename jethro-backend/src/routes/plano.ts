@@ -50,7 +50,7 @@ export async function registerPlanoRoutes(app: FastifyInstance) {
       }>(
         `SELECT pa.id, pa.modelo, pa.tagline, pa.introducao, pa.diagnostico_geral,
                 pa.fundamento_biblico, pa.negocio,
-                to_char(pa.data_geracao, 'DD Mon YYYY') AS data_geracao
+                to_char(pa.data_geracao, 'YYYY-MM-DD') AS data_geracao
          FROM planos_acao pa
          JOIN (
            SELECT id FROM onboarding_sessions

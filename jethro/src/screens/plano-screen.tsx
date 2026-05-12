@@ -775,7 +775,7 @@ function VisaoGeralTab({ plano, colors }: { plano: PlanoCompleto | null; colors:
           <Text style={s.taglineText}>{plano.tagline}</Text>
           {(plano.negocio || plano.data_geracao) ? (
             <Text style={s.taglineMeta}>
-              {[plano.negocio, plano.data_geracao].filter(Boolean).join('  ·  ')}
+              {[plano.negocio, plano.data_geracao ? new Date(plano.data_geracao).toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' }) : null].filter(Boolean).join('  ·  ')}
             </Text>
           ) : null}
         </View>
