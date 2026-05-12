@@ -461,8 +461,8 @@ function makeStyles(c: ThemeColors) {
     date:        { fontFamily: FontFamily.sansRegular, fontSize: 13, color: c.inkSoft, textTransform: 'capitalize', marginTop: 2 },
     mentorLabel: { fontFamily: FontFamily.sansSemiBold, fontSize: 13, color: c.ink, marginTop: 3 },
 
-    propositoBlock:   { marginTop: 14, paddingTop: 12, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: c.hairline },
-    propositoEyebrow: { fontFamily: FontFamily.sansBold, fontSize: 9, letterSpacing: 1.5, textTransform: 'uppercase', color: c.inkMute, marginBottom: 5 },
+    propositoBlock:   { marginTop: 18 },
+    propositoEyebrow: { fontFamily: FontFamily.sansBold, fontSize: 9, letterSpacing: 1.5, textTransform: 'uppercase', color: c.inkMute, marginBottom: 6 },
     propositoText:    { fontFamily: FontFamily.serifMediumItalic, fontSize: 14, color: c.inkSoft, lineHeight: 21 },
 
     errorBanner: { backgroundColor: 'rgba(226,72,60,0.08)', borderRadius: Radius.xs, padding: 14, marginBottom: 16, borderWidth: 1, borderColor: c.liveRed },
