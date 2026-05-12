@@ -118,7 +118,7 @@ export type PlanoSemanaCompleta = {
   materiais_biblioteca: string[] | null;
   materiais_semana?: MateriaisSemana[] | null;
   conteudo_completo: boolean;
-  acoes: { id: string; texto: string; ordem: number | null; completada: boolean; tag: string | null }[];
+  acoes: { id: string; texto: string; titulo?: string | null; descricao?: string | null; concluida_quando?: string | null; ordem: number | null; completada: boolean; tag: string | null }[];
   check_in?: { confianca: number | null; clareza: number | null; progresso: number | null; registrado: boolean } | null;
 };
 

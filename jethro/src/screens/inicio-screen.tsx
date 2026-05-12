@@ -1,4 +1,5 @@
 import { useRouter } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
 import { mentorContext } from '@/src/lib/mentor-context';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
@@ -180,6 +181,7 @@ export function InicioScreen() {
 
   return (
     <SafeAreaView style={s.safe} edges={['top']}>
+      <StatusBar style="dark" backgroundColor={palette.paperCard} translucent={false} />
       <ScrollView
         style={s.scroll}
         contentContainerStyle={s.container}
@@ -188,28 +190,30 @@ export function InicioScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={colors.accent} />
         }
       >
-        {/* ── Header ── */}
-        <View style={s.header}>
-          <View style={{ flex: 1 }}>
-            <Text style={s.greeting}>{getGreeting()}, {firstName}</Text>
-            <Text style={s.date}>{getFormattedDate()}</Text>
-            <Text style={s.mentorLabel}>Jethro, o Mentor do Empreendedor Cristão</Text>
+        {/* ── Header Banner (branco) ── */}
+        <View style={s.headerBanner}>
+          <View style={s.headerRow}>
+            <View style={{ flex: 1 }}>
+              <Text style={s.greeting}>{getGreeting()}, {firstName}</Text>
+              <Text style={s.date}>{getFormattedDate()}</Text>
+              <Text style={s.mentorLabel}>Jethro, o Mentor do Empreendedor Cristão</Text>
+            </View>
+            <Pressable
+              style={s.avatar}
+              onPress={() => router.push('/(tabs)/perfil' as Parameters<typeof router.push>[0])}
+              accessibilityRole="button"
+              accessibilityLabel="Ver perfil"
+            >
+              <Text style={s.avatarText}>{firstName.substring(0, 2).toUpperCase()}</Text>
+            </Pressable>
           </View>
-          <Pressable
-            style={s.avatar}
-            onPress={() => router.push('/(tabs)/perfil' as Parameters<typeof router.push>[0])}
-            accessibilityRole="button"
-            accessibilityLabel="Ver perfil"
-          >
-            <Text style={s.avatarText}>{firstName.substring(0, 2).toUpperCase()}</Text>
-          </Pressable>
         </View>
 
-        {/* ── Propósito do Plano ── */}
+        {/* ── Propósito do Plano — card navy idêntico à aba Visão Geral ── */}
         {data?.tagline ? (
-          <View style={s.propositoCard}>
-            <Text style={s.propositoEyebrow}>PROPÓSITO DO PLANO</Text>
-            <Text style={s.propositoText}>"{data.tagline}"</Text>
+          <View style={s.taglineCard}>
+            <Text style={s.taglineEyebrow}>PROPÓSITO DO PLANO</Text>
+            <Text style={s.taglineText}>{data.tagline}</Text>
           </View>
         ) : null}
 
@@ -254,6 +258,13 @@ export function InicioScreen() {
               <Text style={s.focoTitle}>
                 {acaoPrincipal?.texto ?? 'Complete a primeira ação da semana'}
               </Text>
+              {acaoPrincipal?.concluida_quando ? (
+                <View style={s.criterioRow}>
+                  <Text style={s.criterioTx}>
+                    {'✅ '}<Text style={s.criterioBold}>Concluída quando: </Text>{acaoPrincipal.concluida_quando}
+                  </Text>
+                </View>
+              ) : null}
               <View style={s.focoBtnRow}>
                 <Pressable
                   style={[s.focoBtn, focusStatus === 'done' && s.focoBtnActive]}
@@ -425,12 +436,23 @@ export function InicioScreen() {
 
 function makeStyles(c: ThemeColors) {
   return StyleSheet.create({
-    safe:   { flex: 1, backgroundColor: c.background },
+    safe:   { flex: 1, backgroundColor: palette.paperCard },
     center: { justifyContent: 'center', alignItems: 'center' },
-    scroll: { flex: 1 },
+    scroll: { flex: 1, backgroundColor: c.background },
     container: { paddingHorizontal: Spacing.screenH, paddingTop: 16 },
 
-    header:      { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 },
+    headerBanner: {
+      backgroundColor: palette.paperCard,
+      marginHorizontal: -Spacing.screenH,
+      paddingHorizontal: Spacing.screenH,
+      marginTop: -16,
+      paddingTop: 20,
+      paddingBottom: 22,
+      marginBottom: 20,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: c.hairline,
+    },
+    headerRow:   { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
     avatar: {
       width: 42, height: 42, borderRadius: 21,
       backgroundColor: palette.navy800, borderWidth: 1.5, borderColor: palette.gold500,
@@ -438,12 +460,12 @@ function makeStyles(c: ThemeColors) {
     },
     avatarText:  { fontFamily: FontFamily.serifSemiBold, fontSize: 14, color: palette.gold500 },
     greeting:    { fontFamily: FontFamily.serifMedium, fontSize: 22, color: c.ink, textTransform: 'capitalize' },
-    date:        { fontFamily: FontFamily.sansRegular, fontSize: 13, color: c.inkMute, textTransform: 'capitalize', marginTop: 2 },
+    date:        { fontFamily: FontFamily.sansRegular, fontSize: 13, color: c.inkSoft, textTransform: 'capitalize', marginTop: 2 },
     mentorLabel: { fontFamily: FontFamily.sansSemiBold, fontSize: 13, color: c.ink, marginTop: 3 },
 
-    propositoCard:    { backgroundColor: c.surface, borderRadius: Radius.md, padding: 14, marginBottom: 16, borderWidth: StyleSheet.hairlineWidth, borderColor: c.hairline, ...getShadow(1) },
-    propositoEyebrow: { fontFamily: FontFamily.sansBold, fontSize: 9, letterSpacing: 1.5, textTransform: 'uppercase', color: palette.gold500, marginBottom: 6 },
-    propositoText:    { fontFamily: FontFamily.serifMediumItalic, fontSize: 14, color: c.ink, lineHeight: 21 },
+    taglineCard:    { backgroundColor: palette.navy800, borderRadius: Radius.md, padding: 18, marginBottom: 16, ...getShadow(2) },
+    taglineEyebrow: { fontFamily: FontFamily.sansBold, fontSize: 9, textTransform: 'uppercase', letterSpacing: 1.5, color: palette.gold500, marginBottom: 10 },
+    taglineText:    { fontFamily: FontFamily.serifSemiBold, fontSize: 18, color: palette.paper, lineHeight: 26 },
 
     errorBanner: { backgroundColor: 'rgba(226,72,60,0.08)', borderRadius: Radius.xs, padding: 14, marginBottom: 16, borderWidth: 1, borderColor: c.liveRed },
     errorText:   { fontFamily: FontFamily.sansRegular, fontSize: 13, color: c.liveRed,  marginBottom: 4 },
@@ -464,6 +486,9 @@ function makeStyles(c: ThemeColors) {
 
     focoCard:       { backgroundColor: c.surface, borderRadius: Radius.md, padding: 16, borderWidth: 1.5, borderColor: palette.gold500, marginBottom: 16, gap: 10, ...getShadow(1) },
     focoTitle:      { fontFamily: FontFamily.serifMedium, fontSize: 17, color: c.ink, lineHeight: 25 },
+    criterioRow:    { paddingTop: 8, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: c.hairline },
+    criterioTx:     { fontFamily: FontFamily.sansRegular, fontSize: 12, color: c.inkSoft, lineHeight: 18 },
+    criterioBold:   { fontFamily: FontFamily.sansBold, color: c.ink },
     focoBtnRow:     { flexDirection: 'row', gap: 8 },
     focoBtn:        { flex: 1, height: 44, borderRadius: Radius.xs, borderWidth: StyleSheet.hairlineWidth, borderColor: c.hairline, justifyContent: 'center', alignItems: 'center' },
     focoBtnActive:  { backgroundColor: palette.navy800, borderColor: palette.navy800 },

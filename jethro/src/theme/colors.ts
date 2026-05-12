@@ -1,6 +1,6 @@
 // Raw design tokens — exact hex values from the Jethro design handoff
 export const palette = {
-  paper:     '#EFEFEA',
+  paper:     '#E5E5DF',
   paperCard: '#FFFFFF',
 
   navy800: '#0B1F3B',  // primary ink, headings, primary buttons

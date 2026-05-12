@@ -198,6 +198,13 @@ function SemanaDetalhe({ semana, onBack, onWeekAdvanced }: SemanaDetalheProps) {
                       {isEmAndamento && <View style={s.focoBadge}><Text style={s.focoBadgeTx}>FOCO DE HOJE</Text></View>}
                     </View>
                     <Text style={[s.tarefaTx, isBloqueada && s.dimText, isConcluida && s.mutedText]}>{acao.texto}</Text>
+                    {acao.concluida_quando && !isBloqueada ? (
+                      <View style={s.criterioRow}>
+                        <Text style={s.criterioTx}>
+                          {'✅ '}<Text style={s.criterioBold}>Concluída quando: </Text>{acao.concluida_quando}
+                        </Text>
+                      </View>
+                    ) : null}
                     {isEmAndamento && (
                       <>
                         <View style={s.btnRow}>
@@ -397,6 +404,9 @@ function makeDetalheStyles(c: ThemeColors) {
     focoBadge:      { backgroundColor: '#FEF9C3', borderRadius: 3, paddingHorizontal: 6, paddingVertical: 1 },
     focoBadgeTx:    { fontFamily: FontFamily.sansBold, fontSize: 8, color: '#854D0E' },
     tarefaTx:       { fontFamily: FontFamily.sansRegular, fontSize: 13, color: c.ink, lineHeight: 19 },
+    criterioRow:    { marginTop: 8, paddingTop: 8, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: c.hairline },
+    criterioTx:     { fontFamily: FontFamily.sansRegular, fontSize: 12, color: c.inkSoft, lineHeight: 18 },
+    criterioBold:   { fontFamily: FontFamily.sansBold, color: c.ink },
     btnRow:         { flexDirection: 'row', gap: 8, marginTop: 10, marginBottom: 6 },
     btnOk:          { flex: 1, backgroundColor: palette.navy800, borderRadius: Radius.xs, paddingVertical: 8, alignItems: 'center' },
     btnOkTx:        { fontFamily: FontFamily.sansSemiBold, fontSize: 12, color: palette.paper },
