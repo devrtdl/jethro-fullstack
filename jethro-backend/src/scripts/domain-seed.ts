@@ -793,7 +793,7 @@ const onboardingQuestions: DiagnosticQuestionSeed[] = [
     label: 'Sabes quanto custa produzir/entregar cada produto ou serviço?',
     questionType: 'single_select',
     options: [
-      { label: 'Sim, tenho custo unitário definido', value: 'A' },
+      { label: 'Sim, tenho claro', value: 'A' },
       { label: 'Mais ou menos', value: 'B' },
       { label: 'Não, nunca calculei', value: 'C' },
     ],
@@ -840,9 +840,9 @@ const onboardingQuestions: DiagnosticQuestionSeed[] = [
     label: 'Consegues explicar em 1 frase o que fazes e para quem?',
     questionType: 'single_select',
     options: [
-      { label: 'Sim, tenho bem claro', value: 'A' },
+      { label: 'Sim, tenho claro', value: 'A' },
       { label: 'Mais ou menos', value: 'B' },
-      { label: 'Mudo toda vez', value: 'C' },
+      { label: 'Não consigo', value: 'C' },
     ],
     metadata: {
       form: 'onboarding', phase: '4', conditional: true, fields: ['clareza_posicionamento'],
@@ -883,9 +883,8 @@ const onboardingQuestions: DiagnosticQuestionSeed[] = [
     questionType: 'single_select',
     options: [
       { label: 'Quase tudo', value: 'A' },
-      { label: '3 a 4 actividades críticas', value: 'B' },
-      { label: '1 a 2 específicas', value: 'C' },
-      { label: 'A equipe resolve quase tudo', value: 'D' },
+      { label: 'Metade', value: 'B' },
+      { label: 'Poucas', value: 'C' },
     ],
     metadata: {
       form: 'onboarding', phase: '4', conditional: true, fields: ['dependencia_dono_pct'],
@@ -913,10 +912,9 @@ const onboardingQuestions: DiagnosticQuestionSeed[] = [
     label: 'Se tirasses 2 semanas de férias, o que para?',
     questionType: 'single_select',
     options: [
-      { label: 'Tudo para', value: 'A' },
-      { label: 'As vendas param', value: 'B' },
-      { label: 'A operação para', value: 'C' },
-      { label: 'Quase nada — a equipe resolve', value: 'D' },
+      { label: 'Quase nada', value: 'A' },
+      { label: 'Algumas coisas', value: 'B' },
+      { label: 'Tudo', value: 'C' },
     ],
     metadata: {
       form: 'onboarding', phase: '4', conditional: true, fields: ['teste_ferias'],
@@ -930,10 +928,9 @@ const onboardingQuestions: DiagnosticQuestionSeed[] = [
     label: 'Cada pessoa da equipe sabe a meta desta semana?',
     questionType: 'single_select',
     options: [
-      { label: 'Sim, toda a gente', value: 'A' },
-      { label: 'Alguns sabem', value: 'B' },
+      { label: 'Sim, com clareza', value: 'A' },
+      { label: 'Mais ou menos', value: 'B' },
       { label: 'Ninguém tem meta clara', value: 'C' },
-      { label: 'Eu sou o único com metas', value: 'D' },
     ],
     metadata: {
       form: 'onboarding', phase: '4', conditional: true, fields: ['clareza_metas_equipe'],
@@ -943,15 +940,12 @@ const onboardingQuestions: DiagnosticQuestionSeed[] = [
   {
     code: 'onb_o22a_decisoes',
     orderIndex: 173,
-    label: 'Quais decisões do dia a dia ainda passam por você? (pode selecionar vários)',
-    questionType: 'multi_select',
+    label: 'Quais decisões ainda passam por você?',
+    questionType: 'single_select',
     options: [
-      { label: 'Preços e descontos', value: 'A' },
-      { label: 'Atendimento ao cliente', value: 'B' },
-      { label: 'Compras e pagamentos', value: 'C' },
-      { label: 'Problemas da equipe', value: 'D' },
-      { label: 'Redes sociais', value: 'E' },
-      { label: 'Quase tudo passa por mim', value: 'F' },
+      { label: 'Poucas', value: 'A' },
+      { label: 'Metade', value: 'B' },
+      { label: 'Quase tudo', value: 'C' },
     ],
     metadata: {
       form: 'onboarding', phase: '4', conditional: true, fields: ['decisoes_centralizadas'],
@@ -975,10 +969,10 @@ const onboardingQuestions: DiagnosticQuestionSeed[] = [
     label: 'Quanto podias cobrar com o posicionamento certo?',
     questionType: 'single_select',
     options: [
-      { label: 'Até 2x mais do que cobro', value: 'A' },
-      { label: '2 a 3x mais', value: 'B' },
-      { label: 'Mais de 3x', value: 'C' },
-      { label: 'Já cobro o que deveria', value: 'D' },
+      { label: 'Mesmo valor', value: 'A' },
+      { label: '1.5x mais', value: 'B' },
+      { label: '2-3x mais', value: 'C' },
+      { label: 'Não sei', value: 'D' },
     ],
     metadata: {
       form: 'onboarding', phase: '4', conditional: true, fields: ['gap_ticket'],
@@ -993,9 +987,8 @@ const onboardingQuestions: DiagnosticQuestionSeed[] = [
     questionType: 'single_select',
     options: [
       { label: 'Sim, tenho reserva', value: 'A' },
-      { label: 'Sim, até R$2k/mês', value: 'B' },
-      { label: 'Não, caixa apertado', value: 'C' },
-      { label: 'Depende do retorno', value: 'D' },
+      { label: 'Pouco', value: 'B' },
+      { label: 'Não', value: 'C' },
     ],
     metadata: {
       form: 'onboarding', phase: '4', conditional: true, fields: ['capacidade_investimento'],
@@ -1041,9 +1034,8 @@ const onboardingQuestions: DiagnosticQuestionSeed[] = [
     questionType: 'single_select',
     options: [
       { label: 'Nunca tive', value: 'A' },
-      { label: 'Já tive, não estou mais', value: 'B' },
+      { label: 'Já tive', value: 'B' },
       { label: 'Tenho atualmente', value: 'C' },
-      { label: 'Já tentei, não funcionou', value: 'D' },
     ],
     metadata: {
       form: 'onboarding', phase: '4', conditional: true, fields: ['experiencia_mentoria'],
