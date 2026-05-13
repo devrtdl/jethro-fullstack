@@ -6,12 +6,26 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
 import { authService } from '@/src/services/auth/auth-service';
+import { subscriptionService } from '@/src/services/subscription/subscription-service';
 import { useTheme } from '@/src/theme/ThemeContext';
 import type { ThemeColors } from '@/src/theme/colors';
 import { palette } from '@/src/theme/colors';
 import { FontFamily } from '@/src/theme/typography';
 
 type AuthScreenMode = 'login' | 'register';
+
+async function navigateAfterAuth() {
+  try {
+    const status = await subscriptionService.getFlowStatus();
+    if (!status.hasDiagnostic) { router.replace('/diagnostico'); return; }
+    if (!status.hasSubscription) { router.replace('/paywall'); return; }
+    if (!status.hasOnboarding) { router.replace('/onboarding'); return; }
+    if (!status.hasPlan) { router.replace('/onboarding-result'); return; }
+    router.replace('/(tabs)');
+  } catch {
+    router.replace('/diagnostico');
+  }
+}
 
 export function AuthScreen({ mode }: { mode: AuthScreenMode }) {
   const { colors } = useTheme();
@@ -40,13 +54,13 @@ export function AuthScreen({ mode }: { mode: AuthScreenMode }) {
         const result = await authService.signUpWithPassword(normalizedEmail, password, fullName);
         if (result.user?.id) {
           setMessage('Conta criada com sucesso. Vamos para o diagnóstico.');
-          router.replace('/(tabs)');
+          await navigateAfterAuth();
           return;
         }
         setMessage('Conta criada. Se o ambiente exigir confirmação de e-mail, valide e depois entre.');
       } else {
         await authService.signInWithPassword(normalizedEmail, password);
-        router.replace('/(tabs)');
+        await navigateAfterAuth();
         return;
       }
     } catch (authError) {
@@ -62,7 +76,7 @@ export function AuthScreen({ mode }: { mode: AuthScreenMode }) {
     setError(null);
     try {
       await authService.signInWithOAuth(provider);
-      router.replace('/(tabs)');
+      await navigateAfterAuth();
     } catch (authError) {
       setError(authError instanceof Error ? authError.message : 'Não foi possível iniciar o login social.');
     } finally {
