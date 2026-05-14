@@ -1259,7 +1259,7 @@ export class FormsService {
 
       const weekResult = await client.query<{ id: string }>(
         `insert into semanas (
-           plano_id, numero, mes, fase, pilar, versiculo, objetivo, unlocked_at, iniciada_em
+           plano_id, numero, mes, fase, pilar, versiculo_ancora, objetivo, unlocked_at, iniciada_em
          ) values ($1, $2, $3, $4, $5, $6, $7, $8, $9)
          returning id`,
         [
