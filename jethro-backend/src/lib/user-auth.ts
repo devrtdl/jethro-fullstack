@@ -33,6 +33,7 @@ export async function userAuthPreHandler(request: FastifyRequest) {
   }
 
   const authUser = data.user;
+  const normalizedEmail = authUser.email ? authUser.email.trim().toLowerCase() : null;
 
   const pool = getDbPool();
 
@@ -41,9 +42,9 @@ export async function userAuthPreHandler(request: FastifyRequest) {
     .query<{ id: string }>('SELECT id FROM users WHERE auth_id = $1 LIMIT 1', [authUser.id])
     .then((r) => r.rows[0] ?? null);
 
-  if (!userRow && authUser.email) {
+  if (!userRow && normalizedEmail) {
     userRow = await pool
-      .query<{ id: string }>('SELECT id FROM users WHERE email = $1 LIMIT 1', [authUser.email])
+      .query<{ id: string }>('SELECT id FROM users WHERE email = $1 LIMIT 1', [normalizedEmail])
       .then((r) => r.rows[0] ?? null);
 
     // Backfill auth_id para chamadas futuras
@@ -60,7 +61,7 @@ export async function userAuthPreHandler(request: FastifyRequest) {
          VALUES ($1, $2, 'email', 'active')
          ON CONFLICT (email) DO UPDATE SET auth_id = $2, status = 'active'
          RETURNING id`,
-        [authUser.email ?? `${authUser.id}@unknown`, authUser.id]
+        [normalizedEmail ?? `${authUser.id}@unknown`, authUser.id]
       )
       .then((r) => r.rows[0] ?? null);
 
