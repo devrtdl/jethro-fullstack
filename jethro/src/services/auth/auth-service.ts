@@ -4,6 +4,7 @@ import type { Provider, Session } from '@supabase/supabase-js';
 
 import { env } from '@/src/config/env';
 import { supabase } from '@/src/lib/supabase';
+import { appStorage } from '@/src/lib/app-storage';
 import { apiClient } from '@/src/services/api/client';
 import type { SubmissionResult } from '@/src/types/diagnostic-form';
 import { ApiError } from '@/src/types/api';
@@ -364,5 +365,7 @@ export const authService = {
         details: error,
       });
     }
+
+    await appStorage.removeItem('onboarding_draft').catch(() => {});
   },
 };

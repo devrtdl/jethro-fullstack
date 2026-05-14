@@ -51,4 +51,21 @@ export const appStorage = {
       memoryStorage.set(key, value);
     }
   },
+
+  async removeItem(key: string) {
+    if (Platform.OS === 'web') {
+      if (typeof globalThis.localStorage !== 'undefined') {
+        globalThis.localStorage.removeItem(key);
+      } else {
+        memoryStorage.delete(key);
+      }
+      return;
+    }
+
+    try {
+      await SecureStore.deleteItemAsync(key);
+    } catch {
+      memoryStorage.delete(key);
+    }
+  },
 };
