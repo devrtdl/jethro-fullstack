@@ -7,13 +7,56 @@
     "preview": {
       "distribution": "internal",
       "developmentClient": false,
-      "channel": "preview"
+      "channel": "preview",
+      "env": {
+        "EXPO_PUBLIC_APP_ENV": "production",
+        "EXPO_PUBLIC_API_URL": "https://jethro-fullstack.onrender.com/",
+        "EXPO_PUBLIC_API_TIMEOUT_MS": "30000",
+        "EXPO_PUBLIC_AUTH_REDIRECT_URL": "jethro://auth/callback",
+        "EXPO_PUBLIC_SUPABASE_URL": "https://sglpwjmdrvapurllisdn.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "sb_publishable_X-jGKTIsVFFc2bZedtdaKA_V_vSgRML"
+      }
+    },
+    "preview-android": {
+      "distribution": "internal",
+      "developmentClient": false,
+      "channel": "preview",
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_APP_ENV": "production",
+        "EXPO_PUBLIC_API_URL": "https://jethro-fullstack.onrender.com/",
+        "EXPO_PUBLIC_API_TIMEOUT_MS": "30000",
+        "EXPO_PUBLIC_AUTH_REDIRECT_URL": "jethro://auth/callback",
+        "EXPO_PUBLIC_SUPABASE_URL": "https://sglpwjmdrvapurllisdn.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "sb_publishable_X-jGKTIsVFFc2bZedtdaKA_V_vSgRML"
+      }
     },
     "production": {
-      "channel": "production"
+      "channel": "production",
+      "distribution": "store",
+      "autoIncrement": true,
+      "ios": {
+        "buildConfiguration": "Release"
+      },
+      "env": {
+        "EXPO_PUBLIC_APP_ENV": "production",
+        "EXPO_PUBLIC_API_URL": "https://jethro-fullstack.onrender.com/",
+        "EXPO_PUBLIC_API_TIMEOUT_MS": "30000",
+        "EXPO_PUBLIC_AUTH_REDIRECT_URL": "jethro://auth/callback",
+        "EXPO_PUBLIC_SUPABASE_URL": "https://sglpwjmdrvapurllisdn.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "sb_publishable_X-jGKTIsVFFc2bZedtdaKA_V_vSgRML"
+      }
     }
   },
   "submit": {
-    "production": {}
+    "production": {
+      "ios": {
+        "appleId": "daniel.lopes@joinusit.pt",
+        "ascAppId": "6768756480",
+        "appleTeamId": "4ZT2RAP9DD"
+      }
+    }
   }
 }
