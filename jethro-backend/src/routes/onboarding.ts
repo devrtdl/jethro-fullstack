@@ -179,6 +179,8 @@ export async function registerOnboardingRoutes(app: FastifyInstance) {
       jsonCompleto.tempo_negocio = diagAnswers['q5_fase_negocio']
         ? (faseLabelMap[diagAnswers['q5_fase_negocio']] ?? diagAnswers['q5_fase_negocio'])
         : null;
+      jsonCompleto.expectativa_6_12_meses = (diagAnswers['q13_objetivo_futuro'] as string | undefined) ?? null;
+      jsonCompleto.desafios_principais = (diagAnswers['q14_desafios'] as string | undefined) ?? null;
 
       const newSession = await pool
         .query<{ id: string }>(

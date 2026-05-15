@@ -399,7 +399,9 @@ export function HomeScreen() {
             ) : resultStep === 'block2' ? (
               <>
                 <Text style={s.diagEyebrowGold}>Resultado do diagnóstico</Text>
-                <Text style={s.diagEyebrowMuted}>O que o negócio não consegue te dizer sozinho</Text>
+                {diagnostic.submitResult.diagnostic.generatedAt ? (
+                  <Text style={s.diagDataLabel}>{formatDate(diagnostic.submitResult.diagnostic.generatedAt)}</Text>
+                ) : null}
                 <Text style={s.diagTitulo}>{diagnostic.submitResult.diagnostic.block2Title}</Text>
                 <Text style={s.diagParagrafo}>{diagnostic.submitResult.diagnostic.block2Body}</Text>
 

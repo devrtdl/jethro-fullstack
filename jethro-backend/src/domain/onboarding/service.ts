@@ -8,7 +8,7 @@ export type OnboardingJson = {
   // EQUIPE E ATIVOS
   equipa_total: number | null;
   equipa_comercial_count: number | null;
-  equipa_detalhada: Array<{ nome: string; funcao: string }> | null;
+  equipa_detalhada: Array<{ nome: string; funcao: string }> | string | null;
   ativo_fisico: string | null;
   audiencia_digital_status: string | null;
   audiencia_tamanho: string | null;
@@ -77,6 +77,9 @@ export type OnboardingJson = {
   risco_plataforma: boolean;
   precisa_primeiro_contrato: boolean;
   pre_receita: boolean;
+  // CAMPOS DO DIAGNÓSTICO (enriquecidos na rota de submit)
+  expectativa_6_12_meses: string | null;
+  desafios_principais: string | null;
   // CAMPOS LEGADOS (compatibilidade com plano/IA)
   equipa: string | null;
   ativos_fisicos: string | null;
@@ -179,18 +182,22 @@ export function buildOnboardingJson(
   const equipa_comercial_num = equipa_comercial_raw ? (num(equipa_comercial_raw) ?? 0) : 0;
 
   const equipa_detalhada_raw = str(answers['onb_o2b_equipa_detalhada']);
-  let equipa_detalhada: Array<{ nome: string; funcao: string }> | null = null;
+  let equipa_detalhada: Array<{ nome: string; funcao: string }> | string | null = null;
   if (equipa_detalhada_raw) {
     try {
+      // Tenta parse JSON (formato antigo team_slots)
       const parsed = JSON.parse(equipa_detalhada_raw) as unknown;
       if (Array.isArray(parsed)) {
-        equipa_detalhada = (parsed as Array<{ nome?: string; funcao?: string }>)
+        const slots = (parsed as Array<{ nome?: string; funcao?: string }>)
           .filter((p) => p.funcao)
           .map((p) => ({ nome: p.nome ?? '', funcao: p.funcao! }));
-        if (equipa_detalhada.length === 0) equipa_detalhada = null;
+        equipa_detalhada = slots.length > 0 ? slots : null;
+      } else {
+        equipa_detalhada = equipa_detalhada_raw;
       }
     } catch {
-      equipa_detalhada = null;
+      // Texto livre (formato novo textarea)
+      equipa_detalhada = equipa_detalhada_raw;
     }
   }
 
@@ -227,8 +234,10 @@ export function buildOnboardingJson(
 
   // Labels legíveis para campos que o plano usa como texto
   const meta_labels: Record<string, string> = {
-    A: 'Manter o atual', B: 'R$10 mil', C: 'R$20 mil',
-    D: 'R$50 mil', E: 'R$100 mil', F: 'Acima de R$100 mil',
+    A: 'Manter a faturação atual',
+    B: 'R$5 a 10 mil', C: 'R$10 a 20 mil',
+    D: 'R$20 a 30 mil', E: 'R$30 a 50 mil',
+    F: 'R$50 a 75 mil', G: 'Acima de R$100 mil',
   };
   const problema_labels: Record<string, string> = {
     A: 'Vender mais', B: 'Cobrar melhor', C: 'Organizar finanças',
@@ -270,7 +279,9 @@ export function buildOnboardingJson(
     ? ja_tentou_raw.split(',').map((c) => ja_tentou_labels[c.trim()] ?? c).filter(Boolean).join(', ')
     : null;
 
-  const meta_raw = str(answers['onb_o3_meta']);
+  const meta_raw_full = str(answers['onb_o3_meta']);
+  const [meta_code, meta_opt] = meta_raw_full ? meta_raw_full.split('|') : [null, undefined];
+  const meta_raw = meta_code; // compatibilidade
   const problema_raw = str(answers['onb_o3a_problema']);
   const impacto_raw = str(answers['onb_o11_impacto']);
   const sobra_raw = str(answers['onb_o4a_sobra']);
@@ -319,7 +330,9 @@ export function buildOnboardingJson(
     audiencia_digital_status: str(answers['onb_o7c_audiencia']),
     audiencia_tamanho: str(answers['onb_o7d_seguidores']),
     // META E PERCEPÇÃO
-    meta_6_meses: meta_raw ? (meta_labels[meta_raw] ?? meta_raw) : null,
+    meta_6_meses: meta_opt?.trim()
+      ? meta_opt.trim()
+      : (meta_code ? (meta_labels[meta_code] ?? meta_code) : null),
     maior_problema_percebido: problema_raw ? (problema_labels[problema_raw] ?? problema_raw) : null,
     impacto_pessoal: impacto_raw ? (impacto_labels[impacto_raw] ?? impacto_raw) : null,
     ja_tentou: ja_tentou_label,
@@ -383,6 +396,9 @@ export function buildOnboardingJson(
     risco_plataforma,
     precisa_primeiro_contrato,
     pre_receita,
+    // CAMPOS DO DIAGNÓSTICO (preenchidos na rota de submit após onboarding)
+    expectativa_6_12_meses: null,
+    desafios_principais: null,
     // CAMPOS LEGADOS (aliases para compatibilidade com plano/IA existente)
     equipa: equipa_total_num ? String(equipa_total_num) : null,
     ativos_fisicos: str(answers['onb_o2c_ativo_fisico']),

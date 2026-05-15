@@ -193,7 +193,15 @@ REGRAS ABSOLUTAS:
 6. S1 específica por modelo: D = sangramento; E = ponto de partida; C = gap de preço; F = dependência de canal; G = dependência operacional; H = centralização; B = platô; X = alavancas; A = priorização de caos.
 7. Use os nomes de blocos personalizados por modelo informados no prompt do usuário.
 8. Se ticket_medio = 0, não use como base de cálculo. A tarefa deve definir quanto cobrar pelo primeiro pacote.
-9. Referencie materiais da Biblioteca no campo materiais_biblioteca da semana (array de tags, ex: ["P1","P2"]). As ações usam apenas tag sequencial (T01–T05), não referência de biblioteca.
+9. BIBLIOTECA DA SEMANA: No campo materiais_biblioteca de cada semana, inclua exatamente 3 itens com o formato: [{"tipo":"GUIA","codigo":"G05","titulo":"Do Operacional ao Estratégico","onde":"Pilares > P4"}, ...]. Tipos permitidos: GUIA, TEMPLATE, CALCULADORA, SCRIPT. Prefira 1 GUIA + 1 TEMPLATE/CALCULADORA + 1 de formato complementar. Priorize materiais do modelo do diagnóstico. Nunca repita o mesmo código em semanas consecutivas. Semana 1: sempre incluir G14 (Start With Why). Semana 24: sempre incluir G10 (Hábitos Atômicos). Fallback: G09+G14+T11.
+
+ÍNDICE BIBLIOTECA (modelo → materiais prioritários):
+Guias: G01(Liderança Eficaz,P1,H/G/A) G02(Finanças PME,P5,D/C/E) G03(Proposta Valor,P2,C/E/F) G04(Gestão Tempo,P1,A/H/G) G05(Op→Estratégico,P4,G/H/X) G06(Seleção Comp.,P4,G/H/X) G07(Funil Vendas,P6,F/E/D/B) G08(Processos/SOPs,P4,G/H/X/B) G09(Planejamento,P3,A/B/X) G10(Hábitos Atômicos,Universal) G11(StoryBrand,P6,F/E/C/B) G12(Profit First,P5,D/C/F/X) G13(Traction/EOS,P4,B/X/G) G14(Start With Why,Universal) G15(Validação 1ª Venda,P2,E) G16(Cobrar o Que Vale,P2,C) G17(Recuperação Financeira,P5,D) G18(Marketing Digital,P6,F/E/B) G19(Essencialismo,P1,A) G20(Cultura de Time,P4,G/H/X) G21(2º em Comando,P4,H) G22(Retenção e Crescimento,P6,B/F/C) G23(Parcerias e Canais,P6,X/B).
+Templates: T-H1(Matriz Delegar,P4,H) T-X1(Mapa de Escala,P6,X/B) T11(Clientes Ativos,Universal).
+Calculadoras: T02(Custos Fixos,Universal) T-C2(Valor da Hora,P2/P5,C).
+Scripts: T-D1(Script Renegociação,P5,D) T-D2(Régua Cobranças,P5,D).
+
+As ações usam apenas tag sequencial (T01–T05), não referência de biblioteca.
 10. AÇÕES E METÁFORAS DA ALMA (consultar primeiro, nunca ignorar)
 A seção "AÇÕES ALMA PRIORIZADAS" contém ações escritas pelo mentor Rogério Teixeira, pré-selecionadas para este modelo. A seção "METÁFORAS ALMA" contém metáforas bíblicas e empresariais curadas pelo mentor.
 FLUXO OBRIGATÓRIO para cada tarefa do plano:
@@ -208,7 +216,7 @@ PASSO 1: Verificar se existe ação em "AÇÕES ALMA PRIORIZADAS" que correspond
 PASSO 2: Independente de ter encontrado ação ou não, verificar "METÁFORAS ALMA" e incluir metáforas relevantes no campo por_que_importa ou na descrição das tarefas.
 PASSO 3: SOMENTE se "AÇÕES ALMA PRIORIZADAS" não contiver NENHUMA ação relevante (0 ações) E "METÁFORAS ALMA" não contiver NENHUMA metáfora aplicável (0 metáforas) — a IA cria ações e linguagem próprias, mantendo o tom do mentor.
 REGRAS DA ALMA: NUNCA substituir uma ação da Alma por versão genérica. NUNCA ignorar as ações priorizadas se contiverem ações relevantes. Metáforas da Alma TÊM PRIORIDADE sobre metáforas inventadas. Quando a IA criar ação nova, manter o mesmo nível de concretude e tom das ações da Alma. A Alma NÃO é limitante — a IA pode e deve criar ações novas quando necessário, mas SEMPRE consultando a Alma primeiro.
-13. LINGUAGEM POR SETOR: Use o campo area_negocio do onboarding para traduzir cada tarefa para a realidade concreta do empreendedor. Nunca use linguagem genérica quando existe equivalente do setor. Antes de finalizar cada tarefa, aplique o teste: "Esta descrição poderia servir para qualquer negócio sem alterar uma palavra?" Se sim — reformule com area_negocio + ofertas_atuais do empreendedor.
+13. LINGUAGEM POR SETOR: Use o campo area_negocio do onboarding para traduzir cada tarefa para a realidade concreta do empreendedor. Use expectativa_6_12_meses (quando disponível) para calibrar a ambição do plano. Use desafios_principais (quando disponível) para garantir que as semanas iniciais atacam diretamente o que o empreendedor identificou como seus maiores obstáculos. Nunca use linguagem genérica quando existe equivalente do setor. Antes de finalizar cada tarefa, aplique o teste: "Esta descrição poderia servir para qualquer negócio sem alterar uma palavra?" Se sim — reformule com area_negocio + ofertas_atuais do empreendedor.
 14. CRITÉRIO DE CONCLUSÃO: Cada ação DEVE ter um campo concluida_quando com critério verificável pelo próprio empreendedor. O critério deve ser específico (número ou entregável concreto) e binário (feito ou não feito). Errado: "Quando organizar o financeiro". Correto: "Quando conseguir mostrar uma planilha com receitas e despesas separadas dos últimos 30 dias".
 
 CONFIDENCIALIDADE ABSOLUTA:
@@ -287,7 +295,11 @@ FORMATO DE SAÍDA (JSON puro, sem markdown, sem texto antes ou depois):
       { "tag": "T05", "titulo": "Título curto da ação", "descricao": "Descrição detalhada no setor do empreendedor", "concluida_quando": "Quando conseguir [critério verificável e específico]" }
     ],
     "indicador_sucesso": "Como saber praticamente se a semana foi cumprida",
-    "materiais_biblioteca": ["P1", "P2"]
+    "materiais_biblioteca": [
+      {"tipo": "GUIA", "codigo": "G14", "titulo": "Start With Why", "onde": "Pilares > P3"},
+      {"tipo": "TEMPLATE", "codigo": "T11", "titulo": "Planilha de Clientes Ativos", "onde": "Por Tipo > Templates"},
+      {"tipo": "CALCULADORA", "codigo": "T02", "titulo": "Planilha de Custos Fixos", "onde": "Por Tipo > Calculadoras"}
+    ]
   },
   "semanas_restantes": [
 ${buildRemainingWeeksExample(diagnosticModel)}
@@ -371,7 +383,11 @@ FORMATO DE SAÍDA (JSON puro, sem markdown, sem texto antes ou depois):
     { "tag": "T05", "titulo": "Título curto da ação", "descricao": "Descrição detalhada no setor do empreendedor", "concluida_quando": "Quando conseguir [critério verificável e específico]" }
   ],
   "indicador_sucesso": "Como saber praticamente se a semana foi cumprida",
-  "materiais_biblioteca": ["P1", "P2"]
+  "materiais_biblioteca": [
+    {"tipo": "GUIA", "codigo": "G05", "titulo": "Título do guia escolhido", "onde": "Pilares > P4"},
+    {"tipo": "TEMPLATE", "codigo": "T-H1", "titulo": "Título do template escolhido", "onde": "Por Tipo > Templates"},
+    {"tipo": "CALCULADORA", "codigo": "T02", "titulo": "Título da calculadora escolhida", "onde": "Por Tipo > Calculadoras"}
+  ]
 }`;
 }
 
