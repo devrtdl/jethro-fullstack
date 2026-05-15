@@ -1289,12 +1289,13 @@ export class FormsService {
 
       if (action) {
         await client.query(
-          `insert into tarefas_semana (semana_id, acao_codigo, titulo, descricao, responsavel, meta)
-           values ($1, $2, $3, $4, $5, $6)`,
+          `insert into tarefas_semana (semana_id, acao_codigo, titulo, texto, descricao, responsavel, meta)
+           values ($1, $2, $3, $4, $5, $6, $7)`,
           [
             weekId,
             action.codigo,
             action.titulo,
+            action.descricao,
             action.descricao,
             'Fundador',
             `Executar ${action.titulo.toLowerCase()} na semana ${weekNumber}.`,
