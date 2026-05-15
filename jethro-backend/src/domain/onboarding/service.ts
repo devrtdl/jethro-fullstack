@@ -150,6 +150,7 @@ const CANAL_MOTOR_MAP: Record<string, string> = {
 
 // Lê resposta range_with_optional: formato "A" ou "A|7000"
 // Se valor opcional preenchido → usa esse; senão → midpoint da faixa
+// Suporta formato pt-BR: "30.000" (separador de milhar) → 30000
 function resolveRange(
   raw: string | null | undefined,
   midpoints: Record<string, number | null>
@@ -157,7 +158,9 @@ function resolveRange(
   if (!raw) return null;
   const [rangeCode, optVal] = raw.split('|');
   if (optVal?.trim()) {
-    const n = parseFloat(optVal.trim().replace(/[^\d.]/g, ''));
+    // Remove espaços, pontos (milhar pt-BR) e converte vírgula decimal → ponto
+    const cleaned = optVal.trim().replace(/\s/g, '').replace(/\./g, '').replace(',', '.');
+    const n = parseFloat(cleaned);
     if (!isNaN(n) && n > 0) return n;
   }
   return midpoints[rangeCode ?? ''] ?? null;
