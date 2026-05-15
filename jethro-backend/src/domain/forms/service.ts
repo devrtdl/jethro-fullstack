@@ -1169,8 +1169,9 @@ export class FormsService {
       }
 
       await client.query('commit');
-    } catch {
+    } catch (err) {
       await client.query('rollback');
+      console.error('[persistProductDomainSubmission] rollback:', err);
     } finally {
       client.release();
     }
