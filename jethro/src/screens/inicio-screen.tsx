@@ -1,9 +1,11 @@
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { mentorContext } from '@/src/lib/mentor-context';
+import { planoContext } from '@/src/lib/plano-context';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
+  Linking,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -24,6 +26,13 @@ import { EyebrowLabel } from '@/src/components/ui/EyebrowLabel';
 import { PrimaryButton } from '@/src/components/ui/PrimaryButton';
 import { FeatureCard } from '@/src/components/ui/FeatureCard';
 import { SectionCard } from '@/src/components/section-card';
+import {
+  CATALOGO,
+  MODEL_RECURSO_SEMANA,
+  TYPE_COLORS,
+  TIPO_LABELS,
+  type Material,
+} from '@/src/data/biblioteca-catalog';
 
 
 function getUserDisplayName(session: { user?: { user_metadata?: { full_name?: string; name?: string }; email?: string } } | null): string {
@@ -59,61 +68,41 @@ function faseLabel(fase: string): string {
 
 
 
-type BibliotecaItem = { tipo: 'AULA' | 'TEMPLATE' | 'ARTIGO'; titulo: string };
-
-const BIBLIOTECA_CONTEUDO: Record<string, BibliotecaItem[]> = {
-  P1: [
-    { tipo: 'AULA',     titulo: 'Definindo Seu Propósito Empresarial' },
-    { tipo: 'ARTIGO',   titulo: 'O Empresário Cristão e Seu Chamado' },
-    { tipo: 'TEMPLATE', titulo: 'Manifesto de Propósito do Negócio' },
-  ],
-  P2: [
-    { tipo: 'AULA',     titulo: 'DRE Simplificado para Pequenas Empresas' },
-    { tipo: 'TEMPLATE', titulo: 'Planilha de Fluxo de Caixa Mensal' },
-    { tipo: 'ARTIGO',   titulo: 'Separando Finanças Pessoais das Empresariais' },
-  ],
-  P3: [
-    { tipo: 'AULA',     titulo: 'Precificação com Justiça e Margem Real' },
-    { tipo: 'TEMPLATE', titulo: 'Calculadora de Preço Justo' },
-    { tipo: 'ARTIGO',   titulo: 'Por Que Cobrar Pouco É um Erro Espiritual' },
-  ],
-  P4: [
-    { tipo: 'AULA',     titulo: 'Processo de Venda que Honra o Cliente' },
-    { tipo: 'TEMPLATE', titulo: 'Script de Proposta de Valor' },
-    { tipo: 'ARTIGO',   titulo: 'Persuasão vs Manipulação: A Linha Bíblica' },
-  ],
-  P5: [
-    { tipo: 'AULA',     titulo: 'Como Delegar com Autoridade e Confiança' },
-    { tipo: 'TEMPLATE', titulo: 'Manual de Onboarding para Equipe' },
-    { tipo: 'ARTIGO',   titulo: 'O Líder que Multiplica, não Centraliza' },
-  ],
-  P6: [
-    { tipo: 'AULA',     titulo: 'Mapeamento de Processos Essenciais' },
-    { tipo: 'TEMPLATE', titulo: 'Checklist de Rotinas Operacionais' },
-    { tipo: 'ARTIGO',   titulo: 'Negócio que Funciona Sem Você' },
-  ],
-  P7: [
-    { tipo: 'AULA',     titulo: 'Construindo uma Visão de 10 Anos' },
-    { tipo: 'TEMPLATE', titulo: 'Canvas de Legado Empresarial' },
-    { tipo: 'ARTIGO',   titulo: 'Mateus 25:21 — O Padrão do Legado Fiel' },
-  ],
-};
+function getBibMateriais(modelo: string, weekNumber: number): Material[] {
+  const recursoCode = MODEL_RECURSO_SEMANA[modelo] ?? 'T02';
+  const recurso = CATALOGO.find((m) => m.codigo === recursoCode);
+  const rest = CATALOGO.filter(
+    (m) =>
+      m.modelos.includes(modelo) &&
+      !m.modelos.includes('universal') &&
+      m.codigo !== recursoCode,
+  );
+  // rotate through model-specific files by week so each week shows different material
+  const offset = (weekNumber - 1) % Math.max(rest.length, 1);
+  const rotated = [...rest.slice(offset), ...rest.slice(0, offset)];
+  const picks: Material[] = recurso ? [recurso] : [];
+  for (const m of rotated) {
+    if (picks.length >= 3) break;
+    picks.push(m);
+  }
+  if (picks.length < 3) {
+    const universal = CATALOGO.filter((m) => m.modelos.includes('universal'));
+    for (const m of universal) {
+      if (picks.length >= 3) break;
+      if (!picks.find((p) => p.id === m.id)) picks.push(m);
+    }
+  }
+  return picks.slice(0, 3);
+}
 
 function matBadgeBg(tipo: string): object {
-  const map: Record<string, object> = {
-    AULA:     { backgroundColor: '#0B1C35' },
-    TEMPLATE: { backgroundColor: '#FEF3C7' },
-    ARTIGO:   { backgroundColor: '#D1FAE5' },
-  };
-  return map[tipo] ?? { backgroundColor: '#DDD6C8' };
+  return { backgroundColor: TYPE_COLORS[tipo as keyof typeof TYPE_COLORS]?.bg ?? '#DDD6C8' };
 }
 function matBadgeTx(tipo: string): object {
-  const map: Record<string, object> = {
-    AULA:     { color: '#C9A655' },
-    TEMPLATE: { color: '#92400E' },
-    ARTIGO:   { color: '#065F46' },
-  };
-  return map[tipo] ?? { color: '#666' };
+  return { color: TYPE_COLORS[tipo as keyof typeof TYPE_COLORS]?.text ?? '#666' };
+}
+function matLabel(tipo: string): string {
+  return TIPO_LABELS[tipo as keyof typeof TIPO_LABELS] ?? tipo;
 }
 
 export function InicioScreen() {
@@ -279,52 +268,43 @@ export function InicioScreen() {
                   <Text style={[s.focoBtnText, focusStatus === 'ongoing' && s.focoBtnTextActive]}>◑ Em andamento</Text>
                 </Pressable>
               </View>
-              {/* Botão dourado Jethro — abre mentor com contexto da ação atual */}
+              {/* Botão — abre aba Ações da semana atual no plano */}
               <Pressable
-                style={s.jethroBtn}
+                style={s.acoesBtn}
                 onPress={() => {
-                  if (acaoPrincipal) {
-                    mentorContext.set(
-                      `Preciso de ajuda com esta ação da Semana ${plano.semanaNumero}: "${acaoPrincipal.texto}"\n\nObjectivo desta semana: ${plano.objetivo}`
-                    );
-                  }
-                  router.push('/(tabs)/mentor');
+                  planoContext.setOpenAcoes();
+                  router.push('/(tabs)/explore' as Parameters<typeof router.push>[0]);
                 }}
                 accessibilityRole="button"
-                accessibilityLabel="Pedir ajuda ao Jethro com esta ação"
+                accessibilityLabel="Ver ações desta semana no plano"
               >
-                <Text style={s.jethroBtnText}>✦  Jethro, me ajuda com esta ação</Text>
+                <Text style={s.acoesBtnText}>Ver ações desta semana →</Text>
               </Pressable>
             </View>
 
             {/* ⑤ Biblioteca do Jethro */}
             {(() => {
-              // Monta lista de itens reais (AULA/TEMPLATE/ARTIGO)
-              // Fonte prioritária: materiais_semana do plano (gerado pelo Claude para esta semana)
-              // Fallback: pega 1 item de cada pilar sugerido (materiais_biblioteca) ou do pilar atual
-              const matSemana = plano.materiais_semana ?? [];
-              const pilaresRef = (plano.materiais_biblioteca ?? []).length > 0
-                ? (plano.materiais_biblioteca ?? []).slice(0, 3)
-                : plano.pilar ? [plano.pilar] : [];
-
-              const itensFinais: BibliotecaItem[] = matSemana.length > 0
-                ? matSemana.map((m) => ({ tipo: m.tipo, titulo: m.titulo } as BibliotecaItem))
-                : pilaresRef.flatMap((pid) => (BIBLIOTECA_CONTEUDO[pid] ?? []).slice(0, 1));
-
+              const modelo = data?.modelo ?? 'A';
+              const semana = plano.semanaNumero ?? 1;
+              const itens = getBibMateriais(modelo, semana);
               return (
                 <View style={s.bibCard}>
                   <Text style={s.bibLabelMain}>BIBLIOTECA DO JETHRO</Text>
                   <Text style={s.bibLabelSub}>Materiais recomendados para esta semana</Text>
                   <View style={s.bibDivider} />
-                  {itensFinais.map((item, idx) => (
-                    <View key={idx}>
-                      <View style={s.bibItem}>
+                  {itens.map((item, idx) => (
+                    <View key={item.id}>
+                      <Pressable
+                        style={s.bibItem}
+                        onPress={() => void Linking.openURL(item.url)}
+                        android_ripple={{ color: 'rgba(0,0,0,0.04)' }}
+                      >
                         <View style={[s.bibBadge, matBadgeBg(item.tipo)]}>
-                          <Text style={[s.bibBadgeTx, matBadgeTx(item.tipo)]}>{item.tipo}</Text>
+                          <Text style={[s.bibBadgeTx, matBadgeTx(item.tipo)]}>{matLabel(item.tipo)}</Text>
                         </View>
-                        <Text style={s.bibTitulo}>{item.titulo}</Text>
-                      </View>
-                      {idx < itensFinais.length - 1 && <View style={s.bibSep} />}
+                        <Text style={s.bibTitulo} numberOfLines={2}>{item.nome}</Text>
+                      </Pressable>
+                      {idx < itens.length - 1 && <View style={s.bibSep} />}
                     </View>
                   ))}
                   <View style={s.bibDivider} />
@@ -492,8 +472,8 @@ function makeStyles(c: ThemeColors) {
     focoBtnActive:  { backgroundColor: palette.navy800, borderColor: palette.navy800 },
     focoBtnText:    { fontFamily: FontFamily.sansMedium, fontSize: 13, color: c.inkSoft },
     focoBtnTextActive: { color: palette.paper },
-    jethroBtn:      { backgroundColor: palette.gold500, borderRadius: Radius.xs, paddingVertical: 11, alignItems: 'center' },
-    jethroBtnText:  { fontFamily: FontFamily.sansBold, fontSize: 13, color: palette.navy800 },
+    acoesBtn:      { backgroundColor: palette.gold500, borderRadius: Radius.xs, paddingVertical: 11, alignItems: 'center' },
+    acoesBtnText:  { fontFamily: FontFamily.sansBold, fontSize: 13, color: palette.navy800 },
 
     // Biblioteca do Jethro
     bibCard:        { backgroundColor: c.surface, borderRadius: Radius.md, padding: 16, marginBottom: 16, ...getShadow(1) },

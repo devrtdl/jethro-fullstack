@@ -9,10 +9,11 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 
 import { homeService, type PlanoCompleto, type PlanoSemanaCompleta } from '@/src/services/home/home-service';
 import { mentorContext } from '@/src/lib/mentor-context';
+import { planoContext } from '@/src/lib/plano-context';
 import { useTheme } from '@/src/theme/ThemeContext';
 import type { ThemeColors } from '@/src/theme/colors';
 import { palette } from '@/src/theme/colors';
@@ -45,13 +46,14 @@ type SemanaDetalheProps = {
   semana: PlanoSemanaCompleta;
   onBack: () => void;
   onWeekAdvanced: () => void;
+  initialAba?: 'objetivo' | 'acoes' | 'materiais' | 'checkin';
 };
 
-function SemanaDetalhe({ semana, onBack, onWeekAdvanced }: SemanaDetalheProps) {
+function SemanaDetalhe({ semana, onBack, onWeekAdvanced, initialAba }: SemanaDetalheProps) {
   const { colors } = useTheme();
   const s = useMemo(() => makeDetalheStyles(colors), [colors]);
   const router = useRouter();
-  const [aba, setAba] = useState<'objetivo' | 'acoes' | 'materiais' | 'checkin'>('objetivo');
+  const [aba, setAba] = useState<'objetivo' | 'acoes' | 'materiais' | 'checkin'>(initialAba ?? 'objetivo');
 
   const [confianca,     setConfianca]     = useState<number | null>(semana.check_in?.confianca ?? null);
   const [clareza,       setClareza]       = useState<number | null>(semana.check_in?.clareza   ?? null);
@@ -652,30 +654,62 @@ export function PlanoScreen() {
   const { colors } = useTheme();
   const s = useMemo(() => makeScreenStyles(colors), [colors]);
 
-  const [plano,         setPlano]         = useState<PlanoCompleto | null>(null);
-  const [loading,       setLoading]       = useState(true);
-  const [blocoAberto,   setBlocoAberto]   = useState<number | null>(0);
-  const [semanaDetalhe, setSemanaDetalhe] = useState<PlanoSemanaCompleta | null>(null);
-  const [aba,           setAba]           = useState<'visaoGeral' | 'fases'>('visaoGeral');
+  const [plano,            setPlano]            = useState<PlanoCompleto | null>(null);
+  const [loading,          setLoading]          = useState(true);
+  const [blocoAberto,      setBlocoAberto]      = useState<number | null>(0);
+  const [semanaDetalhe,    setSemanaDetalhe]    = useState<PlanoSemanaCompleta | null>(null);
+  const [detalheInitialAba,setDetalheInitialAba]= useState<'objetivo' | 'acoes' | undefined>(undefined);
+  const [aba,              setAba]              = useState<'visaoGeral' | 'fases'>('visaoGeral');
+  const pendingAcoes = useRef(false);
+
+  const openCurrentWeekAcoes = useCallback((data: PlanoCompleto | null) => {
+    if (!data) return;
+    const current = data.semanas.find(s => s.gate_status === 'available') ?? null;
+    if (current) {
+      setDetalheInitialAba('acoes');
+      setSemanaDetalhe(current);
+    }
+  }, []);
+
+  useFocusEffect(useCallback(() => {
+    const intent = planoContext.consume();
+    if (intent === 'acoes') {
+      if (plano) {
+        openCurrentWeekAcoes(plano);
+      } else {
+        pendingAcoes.current = true;
+      }
+    }
+  }, [plano, openCurrentWeekAcoes]));
 
   const loadPlano = useCallback(async () => {
     try {
       const data = await homeService.getPlanoCompleto();
       setPlano(data);
+      if (pendingAcoes.current && data) {
+        pendingAcoes.current = false;
+        openCurrentWeekAcoes(data);
+      }
     } catch {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [openCurrentWeekAcoes]);
 
   useEffect(() => { void loadPlano(); }, [loadPlano]);
+
+  const handleBack = useCallback(() => {
+    setSemanaDetalhe(null);
+    setDetalheInitialAba(undefined);
+  }, []);
 
   if (semanaDetalhe) {
     return (
       <SemanaDetalhe
         semana={semanaDetalhe}
-        onBack={() => setSemanaDetalhe(null)}
-        onWeekAdvanced={() => { setSemanaDetalhe(null); void loadPlano(); }}
+        onBack={handleBack}
+        onWeekAdvanced={() => { handleBack(); void loadPlano(); }}
+        initialAba={detalheInitialAba}
       />
     );
   }
